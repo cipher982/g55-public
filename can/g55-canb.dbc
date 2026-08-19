@@ -1,0 +1,39 @@
+VERSION "W463 CAN-B confirmed signals 2026-07-20"
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+
+BS_:
+
+BU_: EZS DOOR_FL DOOR_FR DOOR_RR ZGW LOGGER
+
+BO_ 2 GatewayEngineStatus_002_G55: 7 ZGW
+ SG_ EngineCoolantTemperature : 32|8@1+ (1,-40) [-40|215] "degC" LOGGER
+
+BO_ 24 FrontLeftWindowStatus_018_G55: 3 DOOR_FL
+ SG_ FrontLeftWindowPositionRaw : 11|12@0+ (1,0) [0|4095] "modulo4096" LOGGER
+
+BO_ 25 FrontRightWindowStatus_019_G55: 3 DOOR_FR
+ SG_ FrontRightWindowPositionRaw : 11|12@0+ (1,0) [0|4095] "modulo4096" LOGGER
+
+BO_ 68 DriverMasterWindowRequest_044_G55: 4 DOOR_FL
+ SG_ RearLeftWindowDownRequest : 17|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ RearLeftWindowUpRequest : 18|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ RearRightWindowDownRequest : 21|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ RearRightWindowUpRequest : 22|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ FrontRightWindowDownRequest : 29|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ FrontRightWindowUpRequest : 30|1@1+ (1,0) [0|1] "" LOGGER
+
+BO_ 156 RearRightWindowStatus_09C_G55: 2 DOOR_RR
+ SG_ RearRightWindowPositionRaw : 3|12@0+ (1,0) [0|4095] "modulo4096" LOGGER
+
+CM_ "Only signals confirmed from a single 2011 W463 test vehicle are included. See the public notes for evidence and remaining candidate fields.";
+CM_ BO_ 68 "Physical driver-master stimuli confirmed these six manual request bits at about 51 Hz while held. No 0x044 command is sent for the driver's own front-left window.";
+CM_ SG_ 24 FrontLeftWindowPositionRaw "Down increases and up decreases; wraps modulo 4096. Adjacent-platform physical scaling remains unverified.";
+CM_ SG_ 25 FrontRightWindowPositionRaw "Down increases and up decreases; wraps modulo 4096. Adjacent-platform physical scaling remains unverified.";
+CM_ SG_ 156 RearRightWindowPositionRaw "Down increases and up decreases; wraps modulo 4096. Adjacent-platform physical scaling remains unverified.";
+CM_ SG_ 2 EngineCoolantTemperature "Exact gateway copy of CAN-C 0x608 byte 0. A cold-start capture rose from ambient temperature to normal operating temperature; raw encoding is degrees C plus 40.";

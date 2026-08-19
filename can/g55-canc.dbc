@@ -1,0 +1,109 @@
+VERSION "W463 CAN-C confirmed signals 2026-07-20"
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+
+BS_:
+
+BU_: ECU ESP TCU CLUSTER MRM ZGW UNKNOWN LOGGER
+
+BO_ 281 G55_119: 8 UNKNOWN
+ SG_ RollingCounter : 48|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ PayloadCRC8 : 56|8@1+ (1,0) [0|255] "" LOGGER
+
+BO_ 329 G55_149: 8 UNKNOWN
+ SG_ RollingCounter : 48|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ PayloadCRC8 : 56|8@1+ (1,0) [0|255] "" LOGGER
+
+BO_ 337 G55_151: 8 UNKNOWN
+ SG_ RollingCounter : 48|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ PayloadCRC8 : 56|8@1+ (1,0) [0|255] "" LOGGER
+
+BO_ 342 G55_156: 8 UNKNOWN
+ SG_ RollingCounter : 48|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ PayloadCRC8 : 56|8@1+ (1,0) [0|255] "" LOGGER
+
+BO_ 512 BS_200_G55: 8 ESP
+ SG_ RollingCounter : 10|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ WheelSpeedFrontLeft : 19|12@0+ (0.072202166,0) [0|295.6] "km/h" LOGGER
+ SG_ WheelSpeedFrontRight : 35|12@0+ (0.072202166,0) [0|295.6] "km/h" LOGGER
+ SG_ WheelSpeedCruise : 51|12@0+ (0.072202166,0) [0|295.6] "km/h" LOGGER
+
+BO_ 520 BS_208_G55: 8 ESP
+ SG_ WheelSpeedRearRight : 35|12@0+ (0.072202166,0) [0|295.6] "km/h" LOGGER
+ SG_ WheelSpeedRearLeft : 51|12@0+ (0.072202166,0) [0|295.6] "km/h" LOGGER
+
+BO_ 528 MS_210_G55: 8 ECU
+ SG_ AcceleratorPedalRaw : 16|8@1+ (1,0) [0|255] "raw" LOGGER
+
+BO_ 536 GS_218_G55: 8 TCU
+ SG_ ActualGear : 16|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ TargetGear : 20|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ RollingCounter : 56|2@1+ (1,0) [0|3] "" LOGGER
+
+BO_ 566 LRW_236_G55: 8 MRM
+ SG_ SteeringAngleRaw : 7|16@0+ (1,-4096) [-4096|61439] "raw" LOGGER
+ SG_ SteeringAngularVelocityRaw : 23|16@0+ (1,-4096) [-4096|61439] "raw/s" LOGGER
+ SG_ RollingCounter : 36|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ PayloadCRC8 : 56|8@1+ (1,0) [0|255] "" LOGGER
+
+BO_ 568 MRM_238_G55: 4 MRM
+ SG_ RollingCounter : 8|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ SteeringAngleNegative : 19|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ SteeringAngleMagnitudeRaw : 18|11@0+ (1,0) [0|2047] "raw" LOGGER
+
+BO_ 624 BS_270_G55: 8 ESP
+ SG_ PulseRingRearLeft : 0|8@1+ (1,0) [0|255] "count" LOGGER
+ SG_ PulseRingRearRight : 8|8@1+ (1,0) [0|255] "count" LOGGER
+ SG_ RollingCounter : 52|4@1+ (1,0) [0|15] "" LOGGER
+
+BO_ 768 BS_300_G55: 8 ESP
+ SG_ YawRateRaw : 55|16@0+ (1,-32768) [-32768|32767] "raw" LOGGER
+
+BO_ 776 MS_308_G55: 8 ECU
+ SG_ EngineRPM : 15|16@0+ (1,0) [0|65535] "rpm" LOGGER
+
+BO_ 808 BS_328_G55: 8 ESP
+ SG_ LateralAccelerationRaw : 16|8@1+ (1,-128) [-128|127] "raw" LOGGER
+ SG_ RollingCounter : 40|3@1+ (1,0) [0|7] "" LOGGER
+ SG_ PulseRingFrontLeft : 48|8@1+ (1,0) [0|255] "count" LOGGER
+ SG_ PulseRingFrontRight : 56|8@1+ (1,0) [0|255] "count" LOGGER
+
+BO_ 824 GS_338_G55: 8 TCU
+ SG_ TransmissionOutputSpeedRaw : 3|12@0+ (1,0) [0|4095] "" LOGGER
+ SG_ TransmissionTurbineSpeed : 51|12@0+ (1,0) [0|4095] "rpm" LOGGER
+
+BO_ 1042 KOMBI_412_G55: 8 CLUSTER
+ SG_ DisplayedVehicleSpeed : 11|12@0+ (0.1,0) [0|409.5] "km/h" LOGGER
+
+BO_ 1048 GS_418_G55: 8 TCU
+ SG_ ActualGear : 32|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ TargetGear : 36|4@1+ (1,0) [0|15] "" LOGGER
+
+BO_ 1544 MS_608_G55: 8 ECU
+ SG_ EngineCoolantTemperature : 0|8@1+ (1,-40) [-40|215] "degC" LOGGER
+
+CM_ "Only signals confirmed from a single 2011 W463 test vehicle are included. See the public notes for evidence and remaining candidate fields.";
+CM_ SG_ 281 PayloadCRC8 "CRC-8/SAE J1850 over bytes 0-6: poly 0x1D, init 0xFF, xorout 0xFF, non-reflected.";
+CM_ SG_ 329 PayloadCRC8 "CRC-8/SAE J1850 over bytes 0-6: poly 0x1D, init 0xFF, xorout 0xFF, non-reflected.";
+CM_ SG_ 337 PayloadCRC8 "CRC-8/SAE J1850 over bytes 0-6: poly 0x1D, init 0xFF, xorout 0xFF, non-reflected.";
+CM_ SG_ 342 PayloadCRC8 "CRC-8/SAE J1850 over bytes 0-6: poly 0x1D, init 0xFF, xorout 0xFF, non-reflected.";
+CM_ SG_ 566 PayloadCRC8 "CRC-8/SAE J1850 over bytes 0-6: poly 0x1D, init 0xFF, xorout 0xFF, non-reflected.";
+CM_ SG_ 566 SteeringAngleRaw "Matches the 0x238 sign/magnitude copy. Physical degrees/count and left/right sign remain unverified.";
+CM_ SG_ 566 SteeringAngularVelocityRaw "Tracks the smoothed derivative of SteeringAngleRaw; physical scale remains unverified.";
+CM_ SG_ 568 SteeringAngleNegative "Apply sign to SteeringAngleMagnitudeRaw: 1 means negative.";
+CM_ SG_ 824 TransmissionOutputSpeedRaw "0xFFF means unavailable. Identity is confirmed; physical rpm scale remains provisional.";
+CM_ SG_ 824 TransmissionTurbineSpeed "0xFFF means unavailable. Big-endian 12-bit value tracks engine rpm and converter slip at 1 rpm/count.";
+CM_ SG_ 768 YawRateRaw "Centered at raw word 0x8000. 0x4000 and 0xFFFF occur as invalid/state sentinels. Physical scale and sign direction remain unverified.";
+CM_ SG_ 808 LateralAccelerationRaw "Centered at raw byte 0x80. 0x00 and 0xFF occur as invalid/state sentinels. Physical scale and sign direction remain unverified.";
+CM_ SG_ 528 AcceleratorPedalRaw "Driver accelerator-pedal value. Zero at released pedal and rises with pedal application; physical percent scale remains unverified.";
+CM_ SG_ 1544 EngineCoolantTemperature "Exact gateway copy of CAN-B 0x002 byte 4. A cold-start capture rose from ambient temperature to normal operating temperature; raw encoding is degrees C plus 40.";
+
+VAL_ 536 TargetGear 0 "N" 1 "1" 2 "2" 3 "3" 4 "4" 5 "5" 11 "R" 13 "P" 15 "Unavailable";
+VAL_ 536 ActualGear 0 "N" 1 "1" 2 "2" 3 "3" 4 "4" 5 "5" 11 "R" 13 "P" 15 "Unavailable";
+VAL_ 1048 TargetGear 0 "N" 1 "1" 2 "2" 3 "3" 4 "4" 5 "5" 11 "R" 13 "P" 15 "Unavailable";
+VAL_ 1048 ActualGear 0 "N" 1 "1" 2 "2" 3 "3" 4 "4" 5 "5" 11 "R" 13 "P" 15 "Unavailable";
