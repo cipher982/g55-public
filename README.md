@@ -12,9 +12,9 @@ This is an engineering notebook and artifact collection, not a supported product
 
 The private vehicle workspace is maintained separately. It contains personal identity, complete captures, operational state, and other material that does not belong here.
 
-## Initial release
+## Current contents
 
-This first public release contains:
+The public workspace currently contains:
 
 - curated passive-analysis CAN-C/CAN-B DBCs;
 - a rewritten CAN-B physical-layer fault-isolation case study;

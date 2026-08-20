@@ -3,7 +3,7 @@
 Parametric source and generated STEP/STL for a flat replacement speaker faceplate
 on the upper dash recess of a 2011 W463 G-Class.
 
-## What this release is
+## What this prototype is
 
 - A geometry and fit prototype for the trim panel.
 - A 1.5 mm flat plate that is intended to form to the installed bezel's measured
@@ -13,7 +13,7 @@ on the upper dash recess of a 2011 W463 G-Class.
 
 The outline and flat-print process were checked with a physical fit sequence on
 one vehicle. The panel's old printed tab and tie retention path failed physical
-testing and is intentionally absent here. This release carries no tablet load,
+testing and is intentionally absent here. This prototype carries no tablet load,
 contains no tablet mount, and is not a road-ready retention system.
 
 ## Evidence grades
