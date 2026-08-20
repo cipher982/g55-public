@@ -21,6 +21,14 @@ The public workspace currently contains:
 - the agent CAD review tool and one trim-only faceplate prototype;
 - high-level L2 layering and validation boundaries.
 
+## Explore
+
+| Area | Start here | What is inside |
+|---|---|---|
+| CAN | [`can/README.md`](can/README.md) | DBCs, evidence grades, and diagnostic case studies |
+| CAD | [`cad/README.md`](cad/README.md) | Agent geometry review tooling and printable parts |
+| L2 | [`l2/README.md`](l2/README.md) | Layer boundaries and validation principles |
+
 The repository is intentionally not a vehicle controller, a supported hardware
 product, or a road-use instruction set.
 
