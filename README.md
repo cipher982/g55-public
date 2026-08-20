@@ -12,9 +12,17 @@ This is an engineering notebook and artifact collection, not a supported product
 
 The private vehicle workspace is maintained separately. It contains personal identity, complete captures, operational state, and other material that does not belong here.
 
-## Status
+## Initial release
 
-This repository is the first public-workspace draft. CAN and CAD foundations are present; additional autonomy and safety artifacts will be added only when they can stand alone without private vehicle context.
+This first public release contains:
+
+- curated passive-analysis CAN-C/CAN-B DBCs;
+- a rewritten CAN-B physical-layer fault-isolation case study;
+- the agent CAD review tool and one trim-only faceplate prototype;
+- high-level L2 layering and validation boundaries.
+
+The repository is intentionally not a vehicle controller, a supported hardware
+product, or a road-use instruction set.
 
 ## Agent maintenance
 
