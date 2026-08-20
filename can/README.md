@@ -22,3 +22,7 @@ instructions for transmitting or injecting frames into a vehicle.
 - [`g55-canb.dbc`](g55-canb.dbc) — curated CAN-B, nominally 83.333 kbit/s fault-tolerant CAN.
 
 Signal identity and encoding confidence remain uneven. Treat comments in the DBCs as part of the evidence record, not as a factory specification.
+
+## Case studies
+
+- [Isolating an intermittent fault-tolerant CAN-B failure](case-studies/can-b-fault-isolation.md)

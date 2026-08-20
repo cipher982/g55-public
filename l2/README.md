@@ -11,3 +11,7 @@ The central design boundary is conservative:
 - no public document here authorizes road testing or vehicle actuation.
 
 The detailed vehicle hazard analysis remains in the private workspace while the public architecture and safety reasoning are being shaped. This section will contain only material that stands alone without private maintenance state, wiring locations, network details, or live vehicle instructions.
+
+## Architecture
+
+- [Separate the layers](architecture.md)
