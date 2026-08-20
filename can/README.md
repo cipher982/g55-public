@@ -23,6 +23,9 @@ instructions for transmitting or injecting frames into a vehicle.
 
 Signal identity and encoding confidence remain uneven. Treat comments in the DBCs as part of the evidence record, not as a factory specification.
 
+See [`PROVENANCE.md`](PROVENANCE.md) for upstream references and the
+measured/derived/borrowed boundary.
+
 ## Case studies
 
 - [Isolating an intermittent fault-tolerant CAN-B failure](case-studies/can-b-fault-isolation.md)

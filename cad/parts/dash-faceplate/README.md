@@ -18,11 +18,13 @@ contains no tablet mount, and is not a road-ready retention system.
 
 ## Evidence grades
 
-- **Measured:** recess width/depth, speaker-ring position, and vent reference
-  geometry from one vehicle.
-- **Derived:** plate dimensions, clearance, vent field, and open-area estimate.
-- **Confirmed by fit:** the flat outline and the bezel-forming concept.
-- **Open:** final retention, long-term heat/cycle behavior, and any tablet support.
+- **Measured:** recess width, speaker-ring bore, and ring centreline from one
+  vehicle.
+- **Derived:** ring Y offset, plate dimensions, clearance, vent field, and
+  open-area estimate.
+- **Confirmed by fit:** the outline, recess depth, and bezel-forming concept.
+- **Open:** exact crown repeatability, final retention, long-term heat/cycle
+  behavior, and any tablet support.
 
 The dimensions are not guaranteed for every W463 model year or trim level. Check
 this part against the target vehicle before manufacturing.
@@ -41,8 +43,8 @@ review tool:
 
 ```sh
 uv run --project ../.. python ../../review.py \
-  parts/dash-faceplate/generated/dash-faceplate-v14-clean.stl \
-  --out parts/dash-faceplate/generated/views
+  generated/dash-faceplate-v14-clean.stl \
+  --out generated/views
 ```
 
 For an initial dimensional check, use a heat-stable filament and print flat.

@@ -29,13 +29,13 @@ BO_ 342 G55_156: 8 UNKNOWN
 
 BO_ 512 BS_200_G55: 8 ESP
  SG_ RollingCounter : 10|4@1+ (1,0) [0|15] "" LOGGER
- SG_ WheelSpeedFrontLeft : 19|12@0+ (0.072202166,0) [0|295.6] "km/h" LOGGER
- SG_ WheelSpeedFrontRight : 35|12@0+ (0.072202166,0) [0|295.6] "km/h" LOGGER
- SG_ WheelSpeedCruise : 51|12@0+ (0.072202166,0) [0|295.6] "km/h" LOGGER
+ SG_ WheelSpeedFrontLeft : 21|14@0+ (0.072202166,0) [0|1228.7] "km/h" LOGGER
+ SG_ WheelSpeedFrontRight : 37|14@0+ (0.072202166,0) [0|1228.7] "km/h" LOGGER
+ SG_ WheelSpeedCruise : 53|14@0+ (0.072202166,0) [0|1228.7] "km/h" LOGGER
 
 BO_ 520 BS_208_G55: 8 ESP
- SG_ WheelSpeedRearRight : 35|12@0+ (0.072202166,0) [0|295.6] "km/h" LOGGER
- SG_ WheelSpeedRearLeft : 51|12@0+ (0.072202166,0) [0|295.6] "km/h" LOGGER
+ SG_ WheelSpeedRearRight : 37|14@0+ (0.072202166,0) [0|1228.7] "km/h" LOGGER
+ SG_ WheelSpeedRearLeft : 53|14@0+ (0.072202166,0) [0|1228.7] "km/h" LOGGER
 
 BO_ 528 MS_210_G55: 8 ECU
  SG_ AcceleratorPedalRaw : 16|8@1+ (1,0) [0|255] "raw" LOGGER
@@ -88,6 +88,8 @@ BO_ 1544 MS_608_G55: 8 ECU
  SG_ EngineCoolantTemperature : 0|8@1+ (1,-40) [-40|215] "degC" LOGGER
 
 CM_ "Only signals confirmed from a single 2011 W463 test vehicle are included. See the public notes for evidence and remaining candidate fields.";
+CM_ BO_ 512 "Wheel-speed signals are 14-bit. The two bits above each speed field are not modeled here because their direction encoding remains unverified.";
+CM_ BO_ 520 "Wheel-speed signals are 14-bit. The two bits above each speed field are not modeled here because their direction encoding remains unverified.";
 CM_ SG_ 281 PayloadCRC8 "CRC-8/SAE J1850 over bytes 0-6: poly 0x1D, init 0xFF, xorout 0xFF, non-reflected.";
 CM_ SG_ 329 PayloadCRC8 "CRC-8/SAE J1850 over bytes 0-6: poly 0x1D, init 0xFF, xorout 0xFF, non-reflected.";
 CM_ SG_ 337 PayloadCRC8 "CRC-8/SAE J1850 over bytes 0-6: poly 0x1D, init 0xFF, xorout 0xFF, non-reflected.";

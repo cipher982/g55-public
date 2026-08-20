@@ -13,13 +13,16 @@ from pathlib import Path
 
 from build123d import Cylinder, Plane, Pos, Rectangle, export_step, export_stl, extrude
 
-# MEASURED / CONFIRMED from a printed outline and crown fit sequence on one
-# 2011 W463 test vehicle. Values remain platform-specific, not factory data.
+# Measured on one 2011 W463 test vehicle:
 RECESS_W = 252.83
-RECESS_D = 114.00
-CROWN = 3.25
 RING_BORE = 70.00
 RING_OFFSET_X = 0.00
+
+# Confirmed by an outline/crown fit sequence, but not a factory specification.
+RECESS_D = 114.00
+CROWN = 3.25
+
+# Derived from the rear-gap survey and the measured ring diameter.
 RING_OFFSET_Y = -8.10
 
 # DERIVED / PRINT PARAMETERS.
