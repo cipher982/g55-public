@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500" role="img" aria-labelledby="title description">
+  <title id="title">M113K supercharger clutch: factory switching, diagnostic finding, and open safety gate</title>
+  <desc id="description">A factory ME2.8.1 ECU grounds the magnetic supercharger clutch. An offline diagnostic definition identifies a named actuator operation, with the clutch occupying bit seven of a shared output byte. No live vehicle actuation or road-use command has been validated.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M1 1 L9 5 L1 9 Z" fill="#79DCD1"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: 'Helvetica Neue', Arial, sans-serif; }
+    .panel { fill:#142638; stroke:#2B485B; stroke-width:2; }
+    .node { fill:#0D1C2D; stroke:#436176; stroke-width:2; }
+    .small-head { fill:#79DCD1; font-size:27px; font-weight:800; letter-spacing:1px; }
+    .grade { fill:#AAC2CE; font-size:20px; font-weight:700; letter-spacing:1px; }
+    .body { fill:#E6F0F3; font-size:25px; }
+    .muted { fill:#AAC2CE; font-size:22px; }
+    .node-title { fill:#F2F7F9; font-size:29px; font-weight:800; }
+    .node-sub { fill:#B6CDD6; font-size:21px; }
+    .flow { fill:none; stroke:#79DCD1; stroke-width:5; stroke-linecap:round; marker-end:url(#arrow); }
+  </style>
+
+  <rect width="1200" height="1500" fill="#0B1725"/>
+  <rect x="0" y="0" width="1200" height="10" fill="#79DCD1"/>
+  <text x="56" y="73" fill="#AAC2CE" font-size="23" font-weight="700" letter-spacing="3">ENGINE CONTROL  /  M113K</text>
+  <rect x="837" y="45" width="307" height="48" rx="24" fill="#253242" stroke="#E9B56D" stroke-width="2"/>
+  <text x="990" y="76" text-anchor="middle" fill="#FFCE86" font-size="19" font-weight="800" letter-spacing="1">DESK FINDING · NOT TESTED</text>
+  <text x="56" y="155" fill="#F2F7F9" font-size="63" font-weight="800" letter-spacing="-1">SUPERCHARGER</text>
+  <text x="56" y="222" fill="#79DCD1" font-size="66" font-weight="800" letter-spacing="-1">CLUTCH CONTROL</text>
+  <text x="56" y="258" fill="#C5D7DE" font-size="27">Factory-switchable clutch; diagnostic path found offline.</text>
+
+  <!-- Factory electrical path, drawn independently from service-manual artwork. -->
+  <rect class="panel" x="56" y="280" width="1088" height="342" rx="28"/>
+  <text class="small-head" x="88" y="326">01  FACTORY CIRCUIT</text>
+  <text class="grade" x="1110" y="325" text-anchor="end">BORROWED · FACTORY</text>
+  <rect class="node" x="88" y="375" width="206" height="128" rx="18"/>
+  <text class="node-title" x="191" y="429" text-anchor="middle">+12 V</text>
+  <text class="node-sub" x="191" y="464" text-anchor="middle">fused ignition</text>
+  <path class="flow" d="M302 439 H341"/>
+  <rect class="node" x="350" y="375" width="300" height="128" rx="18"/>
+  <circle cx="407" cy="438" r="31" fill="none" stroke="#FFCB83" stroke-width="6"/>
+  <path d="M388 438 C395 420 400 456 407 438 S420 420 427 438" fill="none" stroke="#FFCB83" stroke-width="4" stroke-linecap="round"/>
+  <text class="node-title" x="492" y="429">CLUTCH</text>
+  <text class="node-sub" x="492" y="464">Y2/1 · coil</text>
+  <path class="flow" d="M658 439 H699"/>
+  <rect class="node" x="708" y="375" width="282" height="128" rx="18"/>
+  <text class="node-title" x="849" y="429" text-anchor="middle">ME2.8.1 ECU</text>
+  <text class="node-sub" x="849" y="464" text-anchor="middle">low-side switch</text>
+  <path class="flow" d="M998 439 H1040"/>
+  <path d="M1045 439 H1090 M1056 454 H1079 M1063 466 H1072" stroke="#79DCD1" stroke-width="5" stroke-linecap="round"/>
+  <text class="body" x="88" y="550">The ECU grounds the coil to couple the blower, then opens it to release.</text>
+  <circle cx="101" cy="586" r="11" fill="none" stroke="#FFCB83" stroke-width="3"/>
+  <path d="M101 579 V587" stroke="#FFCB83" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="101" cy="592" r="2" fill="#FFCB83"/>
+  <text class="muted" x="130" y="593">CAN status is not a confirmed clutch command.</text>
+
+  <!-- Factory tester path is offline-derived, not vehicle-validated. -->
+  <rect class="panel" x="56" y="646" width="1088" height="447" rx="28"/>
+  <text class="small-head" x="88" y="692">02  DIAGNOSTIC ROUTE</text>
+  <text class="grade" x="1110" y="691" text-anchor="end">DERIVED · OFFLINE</text>
+  <rect class="node" x="88" y="741" width="202" height="110" rx="18"/>
+  <text class="node-title" x="189" y="790" text-anchor="middle">TESTER</text>
+  <text class="node-sub" x="189" y="821" text-anchor="middle">factory menu</text>
+  <path class="flow" d="M298 796 H330"/>
+  <rect class="node" x="339" y="741" width="252" height="110" rx="18"/>
+  <text class="node-title" x="465" y="790" text-anchor="middle">K-LINE</text>
+  <text class="node-sub" x="465" y="821" text-anchor="middle">diagnostic link</text>
+  <path class="flow" d="M599 796 H630"/>
+  <rect class="node" x="639" y="741" width="471" height="110" rx="18"/>
+  <text class="node-title" x="874" y="788" text-anchor="middle">ME2.8.1</text>
+  <text class="node-sub" x="874" y="821" text-anchor="middle">named clutch actuator operation</text>
+  <text x="88" y="900" fill="#F2F7F9" font-size="24" font-weight="800" letter-spacing="1">THE OUTPUT BYTE IS SHARED</text>
+  <rect x="88" y="923" width="140" height="78" rx="15" fill="#23776E" stroke="#79DCD1" stroke-width="3"/>
+  <text x="158" y="958" text-anchor="middle" fill="#F4FFFC" font-size="30" font-weight="800">B7</text>
+  <text x="158" y="985" text-anchor="middle" fill="#F4FFFC" font-size="17" font-weight="800">CLUTCH</text>
+  <g fill="#0D1C2D" stroke="#436176" stroke-width="2">
+    <rect x="236" y="923" width="118" height="78" rx="14"/>
+    <rect x="360" y="923" width="118" height="78" rx="14"/>
+    <rect x="484" y="923" width="118" height="78" rx="14"/>
+    <rect x="608" y="923" width="118" height="78" rx="14"/>
+    <rect x="732" y="923" width="118" height="78" rx="14"/>
+    <rect x="856" y="923" width="118" height="78" rx="14"/>
+    <rect x="980" y="923" width="118" height="78" rx="14"/>
+  </g>
+  <g fill="#ACC3CD" font-size="28" font-weight="800" text-anchor="middle">
+    <text x="295" y="972">B6</text><text x="419" y="972">B5</text>
+    <text x="543" y="972">B4</text><text x="667" y="972">B3</text>
+    <text x="791" y="972">B2</text><text x="915" y="972">B1</text>
+    <text x="1039" y="972">B0</text>
+  </g>
+  <text class="body" x="88" y="1041">Preserve the other bits; the stored zero-byte is not a safe command.</text>
+  <text x="88" y="1072" fill="#FFCB83" font-size="21" font-weight="700">No live response, on/off polarity, or release behavior verified.</text>
+
+  <!-- Separate alternatives: neither follows automatically from a workshop test. -->
+  <rect class="panel" x="56" y="1117" width="1088" height="218" rx="28"/>
+  <text class="small-head" x="88" y="1162">03  DIFFERENT END GOALS</text>
+  <text class="grade" x="1110" y="1161" text-anchor="end">HYPOTHETICAL · DESIGN</text>
+  <rect class="node" x="88" y="1185" width="319" height="121" rx="18"/>
+  <rect x="90" y="1186" width="315" height="5" rx="2" fill="#79DCD1"/>
+  <text x="110" y="1225" fill="#79DCD1" font-size="22" font-weight="800">WORKSHOP TEST</text>
+  <text x="110" y="1259" fill="#E5EFF2" font-size="22">Ask ECU to switch;</text>
+  <text x="110" y="1287" fill="#E5EFF2" font-size="22">not driving control.</text>
+  <rect class="node" x="440" y="1185" width="319" height="121" rx="18"/>
+  <rect x="442" y="1186" width="315" height="5" rx="2" fill="#FFCB83"/>
+  <text x="462" y="1225" fill="#FFCB83" font-size="22" font-weight="800">DRIVING CONTROL</text>
+  <text x="462" y="1259" fill="#E5EFF2" font-size="21">ECU calibration or an</text>
+  <text x="462" y="1287" fill="#E5EFF2" font-size="21">engineered interface.</text>
+  <rect class="node" x="792" y="1185" width="318" height="121" rx="18"/>
+  <rect x="794" y="1186" width="314" height="5" rx="2" fill="#D2AEF2"/>
+  <text x="814" y="1225" fill="#D2AEF2" font-size="22" font-weight="800">CLUTCHLESS</text>
+  <text x="814" y="1259" fill="#E5EFF2" font-size="21">Permanent mechanical</text>
+  <text x="814" y="1287" fill="#E5EFF2" font-size="21">drive, not a switch.</text>
+
+  <rect x="56" y="1360" width="1088" height="105" rx="24" fill="#322733" stroke="#F09192" stroke-width="2"/>
+  <text x="88" y="1403" fill="#FFA6A9" font-size="26" font-weight="800" letter-spacing="1">BEFORE ANY POWERED TEST</text>
+  <text x="88" y="1441" fill="#F4EAEC" font-size="24">Confirm mode, polarity and safe release on a real ECU.</text>
+  <text x="56" y="1484" fill="#8FAAB7" font-size="19">Engineering explainer · factory circuit borrowed · diagnostic control derived offline · vehicle untested</text>
+</svg>

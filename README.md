@@ -20,6 +20,7 @@ The public workspace currently contains:
 - a rewritten CAN-B physical-layer fault-isolation case study;
 - the agent CAD review tool and one trim-only faceplate prototype;
 - high-level L2 layering and validation boundaries.
+- a platform-level, evidence-graded supercharger-clutch control visual (SVG and PNG).
 
 ## Explore
 
@@ -28,6 +29,7 @@ The public workspace currently contains:
 | CAN | [`can/README.md`](can/README.md) | DBCs, evidence grades, and diagnostic case studies |
 | CAD | [`cad/README.md`](cad/README.md) | Agent geometry review tooling and printable parts |
 | L2 | [`l2/README.md`](l2/README.md) | Layer boundaries and validation principles |
+| Engine-control visual | [Shareable PNG](m113k-clutch-control.png) · [Editable SVG](m113k-clutch-control.svg) | Factory clutch switching, an offline diagnostic finding, and the unverified vehicle-control boundary |
 
 The repository is intentionally not a vehicle controller, a supported hardware
 product, or a road-use instruction set.
