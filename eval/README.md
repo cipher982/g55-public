@@ -65,7 +65,8 @@ against v times the yaw rate that followed (shifted by the model's own `action_t
 longitudinal action against the car's later acceleration, and the plan speed at 3 s against the
 speed 3 s later. Closed loop: 36 generated frames at 5 Hz (7.2 s), each conditioned on 9 history
 frames, 5 recorded anchor frames and the car's pose; the distance from the recorded path at 2, 4
-and 7.2 s, with 4 s the primary horizon. Means over units with 95% percentile bootstrap
+and 7.2 s. The site's ranking uses the median at 2 s with a drive-clustered interval of the median
+(`uv run python -m geval.ranking`). Means over units with 95% percentile bootstrap
 intervals that resample whole drives (a public segment's route, a truck window's recorded drive);
 no interval below 10 drives. Paired deltas are model minus baseline on shared units. Limits are
 listed in every results file. `uv run python -m geval.reproduce` recomputes every published public

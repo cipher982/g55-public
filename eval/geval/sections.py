@@ -8,11 +8,11 @@ from __future__ import annotations
 
 OPEN = [
     ("lat_mae", "Lateral error", "m/s²", "lower"),
-    ("lat_mae_bl", "Lateral error at the model's own best lag", "m/s²", "lower"),
+    ("lat_mae_bl", "Lateral error at the model's own best lead", "m/s²", "lower"),
     ("lat_corr", "Lateral correlation with the car's later motion", "", "higher"),
     ("lat_gain", "Lateral gain (1 = same size as the car's motion)", "", "near1"),
     ("lat_rate_rms", "Lateral action rate, RMS (smoothness)", "m/s³", "lower"),
-    ("lat_best_lag", "Lateral best-correlating lag", "s", "lower"),
+    ("lat_best_lag", "Lead of the lateral request over the car's motion", "s", "lower"),
     ("lon_mae", "Longitudinal error", "m/s²", "lower"),
     ("lon_corr", "Longitudinal correlation", "", "higher"),
     ("lon_brake_mae", "Longitudinal error while braking", "m/s²", "lower"),
@@ -26,7 +26,7 @@ CENSORED = {"lat_best_lag": (0.0, 1.5)}
 
 CLOSED = [
     ("xtrack_2s", "Distance from the recorded path at 2 s", "m", "lower", "absx_2s"),
-    ("xtrack_4s", "Distance from the recorded path at 4 s (primary)", "m", "lower", "absx_4s"),
+    ("xtrack_4s", "Distance from the recorded path at 4 s", "m", "lower", "absx_4s"),
     ("xtrack_7s", "Distance from the recorded path at 7.2 s", "m", "lower", "absx_7.2s"),
     ("fail_1m", "Share of episodes ever more than 1 m off the path", "", "lower", "fail_1m"),
     ("lat_jerk", "Requested lateral jerk, RMS", "m/s³", "lower", "rms_lat_jerk"),
@@ -90,20 +90,24 @@ RECOVERY_TESTS = {
 
 LIMITS_COMMON = [
     "Open-loop scores compare a model's action with what the recording driver or car did; a model that "
-    "drives differently but well is scored as wrong, and smoother, later actions (what comma's RL "
-    "residual produces by design) score worse here. Measured on the 2026-10-27 deep dive: open-loop "
-    "accuracy did not predict closed-loop driving.",
-    "Closed-loop numbers come from a generative world model, not a car. Nothing separates models before "
-    "about 2 s; past about 4 s the recorded anchor frames pull every model back toward the recorded "
-    "path, so 4 s is the primary horizon.",
+    "drives differently but well is scored as wrong. comma's RL residual makes the lateral action "
+    "smoother, and earlier than its base's by 0.10 to 0.26 s (measured on the G55 and on 16 of comma's "
+    "cars); both score as error here. Measured on the 2026-10-27 deep dive: open-loop accuracy did not "
+    "predict closed-loop driving.",
+    "Closed-loop numbers come from a generative world model, not a car. In a separate test on the G55's "
+    "windows, worldmodel-4B followed an added yaw command through 2 s but showed 0 to 20% of an added "
+    "lateral offset 3 to 4 s later; past about 4 s the recorded anchor frames also pull every model "
+    "back toward the recorded path. The front-page ranking uses 2 s.",
     "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was "
     "cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below "
     "10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
     "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its "
     "distance from 1); wins count units where the model is better in the metric's direction.",
-    "Lateral best-correlating lag is searched from 0 to 1.5 s; a lag at either edge is censored and left "
-    "out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen "
-    "base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
+    "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best "
+    "correlates with the car's later lateral motion; a larger value means the request comes earlier. A "
+    "value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which "
+    "does not separate models built on one frozen base: it is identical on every segment for the four "
+    "f22e06e5 models, and for Cinque v2 and v3.",
 ]
 
 LIMITS = {

@@ -50,17 +50,23 @@ four drives, so they report the mean, the median and win counts, including the n
 better, and no interval.</p>
 <p>A delta compares a model with a baseline on the units both were scored on. It is model minus baseline, computed per
 unit and then bootstrapped the same way, so differences between cars, roads and light that affect both models cancel. The
-fraction beside it counts the units where the model did better.</p>
-<p>A blue dot or a red diamond means the delta's interval excludes zero; a ring means the data do not separate the two
+fraction beside it counts the units where the model did better; for lateral action rate and the lead of the lateral
+request, which have no better direction, it counts the units where the model's value was lower.</p>
+<p>A blue dot or a red diamond means the delta's interval excludes zero (a grey triangle, for a measure with no better direction); a ring means the data do not separate the two
 models; a dash means there is no interval. Each page shows dozens of these comparisons with no correction for multiple
 tests, so a delta whose interval only just excludes zero is weak evidence. Where one segment dominates a mean, the
 median beside it shows it.</p>
-<p>Two measures need care. The lateral lag is the shift, searched from 0 to 1.5 s, at which the model's lateral
-request best correlates with the car's measured lateral motion; a value at either end of the search is only a bound and is left out, so its
+<p>Two measures need care. The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the model's lateral
+request best correlates with the car's later lateral motion: a larger value means the request matches motion further ahead,
+so it comes earlier. Smoothing a request also moves that peak, so the lead is not a timing measure on its own and has no
+better direction. A value at either end of the search is only a bound and is left out, so its
 count can be below the section's. The plan speed error at 3 s reads the model's plan output, which does not separate
 models built on one frozen base: it is identical for the four October models on base <code>f22e06e5</code>.</p>
 <p>Every public interval can be recomputed from the per-segment CSVs: <code>uv run python -m geval.reproduce</code> in
-<code>eval/</code>.</p>
+<code>eval/</code>. The front-page ranking ranks models by the median distance from the recorded path at 2 s on comma's
+public segments, closed loop, with a 95% interval of the median that resamples drives. Two models are separated when the
+interval of the difference of their medians, on the segments both have, excludes zero; a model's rank is 1 plus the number
+of models separated from it with a lower median. <code>uv run python -m geval.ranking</code> prints it.</p>
 </section>
 
 <section class="prose">
@@ -74,7 +80,9 @@ of any model on comma's public segments (0.074 m/s², against lebowski's 0.109).
 windows (before the current eighteen), after a small yaw disturbance, the same base ended about 1.8 m from the driven path at 4 s. lebowski ended 0.4 m away, and
 a policy that does not steer at all 2.3 m; the same models with their residual ended 1.2 to 1.3 m closer to the path than
 their base alone, in 9 of 9 windows. On comma's public segments the residual lowers the lateral action rate by 33 to 40%
-and moves the best-correlating lateral lag by +0.17 to +0.32 s; open-loop scoring counts that shift as error.</p>
+and raises the lead of the lateral request by 0.17 to 0.32 s. Aligned directly with its own base, the residual's
+lateral request comes 0.13 to 0.26 s earlier on 16 of comma's cars (0.10 to 0.15 s on the G55); the rest of the
+difference goes with the smoother request. Open-loop scoring counts both as error.</p>
 <p>This matches published work: on the nuPlan benchmark, open-loop and closed-loop planning scores were negatively
 correlated (<a href="https://doi.org/10.48550/arxiv.2306.07962">Dauner et al., 2023</a>). The site reports both kinds of
 score side by side and does not combine them.</p>
@@ -89,7 +97,8 @@ cover, and whether a ranking on comma's cars holds on a vehicle unlike them.</p>
 <li>There are few windows. Each section shows its count, and the conditions (day, night, speed, camera setup) are not balanced.</li>
 <li>Others cannot reproduce them: the drives are private, and only aggregate scores and a few checked stills are published.</li>
 <li>Closed loop is a simulation. The world model is weakest at night, rolls out 7.2 s at most, and pulls late frames toward
-what was actually recorded, so differences that appear only past about 4 s carry little weight.</li>
+what was actually recorded, so differences that appear only past about 4 s carry little weight. In a separate test it
+showed 0 to 20% of an added lateral offset 3 to 4 s after it, so the front-page ranking uses 2 s.</li>
 <li>No newer model has steered the truck. It drives on lebowski, and every other model is scored by replay.</li>
 </ul>
 <p>Stills are a few camera frames per condition with the model's path drawn on them, each checked so that nothing in it

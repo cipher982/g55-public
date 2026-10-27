@@ -60,6 +60,51 @@ def pool(vals: dict, cluster_of=None):
             "ci": boot_ci(vals, cluster_of), "n": len(v), "clusters": len(ids)}
 
 
+def _draws(vals: dict, cluster_of, reps: int):
+    """Sorted units grouped by cluster, and the bootstrap draws of cluster indices; None below
+    MIN_CLUSTERS."""
+    groups = defaultdict(list)
+    for u in sorted(vals):
+        if finite(vals[u]):
+            groups[cluster_of(u) if cluster_of else u].append(u)
+    ids = sorted(groups)
+    if len(ids) < MIN_CLUSTERS:
+        return [groups[c] for c in ids], None
+    rng = np.random.default_rng(SEED)
+    return [groups[c] for c in ids], rng.integers(0, len(ids), size=(reps, len(ids)))
+
+
+def median_pool(vals: dict, cluster_of=None, reps: int = BOOT):
+    """Median over the units with a finite value, with a 95% percentile interval of the median that
+    resamples clusters; no interval below MIN_CLUSTERS."""
+    groups, idx = _draws(vals, cluster_of, reps)
+    v = [float(vals[u]) for g in groups for u in g]
+    ci = None
+    if idx is not None:
+        arr = [np.array([float(vals[u]) for u in g]) for g in groups]
+        meds = [np.median(np.concatenate([arr[i] for i in row])) for row in idx]
+        ci = [float(np.percentile(meds, 2.5)), float(np.percentile(meds, 97.5))]
+    return {"median": float(np.median(v)) if v else None, "ci": ci, "n": len(v), "clusters": len(groups)}
+
+
+def median_diff(model: dict, base: dict, cluster_of=None, reps: int = BOOT):
+    """Median of model minus median of base, over the units both have, with a 95% interval from
+    resampling clusters of shared units (both medians recomputed on each draw)."""
+    shared = {u: 0.0 for u in model if u in base and finite(model[u]) and finite(base[u])}
+    if not shared:
+        return None
+    groups, idx = _draws(shared, cluster_of, reps)
+    a = [np.array([float(model[u]) for u in g]) for g in groups]
+    b = [np.array([float(base[u]) for u in g]) for g in groups]
+    d = float(np.median(np.concatenate(a)) - np.median(np.concatenate(b)))
+    ci = None
+    if idx is not None:
+        ds = [np.median(np.concatenate([a[i] for i in row])) - np.median(np.concatenate([b[i] for i in row]))
+              for row in idx]
+        ci = [float(np.percentile(ds, 2.5)), float(np.percentile(ds, 97.5))]
+    return {"delta": d, "ci": ci, "n": len(shared), "clusters": len(groups)}
+
+
 def better_than(a: float, b: float, better: str) -> bool:
     if better == "lower":
         return a < b
