@@ -15,6 +15,7 @@ import argparse
 import html
 import json
 import math
+import re
 import shutil
 from pathlib import Path
 
@@ -99,10 +100,15 @@ def mark(v: str) -> str:
 
 
 def lc(label: str) -> str:
-    """Sentence-internal form of a metric label: 'Lateral error' -> 'lateral error'."""
+    """Sentence-internal form of a metric label: 'Lateral gain (1 = ...)' -> 'lateral gain'."""
+    label = re.sub(r"\s*\([^)]*\)$", "", label)
     if len(label) > 1 and label[0].isupper() and label[1].islower():
         return label[0].lower() + label[1:]
     return label
+
+
+def unit_and_better(x: dict) -> str:
+    return ", ".join(p for p in (x["unit"], BETTER_TEXT[x["better"]]) if p)
 
 
 def join_words(items: list[str]) -> str:
@@ -264,8 +270,7 @@ def forest(models, ref, section, key, example):
     pos = lambda v: (v - lo) / (hi - lo) * 100
     d = decimals_for(example["value"])
     out = [f'<figure class="forest"><figcaption><span class="f-t">{esc(example["label"])}</span>'
-           f'<span class="f-s">{esc(SECTIONS.get(section, section))}, {esc(example["unit"])}, '
-           f'{BETTER_TEXT[example["better"]]}</span></figcaption><div class="f-rows">']
+           f'<span class="f-s">{esc(SECTIONS.get(section, section))}, {esc(unit_and_better(example))}</span></figcaption><div class="f-rows">']
     for m, x, s, p in rows:
         label = f'<a href="models/{esc(m["model"]["id"])}.html">{esc(name_of(m))}</a>'
         if not p:
@@ -274,7 +279,7 @@ def forest(models, ref, section, key, example):
             continue
         v = verdict_of(x, p)
         uw = UNIT_WORD.get(s["unit_of_evidence"], (s["unit_of_evidence"],) * 2)
-        tip = (f'{name_of(m)} minus lebowski: {num(p["delta"], d, True)} {x["unit"]} '
+        tip = (f'{name_of(m)} minus lebowski: {num(p["delta"], d, True)}{(" " + x["unit"]) if x["unit"] else ""} '
                f'{ci_text(p["ci"], d, True)}; better on {p["wins"]} of {p["n"]} {uw[1]}; {MARK_TEXT[v]}')
         whisk = ""
         if p["ci"]:
@@ -302,7 +307,7 @@ def delta_cell(x, p, d) -> str:
 
 def delta_table(models, ref, heads, by_model, caption):
     """by_model(m) -> baseline id to compare against, or None to skip the row."""
-    th = "".join(f'<th class="n" scope="col">{esc(x["label"])}<span class="th-s">{esc(SECTIONS.get(s, s))}, {esc(x["unit"])}</span></th>'
+    th = "".join(f'<th class="n" scope="col">{esc(x["label"])}<span class="th-s">{esc(", ".join(p for p in (SECTIONS.get(s, s), x["unit"]) if p))}</span></th>'
                  for s, k, x in heads)
     body = []
     for m in models:
@@ -357,10 +362,13 @@ def verdict_sentences(newest, models, ref, heads) -> str:
         word = {"worse": "worse than", "better": "better than", "diff": "different from"}
         parts = [f"{word[w]} {bname} on {join_words(items)}" if i == 0 else f"{word[w].split()[0]} on {join_words(items)}"
                  for i, (w, items) in enumerate(sep)]
-        out = f"{subject} is " + join_words(parts)
         if n_tie:
             rest = "the other headline metric" if n_tie == 1 else f"the other {WORDS.get(n_tie, n_tie)} headline metrics"
-            out += f", and not separated from it on {rest}"
+            parts.append(f"not separated on {rest}")
+        if len(parts) == 1:
+            out = f"{subject} is {parts[0]}"
+        else:
+            out = f"{subject} is " + ", ".join(parts[:-1]) + ", and " + parts[-1]
         return out + "."
 
     lines = []
@@ -435,8 +443,8 @@ def section_block(m, key, s, models, root, out) -> str:
     st = s["status"]
     if st != "ok":
         msg = {"not_run": "Not run for this model.", "failed": "The run failed; there are no scores."}.get(st, st)
-        cond = f' <span class="muted">Condition: {esc(s.get("condition"))}.</span>' if s.get("condition") else ""
-        return f'<section class="sec sec-off"><h3>{esc(title)}</h3><p><strong>{msg}</strong>{cond}</p></section>'
+        cond = f'<p class="cond">{esc(s["condition"])}</p>' if s.get("condition") else ""
+        return f'<section class="sec sec-off"><h3>{esc(title)}</h3><p><strong>{msg}</strong></p>{cond}</section>'
     uw = UNIT_WORD.get(s["unit_of_evidence"], (s["unit_of_evidence"],) * 2)
     bases = [b for b in m["baselines"]]
     bname = {o["model"]["id"]: name_of(o) for o in models}
@@ -445,13 +453,14 @@ def section_block(m, key, s, models, root, out) -> str:
     for x in s["metrics"]:
         d = decimals_for(x["value"])
         cells = "".join(delta_cell(x, x["paired"].get(b), d) for b in bases)
-        rows.append(f'<tr><th scope="row">{esc(x["label"])}<span class="th-s">{esc(x["unit"])}, {BETTER_TEXT[x["better"]]}</span></th>'
+        rows.append(f'<tr><th scope="row">{esc(x["label"])}<span class="th-s">{esc(unit_and_better(x))}</span></th>'
                     f'<td class="n">{num(x["value"], d)}<span class="ci">{ci_text(x["ci"], d)}</span></td>{cells}</tr>')
     dl = ""
     if s.get("per_unit_file"):
         dl = f' <a href="../{esc(copy_rel(root, out, s["per_unit_file"]))}">Per-{uw[0]} CSV</a>.'
     return (f'<section class="sec"><h3>{esc(title)}</h3>'
-            f'<p class="sec-m">{s["n"]} {uw[1] if s["n"] != 1 else uw[0]}. Condition: {esc(s["condition"])}.{dl}</p>'
+            f'<p class="sec-m"><strong>{s["n"]} {uw[1] if s["n"] != 1 else uw[0]}.</strong>{dl}</p>'
+            f'<p class="cond">{esc(s["condition"])}</p>'
             f'<div class="tw"><table><thead><tr><th scope="col">Metric</th><th class="n" scope="col">Value</th>{th}</tr></thead>'
             f'<tbody>{"".join(rows)}</tbody></table></div></section>')
 

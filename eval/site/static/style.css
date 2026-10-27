@@ -116,6 +116,7 @@ thead .th-s { white-space: normal; min-width: 9em; }
 .sec { padding-top: 6px; }
 .sec-m { font-size: 14px; color: var(--ink2); }
 .sec-off p { color: var(--ink2); }
+.cond { font-size: 14px; color: var(--muted); }
 .stills { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 16px; }
 .stills figure { margin: 0; display: grid; gap: 6px; }
 .stills img { width: 100%; height: auto; border-radius: 3px; border: 1px solid var(--rule); background: var(--wash); }

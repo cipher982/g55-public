@@ -19,5 +19,9 @@
     el.addEventListener("focus", () => show(el));
     el.addEventListener("blur", hide);
   }
-  window.addEventListener("scroll", hide, { passive: true });
+  // Scrolling hides a hover readout but keeps a keyboard-focused one next to its row.
+  window.addEventListener("scroll", () => {
+    const el = document.activeElement;
+    if (el && el.dataset && el.dataset.tip) show(el); else hide();
+  }, { passive: true });
 })();

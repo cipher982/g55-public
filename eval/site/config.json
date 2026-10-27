@@ -6,10 +6,11 @@
   "repo_url": "https://github.com/cipher982/g55-public",
   "headline": [
     ["public_open_loop", "lat_mae"],
-    ["public_open_loop", "speed_err_3s"],
-    ["public_closed_loop", "dist_4s"],
-    ["truck_open_loop", "speed_err"],
-    ["truck_closed_loop", "dist_4s"],
-    ["truck_closed_loop", "recovery_4s"]
+    ["public_open_loop", "lat_rate_rms"],
+    ["public_open_loop", "v3_mae"],
+    ["public_closed_loop", "xtrack_4s"],
+    ["truck_open_loop", "lat_gain"],
+    ["truck_closed_loop", "xtrack_4s"],
+    ["truck_recovery", "heading_xtrack_4s"]
   ]
 }

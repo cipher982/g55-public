@@ -53,7 +53,7 @@
           }
         },
         {
-          "key": "speed_err_3s",
+          "key": "v3_mae",
           "label": "Speed error at 3 s",
           "unit": "m/s",
           "better": "lower",
@@ -167,7 +167,7 @@
       "condition": "worldmodel-4B, G55 steering response",
       "metrics": [
         {
-          "key": "dist_4s",
+          "key": "xtrack_4s",
           "label": "Distance from driven path at 4 s",
           "unit": "m",
           "better": "lower",
