@@ -71,12 +71,15 @@ CONDITIONS = {
         "G55's measured steering and powertrain response instead of the ideal car. Lane-following "
         "windows from the G55's drives, day and night; distance is to the driver's recorded path; "
         "seeds 0 and 1, averaged per window."),
-    "truck_recovery": (
-        "Measured. The truck closed loop with a disturbance while the model drives. 2° off heading: an "
-        "extra 2°/s yaw for the first second. 0.5 m off centre: an extra yaw-rate pulse, out and back "
-        "over the first 2 s, that moves an uncorrected car 0.5 m sideways with no net heading change. "
-        "Braking lead: windows where the car ahead braked; gap derived from the recorded lead distance "
-        "minus how far the model ran ahead of the recorded car."),
+    "truck_recovery": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran.",
+}
+
+RECOVERY_TESTS = {
+    "heading": "2° off heading: an extra 2°/s yaw for the first second.",
+    "offcentre": ("0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move "
+                  "an uncorrected car 0.5 m sideways with no net heading change."),
+    "brake": ("Braking lead: windows where the car ahead braked; the gap is derived from the lead distance "
+              "seen on the recording minus how far the model ran ahead of the recorded car."),
 }
 
 LIMITS_COMMON = [

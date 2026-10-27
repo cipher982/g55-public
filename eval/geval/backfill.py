@@ -115,7 +115,7 @@ def truck_closed_loop(cfg) -> list:
         if cond == "nominal":
             store.save(cfg.work, "truck_closed_loop", mid, units, {"condition": desc})
         elif cond == "disturb":
-            merge_recovery(cfg, mid, "heading", units, f"2° off heading: {desc}")
+            merge_recovery(cfg, mid, "heading", units, f"{S.RECOVERY_TESTS['heading']} {desc}")
         done.append((mid, cond, len(units)))
     return done
 
