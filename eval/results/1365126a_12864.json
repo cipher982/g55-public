@@ -16,9 +16,9 @@
   "notes": "On openpilot master as MD v3 (2026-10-14, PR #39087) and again as Flip Flop (2026-10-24, PR #39156), same weights. Scored from the 2026-10-24 Hugging Face re-upload, weights identical to the 2026-10-16 upload. Vision base f22e06e5 with an RL residual head."
  },
  "scored": {
-  "date": "2026-10-27T20:29:26Z",
+  "date": "2026-10-27T21:27:17Z",
   "suite": "geval-1",
-  "code": "ee5e4c525a71"
+  "code": "4038df86acfd"
  },
  "baselines": [
   "lebowski_877m",
@@ -1217,7 +1217,7 @@
    "status": "ok",
    "unit_of_evidence": "window",
    "n": 18,
-   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night).",
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night).",
    "metrics": [
     {
      "key": "heading_xtrack_2s",
@@ -1312,6 +1312,102 @@
        ],
        "n": 18,
        "wins": 10
+      }
+     }
+    },
+    {
+     "key": "offcentre_xtrack_2s",
+     "label": "0.5 m off centre: distance from the path at 2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.3409,
+     "ci": [
+      0.2749,
+      0.4159
+     ],
+     "n": 18,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.007902,
+       "ci": [
+        -0.07186,
+        0.04603
+       ],
+       "n": 18,
+       "wins": 7
+      },
+      "8d736683_12864": {
+       "delta": 0.002898,
+       "ci": [
+        -0.02722,
+        0.02754
+       ],
+       "n": 18,
+       "wins": 6
+      }
+     }
+    },
+    {
+     "key": "offcentre_xtrack_4s",
+     "label": "0.5 m off centre: distance from the path at 4 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.4982,
+     "ci": [
+      0.3464,
+      0.6629
+     ],
+     "n": 18,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.1608,
+       "ci": [
+        -0.4724,
+        0.02427
+       ],
+       "n": 18,
+       "wins": 13
+      },
+      "8d736683_12864": {
+       "delta": -0.03206,
+       "ci": [
+        -0.1046,
+        0.03483
+       ],
+       "n": 18,
+       "wins": 10
+      }
+     }
+    },
+    {
+     "key": "offcentre_lat_jerk",
+     "label": "0.5 m off centre: requested lateral jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.6853,
+     "ci": [
+      0.4643,
+      1.013
+     ],
+     "n": 18,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.4876,
+       "ci": [
+        -0.7133,
+        -0.2009
+       ],
+       "n": 18,
+       "wins": 15
+      },
+      "8d736683_12864": {
+       "delta": 0.09049,
+       "ci": [
+        -0.1321,
+        0.3838
+       ],
+       "n": 18,
+       "wins": 7
       }
      }
     }

@@ -16,9 +16,9 @@
   "notes": "877M ConvNeXt encoder, host-kept history, no RL residual. Checkpoint 6f5c8d09/ecc73f48. The model the G55 runs."
  },
  "scored": {
-  "date": "2026-10-27T20:29:21Z",
+  "date": "2026-10-27T21:27:16Z",
   "suite": "geval-1",
-  "code": "ee5e4c525a71"
+  "code": "4038df86acfd"
  },
  "baselines": [],
  "sections": {
@@ -530,7 +530,7 @@
    "status": "ok",
    "unit_of_evidence": "window",
    "n": 18,
-   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night).",
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night).",
    "metrics": [
     {
      "key": "heading_xtrack_2s",
@@ -567,6 +567,45 @@
      "ci": [
       0.7198,
       0.9404
+     ],
+     "n": 18,
+     "paired": {}
+    },
+    {
+     "key": "offcentre_xtrack_2s",
+     "label": "0.5 m off centre: distance from the path at 2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.3488,
+     "ci": [
+      0.2597,
+      0.4618
+     ],
+     "n": 18,
+     "paired": {}
+    },
+    {
+     "key": "offcentre_xtrack_4s",
+     "label": "0.5 m off centre: distance from the path at 4 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.659,
+     "ci": [
+      0.4237,
+      0.9648
+     ],
+     "n": 18,
+     "paired": {}
+    },
+    {
+     "key": "offcentre_lat_jerk",
+     "label": "0.5 m off centre: requested lateral jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 1.173,
+     "ci": [
+      1.067,
+      1.287
      ],
      "n": 18,
      "paired": {}
