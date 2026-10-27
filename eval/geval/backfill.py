@@ -43,9 +43,9 @@ def public_open_loop(cfg, reg) -> list:
             units[seg] = {k[0]: m.get(k[0]) for k in S.OPEN}
         if units:
             moving = sum(1 for u in units.values() if u.get("lat_mae") is not None)
-            cars = len({segs[u]["car"] for u in units if u in segs})
+            cars = len({segs[u]["car"] for u, m in units.items() if u in segs and m.get("lat_mae") is not None})
             store.save(cfg.work, "public_open_loop", mid, units,
-                       {"condition": f"{len(units)} segments from {cars} cars ({moving} with movement).",
+                       {"condition": f"{len(units)} segments, {moving} with movement from {cars} cars.",
                         "source": "deep dive 2026-10-27 scorer (matrix_scores.json)"})
             done.append(mid)
     return done
@@ -128,5 +128,6 @@ def run(cfg, out_dir: Path, per_unit_root: Path, suite: str):
     arch = arch_table(cfg["backfill"]["arch"])
     written = []
     for mid in reg:
-        written.append(str(results.build(cfg.work, mid, arch_for(mid, arch), out_dir, per_unit_root, suite=suite)))
+        written.append(str(results.build(cfg.work, mid, arch_for(mid, arch), out_dir, per_unit_root, suite=suite,
+                                          drives=results.truck_drives(cfg))))
     return log, written

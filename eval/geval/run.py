@@ -298,8 +298,9 @@ def score(cfg, mid: str, sections: list):
         if units:
             segs = results.segments()
             moving = sum(1 for u in units.values() if u.get("lat_mae") is not None)
-            store.save(work, "public_open_loop", mid, units, {"condition": f"{len(units)} segments from "
-                       f"{len({segs[u]['car'] for u in units})} cars ({moving} with movement)."})
+            cars = len({segs[u]["car"] for u, m in units.items() if u in segs and m.get("lat_mae") is not None})
+            store.save(work, "public_open_loop", mid, units,
+                       {"condition": f"{len(units)} segments, {moving} with movement from {cars} cars."})
     if "truck_open_loop" in sections:
         backfill.truck_open_loop_one(cfg, mid, [work / "out" / "truck_open_loop"])
     if "public_closed_loop" in sections:

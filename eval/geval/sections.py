@@ -20,6 +20,10 @@ OPEN = [
     ("v3_mae", "Plan speed error at 3 s", "m/s", "lower"),
 ]
 
+# Values a metric cannot resolve, left out of its mean and pairs: a best-correlating lag at either edge
+# of its search (openloop.best_lag searches 0 to 1.5 s) is only a bound on the true lag.
+CENSORED = {"lat_best_lag": (0.0, 1.5)}
+
 CLOSED = [
     ("xtrack_2s", "Distance from the recorded path at 2 s", "m", "lower", "absx_2s"),
     ("xtrack_4s", "Distance from the recorded path at 4 s (primary)", "m", "lower", "absx_4s"),
@@ -92,10 +96,14 @@ LIMITS_COMMON = [
     "Closed-loop numbers come from a generative world model, not a car. Nothing separates models before "
     "about 2 s; past about 4 s the recorded anchor frames pull every model back toward the recorded "
     "path, so 4 s is the primary horizon.",
-    "Intervals are 95% percentile bootstraps over units (segments or windows); segments from the same "
-    "car are not independent, so the public intervals are somewhat narrow.",
-    "Paired deltas are model minus baseline on the units both have; wins count units where the model is "
-    "better in the metric's direction.",
+    "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was "
+    "cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below "
+    "10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
+    "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its "
+    "distance from 1); wins count units where the model is better in the metric's direction.",
+    "Lateral best-correlating lag is searched from 0 to 1.5 s; a lag at either edge is censored and left "
+    "out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen "
+    "base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
 ]
 
 LIMITS = {

@@ -46,7 +46,7 @@ def cmd_build(cfg, ids):
     reg = results.registry(cfg.work)
     for mid in ids or [m for m in reg if any(store.load(cfg.work, s, m) for s in S.SECTIONS)]:
         arch, sha = model_arch(cfg, mid)
-        print(results.build(cfg.work, mid, arch, res, pu, sha256=sha))
+        print(results.build(cfg.work, mid, arch, res, pu, sha256=sha, drives=results.truck_drives(cfg)))
 
 
 def main(argv=None):

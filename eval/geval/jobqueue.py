@@ -9,7 +9,9 @@ get in. Jobs run pinned to `cpu_cores` (taskset) when given. Each job's state is
 <queue>/<stop_file> exists (the stop file is never deleted by the runner).
 
 A job left .running by an earlier runner is adopted if its process is alive; if it is gone its
-marker is renamed aside and the job runs again (jobs skip work whose output exists).
+marker is renamed aside and the job runs again (jobs skip work whose output exists). Every job
+writes its exit status to <job>.sh.rc on exit, which is how an adopted job's outcome is known; an
+adopted job with no status file is marked failed.
 
 Consolidated from the 2026-10-27 deep dive's gpu_queue_v3.py.
 """
@@ -48,7 +50,7 @@ def add_job(q: Path, name: str, body: str) -> Path:
     (q / "jobs").mkdir(parents=True, exist_ok=True)
     p = q / "jobs" / f"{name}.sh"
     if not p.exists():
-        p.write_text("#!/bin/bash\nset -euo pipefail\n" + body.rstrip() + "\n")
+        p.write_text("#!/bin/bash\ntrap 'echo $? > \"$0.rc\"' EXIT\nset -euo pipefail\n" + body.rstrip() + "\n")
     return p
 
 
@@ -83,7 +85,10 @@ def run(q: Path, lock_path: str, slots: int = 2, share_s: float = 2700, stop_fil
             else:
                 if alive(pid):
                     continue
-                ok, rc, note = True, "?", "rc=unknown (adopted from an earlier runner; see the job's log)\n"
+                rcf = job.with_name(job.name + ".rc")
+                rc = rcf.read_text().strip() if rcf.exists() else "?"
+                ok = rc == "0"
+                note = f"rc={rc} (adopted from an earlier runner; see the job's log)\n"
             job.with_suffix(".running").rename(job.with_suffix(".done" if ok else ".failed"))
             with open(job.with_suffix(".done" if ok else ".failed"), "a") as f:
                 f.write(note)

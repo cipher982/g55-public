@@ -2,7 +2,8 @@
 
 A fixed suite that scores each of comma's openpilot driving models the day it appears, against
 lebowski (comma's 877M model of 2026-07-01) and against the previous model on the timeline (the
-scored model with the latest `model.source.date` before its own, ties broken by id). One results file per model, `results/<model-id>.json`, in the format of
+model whose weights were first public just before its own, `model.first_public`; in a section that
+model has no scores for, the latest earlier model that has them). One results file per model, `results/<model-id>.json`, in the format of
 [SCHEMA.md](SCHEMA.md); the site is built from those files only.
 
 | Section | What | Reproducible by others |
@@ -65,8 +66,10 @@ longitudinal action against the car's later acceleration, and the plan speed at 
 speed 3 s later. Closed loop: 36 generated frames at 5 Hz (7.2 s), each conditioned on 9 history
 frames, 5 recorded anchor frames and the car's pose; the distance from the recorded path at 2, 4
 and 7.2 s, with 4 s the primary horizon. Means over units with 95% percentile bootstrap
-intervals over units; paired deltas are model minus baseline on shared units. Limits are listed in
-every results file.
+intervals that resample whole drives (a public segment's route, a truck window's recorded drive);
+no interval below 10 drives. Paired deltas are model minus baseline on shared units. Limits are
+listed in every results file. `uv run python -m geval.reproduce` recomputes every published public
+value, interval and delta from the per-segment CSVs and checks it against the results files.
 
 Backfill: the first edition comes from the 2026-10-27 deep dive's outputs (`geval backfill`
 regenerates it from them).

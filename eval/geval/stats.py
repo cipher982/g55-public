@@ -1,34 +1,63 @@
-"""Means over units with percentile bootstrap intervals, and paired differences on shared units.
+"""Means over units with cluster-bootstrap intervals, and paired differences on shared units.
 
-The unit of evidence (a public segment, a truck window) is what the bootstrap resamples. Every call
-seeds its own generator, so the same inputs always give the same interval.
+Units (a public segment, a truck window) are grouped into clusters, the independent draws: the
+drive (route) a public segment was cut from, the recorded drive a truck window comes from. The
+bootstrap resamples whole clusters and recomputes the mean over all units in the draw, so three
+adjacent minutes of one drive count as one draw, not three.
+
+Below MIN_CLUSTERS clusters there is no interval. Simulated coverage of the nominal 95% percentile
+interval of a mean: 79% at 4 draws, 88% at 8, 90% at 10 for normal data, and 69% / 79% / 80% for
+skewed (lognormal) data; at 19 to 23 draws it is about 93% (normal) and 85 to 87% (skewed).
+
+Every call orders units and clusters by id and seeds its own generator, so the same values give the
+same interval whatever order they arrive in, and a reader can reproduce it from the per-unit CSVs.
 """
 from __future__ import annotations
 
 import math
+from collections import defaultdict
 
 import numpy as np
 
 BOOT = 4000
 SEED = 0
+MIN_CLUSTERS = 10
 
 
 def finite(x) -> bool:
     return x is not None and isinstance(x, (int, float, np.floating, np.integer)) and math.isfinite(float(x))
 
 
-def boot_ci(values, reps: int = BOOT):
-    v = np.asarray([float(x) for x in values if finite(x)], float)
-    if len(v) < 2:
+def _clusters(vals: dict, cluster_of) -> tuple[list, np.ndarray, np.ndarray]:
+    """Sorted cluster ids, per-cluster sums and counts of the finite values in {unit: value}."""
+    sums, counts = defaultdict(float), defaultdict(int)
+    for u in sorted(vals):
+        v = vals[u]
+        if finite(v):
+            c = cluster_of(u) if cluster_of else u
+            sums[c] += float(v)
+            counts[c] += 1
+    ids = sorted(sums)
+    return ids, np.array([sums[c] for c in ids]), np.array([counts[c] for c in ids], float)
+
+
+def boot_ci(vals: dict, cluster_of=None, reps: int = BOOT):
+    """95% percentile interval of the unit mean, resampling clusters; None below MIN_CLUSTERS."""
+    ids, sums, counts = _clusters(vals, cluster_of)
+    if len(ids) < MIN_CLUSTERS:
         return None
     rng = np.random.default_rng(SEED)
-    means = v[rng.integers(0, len(v), size=(reps, len(v)))].mean(axis=1)
+    idx = rng.integers(0, len(ids), size=(reps, len(ids)))
+    means = sums[idx].sum(axis=1) / counts[idx].sum(axis=1)
     return [float(np.percentile(means, 2.5)), float(np.percentile(means, 97.5))]
 
 
-def pool(values):
-    v = [float(x) for x in values if finite(x)]
-    return {"value": float(np.mean(v)) if v else None, "ci": boot_ci(v), "n": len(v)}
+def pool(vals: dict, cluster_of=None):
+    """vals: {unit: value}. Mean, median and interval over the units with a finite value."""
+    v = [float(vals[u]) for u in sorted(vals) if finite(vals[u])]
+    ids, _, _ = _clusters(vals, cluster_of)
+    return {"value": float(np.mean(v)) if v else None, "median": float(np.median(v)) if v else None,
+            "ci": boot_ci(vals, cluster_of), "n": len(v), "clusters": len(ids)}
 
 
 def better_than(a: float, b: float, better: str) -> bool:
@@ -41,14 +70,26 @@ def better_than(a: float, b: float, better: str) -> bool:
     raise ValueError(better)
 
 
-def paired(model: dict, base: dict, better: str):
-    """model, base: {unit: value}. Delta is model minus baseline on units both have."""
-    shared = [u for u in model if u in base and finite(model[u]) and finite(base[u])]
+def paired(model: dict, base: dict, better: str, cluster_of=None):
+    """model, base: {unit: value}. Per shared unit, model minus baseline; for a "near1" metric the
+    difference of their distances from 1, so a negative delta is better there too. Also the units
+    and clusters where the model was better, and the units where the two were equal."""
+    shared = sorted(u for u in model if u in base and finite(model[u]) and finite(base[u]))
     if not shared:
         return None
-    d = [float(model[u]) - float(base[u]) for u in shared]
+    if better == "near1":
+        d = {u: abs(float(model[u]) - 1.0) - abs(float(base[u]) - 1.0) for u in shared}
+    else:
+        d = {u: float(model[u]) - float(base[u]) for u in shared}
     wins = sum(better_than(float(model[u]), float(base[u]), better) for u in shared)
-    return {"delta": float(np.mean(d)), "ci": boot_ci(d), "n": len(shared), "wins": int(wins)}
+    ties = sum(float(model[u]) == float(base[u]) for u in shared)
+    ids, sums, counts = _clusters(d, cluster_of)
+    cmean = sums / counts
+    gain = cmean < 0 if better in ("lower", "near1") else cmean > 0
+    out = {"delta": float(np.mean(list(d.values()))), "median": float(np.median(list(d.values()))),
+           "ci": boot_ci(d, cluster_of), "n": len(shared), "wins": int(wins), "ties": int(ties),
+           "clusters": len(ids), "cluster_wins": int(gain.sum())}
+    return out
 
 
 def rounded(x, digits: int = 4):
