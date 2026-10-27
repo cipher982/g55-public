@@ -79,5 +79,6 @@ regenerates it from them).
 
 `uv run python site/build.py` writes the static site to `site/_site/` (index, method, one page per
 model, the results files) from `results/` and `per_unit/`; there is no server side. The public copy
-at https://openpilot-gwagon-evals.drose.io is republished from a clean checkout of `main` by one
-deploy command, kept with the operator's private notes, that runs this build first.
+at https://openpilot-gwagon-evals.drose.io follows `main`: the web host checks for a new commit
+every 15 minutes, runs this build on it and publishes the result, one release per commit. Pushing
+to `main` is how a new results file goes live.
