@@ -343,47 +343,46 @@ def legend() -> str:
             '<span>Delta is model minus baseline; the fraction is units where the model did better.</span></p>')
 
 
-def verdict_sentences(newest, models, ref, heads) -> str:
-    """One sentence against lebowski, one against the previous model, from the headline metrics only."""
-    name = name_of(newest)
+def verdict_sentences(newest, models, ref, heads, cfg) -> str:
+    """Two short sentences, one per baseline, naming only headline metrics whose interval excludes zero.
 
-    def groups(bid):
-        g = {"better": [], "worse": [], "diff": [], "tie": []}
+    config.json "verdicts" {model id: text} replaces the generated text; "verdict_terms"
+    {"section.key": name, or {"better": phrase, "worse": phrase}} gives each metric its short name.
+    """
+    override = cfg.get("verdicts", {}).get(newest["model"]["id"])
+    if override:
+        return override
+    terms = cfg.get("verdict_terms", {})
+
+    def clause(bid):
+        worse, better, phrases = [], [], []
         for s, k, _ in heads:
             x, _ = find_metric(newest, s, k)
             p = x and x["paired"].get(bid)
-            if p and verdict_of(x, p) in g:
-                where = "truck" if s.startswith("truck") else "public segments"
-                g[verdict_of(x, p)].append(f'{lc(x["label"])} ({where})')
-        return g
+            if not p:
+                continue
+            v = verdict_of(x, p)
+            if v not in ("better", "worse", "diff"):
+                continue
+            t = terms.get(f"{s}.{k}", lc(x["label"]))
+            if isinstance(t, dict):
+                phrases.append(t.get(v) or f'{v} on {lc(x["label"])}')
+            elif v == "diff":
+                phrases.append(f"different on {t}")
+            else:
+                (better if v == "better" else worse).append(t)
+        parts = ([f"worse on {join_words(worse)}"] if worse else []) + \
+                ([f"better on {join_words(better)}"] if better else []) + phrases
+        return ", ".join(parts) if parts else "no clear difference"
 
-    def sentence(subject, g, bname):
-        sep = [(w, g[w]) for w in ("worse", "better", "diff") if g[w]]
-        n_tie = len(g["tie"])
-        if not sep and not n_tie:
-            return None
-        if not sep:
-            return f"{subject} is not separated from {bname} on any headline metric."
-        word = {"worse": "worse than", "better": "better than", "diff": "different from"}
-        parts = [f"{word[w]} {bname} on {join_words(items)}" if i == 0 else f"{word[w].split()[0]} on {join_words(items)}"
-                 for i, (w, items) in enumerate(sep)]
-        if n_tie:
-            rest = "the other headline metric" if n_tie == 1 else f"the other {WORDS.get(n_tie, n_tie)} headline metrics"
-            parts.append(f"not separated on {rest}")
-        if len(parts) == 1:
-            out = f"{subject} is {parts[0]}"
-        else:
-            out = f"{subject} is " + ", ".join(parts[:-1]) + ", and " + parts[-1]
-        return out + "."
-
-    lines = []
-    if newest["model"]["id"] != ref:
-        lines.append(sentence(name, groups(ref), "lebowski"))
-        prev = previous_baseline(newest, ref)
-        if prev:
-            pname = next((name_of(o) for o in models if o["model"]["id"] == prev), prev)
-            lines.append(sentence("It", groups(prev), f"{pname}, the model before it,"))
-    return " ".join(x for x in lines if x) or "No paired scores against lebowski yet."
+    if newest["model"]["id"] == ref:
+        return "No paired scores against lebowski yet."
+    lines = [f"Against lebowski: {clause(ref)}."]
+    prev = previous_baseline(newest, ref)
+    if prev:
+        pname = next((name_of(o) for o in models if o["model"]["id"] == prev), prev)
+        lines.append(f"Against {pname}: {clause(prev)}.")
+    return " ".join(lines)
 
 
 def evidence_line(newest) -> str:
@@ -400,20 +399,36 @@ def evidence_line(newest) -> str:
 
 
 def timeline(models) -> str:
-    mx = max((m["model"]["params_m"] or 0) for m in models) or 1
+    """Scored models link to their pages; models.json adds comma models with no results file, greyed."""
+    extra_f = SITE / "models.json"
+    extra = json.loads(extra_f.read_text())["unscored"] if extra_f.exists() else []
     rows = []
     for m in models:
         md = m["model"]
-        w = (md["params_m"] or 0) / mx * 100
-        rows.append(
-            f'<tr><td class="n">{esc(md["source"]["date"])}</td>'
-            f'<th scope="row"><a href="models/{esc(md["id"])}.html">{esc(name_of(m))}</a>{hash_code(m)}</th>'
-            f'<td class="n size"><span class="bar" style="width:{w:.1f}%"></span><span>{num(md["params_m"], 0) + "M" if md["params_m"] is not None else "n/a"}</span></td>'
-            f'<td class="n">{num(md["gmac"], 1)}</td><td>{esc(md["family"])}</td></tr>')
-    return ('<p class="cap">Every scored model, oldest first. Parameters are counted from the weights; '
-            'GMAC is multiply-accumulates per model step.</p><div class="tw"><table class="tl" aria-label="comma\'s models">'
+        rows.append((md["source"]["date"], md["params_m"], (
+            f'<th scope="row"><a href="models/{esc(md["id"])}.html">{esc(name_of(m))}</a>{hash_code(m)}</th>',
+            num(md["params_m"], 0) + "M" if md["params_m"] is not None else "n/a",
+            num(md["gmac"], 1), esc(md["family"])), ""))
+    for e in extra:
+        name = esc(e["name"]) + (f' <code>{esc(e["checkpoint"])}</code>' if e.get("checkpoint") else "")
+        why = esc(e["why"])
+        if e.get("url"):
+            why = f'<a href="{esc(e["url"])}">{why}</a>'
+        rows.append((e.get("date"), e.get("params_m"), (
+            f'<th scope="row">{name}</th>', esc(e.get("size") or "n/a"), "n/a", f"Not scored. {why}"), "off"))
+    rows.sort(key=lambda r: (r[0] is None, r[0] or ""))
+    mx = max((r[1] or 0) for r in rows) or 1
+    body = []
+    for date, params, (name, size, gmac, note), cls in rows:
+        w = (params or 0) / mx * 100
+        body.append(f'<tr class="{cls}"><td class="n">{esc(date or "unknown")}</td>{name}'
+                    f'<td class="n size"><span class="bar" style="width:{w:.1f}%"></span><span>{size}</span></td>'
+                    f'<td class="n">{gmac}</td><td>{note}</td></tr>')
+    cap = ("Oldest first. Parameters are counted from the weights; GMAC is multiply-accumulates per model step."
+           + (" Grey rows are comma models with no score here." if extra else ""))
+    return (f'<p class="cap">{cap}</p><div class="tw"><table class="tl" aria-label="comma\'s models">'
             '<thead><tr><th class="n" scope="col">Published</th><th scope="col">Model</th><th class="n" scope="col">Parameters</th>'
-            f'<th class="n" scope="col">GMAC</th><th scope="col">Family</th></tr></thead><tbody>{"".join(rows)}</tbody></table></div>')
+            f'<th class="n" scope="col">GMAC</th><th scope="col">Family or status</th></tr></thead><tbody>{"".join(body)}</tbody></table></div>')
 
 
 def overview(models, cfg) -> str:
@@ -422,12 +437,12 @@ def overview(models, cfg) -> str:
     newest = models[-1]
     nm = newest["model"]
     hero = (f'<section class="hero"><p class="hero-k">Newest model: <a href="models/{esc(nm["id"])}.html">{esc(name_of(newest))}</a>{hash_code(newest)}, published {esc(nm["source"]["date"])}, scored {esc(newest["scored"]["date"][:10])}</p>'
-            f'<p class="hero-v">{esc(verdict_sentences(newest, models, ref, heads))}</p>'
+            f'<p class="hero-v">{esc(verdict_sentences(newest, models, ref, heads, cfg))}</p>'
             f'<p class="hero-n">{esc(evidence_line(newest))} Open-loop error counts a smoother, later action as error, '
             'which is what comma\'s RL models produce by design; the closed-loop rows are the closer test of driving.</p></section>')
     intro = ('<p class="intro">Each comma.ai openpilot driving model, scored with one fixed suite on comma\'s public segments and on '
-             'recorded drives from one 2011 Mercedes G55. Every score is compared with lebowski, the 877M model from July 2026 that '
-             'many openpilot users still run, and with the comma model released before it. '
+             'recorded drives from one 2011 Mercedes G55. Every score is compared with lebowski, the 877M model from July 2026, which '
+             'this truck runs, and with the comma model released before it. '
              '<a href="method.html">How the scores are made</a>.</p>')
     charts = "".join(forest(models, ref, s, k, x) for s, k, x in heads)
     vs_ref = delta_table(models, ref, heads, lambda m: ref if m["model"]["id"] != ref and m["baselines"] and ref in m["baselines"] else None,

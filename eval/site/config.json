@@ -11,5 +11,17 @@
     ["public_closed_loop", "xtrack_4s"],
     ["truck_closed_loop", "xtrack_4s"],
     ["truck_recovery", "heading_xtrack_4s"]
-  ]
+  ],
+  "verdict_terms": {
+    "public_open_loop.lat_mae": "lateral error",
+    "public_open_loop.lat_rate_rms": {
+      "better": "smoother steering",
+      "worse": "less smooth steering"
+    },
+    "public_open_loop.v3_mae": "3 s speed error",
+    "public_closed_loop.xtrack_4s": "closed-loop path error at 4 s",
+    "truck_closed_loop.xtrack_4s": "truck closed-loop path error at 4 s",
+    "truck_recovery.heading_xtrack_4s": "truck recovery from a heading error"
+  },
+  "verdicts": {}
 }

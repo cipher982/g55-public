@@ -146,3 +146,6 @@ thead .th-s { white-space: normal; min-width: 9em; }
   .f-dot, .mk { forced-color-adjust: none; }
 }
 thead th.n { white-space: normal; min-width: 8em; }
+.tl tr.off th, .tl tr.off td { color: var(--muted); font-weight: 400; }
+.tl tr.off .bar { opacity: .45; }
+.tl tr.off a { color: var(--muted); }

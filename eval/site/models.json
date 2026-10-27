@@ -1,0 +1,29 @@
+{
+  "_doc": "comma driving models that have no results file, shown greyed in the overview timeline. Facts from comma's PRs and the LFS pointers, as recorded in the 2026-10-27 deep dive; size is approximate where marked.",
+  "unscored": [
+    {
+      "name": "Be Right Here (big)",
+      "date": "2026-08-02",
+      "size": "877M class",
+      "params_m": 877,
+      "why": "Reverted on 2026-08-14 (\"Revert big RL model\")"
+    },
+    {
+      "name": "BIG RL",
+      "checkpoint": "23e6a04e",
+      "date": "2026-08-31",
+      "size": "~383M",
+      "params_m": 383,
+      "why": "The first smaller model; PR #38681, branch remove-avgpool",
+      "url": "https://github.com/commaai/openpilot/pull/38681"
+    },
+    {
+      "name": "ResAction",
+      "checkpoint": "7a933c1c",
+      "date": null,
+      "size": "~383M",
+      "params_m": 383,
+      "why": "Published only as a pickle"
+    }
+  ]
+}
