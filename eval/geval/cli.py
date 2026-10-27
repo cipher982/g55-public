@@ -7,6 +7,7 @@
   geval build [<model-id> ...]                        rewrite results files from the store
   geval queue [--slots N]                             run the GPU job queue (takes the shared GPU lock)
   geval status                                        queue and store state
+  geval watch [--loop] [--dry-run]                    new models on Hugging Face / openpilot -> queue, score
 
 <model-ref>: a Hugging Face file `hf:<revision>:<path>` or `hf:<uuid>/<ckpt>` (latest revision),
 `openpilot:<commit>` (the big model ONNX in that commit), a known model id, or a local .onnx path.
@@ -65,6 +66,11 @@ def main(argv=None):
     sm.add_argument("--tag")
     sm.add_argument("--truck-conds", help="world-model conditions for the truck job, e.g. offcentre")
     sm.add_argument("--after", help="job name the world-model jobs wait for (one world-model job on the GPU at a time)")
+    sm.add_argument("--prefix", help="job name prefix in place of P20..P34 (P70: behind work already queued)")
+    wa = sub.add_parser("watch")
+    wa.add_argument("--loop", action="store_true", help="keep watching (default: one pass, for a timer)")
+    wa.add_argument("--every-s", type=float, default=1200)
+    wa.add_argument("--dry-run", action="store_true", help="discover and report; queue, score and save nothing")
     sub.add_parser("backfill")
     b = sub.add_parser("build")
     b.add_argument("ids", nargs="*")
@@ -84,7 +90,10 @@ def main(argv=None):
     elif a.cmd == "build":
         cmd_build(cfg, a.ids)
     elif a.cmd == "queue":
+        import os
         qc = cfg.get("queue", {})
+        (cfg.work / "queue").mkdir(parents=True, exist_ok=True)
+        (cfg.work / "queue" / "runner.pid").write_text(str(os.getpid()))
         Q.run(cfg.work / "queue", cfg["paths"]["gpu_lock"], slots=a.slots or qc.get("slots", 2),
               share_s=qc.get("share_s", 2700), stop_file=a.stop_file, idle_exit_s=a.idle_exit_s,
               cpu_cores=qc.get("cpu_cores"))
@@ -92,9 +101,13 @@ def main(argv=None):
         from . import run as R
         mids = [R.resolve(cfg, r) for r in a.refs]
         print(json.dumps({"models": mids, "queued": R.queue_jobs(cfg, mids, a.sections.split(","), a.tag,
-                                                                    a.truck_conds.split(",") if a.truck_conds else None,
-                                                                    a.after)}, indent=1))
+                                                                    None if not a.truck_conds else
+                                                                    [] if a.truck_conds == "none" else a.truck_conds.split(","),
+                                                                    a.after, a.prefix)}, indent=1))
         R.ensure_runner(cfg)
+    elif a.cmd == "watch":
+        from . import watch as W
+        W.main(cfg, once=not a.loop, every_s=a.every_s, dry_run=a.dry_run)
     elif a.cmd == "status":
         st = Q.job_states(cfg.work / "queue")
         print(json.dumps({"jobs": st}, indent=1))

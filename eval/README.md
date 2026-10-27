@@ -29,6 +29,7 @@ uv run geval submit <ref> <ref> --sections public_closed_loop   # several models
 uv run geval queue                          # the job runner (`run` starts one if none is alive)
 uv run geval build [<id> ...]               # rewrite results files from the per-unit store
 uv run geval backfill                       # regenerate the first edition from the deep dive's outputs
+uv run geval watch [--dry-run]              # one pass: new models on Hugging Face or openpilot branches -> queue, score
 ```
 
 `run` resolves the model (downloads it, sha256, parameters and GMAC from the graph), writes one
@@ -43,6 +44,13 @@ the `run` extra's packages, comma's segments and cereal schema, the GPU lock), `
 `[closed_loop]` (seeds, and the plugin that serves the truck's drives and steering model to
 `engines/wm_closed_loop.py`). Per-unit values of every scored model stay in the store, so a new
 model is paired with any baseline without re-running the baseline.
+
+`watch` is the release watcher: each pass reads the Hugging Face model repo and openpilot's
+branches anonymously (a branch counts when its change touches the model directory; since 2026-09
+openpilot ships compiled models only, so a checkpoint id named there is held until its ONNX is on
+Hugging Face), queues the suite for anything new at the jobs' normal names, and scores models whose
+jobs have finished. Its first pass only records what exists. It touches no GPU itself and posts
+nothing; state and log are in `<work>/watch/`.
 
 Engines: `engines/route_replay.py` (comma segments, both cameras, lockstep), `engines/wm_closed_loop.py`
 (comma's worldmodel-4B; same initial noise for every policy at every step, so a model run alone

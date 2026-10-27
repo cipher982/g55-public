@@ -174,8 +174,14 @@ def after_line(q: Path, after: str | None) -> str:
 
 
 def queue_jobs(cfg, mids: list, sections: list, tag: str | None = None, truck_conds: list | None = None,
-               after: str | None = None) -> list:
-    """Queue the jobs for one or more models (several models share one world-model batch)."""
+               after: str | None = None, prefix: str | None = None) -> list:
+    """Queue the jobs for one or more models (several models share one world-model batch).
+
+    Job names start P20 (public open loop), P22 (truck open loop), P30 (public closed loop), P32
+    (truck closed loop and recovery), P34 (braking lead); the runner starts them in name order, so
+    `prefix` (e.g. P70) queues this submission behind work already named lower. truck_conds=[]
+    queues no P32 job (only the braking lead, when truck_recovery is asked)."""
+    pf = (lambda d: prefix) if prefix else (lambda d: d)
     work, q, pyx = cfg.work, cfg.work / "queue", cfg["paths"]["python"]
     tag = tag or "_".join(mids)
     onnx = {m: work / "models" / f"{m}.onnx" for m in mids}
@@ -186,7 +192,7 @@ def queue_jobs(cfg, mids: list, sections: list, tag: str | None = None, truck_co
         for m in mids:
             for seg in segment_names(cfg):
                 o = out / f"{seg}__{m}.npz"
-                names.append(Q.add_job(q, f"P20_pol_{m}_{seg}", f"cd {ENGINES}\n[ -s {o} ] || {pyx} -I route_replay.py "
+                names.append(Q.add_job(q, f"{pf('P20')}_pol_{m}_{seg}", f"cd {ENGINES}\n[ -s {o} ] || {pyx} -I route_replay.py "
                                        f"{Path(cfg['paths']['segments_dir']) / seg} {o} {cfg['paths']['cereal']} {onnx[m]} "
                                        f"2>&1 | grep -v W:onnxruntime | tail -3").stem)
     if "truck_open_loop" in sections:
@@ -197,7 +203,7 @@ def queue_jobs(cfg, mids: list, sections: list, tag: str | None = None, truck_co
             for w in tol["windows"]:
                 o = out / f"{w['id']}__{m}.npz"
                 cmd = tol["command"].format(python=pyx, frames_root=tol["frames_root"], model=m, onnx=onnx[m], out=o, **w)
-                names.append(Q.add_job(q, f"P22_tol_{m}_{w['id']}", f"cd {tol['cwd']}\n[ -s {o} ] || {cmd} 2>&1 | "
+                names.append(Q.add_job(q, f"{pf('P22')}_tol_{m}_{w['id']}", f"cd {tol['cwd']}\n[ -s {o} ] || {cmd} 2>&1 | "
                                        f"grep -v W:onnxruntime | tail -3").stem)
     cl = cfg.get("closed_loop", {})
     pol = " ".join(f"--policy {m}={onnx[m]}" for m in mids)
@@ -207,29 +213,31 @@ def queue_jobs(cfg, mids: list, sections: list, tag: str | None = None, truck_co
         o = work / "out" / "public_closed_loop" / f"{tag}.json"
         o.parent.mkdir(parents=True, exist_ok=True)
         segs = " ".join(f"--segment {s}" for s in segment_names(cfg))
-        names.append(Q.add_job(q, f"P30_pcl_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+        names.append(Q.add_job(q, f"{pf('P30')}_pcl_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 {wait_gpu(cl.get('min_free_mib', 15500))}
 cd {ENGINES}
 {pyx} -I wm_closed_loop.py --segments {cfg['paths']['segments_dir']} --cereal {cfg['paths']['cereal']} {segs} \\
   --per-segment {cl.get('public', {}).get('per_segment', 1)} --cars ideal --conds nominal {common} --out {o} 2>&1 | {filt}""").stem)
-    truck_conds = truck_conds or [c for s, c in (("truck_closed_loop", "nominal"), ("truck_recovery", "disturb"),
+    if truck_conds is None:
+        truck_conds = [c for s, c in (("truck_closed_loop", "nominal"), ("truck_recovery", "disturb"),
                                                  ("truck_recovery", "offcentre")) if s in sections]
     if truck_conds:
         t = cl["truck"]
         o = work / "out" / "truck_closed_loop" / f"{tag}.json"
         o.parent.mkdir(parents=True, exist_ok=True)
         args = json.dumps({k: t[k] for k in ("code", "wide_camera", "drives", "starts", "night")})
-        names.append(Q.add_job(q, f"P32_tcl_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+        names.append(Q.add_job(q, f"{pf('P32')}_tcl_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 {wait_gpu(cl.get('min_free_mib', 15500))}
 cd {ENGINES}
 {pyx} -I wm_closed_loop.py --plugin {t['plugin']} --plugin-args {shlex.quote(args)} --cars g55 \\
   --conds {','.join(dict.fromkeys(truck_conds))} {common} --out {o} 2>&1 | {filt}""").stem)
-    if "truck_recovery" in sections and "truck_brake" in cl:
-        t, b = cl["truck"], cl["truck_brake"]
+    if "truck_recovery" in sections and brake_cfg(cfg).get("starts"):
+        t, b = cl["truck"], brake_cfg(cfg)
         o = work / "out" / "truck_brake" / f"{tag}.json"
         o.parent.mkdir(parents=True, exist_ok=True)
-        args = json.dumps({**{k: t[k] for k in ("code", "wide_camera", "drives", "night")}, "starts": b["starts"]})
-        names.append(Q.add_job(q, f"P34_tbr_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+        args = json.dumps({"code": t["code"], "wide_camera": t["wide_camera"], "drives": b.get("drives") or t["drives"],
+                           "night": b.get("night", t["night"]), "starts": b["starts"]})
+        names.append(Q.add_job(q, f"{pf('P34')}_tbr_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 {wait_gpu(cl.get('min_free_mib', 15500))}
 cd {ENGINES}
 {pyx} -I wm_closed_loop.py --plugin {t['plugin']} --plugin-args {shlex.quote(args)} --cars g55 \\
@@ -243,9 +251,14 @@ def ensure_runner(cfg):
     if pidf.exists() and Path(f"/proc/{pidf.read_text().strip()}").exists():
         return
     q.mkdir(parents=True, exist_ok=True)
+    cmd = [sys.executable, "-m", "geval.cli", "--config", cfg["_path"], "queue", "--idle-exit-s", "900"]
+    launcher = cfg.get("queue", {}).get("launcher")
+    if launcher:
+        # e.g. systemd-run --user, so the runner outlives a timer-started watcher; it writes runner.pid itself
+        subprocess.run(list(launcher) + cmd, check=True, cwd=str(Path(__file__).resolve().parents[1]))
+        return
     log = open(q / "runner.out", "a")
-    p = subprocess.Popen([sys.executable, "-m", "geval.cli", "--config", cfg["_path"], "queue", "--idle-exit-s", "900"],
-                         stdout=log, stderr=subprocess.STDOUT, start_new_session=True,
+    p = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, start_new_session=True,
                          cwd=str(Path(__file__).resolve().parents[1]))
     pidf.write_text(str(p.pid))
 
@@ -319,10 +332,18 @@ def describe(wins, units):
     return f"{len(units)} windows ({len(units) - night} day, {night} night)."
 
 
+def brake_cfg(cfg) -> dict:
+    """[closed_loop.truck_brake], merged with the JSON its `file` names (written by the private window picker)."""
+    b = dict(cfg["closed_loop"].get("truck_brake", {}))
+    if b.get("file") and Path(b["file"]).exists():
+        b.update(json.loads(Path(b["file"]).read_text()))
+    return b
+
+
 def brake_units(cfg, wins, mid, seeds):
     """Braking lead: how far the model ran ahead of the recorded car, and the gap that leaves.
     gap(t) = recorded lead distance at t (from the config's per-window lead series) - ahead(t)."""
-    leads = cfg["closed_loop"]["truck_brake"].get("lead_m", {})
+    leads = brake_cfg(cfg).get("lead_m", {})
     out = {}
     for w in wins:
         wid = f"{w['drive']}:{w['start']}"

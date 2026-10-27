@@ -3,9 +3,10 @@ windows are private). `--config PATH`, else $GEVAL_CONFIG.
 
 Keys read here (see README.md for a full example):
   [paths]  work, python, segments_dir, cereal, models_dir, gpu_lock, results, per_unit
-  [queue]  slots, share_s, cpu_cores
+  [queue]  slots, share_s, cpu_cores, launcher (command prefix that starts the runner, e.g. systemd-run)
+  [watch]  sections, github_calls
   [truck_open_loop]   condition, cwd, command, [[truck_open_loop.windows]] id, ...
-  [closed_loop]       wm_args, [closed_loop.public] ..., [closed_loop.truck] ...
+  [closed_loop]       wm_args, [closed_loop.public] ..., [closed_loop.truck] ..., [closed_loop.truck_brake] file, drives
   [backfill]          legacy sources
 """
 from __future__ import annotations
