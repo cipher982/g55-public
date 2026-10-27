@@ -1,0 +1,429 @@
+{
+ "schema": 1,
+ "model": {
+  "id": "870a4823_12864",
+  "name": null,
+  "sha256": "c392ba1aa1b4b89e850366024fa6c1beac1f1fdc3a7182e3c3b0234c55e08eeb",
+  "source": {
+   "kind": "huggingface",
+   "ref": "af05983f67bf9adb4df004dd8382d2aae5763ed4",
+   "url": "https://huggingface.co/commaai/openpilot_driving_models/blob/af05983f67bf9adb4df004dd8382d2aae5763ed4/870a4823-d2ec-4b9a-8015-b947e9901fc7/12864/big_driving_supercombo.onnx",
+   "date": "2026-10-08"
+  },
+  "params_m": 382.9,
+  "gmac": 50.1,
+  "family": "residual",
+  "notes": "Uploaded as \"mountain dew model\"; never shipped. Vision base f22e06e5 with an RL residual head."
+ },
+ "scored": {
+  "date": "2026-10-27T18:26:33Z",
+  "suite": "geval-1 (backfill of the 2026-10-27 deep dive)",
+  "code": "7a1100ad0d1b"
+ },
+ "baselines": [
+  "lebowski_877m",
+  "f78ed37d_12864"
+ ],
+ "sections": {
+  "public_open_loop": {
+   "status": "ok",
+   "unit_of_evidence": "segment",
+   "n": 39,
+   "condition": "Measured. comma's public two-camera segments (openpilot CI data), native intrinsics and the device's own calibration, both cameras; every model on the same decoded frames. Truth is what the recording car did next: carState speed and acceleration, yaw rate from the device's cameraOdometry. Segments where the car never moves have no data. 45 segments from 23 cars (39 with movement).",
+   "metrics": [
+    {
+     "key": "lat_mae",
+     "label": "Lateral error",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.1337,
+     "ci": [
+      0.1097,
+      0.1592
+     ],
+     "n": 39,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.02496,
+       "ci": [
+        0.01433,
+        0.03689
+       ],
+       "n": 39,
+       "wins": 8
+      },
+      "f78ed37d_12864": {
+       "delta": -0.00279,
+       "ci": [
+        -0.007013,
+        0.001642
+       ],
+       "n": 39,
+       "wins": 21
+      }
+     }
+    },
+    {
+     "key": "lat_mae_bl",
+     "label": "Lateral error at the model's own best lag",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.126,
+     "ci": [
+      0.1026,
+      0.1511
+     ],
+     "n": 39,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.02456,
+       "ci": [
+        0.0128,
+        0.03781
+       ],
+       "n": 39,
+       "wins": 9
+      },
+      "f78ed37d_12864": {
+       "delta": -0.002312,
+       "ci": [
+        -0.006947,
+        0.002621
+       ],
+       "n": 39,
+       "wins": 19
+      }
+     }
+    },
+    {
+     "key": "lat_corr",
+     "label": "Lateral correlation with the car's later motion",
+     "unit": "",
+     "better": "higher",
+     "value": 0.8406,
+     "ci": [
+      0.7583,
+      0.9088
+     ],
+     "n": 39,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.01702,
+       "ci": [
+        -0.04225,
+        0.009761
+       ],
+       "n": 39,
+       "wins": 8
+      },
+      "f78ed37d_12864": {
+       "delta": 0.01354,
+       "ci": [
+        -0.001904,
+        0.0328
+       ],
+       "n": 39,
+       "wins": 25
+      }
+     }
+    },
+    {
+     "key": "lat_gain",
+     "label": "Lateral gain (1 = same size as the car's motion)",
+     "unit": "",
+     "better": "near1",
+     "value": 0.7608,
+     "ci": [
+      0.6872,
+      0.8282
+     ],
+     "n": 39,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.07285,
+       "ci": [
+        -0.1229,
+        -0.01737
+       ],
+       "n": 39,
+       "wins": 11
+      },
+      "f78ed37d_12864": {
+       "delta": 0.006967,
+       "ci": [
+        -0.02402,
+        0.03277
+       ],
+       "n": 39,
+       "wins": 20
+      }
+     }
+    },
+    {
+     "key": "lat_rate_rms",
+     "label": "Lateral action rate, RMS (smoothness)",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.4383,
+     "ci": [
+      0.3554,
+      0.5333
+     ],
+     "n": 39,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.2256,
+       "ci": [
+        -0.2702,
+        -0.1817
+       ],
+       "n": 39,
+       "wins": 37
+      },
+      "f78ed37d_12864": {
+       "delta": 0.01599,
+       "ci": [
+        -0.01161,
+        0.05007
+       ],
+       "n": 39,
+       "wins": 23
+      }
+     }
+    },
+    {
+     "key": "lat_best_lag",
+     "label": "Lateral best-correlating lag",
+     "unit": "s",
+     "better": "lower",
+     "value": 0.4744,
+     "ci": [
+      0.3718,
+      0.5872
+     ],
+     "n": 39,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.1013,
+       "ci": [
+        0.02692,
+        0.1885
+       ],
+       "n": 39,
+       "wins": 11
+      },
+      "f78ed37d_12864": {
+       "delta": -0.008974,
+       "ci": [
+        -0.06285,
+        0.05641
+       ],
+       "n": 39,
+       "wins": 13
+      }
+     }
+    },
+    {
+     "key": "lon_mae",
+     "label": "Longitudinal error",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.3091,
+     "ci": [
+      0.269,
+      0.3544
+     ],
+     "n": 39,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.0009908,
+       "ci": [
+        -0.01523,
+        0.01777
+       ],
+       "n": 39,
+       "wins": 18
+      },
+      "f78ed37d_12864": {
+       "delta": 0.007458,
+       "ci": [
+        -0.001513,
+        0.01819
+       ],
+       "n": 39,
+       "wins": 16
+      }
+     }
+    },
+    {
+     "key": "lon_corr",
+     "label": "Longitudinal correlation",
+     "unit": "",
+     "better": "higher",
+     "value": 0.7319,
+     "ci": [
+      0.6527,
+      0.8039
+     ],
+     "n": 39,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.01415,
+       "ci": [
+        -0.01064,
+        0.04049
+       ],
+       "n": 39,
+       "wins": 22
+      },
+      "f78ed37d_12864": {
+       "delta": 0.002636,
+       "ci": [
+        -0.01553,
+        0.02092
+       ],
+       "n": 39,
+       "wins": 22
+      }
+     }
+    },
+    {
+     "key": "lon_brake_mae",
+     "label": "Longitudinal error while braking",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.4116,
+     "ci": [
+      0.3472,
+      0.482
+     ],
+     "n": 30,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.02264,
+       "ci": [
+        -0.05301,
+        0.003295
+       ],
+       "n": 30,
+       "wins": 15
+      },
+      "f78ed37d_12864": {
+       "delta": 0.003995,
+       "ci": [
+        -0.01698,
+        0.02875
+       ],
+       "n": 30,
+       "wins": 17
+      }
+     }
+    },
+    {
+     "key": "lon_rate_rms",
+     "label": "Longitudinal action rate, RMS (smoothness)",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.8937,
+     "ci": [
+      0.7885,
+      1.011
+     ],
+     "n": 39,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.4393,
+       "ci": [
+        -0.5404,
+        -0.3419
+       ],
+       "n": 39,
+       "wins": 36
+      },
+      "f78ed37d_12864": {
+       "delta": 0.0132,
+       "ci": [
+        -0.04053,
+        0.07131
+       ],
+       "n": 39,
+       "wins": 21
+      }
+     }
+    },
+    {
+     "key": "v3_mae",
+     "label": "Plan speed error at 3 s",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 0.7602,
+     "ci": [
+      0.6624,
+      0.8722
+     ],
+     "n": 39,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.04442,
+       "ci": [
+        0.002999,
+        0.08643
+       ],
+       "n": 39,
+       "wins": 12
+      },
+      "f78ed37d_12864": {
+       "delta": 0.001718,
+       "ci": [
+        -0.03063,
+        0.02911
+       ],
+       "n": 39,
+       "wins": 13
+      }
+     }
+    }
+   ],
+   "per_unit_file": "per_unit/870a4823_12864/public_open_loop.csv"
+  },
+  "public_closed_loop": {
+   "status": "not_run",
+   "unit_of_evidence": "segment",
+   "n": 0,
+   "condition": "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to the recording car's own path. Seeds 0 and 1, averaged per segment.",
+   "metrics": [],
+   "per_unit_file": null
+  },
+  "truck_open_loop": {
+   "status": "not_run",
+   "unit_of_evidence": "window",
+   "n": 0,
+   "condition": "Measured. The G55's recorded drives replayed as the truck runs the model: narrow camera only, road-plane warp to 1.45 m (plane:1.45). Truth is the truck's CAN speed and yaw rate. Window = unit.",
+   "metrics": [],
+   "per_unit_file": null
+  },
+  "truck_closed_loop": {
+   "status": "not_run",
+   "unit_of_evidence": "window",
+   "n": 0,
+   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window.",
+   "metrics": [],
+   "per_unit_file": null
+  },
+  "truck_recovery": {
+   "status": "not_run",
+   "unit_of_evidence": "window",
+   "n": 0,
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran.",
+   "metrics": [],
+   "per_unit_file": null
+  }
+ },
+ "stills": [],
+ "limits": [
+  "Open-loop scores compare a model's action with what the recording driver or car did; a model that drives differently but well is scored as wrong, and smoother, later actions (what comma's RL residual produces by design) score worse here. Measured on the 2026-10-27 deep dive: open-loop accuracy did not predict closed-loop driving.",
+  "Closed-loop numbers come from a generative world model, not a car. Nothing separates models before about 2 s; past about 4 s the recorded anchor frames pull every model back toward the recorded path, so 4 s is the primary horizon.",
+  "Intervals are 95% percentile bootstraps over units (segments or windows); segments from the same car are not independent, so the public intervals are somewhat narrow.",
+  "Paired deltas are model minus baseline on the units both have; wins count units where the model is better in the metric's direction."
+ ]
+}
