@@ -16,9 +16,9 @@
   "notes": "Uploaded as \"add N16 nav model\"; never shipped. Takes a navigation map and route inputs, fed zeros here (no route). Vision base 2931d3d9 with an RL residual head."
  },
  "scored": {
-  "date": "2026-10-27T19:13:32Z",
+  "date": "2026-10-27T21:27:17Z",
   "suite": "geval-1",
-  "code": "489f946cb43d"
+  "code": "4038df86acfd"
  },
  "baselines": [
   "lebowski_877m",

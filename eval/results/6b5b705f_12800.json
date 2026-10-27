@@ -16,9 +16,9 @@
   "notes": "Never shipped. Same frozen base as MD v3 (f22e06e5/56320, bit-identical), different RL residual head."
  },
  "scored": {
-  "date": "2026-10-27T19:13:32Z",
+  "date": "2026-10-27T21:27:17Z",
   "suite": "geval-1",
-  "code": "489f946cb43d"
+  "code": "4038df86acfd"
  },
  "baselines": [
   "lebowski_877m",
