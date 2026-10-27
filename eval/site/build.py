@@ -324,7 +324,8 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
         umami = (f'<script defer src="{esc(cfg["umami_src"])}" '
                  f'data-website-id="{esc(cfg["umami_website_id"])}"{dom}></script>')
     nav = []
-    for href, label, key in (("index.html#models", "Models", "models"), ("index.html#how", "How it works", "how"),
+    for href, label, key in (("index.html#time", "Over time", "time"), ("index.html#log", "Log", "log"),
+                             ("index.html#models", "Models", "models"), ("index.html#how", "How it works", "how"),
                              ("method.html", "Method", "method")):
         cur = ' aria-current="page"' if key == current else ""
         nav.append(f'<a href="{up}{href}"{cur}>{label}</a>')
@@ -377,89 +378,6 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 </body>
 </html>
 """
-
-
-# ---------------------------------------------------------------- the hero chart
-
-def hero_chart(models: list[dict], cfg: dict) -> str:
-    """Lateral lead (x) against lateral action rate (y), one dot per model, public open loop. Neither
-    axis has a better direction. The reference and the models config.json names are labelled."""
-    ref = cfg["reference_model"]
-    hl = cfg.get("hero", {}).get("highlight", [])  # [[model id, css class, label, "left" or "right"], ...]
-    pts = []
-    for m in models:
-        x, sx = find_metric(m, "public_open_loop", "lat_best_lag")
-        y, _ = find_metric(m, "public_open_loop", "lat_rate_rms")
-        if x and y:
-            pts.append((m, x, y, sx))
-    if len(pts) < 2:
-        return ""
-    W, H, L, R, T, B = 560, 400, 58, 20, 18, 62
-    xs, ys = [p[1]["value"] for p in pts], [p[2]["value"] for p in pts]
-    x0, x1 = math.floor((min(xs) - 0.03) * 10) / 10, math.ceil((max(xs) + 0.12) * 10) / 10
-    y0, y1 = math.floor((min(ys) - 0.03) * 10) / 10, math.ceil((max(ys) + 0.03) * 10) / 10
-    px = lambda v: L + (v - x0) / (x1 - x0) * (W - L - R)  # noqa: E731
-    py = lambda v: H - B - (v - y0) / (y1 - y0) * (H - T - B)  # noqa: E731
-    g = []
-    t = x0
-    while t <= x1 + 1e-9:
-        X = px(t)
-        g.append(f'<line class="grid" x1="{X:.1f}" x2="{X:.1f}" y1="{T}" y2="{H - B}"/>'
-                 f'<text class="tick" x="{X:.1f}" y="{H - B + 20}" text-anchor="middle">{t:.1f}</text>')
-        t += 0.1
-    t = y0
-    while t <= y1 + 1e-9:
-        Y = py(t)
-        g.append(f'<line class="grid" x1="{L}" x2="{W - R}" y1="{Y:.1f}" y2="{Y:.1f}"/>'
-                 f'<text class="tick" x="{L - 8}" y="{Y + 4:.1f}" text-anchor="end">{t:.1f}</text>')
-        t += 0.1
-    g.append(f'<text class="axis" x="{(L + W - R) / 2:.0f}" y="{H - 14}" text-anchor="middle">'
-             'Lead of the lateral request over the car\'s motion (s)</text>')
-    g.append(f'<text class="axis" transform="translate(16 {(T + H - B) / 2:.0f}) rotate(-90)" text-anchor="middle">'
-             'Lateral action rate, RMS (m/s³)</text>')
-    style = {h[0]: (h[1], h[2]) for h in hl}
-    pos = {}
-    dots, labels = [], []
-    for m, x, y, s in sorted(pts, key=lambda p: p[0]["model"]["id"] in style):
-        mid = m["model"]["id"]
-        X, Y = px(x["value"]), py(y["value"])
-        pos[mid] = (X, Y)
-        cls = style.get(mid, ("other", None))[0]
-        tip = (f'{plain_name(m)}: lateral lead {num(x["value"], 2)} s over {x["n"]} segments, '
-               f'lateral action rate {num(y["value"], 2)} m/s³ over {y["n"]} segments')
-        r = 7 if cls != "other" else 5.5
-        dots.append(f'<circle class="dot d-{cls}" cx="{X:.1f}" cy="{Y:.1f}" r="{r}" tabindex="0" '
-                    f'data-tip="{esc(tip)}" aria-label="{esc(tip)}"/>')
-    for mid, cls, label, side in hl:
-        if mid not in pos:
-            continue
-        X, Y = pos[mid]
-        anchor, dx = ("end", -13) if side == "left" else ("start", 13)
-        labels.append(f'<text class="lbl" x="{X + dx:.1f}" y="{Y + 5:.1f}" text-anchor="{anchor}">{esc(label)}</text>')
-    arrow = ""
-    a = cfg.get("hero", {}).get("arrow")
-    if a and a[0] in pos and a[1] in pos:
-        (ax, ay), (bx, by) = pos[a[0]], pos[a[1]]
-        dx, dy = bx - ax, by - ay
-        d = (dx * dx + dy * dy) ** 0.5 or 1
-        sx, sy, ex, ey = ax + dx / d * 11, ay + dy / d * 11, bx - dx / d * 12, by - dy / d * 12
-        arrow = (f'<path class="arrow" d="M{sx:.1f},{sy:.1f} L{ex:.1f},{ey:.1f}" marker-end="url(#ah)"/>')
-    legend = "".join(f'<span><i class="key k-{h[1]}"></i>{esc(h[2])}</span>' for h in hl)
-    legend += '<span><i class="key k-other"></i>Other comma models</span>'
-    rows = "".join(f'<tr><th scope="row">{esc(plain_name(m))}</th><td class="n">{num(x["value"], 2)}</td>'
-                   f'<td class="n">{num(y["value"], 2)}</td></tr>' for m, x, y, s in reversed(pts))
-    n = max(s["n"] for *_, s in pts)
-    return f"""<figure class="hero-fig">
-<p class="fig-t">{esc(cfg.get("hero", {}).get("title", ""))}</p>
-<div class="legend-row">{legend}</div>
-<svg class="scatter" viewBox="0 0 {W} {H}" role="img" aria-label="Scatter of lateral lead against lateral action rate for each scored model">
-<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
-{''.join(g)}{arrow}{''.join(dots)}{''.join(labels)}
-</svg>
-<figcaption>One dot per model; means over comma's public segments, open loop ({n} with movement; the lead excludes values at the 0 and 1.5 s search limits). Lead: how far ahead of the car's measured lateral motion the model's lateral request best correlates with it; larger means earlier. Lateral action rate: RMS rate of change of that request. Neither is a driving score: a lower action rate can come from a smaller request as well as a smoother one, and smoothing a request also moves its best-correlating lead.
-<details><summary>Numbers behind the chart</summary><div class="tw"><table><thead><tr><th scope="col">Model</th><th class="n" scope="col">Lateral lead (s)</th><th class="n" scope="col">Lateral action rate (m/s³)</th></tr></thead><tbody>{rows}</tbody></table></div></details>
-</figcaption>
-</figure>"""
 
 
 # ---------------------------------------------------------------- per-model verdict and bars
@@ -842,27 +760,275 @@ def ranking_table(models, cfg, root) -> str:
 </figure>"""
 
 
+# ---------------------------------------------------------------- the living parts: status, over time, log
+
+import datetime as _dt
+
+
+def scored_at(m) -> str:
+    return m["scored"]["date"]
+
+
+def shipped(m) -> bool:
+    """On openpilot master or in a release, as against a Hugging Face upload only."""
+    return bool(m["model"].get("on_master")) or m["model"]["source"]["kind"] in ("release", "openpilot-master")
+
+
+def status_strip(models, cfg, root) -> str:
+    latest = max(models, key=lambda m: (scored_at(m), m["model"]["id"]))
+    newest = max(models, key=lambda m: (first_public(m), m["model"]["id"]))
+    r = ranking.scores(root)["models"]
+    w = cfg.get("watch", {})
+    when = latest["scored"]["date"].replace("T", " ").rstrip("Z")[:16] + " UTC"
+    items = [
+        ("Last scored", esc(when)),
+        ("Models", f"{len(models)} tracked, {len(r)} with closed loop"),
+        ("Newest", f'{name_html(newest, "models/" + newest["model"]["id"] + ".html")}, first public {esc(first_public(newest))}, '
+                   f'scored {esc(scored_at(newest)[:10])}'),
+        ("New models", esc(w.get("text", "checked manually"))),
+    ]
+    return '<dl class="strip">' + "".join(f"<div><dt>{k}</dt><dd>{v}</dd></div>" for k, v in items) + "</dl>"
+
+
+def _date(s: str) -> _dt.date:
+    return _dt.date.fromisoformat(s[:10])
+
+
+TRENDS = [  # (title, unit, how to read one model; None = no value)
+    ("Closed loop, comma's segments: median distance from the recorded path at 2 s (cm)", "cm", "rank"),
+    ("G55 closed loop: windows closer to the recorded path than lebowski at 2 s", "windows", "truck"),
+    ("Lateral action rate, open loop, comma's segments (m/s³)", "m/s³", ("public_open_loop", "lat_rate_rms")),
+    ("Lead of the lateral request over the car's motion, open loop (s)", "s", ("public_open_loop", "lat_best_lag")),
+]
+
+
+def trend_values(kind, models, ref, r):
+    """{model id: (value, lo, hi, n, unit word)}; the reference line value or None."""
+    out, line = {}, None
+    for m in models:
+        mid = m["model"]["id"]
+        if kind == "rank":
+            s = r.get(mid)
+            if s:
+                v = (s["median"] * 100, s["ci"][0] * 100 if s["ci"] else None, s["ci"][1] * 100 if s["ci"] else None,
+                     f'{s["n"]} segments from {s["clusters"]} drives')
+                if mid == ref:
+                    line = v
+                else:
+                    out[mid] = v
+        elif kind == "truck":
+            x, _ = find_metric(m, "truck_closed_loop", "xtrack_2s")
+            p = x and x["paired"].get(ref)
+            if mid == ref and x:
+                line = (x["n"] / 2, None, None, f'{x["n"]} windows')
+            elif p:
+                out[mid] = (p["wins"], None, None, f'{p["n"]} windows from {p["clusters"]} drives')
+        else:
+            x, _ = find_metric(m, kind[0], kind[1])
+            if x:
+                v = (x["value"], x["ci"][0] if x["ci"] else None, x["ci"][1] if x["ci"] else None,
+                     f'{x["n"]} segments from {x["clusters"]} drives')
+                if mid == ref:
+                    line = v
+                else:
+                    out[mid] = v
+    return out, line
+
+
+def trend_panel(title, unit, kind, models, cfg, r) -> str:
+    ref = cfg["reference_model"]
+    idx = by_id(models)
+    vals, line = trend_values(kind, models, ref, r)
+    others = [m for m in models if m["model"]["id"] != ref]
+    dates = [_date(first_public(m)) for m in others]
+    d0, d1 = min(dates) - _dt.timedelta(days=6), max(dates) + _dt.timedelta(days=6)
+    W, H, L, Rr, T, B = 360, 190, 44, 14, 14, 34
+    span = (d1 - d0).days
+    X = lambda d: L + (d - d0).days / span * (W - L - Rr)  # noqa: E731
+    ys = [v[0] for v in vals.values()] + [v[i] for v in vals.values() for i in (1, 2) if v[i] is not None]
+    if line:
+        ys.append(line[0])
+    if kind == "truck":
+        n = max([int(v[3].split()[0]) for v in vals.values()] + [int(line[3].split()[0]) if line else 18])
+        y0, y1 = 0.0, float(n)
+    else:
+        lo, hi = (min(ys), max(ys)) if ys else (0.0, 1.0)
+        pad = (hi - lo) * 0.15 or 0.1
+        y0, y1 = max(0.0, lo - pad), hi + pad
+    Y = lambda v: H - B - (v - y0) / (y1 - y0) * (H - T - B)  # noqa: E731
+    step = _nice((y1 - y0) / 4)
+    g = []
+    t = math.ceil(y0 / step) * step
+    while t <= y1 + 1e-9:
+        g.append(f'<line class="grid" x1="{L}" x2="{W - Rr}" y1="{Y(t):.1f}" y2="{Y(t):.1f}"/>'
+                 f'<text class="tick" x="{L - 6}" y="{Y(t) + 4:.1f}" text-anchor="end">{_fmt_tick(t, step)}</text>')
+        t += step
+    d = _dt.date(d0.year, d0.month, 1)
+    while d <= d1:
+        for day in (1, 15):
+            dd = d.replace(day=day)
+            if d0 <= dd <= d1:
+                g.append(f'<line class="xt" x1="{X(dd):.1f}" x2="{X(dd):.1f}" y1="{H - B}" y2="{H - B + 4}"/>'
+                         f'<text class="tick" x="{X(dd):.1f}" y="{H - B + 17}" text-anchor="middle">{dd.strftime("%b")} {day}</text>')
+        d = (d.replace(day=28) + _dt.timedelta(days=4)).replace(day=1)
+    refl = ""
+    if line:
+        lab = f"{line[0]:g} of {int(line[0] * 2)}" if kind == "truck" else "lebowski"
+        refl = (f'<line class="refl" x1="{L}" x2="{W - Rr}" y1="{Y(line[0]):.1f}" y2="{Y(line[0]):.1f}"/>'
+                f'<text class="refl-t" x="{W - Rr}" y="{Y(line[0]) - 5:.1f}" text-anchor="end">{lab}</text>')
+    ordered = sorted((m for m in others if m["model"]["id"] in vals), key=lambda m: (first_public(m), m["model"]["id"]))
+    path = " ".join(f'{X(_date(first_public(m))):.1f},{Y(vals[m["model"]["id"]][0]):.1f}' for m in ordered)
+    marks = []
+    for m in ordered:
+        mid = m["model"]["id"]
+        v, lo, hi, nw = vals[mid]
+        cx, cy = X(_date(first_public(m))), Y(v)
+        c = model_class(m, cfg)
+        if lo is not None:
+            marks.append(f'<line class="tw-ci st-{c}" x1="{cx:.1f}" x2="{cx:.1f}" y1="{Y(lo):.1f}" y2="{Y(hi):.1f}"/>')
+        vt = f"{v:.0f} of {nw}" if kind == "truck" else f"{num(v, 1 if unit == 'cm' else 2)} {unit}" + (f" [{num(lo, 1 if unit == 'cm' else 2)}, {num(hi, 1 if unit == 'cm' else 2)}]" if lo is not None else "") + f", {nw}"
+        tip = f'{plain_name(m)}, first public {first_public(m)}, {"on openpilot master or shipped" if shipped(m) else "Hugging Face upload only"}: {vt}'
+        fill = f"fl-{c}" if shipped(m) else "hollow"
+        marks.append(f'<circle class="tp st-{c} {fill}" cx="{cx:.1f}" cy="{cy:.1f}" r="5" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}"/>')
+    pend = [m for m in others if m["model"]["id"] not in vals]
+    for m in pend:
+        cx = X(_date(first_public(m)))
+        tip = f"{plain_name(m)}, first public {first_public(m)}: not scored here yet"
+        marks.append(f'<path class="pend" d="M{cx - 3:.1f},{H - B - 3:.1f} l6,6 m0,-6 l-6,6" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}"/>')
+    latest = ordered[-1] if ordered else None
+    if latest:
+        v, lo, hi, nw = vals[latest["model"]["id"]]
+        nv = f"{v:.0f} of {nw.split()[0]} windows" if kind == "truck" else f"{num(v, 1 if unit == 'cm' else 2)} {unit}"
+        cap = f'Newest model here: {esc(short_name(latest))} (first public {esc(first_public(latest))}), {esc(nv)} ({esc(nw if kind != "truck" else nw.split(" from ")[1] if " from " in nw else nw)})'
+        if line and kind != "truck":
+            cap += f'; lebowski {num(line[0], 1 if unit == "cm" else 2)} {unit}'
+        cap += "."
+        if pend:
+            cap += f" {len(pend)} not scored yet (×)."
+    else:
+        cap = "No model scored here yet."
+    return (f'<figure class="trend"><p class="trend-t">{esc(title)}</p>'
+            f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="{esc(title)}, by the date each model was first public">'
+            f'{"".join(g)}{refl}<polyline class="tl" points="{path}"/>{"".join(marks)}</svg>'
+            f'<figcaption>{cap}</figcaption></figure>')
+
+
+def _nice(x: float) -> float:
+    e = 10 ** math.floor(math.log10(x)) if x > 0 else 1
+    for f in (1, 2, 2.5, 5, 10):
+        if x <= f * e:
+            return f * e
+    return 10 * e
+
+
+def _fmt_tick(t: float, step: float) -> str:
+    d = 0 if step >= 1 else 1 if step >= 0.1 else 2
+    return f"{t:.{d}f}"
+
+
+def over_time(models, cfg, root) -> str:
+    r = ranking.scores(root)["models"]
+    panels = "".join(trend_panel(t, u, k, models, cfg, r) for t, u, k in TRENDS)
+    sw = "".join(f'<span><i class="sw sw-{h[1]}"></i>{esc(h[2])}</span>' for h in cfg.get("hero", {}).get("highlight", [])
+                 if h[0] != cfg["reference_model"])
+    legend = ('<p class="trend-key">' + sw + '<span><i class="sw sw-other"></i>other comma models</span>'
+              '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-fill"/></svg>on openpilot master or shipped</span>'
+              '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-hollow"/></svg>Hugging Face upload only</span>'
+              '<span><svg width="20" height="12" aria-hidden="true"><line x1="0" x2="20" y1="6" y2="6" class="refl"/></svg>lebowski, July 2026</span>'
+              '<span><svg width="12" height="12" aria-hidden="true"><path class="pend" d="M3,3 l6,6 m0,-6 l-6,6"/></svg>not scored yet</span>'
+              '<span>bars: 95% interval</span></p>')
+    return (f'<p class="sub">Each model at the date its weights were first public, joined in that order. A new model is added when it is scored.</p>'
+            f'{legend}<div class="trends">{panels}</div>')
+
+
+def changelog(root) -> list:
+    f = root / "CHANGELOG.md"
+    if not f.exists():
+        f = EVAL / "CHANGELOG.md"
+    out = []
+    for line in f.read_text().splitlines():
+        mo = re.match(r"- (\d{4}-\d{2}-\d{2}): (.*?)(?: \[([^\]]+)\]\(([^)]+)\))?$", line.strip())
+        if mo:
+            out.append((mo.group(1), "change", mo.group(2), mo.group(4), mo.group(3)))
+    return out
+
+
+def log_entries(models, root) -> list:
+    """(date, kind, text, link, link label), newest first: suite changes from CHANGELOG.md, then each
+    model's releases and scoring runs from its results file."""
+    ev = changelog(root)
+    for m in models:
+        md, src, mid = m["model"], m["model"]["source"], m["model"]["id"]
+        page = f"models/{mid}.html"
+        nm = plain_name(m)
+        seen = set()
+
+        def add(date, text, kind="model"):
+            if (date, text) not in seen:
+                seen.add((date, text))
+                ev.append((date, kind, f"{nm} {text}", page, None))
+        if md.get("on_master"):
+            add(md["on_master"], "merged to openpilot master")
+        if src["kind"] == "huggingface":
+            add(src["date"], "uploaded to Hugging Face")
+        if src["kind"] == "release":
+            add(src["date"], f"shipped in openpilot {src['ref']}")
+        if src["kind"] == "openpilot-master" and src["date"] != md.get("on_master"):
+            add(src["date"], "merged to openpilot master again")
+        if first_public(m) not in {d for d, _ in seen}:
+            add(first_public(m), "first public")
+        secs = [SECTIONS[k] for k, s in m["sections"].items() if s["status"] == "ok" and k in SECTIONS]
+        ev.append((scored_at(m)[:10], "scored", f"{nm} scored, suite {m['scored']['suite']}: {'; '.join(secs)}", page, None))
+    order = {"change": 0, "scored": 1, "model": 2}
+    ev.sort(key=lambda e: (e[0], -order[e[1]]), reverse=True)
+    return ev
+
+
+def log_feed(models, root) -> str:
+    ev = log_entries(models, root)
+    rows, last = [], None
+    for date, kind, text, link, lab in ev:
+        rep = ' class="rep"' if date == last else ""
+        last = date
+        body = esc(text)
+        if link and kind != "change":
+            body = f'<a href="{esc(link)}">{body}</a>'
+        elif link:
+            body += f' <a class="lg-c" href="{esc(link)}">{esc(lab or "link")}</a>'
+        rows.append(f'<li class="lg-{kind}"><time datetime="{date}"{rep}>{date}</time><span class="lg-k">{ {"change": "suite", "scored": "scored", "model": "model"}[kind]}</span><span>{body}</span></li>')
+    head, rest = rows[:12], rows[12:]
+    more = f'<details class="lg-more"><summary>{len(rest)} earlier entries</summary><ol class="log">{"".join(rest)}</ol></details>' if rest else ""
+    return f'<ol class="log">{"".join(head)}</ol>{more}'
+
+
 # ---------------------------------------------------------------- overview
 
 def overview(models, cfg, root) -> str:
     def finding(f):
-        chart = hero_chart(models, cfg) if f.get("chart") == "lag_rate" else ""
         return (f'<li><span class="f-fig">{esc(fill(f["figure"], models, root))}</span>'
-                f'<div class="f-b"><p>{esc(fill(f["text"], models, root))}</p>{chart}</div></li>')
+                f'<div class="f-b"><p>{esc(fill(f["line"], models, root))}</p>'
+                f'<details><summary>Detail</summary><p>{esc(fill(f["text"], models, root))}</p></details></div></li>')
     findings = "".join(finding(f) for f in cfg.get("findings", []))
     return f"""<section class="hero">
 <div class="hero-t">
 <h1>openpilot driving model evaluations</h1>
 <p class="lede">Every comma.ai openpilot driving model, including Hugging Face uploads, scored with one fixed suite on comma's public drives and on drives from a 2011 Mercedes G55, in open loop and in closed loop.</p>
+{status_strip(models, cfg, root)}
 </div>
 {hero_visual(models, cfg)}
 {ranking_table(models, cfg, root)}
 </section>
 
-<section id="found" class="found">
-<h2>Results</h2>
-<p class="asof">Measured by this suite, as of {esc(cfg.get("findings_date", ""))}. The reference is lebowski (877M parameters, July 2026), the model the G55 drives with.</p>
+<section id="time" class="time">
+<h2>Over time</h2>
+{over_time(models, cfg, root)}
 <ul class="findings">{findings}</ul>
+</section>
+
+<section id="log" class="logsec">
+<h2>Log</h2>
+<p class="sub">Model releases and scoring runs from the results files; suite changes from <a href="{esc(cfg['repo_url'])}/blob/main/eval/CHANGELOG.md">CHANGELOG.md</a>. Newest first.</p>
+{log_feed(models, root)}
 </section>
 
 <section id="models">
