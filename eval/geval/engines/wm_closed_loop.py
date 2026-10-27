@@ -363,6 +363,7 @@ def main():
     cars, seeds, conds = a.cars.split(","), [int(x) for x in a.seeds.split(",")], a.conds.split(",")
     result = {"args": {k: str(v) for k, v in vars(a).items() if k != "plugin_args"}, "windows": []}
     done = set()
+    a.out.parent.mkdir(parents=True, exist_ok=True)   # a fresh host (a rented GPU) may not have it
     if a.out.exists():                        # resume: keep finished windows
         result = json.loads(a.out.read_text())
         done = {f"{w['drive']}:{w['start']}" for w in result["windows"]}
