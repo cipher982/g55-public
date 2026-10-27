@@ -1,0 +1,108 @@
+{
+  "_doc": "Known comma big driving models. first_public: the first date the weights were public (openpilot master or Hugging Face). on_master: the date they were merged to openpilot master, null if never. The second baseline of a model is the newest scored model that was on master before the model's first_public date. Lineage facts are borrowed from comma's GitHub PRs and Hugging Face upload history; 'same weights' claims were checked by tensor bytes (deep dive 2026-10-27).",
+  "hf_repo": "commaai/openpilot_driving_models",
+  "models": [
+    {
+      "id": "lebowski_877m",
+      "name": "lebowski",
+      "family": "lebowski",
+      "first_public": "2026-07-01",
+      "on_master": "2026-07-01",
+      "source": {"kind": "openpilot-master", "ref": "fa0c6876d3cf070e91e25e5353ceadc68a5b3285",
+                 "url": "https://github.com/commaai/openpilot/pull/38268", "date": "2026-07-01"},
+      "file": {"lfs": "commaai/openpilot", "commit": "fa0c6876d3cf070e91e25e5353ceadc68a5b3285",
+               "path": "selfdrive/modeld/models/big_driving_supercombo.onnx"},
+      "sha256": "a501760a9d1d5fef0eab2b8c5d122d06124fc26dc8e0782e0aa94b82a208f0ff",
+      "notes": "877M ConvNeXt encoder, host-kept history, no RL residual. Checkpoint 6f5c8d09/ecc73f48. The model the G55 runs."
+    },
+    {
+      "id": "1a421175_12864",
+      "name": "Cinque v2",
+      "family": "big-rl",
+      "first_public": "2026-09-11",
+      "on_master": "2026-09-11",
+      "source": {"kind": "huggingface", "ref": "c83630ca0ea166f74c89a67bbdf2a3a820126de6",
+                 "url": "https://huggingface.co/commaai/openpilot_driving_models/blob/c83630ca0ea166f74c89a67bbdf2a3a820126de6/1a421175-db71-4e3d-9d62-e2166421b02b/12864/big_driving_supercombo.onnx",
+                 "date": "2026-09-18"},
+      "file": {"hf_revision": "c83630ca0ea166f74c89a67bbdf2a3a820126de6", "path": "1a421175-db71-4e3d-9d62-e2166421b02b/12864/big_driving_supercombo.onnx"},
+      "sha256": "c7b300083b8dd6ce17545ef52edb6b577e3a805e6372f9f9343090604690242f",
+      "notes": "On openpilot master 2026-09-11 (PR #38850). Vision base b9facbcc, history in the graph, no residual head."
+    },
+    {
+      "id": "f78ed37d_12864",
+      "name": "Cinque v3",
+      "family": "big-rl",
+      "first_public": "2026-09-18",
+      "on_master": "2026-09-18",
+      "source": {"kind": "huggingface", "ref": "81a9ad0139976653c041de50b60f1160a873869e",
+                 "url": "https://huggingface.co/commaai/openpilot_driving_models/blob/81a9ad0139976653c041de50b60f1160a873869e/f78ed37d-afad-4dbc-8050-40ea885eedde/12864/big_driving_supercombo.onnx",
+                 "date": "2026-09-18"},
+      "file": {"hf_revision": "81a9ad0139976653c041de50b60f1160a873869e", "path": "f78ed37d-afad-4dbc-8050-40ea885eedde/12864/big_driving_supercombo.onnx"},
+      "sha256": "404a18cfd86d29637d20c697dfde245bb47c666ae016730ab674c65f4d1e1aa4",
+      "notes": "On openpilot master 2026-09-18 (PR #38932). Vision base b9facbcc, no residual head."
+    },
+    {
+      "id": "870a4823_12864",
+      "name": null,
+      "family": "residual",
+      "first_public": "2026-10-08",
+      "on_master": null,
+      "source": {"kind": "huggingface", "ref": "af05983f67bf9adb4df004dd8382d2aae5763ed4",
+                 "url": "https://huggingface.co/commaai/openpilot_driving_models/blob/af05983f67bf9adb4df004dd8382d2aae5763ed4/870a4823-d2ec-4b9a-8015-b947e9901fc7/12864/big_driving_supercombo.onnx",
+                 "date": "2026-10-08"},
+      "file": {"hf_revision": "af05983f67bf9adb4df004dd8382d2aae5763ed4", "path": "870a4823-d2ec-4b9a-8015-b947e9901fc7/12864/big_driving_supercombo.onnx"},
+      "sha256": "c392ba1aa1b4b89e850366024fa6c1beac1f1fdc3a7182e3c3b0234c55e08eeb",
+      "notes": "Uploaded as \"mountain dew model\"; never shipped. Vision base f22e06e5 with an RL residual head."
+    },
+    {
+      "id": "8d736683_12864",
+      "name": "Mountain Dew",
+      "family": "residual",
+      "first_public": "2026-10-10",
+      "on_master": "2026-10-10",
+      "source": {"kind": "release", "ref": "v0.11.2",
+                 "url": "https://github.com/commaai/openpilot/releases/tag/v0.11.2", "date": "2026-10-23"},
+      "file": {"hf_revision": "1e0e989e60acee77c4d56c47ad094c6b7076d544", "path": "8d736683-fed4-4e48-96fd-eae5d9d5bc56/12864/big_driving_supercombo.onnx"},
+      "sha256": "87fe86ca0813c099efddf9173ba503be2e40ea4c5362c36812a44141f4cb07d4",
+      "notes": "Shipped in openpilot 0.11.2 (master 2026-10-10, PR #39047). Scored from the Hugging Face upload of 2026-10-14, whose tensors match the release's compiled model byte for byte. Vision base f22e06e5 with an RL residual head."
+    },
+    {
+      "id": "1365126a_12864",
+      "name": "MD v3 / Flip Flop",
+      "family": "residual",
+      "first_public": "2026-10-14",
+      "on_master": "2026-10-14",
+      "source": {"kind": "openpilot-master", "ref": "9fba666fd4",
+                 "url": "https://github.com/commaai/openpilot/pull/39156", "date": "2026-10-24"},
+      "file": {"hf_revision": "159e38e0d011989879b410e6943e812c8ddbbe6a", "path": "1365126a-e71e-4778-be00-8ab92dc82c09/12864/big_driving_supercombo.onnx"},
+      "sha256": "35976b11be3904eb78e32f7dc55a6abf8e9433ac5aa391a1998f1e9ce001b199",
+      "notes": "On openpilot master as MD v3 (2026-10-14, PR #39087) and again as Flip Flop (2026-10-24, PR #39156), same weights. Scored from the 2026-10-24 Hugging Face re-upload, weights identical to the 2026-10-16 upload. Vision base f22e06e5 with an RL residual head."
+    },
+    {
+      "id": "96244b1f_12800",
+      "name": "N16 nav model",
+      "family": "residual",
+      "first_public": "2026-10-15",
+      "on_master": null,
+      "source": {"kind": "huggingface", "ref": "3fe6f3dea4fa9613dd3582b9a3828e97d307ad9e",
+                 "url": "https://huggingface.co/commaai/openpilot_driving_models/blob/3fe6f3dea4fa9613dd3582b9a3828e97d307ad9e/96244b1f-6c4e-4adc-848d-eccd0b44b182/12800/big_driving_supercombo.onnx",
+                 "date": "2026-10-15"},
+      "file": {"hf_revision": "3fe6f3dea4fa9613dd3582b9a3828e97d307ad9e", "path": "96244b1f-6c4e-4adc-848d-eccd0b44b182/12800/big_driving_supercombo.onnx"},
+      "sha256": "01effc679eb46d6036ce0302673a87fe2dcfcc95a679daeeb929679e53c3647a",
+      "notes": "Uploaded as \"add N16 nav model\"; never shipped. Takes a navigation map and route inputs, fed zeros here (no route). Vision base 2931d3d9 with an RL residual head."
+    },
+    {
+      "id": "6b5b705f_12800",
+      "name": null,
+      "family": "residual",
+      "first_public": "2026-10-17",
+      "on_master": null,
+      "source": {"kind": "huggingface", "ref": "eed9e515dccd5aa9be969a2d6c57eb469174a97d",
+                 "url": "https://huggingface.co/commaai/openpilot_driving_models/blob/eed9e515dccd5aa9be969a2d6c57eb469174a97d/6b5b705f-4a05-4f30-9c37-9c51b8dc5ffc/12800/big_driving_supercombo.onnx",
+                 "date": "2026-10-17"},
+      "file": {"hf_revision": "eed9e515dccd5aa9be969a2d6c57eb469174a97d", "path": "6b5b705f-4a05-4f30-9c37-9c51b8dc5ffc/12800/big_driving_supercombo.onnx"},
+      "sha256": "ceb38c593005b3338aee4ca057d5ad9ee64c58f8fdba0b41641a9d4cc6c36e36",
+      "notes": "Never shipped. Same frozen base as MD v3 (f22e06e5/56320, bit-identical), different RL residual head."
+    }
+  ]
+}

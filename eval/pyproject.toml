@@ -1,0 +1,22 @@
+[project]
+name = "geval"
+version = "1.0.0"
+description = "G-Wagon eval: score comma's openpilot driving models with one fixed suite"
+requires-python = ">=3.11"
+dependencies = ["numpy>=2.0"]
+
+[project.optional-dependencies]
+# What the engines need (replay and the world-model loop). The suite can also point
+# [paths] python at an existing interpreter that has these.
+run = ["onnx>=1.18", "onnxruntime-gpu>=1.22", "av>=14", "pycapnp>=2.0", "zstandard", "opencv-python-headless",
+       "torch>=2.8", "huggingface_hub>=0.30", "einops"]
+
+[project.scripts]
+geval = "geval.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["geval"]
