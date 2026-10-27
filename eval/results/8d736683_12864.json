@@ -16,9 +16,9 @@
   "notes": "Shipped in openpilot 0.11.2 (master 2026-10-10, PR #39047). Scored from the Hugging Face upload of 2026-10-14, whose tensors match the release's compiled model byte for byte. Vision base f22e06e5 with an RL residual head."
  },
  "scored": {
-  "date": "2026-10-27T19:13:32Z",
+  "date": "2026-10-27T20:29:24Z",
   "suite": "geval-1",
-  "code": "489f946cb43d"
+  "code": "ee5e4c525a71"
  },
  "baselines": [
   "lebowski_877m",
@@ -387,12 +387,174 @@
    "per_unit_file": "per_unit/8d736683_12864/public_open_loop.csv"
   },
   "public_closed_loop": {
-   "status": "not_run",
+   "status": "ok",
    "unit_of_evidence": "segment",
-   "n": 0,
-   "condition": "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to the recording car's own path. One window per segment, nearest the middle, where the car holds at least 5 m/s for the window and the 4.8 s before it; segments with no such stretch are left out. Seeds 0 and 1, averaged per segment.",
-   "metrics": [],
-   "per_unit_file": null
+   "n": 28,
+   "condition": "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to the recording car's own path. One window per segment, nearest the middle, where the car holds at least 5 m/s for the window and the 4.8 s before it; segments with no such stretch are left out. Seeds 0 and 1, averaged per segment. 28 segments from 17 cars, one 7.2 s window each.",
+   "metrics": [
+    {
+     "key": "xtrack_2s",
+     "label": "Distance from the recorded path at 2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.09638,
+     "ci": [
+      0.04915,
+      0.1766
+     ],
+     "n": 28,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.0513,
+       "ci": [
+        -0.1114,
+        -0.01163
+       ],
+       "n": 28,
+       "wins": 19
+      }
+     }
+    },
+    {
+     "key": "xtrack_4s",
+     "label": "Distance from the recorded path at 4 s (primary)",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.221,
+     "ci": [
+      0.112,
+      0.3948
+     ],
+     "n": 28,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.05729,
+       "ci": [
+        -0.136,
+        0.004229
+       ],
+       "n": 28,
+       "wins": 11
+      }
+     }
+    },
+    {
+     "key": "xtrack_7s",
+     "label": "Distance from the recorded path at 7.2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 1.025,
+     "ci": [
+      0.4082,
+      1.886
+     ],
+     "n": 28,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.01929,
+       "ci": [
+        -0.538,
+        0.5376
+       ],
+       "n": 28,
+       "wins": 15
+      }
+     }
+    },
+    {
+     "key": "fail_1m",
+     "label": "Share of episodes ever more than 1 m off the path",
+     "unit": "",
+     "better": "lower",
+     "value": 0.1786,
+     "ci": [
+      0.07143,
+      0.3214
+     ],
+     "n": 28,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.05357,
+       "ci": [
+        -0.1429,
+        0.0
+       ],
+       "n": 28,
+       "wins": 2
+      }
+     }
+    },
+    {
+     "key": "lat_jerk",
+     "label": "Requested lateral jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.2021,
+     "ci": [
+      0.1392,
+      0.2751
+     ],
+     "n": 28,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.1235,
+       "ci": [
+        -0.1878,
+        -0.0662
+       ],
+       "n": 28,
+       "wins": 24
+      }
+     }
+    },
+    {
+     "key": "long_jerk",
+     "label": "Requested longitudinal jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.341,
+     "ci": [
+      0.2662,
+      0.4235
+     ],
+     "n": 28,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.005382,
+       "ci": [
+        -0.04463,
+        0.03782
+       ],
+       "n": 28,
+       "wins": 17
+      }
+     }
+    },
+    {
+     "key": "speed_err",
+     "label": "Speed error against the recorded speed, RMS",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 1.241,
+     "ci": [
+      0.8605,
+      1.693
+     ],
+     "n": 28,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.14,
+       "ci": [
+        -0.07553,
+        0.3513
+       ],
+       "n": 28,
+       "wins": 8
+      }
+     }
+    }
+   ],
+   "per_unit_file": "per_unit/8d736683_12864/public_closed_loop.csv"
   },
   "truck_open_loop": {
    "status": "ok",

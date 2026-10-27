@@ -16,9 +16,9 @@
   "notes": "877M ConvNeXt encoder, host-kept history, no RL residual. Checkpoint 6f5c8d09/ecc73f48. The model the G55 runs."
  },
  "scored": {
-  "date": "2026-10-27T19:13:32Z",
+  "date": "2026-10-27T20:29:21Z",
   "suite": "geval-1",
-  "code": "489f946cb43d"
+  "code": "ee5e4c525a71"
  },
  "baselines": [],
  "sections": {
@@ -175,12 +175,104 @@
    "per_unit_file": "per_unit/lebowski_877m/public_open_loop.csv"
   },
   "public_closed_loop": {
-   "status": "not_run",
+   "status": "ok",
    "unit_of_evidence": "segment",
-   "n": 0,
-   "condition": "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to the recording car's own path. One window per segment, nearest the middle, where the car holds at least 5 m/s for the window and the 4.8 s before it; segments with no such stretch are left out. Seeds 0 and 1, averaged per segment.",
-   "metrics": [],
-   "per_unit_file": null
+   "n": 28,
+   "condition": "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to the recording car's own path. One window per segment, nearest the middle, where the car holds at least 5 m/s for the window and the 4.8 s before it; segments with no such stretch are left out. Seeds 0 and 1, averaged per segment. 28 segments from 17 cars, one 7.2 s window each.",
+   "metrics": [
+    {
+     "key": "xtrack_2s",
+     "label": "Distance from the recorded path at 2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.1477,
+     "ci": [
+      0.06745,
+      0.282
+     ],
+     "n": 28,
+     "paired": {}
+    },
+    {
+     "key": "xtrack_4s",
+     "label": "Distance from the recorded path at 4 s (primary)",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.2783,
+     "ci": [
+      0.1285,
+      0.5202
+     ],
+     "n": 28,
+     "paired": {}
+    },
+    {
+     "key": "xtrack_7s",
+     "label": "Distance from the recorded path at 7.2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 1.044,
+     "ci": [
+      0.5137,
+      1.662
+     ],
+     "n": 28,
+     "paired": {}
+    },
+    {
+     "key": "fail_1m",
+     "label": "Share of episodes ever more than 1 m off the path",
+     "unit": "",
+     "better": "lower",
+     "value": 0.2321,
+     "ci": [
+      0.08929,
+      0.3929
+     ],
+     "n": 28,
+     "paired": {}
+    },
+    {
+     "key": "lat_jerk",
+     "label": "Requested lateral jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.3256,
+     "ci": [
+      0.2335,
+      0.4354
+     ],
+     "n": 28,
+     "paired": {}
+    },
+    {
+     "key": "long_jerk",
+     "label": "Requested longitudinal jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.3464,
+     "ci": [
+      0.285,
+      0.4178
+     ],
+     "n": 28,
+     "paired": {}
+    },
+    {
+     "key": "speed_err",
+     "label": "Speed error against the recorded speed, RMS",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 1.101,
+     "ci": [
+      0.7914,
+      1.441
+     ],
+     "n": 28,
+     "paired": {}
+    }
+   ],
+   "per_unit_file": "per_unit/lebowski_877m/public_closed_loop.csv"
   },
   "truck_open_loop": {
    "status": "ok",
