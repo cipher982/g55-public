@@ -64,6 +64,7 @@ def main(argv=None):
     sm.add_argument("--sections", required=True)
     sm.add_argument("--tag")
     sm.add_argument("--truck-conds", help="world-model conditions for the truck job, e.g. offcentre")
+    sm.add_argument("--after", help="job name the world-model jobs wait for (one world-model job on the GPU at a time)")
     sub.add_parser("backfill")
     b = sub.add_parser("build")
     b.add_argument("ids", nargs="*")
@@ -91,7 +92,8 @@ def main(argv=None):
         from . import run as R
         mids = [R.resolve(cfg, r) for r in a.refs]
         print(json.dumps({"models": mids, "queued": R.queue_jobs(cfg, mids, a.sections.split(","), a.tag,
-                                                                    a.truck_conds.split(",") if a.truck_conds else None)}, indent=1))
+                                                                    a.truck_conds.split(",") if a.truck_conds else None,
+                                                                    a.after)}, indent=1))
         R.ensure_runner(cfg)
     elif a.cmd == "status":
         st = Q.job_states(cfg.work / "queue")

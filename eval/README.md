@@ -22,15 +22,32 @@ releases are said to be the same weights, that was checked by tensor bytes).
 
 ```
 uv sync
-GEVAL_CONFIG=/path/to/private.toml uv run geval run hf:<uuid>/<checkpoint>   # or openpilot:<commit>, a model id, a .onnx
-GEVAL_CONFIG=... uv run geval queue          # the job runner; takes the host's shared GPU lock
-GEVAL_CONFIG=... uv run geval build          # rewrite results files from the per-unit store
+export GEVAL_CONFIG=/path/to/private.toml
+uv run geval run hf:<uuid>/<checkpoint>     # or hf:<revision>:<path>, openpilot:<commit>, a model id, a .onnx
+uv run geval run <ref> --no-wait            # queue only; `geval score <id>` when the jobs are done
+uv run geval submit <ref> <ref> --sections public_closed_loop   # several models in one world-model batch
+uv run geval queue                          # the job runner (`run` starts one if none is alive)
+uv run geval build [<id> ...]               # rewrite results files from the per-unit store
+uv run geval backfill                       # regenerate the first edition from the deep dive's outputs
 ```
 
-Settings (paths, the GPU lock, the truck's windows and the engines that read the truck's drives)
-live in a private TOML outside this repository; `geval/config.py` lists the keys. Per-unit values
-for every scored model are kept in a store under the configured work directory, so a new model is
-paired with any baseline without re-running it.
+`run` resolves the model (downloads it, sha256, parameters and GMAC from the graph), writes one
+shell job per unit of work into `<work>/queue/jobs`, waits while the runner executes them under
+the host's shared GPU lock, scores every output that holds the model into the per-unit store, and
+writes `results/<id>.json` plus `per_unit/<id>/<section>.csv` for the public sections. Jobs skip
+work whose output exists, so a rerun finishes only what is missing.
+
+Settings live in a private TOML outside this repository: `[paths]` (work dir, the interpreter with
+the `run` extra's packages, comma's segments and cereal schema, the GPU lock), `[queue]`
+(slots, CPU cores), `[truck_open_loop]` (the truck's windows and the private replay command),
+`[closed_loop]` (seeds, and the plugin that serves the truck's drives and steering model to
+`engines/wm_closed_loop.py`). Per-unit values of every scored model stay in the store, so a new
+model is paired with any baseline without re-running the baseline.
+
+Engines: `engines/route_replay.py` (comma segments, both cameras, lockstep), `engines/wm_closed_loop.py`
+(comma's worldmodel-4B; same initial noise for every policy at every step, so a model run alone
+pairs with a baseline run earlier), `runner.py` and `op011.py` (openpilot's model I/O contract,
+vendored from openpilot, MIT).
 
 ## Method in one paragraph
 

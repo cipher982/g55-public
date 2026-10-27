@@ -156,7 +156,7 @@ def resolve(cfg, ref: str) -> str:
 
 # ---------------------------------------------------------------- jobs
 def wait_gpu(mib: int) -> str:
-    return (f"for i in $(seq 180); do free=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1); "
+    return (f"for i in $(seq 1080); do free=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1); "
             f"[ \"$free\" -ge {mib} ] && break; sleep 10; done; echo gpu free $free MiB")
 
 
@@ -165,7 +165,16 @@ def segment_names(cfg):
     return [s for s in results.segments() if (root / s / "ecamera.hevc").exists()]
 
 
-def queue_jobs(cfg, mids: list, sections: list, tag: str | None = None, truck_conds: list | None = None) -> list:
+def after_line(q: Path, after: str | None) -> str:
+    """Shell that waits for another job to finish (so two world-model jobs never share the GPU)."""
+    if not after:
+        return ""
+    j = q / "jobs" / after
+    return f"while [ ! -e {j}.done ] && [ ! -e {j}.failed ]; do sleep 30; done\n"
+
+
+def queue_jobs(cfg, mids: list, sections: list, tag: str | None = None, truck_conds: list | None = None,
+               after: str | None = None) -> list:
     """Queue the jobs for one or more models (several models share one world-model batch)."""
     work, q, pyx = cfg.work, cfg.work / "queue", cfg["paths"]["python"]
     tag = tag or "_".join(mids)
@@ -198,7 +207,7 @@ def queue_jobs(cfg, mids: list, sections: list, tag: str | None = None, truck_co
         o = work / "out" / "public_closed_loop" / f"{tag}.json"
         o.parent.mkdir(parents=True, exist_ok=True)
         segs = " ".join(f"--segment {s}" for s in segment_names(cfg))
-        names.append(Q.add_job(q, f"P30_pcl_{tag}", f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+        names.append(Q.add_job(q, f"P30_pcl_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 {wait_gpu(cl.get('min_free_mib', 15500))}
 cd {ENGINES}
 {pyx} -I wm_closed_loop.py --segments {cfg['paths']['segments_dir']} --cereal {cfg['paths']['cereal']} {segs} \\
@@ -210,7 +219,7 @@ cd {ENGINES}
         o = work / "out" / "truck_closed_loop" / f"{tag}.json"
         o.parent.mkdir(parents=True, exist_ok=True)
         args = json.dumps({k: t[k] for k in ("code", "wide_camera", "drives", "starts", "night")})
-        names.append(Q.add_job(q, f"P32_tcl_{tag}", f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+        names.append(Q.add_job(q, f"P32_tcl_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 {wait_gpu(cl.get('min_free_mib', 15500))}
 cd {ENGINES}
 {pyx} -I wm_closed_loop.py --plugin {t['plugin']} --plugin-args {shlex.quote(args)} --cars g55 \\
@@ -220,7 +229,7 @@ cd {ENGINES}
         o = work / "out" / "truck_brake" / f"{tag}.json"
         o.parent.mkdir(parents=True, exist_ok=True)
         args = json.dumps({**{k: t[k] for k in ("code", "wide_camera", "drives", "night")}, "starts": b["starts"]})
-        names.append(Q.add_job(q, f"P34_tbr_{tag}", f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+        names.append(Q.add_job(q, f"P34_tbr_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 {wait_gpu(cl.get('min_free_mib', 15500))}
 cd {ENGINES}
 {pyx} -I wm_closed_loop.py --plugin {t['plugin']} --plugin-args {shlex.quote(args)} --cars g55 \\
