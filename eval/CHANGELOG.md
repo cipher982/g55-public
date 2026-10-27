@@ -4,6 +4,7 @@ The site's log reads this file: one line per change, newest first, `- YYYY-MM-DD
 optionally ending in a link. Model releases and scoring runs come from the results files and are
 not listed here.
 
+- 2026-10-27: The closed-loop video is replaced by a player: the world model's 256×128 frames as generated, the paths drawn by the page over them, one view at a time.
 - 2026-10-27: Over-time charts and this log replace the one-off results section.
 - 2026-10-27: Closed-loop video of one public segment, with each model's path drawn on the generated view. [fe1a5ed](https://github.com/cipher982/g55-public/commit/fe1a5ed)
 - 2026-10-27: "Lateral lag" corrected to the lead of the lateral request over the car's motion: a larger value means the request comes earlier. No better direction is marked for it or for lateral action rate. [8cebf52](https://github.com/cipher982/g55-public/commit/8cebf52)

@@ -563,10 +563,16 @@ def unscored() -> str:
 
 # ---------------------------------------------------------------- the closed-loop hero
 
+# the road camera at the world model's 256x128 (focal length and principal point, px) and comma's camera
+# height (m): the geometry the earlier hero video drew its paths with
+CAMERA = {"f": 455.0, "cx": 128.0, "cy": 23.8, "h": 1.22}
+
+
 def hero_visual(models, cfg) -> str:
-    """One public segment in closed loop: the 2x2 video (static/closed-loop.mp4, rendered from a re-run
-    that kept the world model's frames) and a bird's-eye map of the same paths from hero.json. The page
-    script moves the map's dots and the distance readouts with the video."""
+    """One public segment in closed loop: a player that draws the world model's frames at their native
+    256x128 (static/hero-*.avif, one sprite per stream, from a re-run that kept the frames) to a canvas and
+    the paths over them as vectors, beside a bird's-eye map of the same paths from hero.json. The page
+    script (site.js) projects the paths with CAMERA and moves the map's dots with the player."""
     f = SITE / "hero.json"
     if not f.exists():
         return ""
@@ -596,11 +602,11 @@ def hero_visual(models, cfg) -> str:
     g.append(f'<text class="tick" x="{W - R + 4}" y="{Hh - B + 16}">m left</text>')
     k2 = int(round(2 / 0.2))
     paths, dots, labels = [], [], []
-    paths.append(f'<polyline class="bp bp-rec" points="{line(ref)}"/>')
+    paths.append(f'<polyline class="bp bp-rec" data-m="rec" points="{line(ref)}"/>')
     ends = []
     for mid in order:
         xy = h["paths"][mid]["xy"]
-        paths.append(f'<polyline class="bp bp-{cls[mid]}" points="{line(xy)}"/>')
+        paths.append(f'<polyline class="bp bp-{cls[mid]}" data-m="{mid}" points="{line(xy)}"/>')
         a, b = xy[k2]
         paths.append(f'<circle class="b2 b2-{cls[mid]}" cx="{X(b):.1f}" cy="{Y(a):.1f}" r="3.5"/>')
         dots.append(f'<circle class="bd dot-{cls[mid]}" data-m="{mid}" cx="{X(0):.1f}" cy="{Y(0):.1f}" r="6"/>')
@@ -617,24 +623,36 @@ def hero_visual(models, cfg) -> str:
     dots.append(f'<circle class="bd bd-rec" data-m="rec" cx="{X(0):.1f}" cy="{Y(0):.1f}" r="4.5"/>')
     svg = (f'<svg class="cl-map" viewBox="0 0 {W} {Hh}" role="img" aria-label="Bird\'s-eye view of the driver\'s path and each model\'s path over 7.2 s">'
            f'{"".join(g)}{"".join(paths)}{"".join(dots)}{"".join(labels)}</svg>')
-    quads = [("rec", "Recorded drive", "the driver's path, dashed")] + [(mid, short_name(idx[mid]), "") for mid in order]
-    labs = "".join(
-        f'<span class="cl-lab q{i}"><i class="sw sw-{"rec" if mid == "rec" else cls[mid]}"></i>{esc(n)}'
-        + (f' <b data-m="{mid}">0.00 m</b>' if mid != "rec" else "") + '</span>' for i, (mid, n, _) in enumerate(quads))
+    btns = '<button type="button" data-v="rec"><i class="sw sw-rec"></i>Recorded</button>' + "".join(
+        f'<button type="button" data-v="{mid}"><i class="sw sw-{cls[mid]}"></i>{esc(short_name(idx[mid]))} <b data-m="{mid}">0.00 m</b></button>'
+        for mid in order)
     d2 = {mid: h["paths"][mid]["dist"][k2] for mid in order}
     names2 = ", ".join(f"{short_name(idx[mid])} {num(d2[mid], 2)} m" for mid in order)
-    data = json.dumps({"fps": h["fps"], "history": h["history"], "steps": h["steps"],
-                       "ref": ref, "paths": {mid: h["paths"][mid] for mid in order}})
+    data = json.dumps({"fps": h["fps"], "history": h["history"], "steps": h["steps"], "hold": h["hold"],
+                       "frame": h["frame"], "cols": h["cols"], "camera": CAMERA, "start": order[0],
+                       "ref_ahead": h["ref_ahead"], "ref_yaw": h["ref_yaw"], "cls": {"rec": "rec", **cls},
+                       "names": {"rec": "Recorded drive", **{mid: short_name(idx[mid]) for mid in order}},
+                       "sprites": {"rec": "hero-rec.avif", **{mid: f"hero-{mid}.avif" for mid in order}},
+                       "paths": {mid: h["paths"][mid] for mid in order}})
+    fw, fh = h["frame"]
     return f"""<figure class="cl">
 <div class="cl-stage">
+<div class="cl-player">
 <div class="cl-vid">
-<video src="closed-loop.mp4" poster="closed-loop-poster.jpg" muted autoplay loop playsinline preload="auto" aria-label="Four camera views of one public segment: the recorded drive, then the view worldmodel-4B generated for each model as it drove"></video>
-{labs}
+<canvas role="img" aria-label="One camera view at a time of one public segment: the recorded drive, or the view worldmodel-4B generated for a model as it drove, with the driver's path and the model's path drawn on the road"></canvas>
+<span class="cl-lab"></span>
 <span class="cl-time" aria-hidden="true"></span>
+</div>
+<div class="cl-ctl">
+<button type="button" class="cl-play" aria-label="Pause"><i></i></button>
+<input type="range" class="cl-scrub" min="0" max="{(h["history"] + h["steps"] + h["hold"]) / h["fps"]:g}" step="0.01" value="0" aria-label="Time in the clip">
+</div>
+<div class="cl-views" role="group" aria-label="Camera view">{btns}</div>
 </div>
 {svg}
 </div>
-<figcaption><p><strong>One public segment in closed loop.</strong> Top left: the recorded drive. The other three: the view <code>worldmodel-4B</code> generated as each model drove comma's ideal car for 7.2 s from the same recorded start, 0.2 s per frame. Dashed magenta is the driver's path; solid is the model's own. Distance from the driver's path at 2 s: {esc(names2)}.</p>
+<figcaption><p><strong>One public segment in closed loop.</strong> Each model drove comma's ideal car for 7.2 s from the same recorded start while <code>worldmodel-4B</code> generated the camera view it saw. Recorded shows the drive as logged. Dashed magenta is the driver's path, solid is the model's own, the ring is where each is at 2 s. Distance from the driver's path at 2 s: {esc(names2)}.</p>
+<p class="cl-how"><code>worldmodel-4B</code> generates one {fw}&times;{fh} frame per 0.2 s step, 5 frames per second. The frames are shown at that resolution, scaled to the screen by the browser, with no frames added between them. The page draws the paths, rings and distances from the logged positions, moving between the 0.2 s steps.</p>
 <p class="cl-how">Segment <code>{esc(h["segment"])}</code> from comma's public CI data, at {num(h["v0"], 1)} m/s on a left curve, chosen because it is the segment where these three models differ most at 2 s. On every other segment all three are within 0.35 m of the driver's path at 2 s. Seed {h["seed"]} of the two the scores average, re-run to keep the frames; its paths are within 0.15 m of the scored run.</p></figcaption>
 <script type="application/json" id="cl-data">{data}</script>
 </figure>"""
