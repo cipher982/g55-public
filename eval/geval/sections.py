@@ -61,7 +61,9 @@ CONDITIONS = {
         "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 "
         "recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested "
         "curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to "
-        "the recording car's own path. Seeds 0 and 1, averaged per segment."),
+        "the recording car's own path. One window per segment, nearest the middle, where the car holds at "
+        "least 5 m/s for the window and the 4.8 s before it; segments with no such stretch are left out. "
+        "Seeds 0 and 1, averaged per segment."),
     "truck_open_loop": (
         "Measured. The G55's recorded drives replayed as the truck runs the model: narrow camera only, "
         "road-plane warp to 1.45 m (plane:1.45). Truth is the truck's CAN speed and yaw rate. "
@@ -103,5 +105,6 @@ LIMITS = {
                          "validated on it in closed loop; the reference is the driver's own line, not the lane "
                          "centre.",
     "truck_recovery": "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame "
-                      "jump it does not, so none is used).",
+                      "jump it does not, so none is used). The braking-lead test is not built yet: the drives the "
+                      "truck closed loop can use hold no window where a car ahead brakes.",
 }
