@@ -4,7 +4,7 @@ Jobs are shell scripts in <queue>/jobs/, started in name order (prefix P10_, P20
 priority). Up to `slots` run at once. The runner holds the GPU lock (an flock on a shared file
 that every GPU user on the host takes) while it has work, and every `share_s` seconds stops
 starting jobs, lets the running ones finish and releases the lock briefly so other GPU work can
-get in. Each job's state is a marker beside it (.running, .done, .failed); output goes to
+get in. Jobs run pinned to `cpu_cores` (taskset) when given. Each job's state is a marker beside it (.running, .done, .failed); output goes to
 <queue>/logs/<job>.log. New jobs can be added at any time; the runner exits when
 <queue>/<stop_file> exists (the stop file is never deleted by the runner).
 
@@ -56,7 +56,8 @@ def job_states(q: Path) -> dict:
     return {j.stem: state(j) for j in sorted((q / "jobs").glob("*.sh"))}
 
 
-def run(q: Path, lock_path: str, slots: int = 2, share_s: float = 2700, stop_file: str = "STOP", idle_exit_s: float = 0):
+def run(q: Path, lock_path: str, slots: int = 2, share_s: float = 2700, stop_file: str = "STOP", idle_exit_s: float = 0,
+        cpu_cores: str | None = None):
     jobs, logs = q / "jobs", q / "logs"
     jobs.mkdir(parents=True, exist_ok=True)
     logs.mkdir(parents=True, exist_ok=True)
@@ -113,7 +114,8 @@ def run(q: Path, lock_path: str, slots: int = 2, share_s: float = 2700, stop_fil
                 job = todo.pop(0)
                 job.with_suffix(".running").write_text(f"{datetime.now(timezone.utc).isoformat()}\n")
                 log = open(logs / f"{job.stem}.log", "a")
-                proc = subprocess.Popen(["bash", str(job)], stdout=log, stderr=subprocess.STDOUT)
+                cmd = (["taskset", "-c", cpu_cores] if cpu_cores else []) + ["bash", str(job)]
+                proc = subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT)
                 running[job] = (proc, proc.pid, time.time(), log)
                 event(q, f"start {job.stem}")
             if not running and (sharing or not todo):

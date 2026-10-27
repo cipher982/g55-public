@@ -2,6 +2,7 @@
 
   geval run <model-ref> [--sections a,b] [--no-wait]   resolve, queue every section's jobs, score, write
   geval score <model-id>                              re-score from finished job outputs, write results
+  geval submit <ref> ... --sections a,b [--tag T]      queue several models together (shared batches)
   geval backfill                                      rebuild the store and results from the deep dive
   geval build [<model-id> ...]                        rewrite results files from the store
   geval queue [--slots N]                             run the GPU job queue (takes the shared GPU lock)
@@ -18,7 +19,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import SUITE_VERSION, config as C, queue as Q, results, sections as S, store
+from . import SUITE_VERSION, config as C, jobqueue as Q, results, sections as S, store
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -58,6 +59,11 @@ def main(argv=None):
     sc = sub.add_parser("score")
     sc.add_argument("model_id")
     sc.add_argument("--sections", default=",".join(S.SECTIONS))
+    sm = sub.add_parser("submit", help="queue jobs for several models in one batch (one world-model batch per window)")
+    sm.add_argument("refs", nargs="+")
+    sm.add_argument("--sections", required=True)
+    sm.add_argument("--tag")
+    sm.add_argument("--truck-conds", help="world-model conditions for the truck job, e.g. offcentre")
     sub.add_parser("backfill")
     b = sub.add_parser("build")
     b.add_argument("ids", nargs="*")
@@ -79,7 +85,14 @@ def main(argv=None):
     elif a.cmd == "queue":
         qc = cfg.get("queue", {})
         Q.run(cfg.work / "queue", cfg["paths"]["gpu_lock"], slots=a.slots or qc.get("slots", 2),
-              share_s=qc.get("share_s", 2700), stop_file=a.stop_file, idle_exit_s=a.idle_exit_s)
+              share_s=qc.get("share_s", 2700), stop_file=a.stop_file, idle_exit_s=a.idle_exit_s,
+              cpu_cores=qc.get("cpu_cores"))
+    elif a.cmd == "submit":
+        from . import run as R
+        mids = [R.resolve(cfg, r) for r in a.refs]
+        print(json.dumps({"models": mids, "queued": R.queue_jobs(cfg, mids, a.sections.split(","), a.tag,
+                                                                    a.truck_conds.split(",") if a.truck_conds else None)}, indent=1))
+        R.ensure_runner(cfg)
     elif a.cmd == "status":
         st = Q.job_states(cfg.work / "queue")
         print(json.dumps({"jobs": st}, indent=1))
@@ -87,7 +100,7 @@ def main(argv=None):
         from . import run as R
         secs = [s for s in a.sections.split(",") if s]
         if a.cmd == "run":
-            mid = R.run(cfg, a.ref, secs, wait=not a.no_wait)
+            mid = R.run(cfg, a.ref, secs, wait_for=not a.no_wait)
         else:
             mid = a.model_id
             R.score(cfg, mid, secs)
