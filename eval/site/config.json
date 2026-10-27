@@ -9,7 +9,6 @@
     ["public_open_loop", "lat_rate_rms"],
     ["public_open_loop", "v3_mae"],
     ["public_closed_loop", "xtrack_4s"],
-    ["truck_open_loop", "lat_gain"],
     ["truck_closed_loop", "xtrack_4s"],
     ["truck_recovery", "heading_xtrack_4s"]
   ]

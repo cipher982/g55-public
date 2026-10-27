@@ -41,7 +41,7 @@ code { font: 400 0.86em/1.3 var(--mono); }
 .top nav a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 
 main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 44px; padding-top: 36px; padding-bottom: 56px; }
-main > section, .sec { display: grid; gap: 14px; min-width: 0; }
+main > section, .sec { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
 h1 { font-size: clamp(28px, 4.4vw, 40px); line-height: 1.12; font-weight: 800; letter-spacing: -0.015em; margin: 0; }
 h1 code { font-size: 0.5em; font-weight: 400; color: var(--muted); vertical-align: 0.35em; margin-left: 6px; }
 h2 { font-size: 23px; line-height: 1.25; font-weight: 700; margin: 0; letter-spacing: -0.005em; }
@@ -88,12 +88,13 @@ ul, ol { padding-left: 1.25em; display: grid; gap: 6px; }
 .f-dot.v-worse { background: var(--worse); }
 .f-dot.v-diff { background: var(--ink2); }
 .f-dot.v-tie, .f-dot.v-none { background: var(--surface); border: 2px solid var(--tie); }
+.f-miss { font-size: 13px; color: var(--muted); }
 .f-axis { min-height: 20px; border-top: 1px solid var(--rule); }
 .f-ticks { position: relative; height: 20px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .f-ticks span { position: absolute; top: 3px; transform: translateX(-50%); white-space: nowrap; }
 
 /* Tables. */
-.tw { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; }
+.tw { position: relative; overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; }
 table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
 .cap { font-size: 14px; color: var(--ink2); margin-bottom: -6px; }
 th, td { text-align: left; padding: 8px 12px; border-top: 1px solid var(--rule); vertical-align: top; }
@@ -144,3 +145,4 @@ thead .th-s { white-space: normal; min-width: 9em; }
 @media (forced-colors: active) {
   .f-dot, .mk { forced-color-adjust: none; }
 }
+thead th.n { white-space: normal; min-width: 8em; }

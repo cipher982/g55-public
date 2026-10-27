@@ -102,6 +102,7 @@ def mark(v: str) -> str:
 def lc(label: str) -> str:
     """Sentence-internal form of a metric label: 'Lateral gain (1 = ...)' -> 'lateral gain'."""
     label = re.sub(r"\s*\([^)]*\)$", "", label)
+    label = re.sub(r",\s*RMS$", "", label)
     if len(label) > 1 and label[0].isupper() and label[1].islower():
         return label[0].lower() + label[1:]
     return label
@@ -147,7 +148,8 @@ def short_hash(m: dict) -> str:
 
 
 def hash_code(m: dict) -> str:
-    h = short_hash(m)
+    """The checkpoint hash beside a model's name; an unnamed model's id already shows it."""
+    h = short_hash(m) if m["model"]["name"] else ""
     return f" <code>{h}</code>" if h else ""
 
 
@@ -271,11 +273,11 @@ def forest(models, ref, section, key, example):
     d = decimals_for(example["value"])
     out = [f'<figure class="forest"><figcaption><span class="f-t">{esc(example["label"])}</span>'
            f'<span class="f-s">{esc(SECTIONS.get(section, section))}, {esc(unit_and_better(example))}</span></figcaption><div class="f-rows">']
+    missing = []
     for m, x, s, p in rows:
         label = f'<a href="models/{esc(m["model"]["id"])}.html">{esc(name_of(m))}</a>'
         if not p:
-            why = "not run" if not s or s["status"] != "ok" else "no paired score"
-            out.append(f'<div class="f-row"><div class="f-l">{label}</div><div class="f-track f-empty">{why}</div></div>')
+            missing.append(name_of(m))
             continue
         v = verdict_of(x, p)
         uw = UNIT_WORD.get(s["unit_of_evidence"], (s["unit_of_evidence"],) * 2)
@@ -292,7 +294,10 @@ def forest(models, ref, section, key, example):
             f'<span class="f-dot v-{v}" style="left:{pos(p["delta"]):.2f}%"></span></div></div>')
     tv, td = nice_ticks(lo, hi)
     ticks = "".join(f'<span style="left:{pos(t):.2f}%">{num(t, td, True) if t else "0"}</span>' for t in tv)
-    out.append(f'<div class="f-row f-axis"><div class="f-l"></div><div class="f-ticks">{ticks}</div></div></div></figure>')
+    out.append(f'<div class="f-row f-axis"><div class="f-l"></div><div class="f-ticks">{ticks}</div></div></div>')
+    if missing:
+        out.append(f'<p class="f-miss">No score: {esc(join_words(missing))}.</p>')
+    out.append('</figure>')
     return "".join(out)
 
 
@@ -403,7 +408,7 @@ def timeline(models) -> str:
         rows.append(
             f'<tr><td class="n">{esc(md["source"]["date"])}</td>'
             f'<th scope="row"><a href="models/{esc(md["id"])}.html">{esc(name_of(m))}</a>{hash_code(m)}</th>'
-            f'<td class="n size"><span class="bar" style="width:{w:.1f}%"></span><span>{num(md["params_m"], 0)}M</span></td>'
+            f'<td class="n size"><span class="bar" style="width:{w:.1f}%"></span><span>{num(md["params_m"], 0) + "M" if md["params_m"] is not None else "n/a"}</span></td>'
             f'<td class="n">{num(md["gmac"], 1)}</td><td>{esc(md["family"])}</td></tr>')
     return ('<p class="cap">Every scored model, oldest first. Parameters are counted from the weights; '
             'GMAC is multiply-accumulates per model step.</p><div class="tw"><table class="tl" aria-label="comma\'s models">'
@@ -418,7 +423,8 @@ def overview(models, cfg) -> str:
     nm = newest["model"]
     hero = (f'<section class="hero"><p class="hero-k">Newest model: <a href="models/{esc(nm["id"])}.html">{esc(name_of(newest))}</a>{hash_code(newest)}, published {esc(nm["source"]["date"])}, scored {esc(newest["scored"]["date"][:10])}</p>'
             f'<p class="hero-v">{esc(verdict_sentences(newest, models, ref, heads))}</p>'
-            f'<p class="hero-n">{esc(evidence_line(newest))}</p></section>')
+            f'<p class="hero-n">{esc(evidence_line(newest))} Open-loop error counts a smoother, later action as error, '
+            'which is what comma\'s RL models produce by design; the closed-loop rows are the closer test of driving.</p></section>')
     intro = ('<p class="intro">Each comma.ai openpilot driving model, scored with one fixed suite on comma\'s public segments and on '
              'recorded drives from one 2011 Mercedes G55. Every score is compared with lebowski, the 877M model from July 2026 that '
              'many openpilot users still run, and with the comma model released before it. '
@@ -488,7 +494,7 @@ def model_page(m, models, cfg, root, out) -> str:
         ("SHA-256", f'<code class="hash">{esc(md["sha256"])}</code>'),
         ("Source", f'{esc(src["kind"])}, <code>{esc(src["ref"])}</code> (<a href="{esc(src["url"])}">link</a>)'),
         ("Published", esc(src["date"])),
-        ("Parameters", f'{num(md["params_m"], 1)}M'),
+        ("Parameters", (f'{num(md["params_m"], 1)}M' if md["params_m"] is not None else "not counted")),
         ("GMAC", num(md["gmac"], 1)),
         ("Family", esc(md["family"])),
         ("Scored", f'{esc(sc["date"][:16].replace("T", " "))} UTC, suite <code>{esc(sc["suite"])}</code>, code {code_html}'),
