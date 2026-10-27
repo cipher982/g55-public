@@ -7,7 +7,7 @@
   "umami_domains": "openpilot-gwagon-evals.drose.io",
   "repo_url": "https://github.com/cipher982/g55-public",
   "hero": {
-    "title": "Newer models steer more smoothly, and later",
+    "title": "Lateral action rate against lateral lag, comma's public segments",
     "highlight": [
       [
         "lebowski_877m",
@@ -24,7 +24,7 @@
       [
         "1365126a_12864",
         "ff",
-        "Flip Flop",
+        "MD v3 / Flip Flop",
         "left"
       ]
     ],
@@ -36,20 +36,20 @@
   "findings_date": "2026-10-27",
   "findings": [
     {
-      "figure": "{pctlo public_open_loop lat_rate_rms lebowski_877m}–{pcthi public_open_loop lat_rate_rms lebowski_877m}% smoother",
-      "text": "Newer models steer far more smoothly: every comma model since lebowski changes its steering request {pctlo public_open_loop lat_rate_rms lebowski_877m} to {pcthi public_open_loop lat_rate_rms lebowski_877m}% less on comma's public drives."
+      "figure": "−{pctlo public_open_loop lat_rate_rms lebowski_877m}% to −{pcthi public_open_loop lat_rate_rms lebowski_877m}%",
+      "text": "Lateral action rate (RMS) of each model scored after lebowski is {pctlo public_open_loop lat_rate_rms lebowski_877m} to {pcthi public_open_loop lat_rate_rms lebowski_877m}% lower than lebowski's on comma's public segments, open loop ({d public_open_loop lat_rate_rms 1365126a_12864 lebowski_877m n int} segments from {d public_open_loop lat_rate_rms 1365126a_12864 lebowski_877m clusters int} drives)."
     },
     {
-      "figure": "+{d public_open_loop lat_best_lag 8d736683_12864 lebowski_877m delta d2} s → +{d public_open_loop lat_best_lag 1365126a_12864 lebowski_877m delta d2} s",
-      "text": "That smoothness came with delay. Mountain Dew's steering trailed the car's own turning by {d public_open_loop lat_best_lag 8d736683_12864 lebowski_877m delta d2} s more than lebowski's; Flip Flop, the model that replaced it on openpilot master, cut the extra delay to {d public_open_loop lat_best_lag 1365126a_12864 lebowski_877m delta d2} s."
+      "figure": "+{d public_open_loop lat_best_lag 8d736683_12864 lebowski_877m delta d2} s, +{d public_open_loop lat_best_lag 1365126a_12864 lebowski_877m delta d2} s",
+      "text": "Lateral lag relative to lebowski, open loop: Mountain Dew +{d public_open_loop lat_best_lag 8d736683_12864 lebowski_877m delta d2} s ({d public_open_loop lat_best_lag 8d736683_12864 lebowski_877m n int} segments), MD v3 / Flip Flop +{d public_open_loop lat_best_lag 1365126a_12864 lebowski_877m delta d2} s ({d public_open_loop lat_best_lag 1365126a_12864 lebowski_877m n int} segments). MD v3 / Flip Flop replaced Mountain Dew on openpilot master."
     },
     {
-      "figure": "{v public_closed_loop xtrack_4s 1365126a_12864 median cm} cm",
-      "text": "Driving comma's simulated car through its world model, Flip Flop and lebowski stay about as close to the recorded path: on a typical segment Flip Flop is {v public_closed_loop xtrack_4s 1365126a_12864 median cm} cm off after 4 s, lebowski {v public_closed_loop xtrack_4s lebowski_877m median cm} cm. The average favours Flip Flop only because lebowski drifted {max public_closed_loop xtrack_4s lebowski_877m d1} m on one segment."
+      "figure": "{v public_closed_loop xtrack_4s 1365126a_12864 median cm} cm, {v public_closed_loop xtrack_4s lebowski_877m median cm} cm",
+      "text": "Closed loop in worldmodel-4B with comma's ideal car, median distance from the recorded path at 4 s: MD v3 / Flip Flop {v public_closed_loop xtrack_4s 1365126a_12864 median cm} cm, lebowski {v public_closed_loop xtrack_4s lebowski_877m median cm} cm ({d public_closed_loop xtrack_4s 1365126a_12864 lebowski_877m n int} segments). The means, {v public_closed_loop xtrack_4s 1365126a_12864 value d2} m and {v public_closed_loop xtrack_4s lebowski_877m value d2} m, differ because lebowski is {max public_closed_loop xtrack_4s lebowski_877m d1} m off on one segment."
     },
     {
       "figure": "{lo truck_recovery offcentre_xtrack_4s lebowski_877m,8d736683_12864,1365126a_12864 value d2}–{hi truck_recovery offcentre_xtrack_4s lebowski_877m,8d736683_12864,1365126a_12864 value d2} m",
-      "text": "On the G-Wagon, pushed half a metre sideways, lebowski, Mountain Dew and Flip Flop end {lo truck_recovery offcentre_xtrack_4s lebowski_877m,8d736683_12864,1365126a_12864 value d2} to {hi truck_recovery offcentre_xtrack_4s lebowski_877m,8d736683_12864,1365126a_12864 value d2} m from the driven path 4 s later, and none is consistently ahead: Flip Flop beat lebowski in {d truck_recovery offcentre_xtrack_4s 1365126a_12864 lebowski_877m wins int} of {d truck_recovery offcentre_xtrack_4s 1365126a_12864 lebowski_877m n int} windows after the push, but in {d truck_recovery heading_xtrack_4s 1365126a_12864 lebowski_877m wins int} of {d truck_recovery heading_xtrack_4s 1365126a_12864 lebowski_877m n int} after a 2° heading error."
+      "text": "G55 closed loop after a 0.5 m lateral offset, mean distance from the recorded path at 4 s: {lo truck_recovery offcentre_xtrack_4s lebowski_877m,8d736683_12864,1365126a_12864 value d2} to {hi truck_recovery offcentre_xtrack_4s lebowski_877m,8d736683_12864,1365126a_12864 value d2} m for lebowski, Mountain Dew and MD v3 / Flip Flop ({d truck_recovery offcentre_xtrack_4s 1365126a_12864 lebowski_877m n int} windows from {d truck_recovery offcentre_xtrack_4s 1365126a_12864 lebowski_877m clusters int} drives, no interval). MD v3 / Flip Flop is closer than lebowski in {d truck_recovery offcentre_xtrack_4s 1365126a_12864 lebowski_877m wins int} of {d truck_recovery offcentre_xtrack_4s 1365126a_12864 lebowski_877m n int} windows after the offset and in {d truck_recovery heading_xtrack_4s 1365126a_12864 lebowski_877m wins int} of {d truck_recovery heading_xtrack_4s 1365126a_12864 lebowski_877m n int} after a 2° heading error."
     }
   ],
   "verdicts": {}

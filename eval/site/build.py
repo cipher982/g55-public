@@ -29,9 +29,9 @@ EVAL = SITE.parent
 SECTIONS = {
     "public_open_loop": "comma's public drives, open loop",
     "public_closed_loop": "comma's public drives, closed loop",
-    "truck_open_loop": "G-Wagon, open loop",
-    "truck_closed_loop": "G-Wagon, closed loop",
-    "truck_recovery": "G-Wagon, recovery tests",
+    "truck_open_loop": "G55, open loop",
+    "truck_closed_loop": "G55, closed loop",
+    "truck_recovery": "G55, recovery tests",
 }
 UNIT_WORD = {"segment": ("segment", "segments"), "window": ("window", "windows")}
 BETTER_TEXT = {"lower": "lower is better", "higher": "higher is better",
@@ -39,22 +39,18 @@ BETTER_TEXT = {"lower": "lower is better", "higher": "higher is better",
 MINUS = "−"
 # The three numbers every model has, in plain words (public open loop; lower is better on all three).
 KEY_METRICS = [
-    ("public_open_loop", "lat_rate_rms", "Steering roughness", "How fast the steering request changes (RMS)"),
-    ("public_open_loop", "lat_best_lag", "Steering delay", "How far the steering trails the car's own turning"),
-    ("public_open_loop", "lat_mae", "Tracking error", "Steering request against what the car did next"),
+    ("public_open_loop", "lat_rate_rms", "Lateral action rate", "RMS rate of change of the lateral request"),
+    ("public_open_loop", "lat_best_lag", "Lateral lag", "Shift at which the request best matches the car's turning"),
+    ("public_open_loop", "lat_mae", "Lateral error", "Request against the car's lateral motion that followed"),
 ]
 MORE_METRICS = [
-    ("public_closed_loop", "xtrack_4s", "Off the path in the world model, 4 s", "Median over segments, comma's ideal car"),
-    ("truck_closed_loop", "xtrack_4s", "G-Wagon off the path, 4 s", "Median over windows, G55 steering"),
-    ("truck_recovery", "offcentre_xtrack_4s", "G-Wagon after a 0.5 m push, 4 s", "Median over windows"),
+    ("public_closed_loop", "xtrack_4s", "Distance from path at 4 s, closed loop", "Median over segments, comma's ideal car"),
+    ("truck_closed_loop", "xtrack_4s", "G55 distance from path at 4 s", "Median over windows, G55 steering model"),
+    ("truck_recovery", "offcentre_xtrack_4s", "G55 at 4 s after a 0.5 m offset", "Median over windows"),
 ]
 # Plain names for the per-model verdict line: (better, worse).
-TERMS = {
-    "lat_rate_rms": ("smoother steering", "rougher steering"),
-    "lat_best_lag": ("less steering delay", "more steering delay"),
-    "lat_mae": ("lower tracking error", "higher tracking error"),
-    "lon_mae": ("lower acceleration error", "higher acceleration error"),
-}
+TERMS = {"lat_rate_rms": "lateral action rate", "lat_best_lag": "lateral lag", "lat_mae": "lateral error",
+         "lon_mae": "longitudinal error"}
 
 
 def esc(x) -> str:
@@ -304,7 +300,7 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 <meta property="og:image" content="{esc(og)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="openpilot's driving models, tested on a car they've never seen">
+<meta property="og:image:alt" content="openpilot driving model evaluations">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{esc(title)}">
 <meta name="twitter:description" content="{esc(desc)}">
@@ -340,7 +336,7 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 # ---------------------------------------------------------------- the hero chart
 
 def hero_chart(models: list[dict], cfg: dict) -> str:
-    """Steering delay (x) against steering roughness (y), one dot per model, public open loop.
+    """Lateral lag (x) against lateral action rate (y), one dot per model, public open loop.
     Lower-left is better on both. The reference and the models config.json names are labelled."""
     ref = cfg["reference_model"]
     hl = cfg.get("hero", {}).get("highlight", [])  # [[model id, css class, label, "left" or "right"], ...]
@@ -372,10 +368,10 @@ def hero_chart(models: list[dict], cfg: dict) -> str:
                  f'<text class="tick" x="{L - 8}" y="{Y + 4:.1f}" text-anchor="end">{t:.1f}</text>')
         t += 0.1
     g.append(f'<text class="axis" x="{(L + W - R) / 2:.0f}" y="{H - 14}" text-anchor="middle">'
-             'Steering delay behind the car\'s own turning (s)</text>')
+             'Lateral lag (s)</text>')
     g.append(f'<text class="axis" transform="translate(16 {(T + H - B) / 2:.0f}) rotate(-90)" text-anchor="middle">'
-             'Steering roughness (m/s³)</text>')
-    g.append(f'<text class="better" x="{L + 10}" y="{H - B - 12}">Better: lower and further left</text>')
+             'Lateral action rate, RMS (m/s³)</text>')
+    g.append(f'<text class="better" x="{L + 10}" y="{H - B - 12}">Lower is better on both axes</text>')
     style = {h[0]: (h[1], h[2]) for h in hl}
     pos = {}
     dots, labels = [], []
@@ -384,8 +380,8 @@ def hero_chart(models: list[dict], cfg: dict) -> str:
         X, Y = px(x["value"]), py(y["value"])
         pos[mid] = (X, Y)
         cls = style.get(mid, ("other", None))[0]
-        tip = (f'{plain_name(m)}: delay {num(x["value"], 2)} s over {x["n"]} segments, '
-               f'roughness {num(y["value"], 2)} m/s³ over {y["n"]} segments')
+        tip = (f'{plain_name(m)}: lateral lag {num(x["value"], 2)} s over {x["n"]} segments, '
+               f'lateral action rate {num(y["value"], 2)} m/s³ over {y["n"]} segments')
         r = 7 if cls != "other" else 5.5
         dots.append(f'<circle class="dot d-{cls}" cx="{X:.1f}" cy="{Y:.1f}" r="{r}" tabindex="0" '
                     f'data-tip="{esc(tip)}" aria-label="{esc(tip)}"/>')
@@ -411,12 +407,12 @@ def hero_chart(models: list[dict], cfg: dict) -> str:
     return f"""<figure class="hero-fig">
 <p class="fig-t">{esc(cfg.get("hero", {}).get("title", ""))}</p>
 <div class="legend-row">{legend}</div>
-<svg class="scatter" viewBox="0 0 {W} {H}" role="img" aria-label="Scatter of steering delay against steering roughness for each scored model">
+<svg class="scatter" viewBox="0 0 {W} {H}" role="img" aria-label="Scatter of lateral lag against lateral action rate for each scored model">
 <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
 {''.join(g)}{arrow}{''.join(dots)}{''.join(labels)}
 </svg>
-<figcaption>Each dot is one comma model, scored on the same {n} public drive segments. Steering delay is the shift at which the model's steering request best matches the car's own turning; roughness is how fast that request changes.
-<details><summary>Numbers behind the chart</summary><div class="tw"><table><thead><tr><th scope="col">Model</th><th class="n" scope="col">Delay (s)</th><th class="n" scope="col">Roughness (m/s³)</th></tr></thead><tbody>{rows}</tbody></table></div></details>
+<figcaption>One dot per model; means over comma's public segments, open loop ({n} with movement; lag excludes values at the 0 and 1.5 s search limits). Lateral lag: the time shift at which the model's lateral request best correlates with the car's measured lateral motion. Lateral action rate: RMS rate of change of that request.
+<details><summary>Numbers behind the chart</summary><div class="tw"><table><thead><tr><th scope="col">Model</th><th class="n" scope="col">Lateral lag (s)</th><th class="n" scope="col">Lateral action rate (m/s³)</th></tr></thead><tbody>{rows}</tbody></table></div></details>
 </figcaption>
 </figure>"""
 
@@ -424,65 +420,66 @@ def hero_chart(models: list[dict], cfg: dict) -> str:
 # ---------------------------------------------------------------- per-model verdict and bars
 
 def verdict_line(m: dict, models: list[dict], cfg: dict) -> str:
-    """One readable sentence from the public open-loop numbers: smoothness and tracking against
-    lebowski, then every separated difference from the previous model. config.json "verdicts"
+    """What was measured and the number, from the public open-loop results: lateral action rate and
+    longitudinal error against lebowski where the interval excludes zero, lateral error either way,
+    then which metrics separate from the previous model, by direction. config.json "verdicts"
     {model id: text} replaces it."""
     over = cfg.get("verdicts", {}).get(m["model"]["id"])
     if over:
         return fill(over, models, EVAL)
     ref = cfg["reference_model"]
     idx = by_id(models)
+    sec = "public_open_loop"
     if m["model"]["id"] == ref:
-        lags = {o["model"]["id"]: find_metric(o, "public_open_loop", "lat_best_lag")[0] for o in models}
-        rough = {o["model"]["id"]: find_metric(o, "public_open_loop", "lat_rate_rms")[0] for o in models}
+        out = "Reference model; the G55 drives with it."
+        lags = [find_metric(o, sec, "lat_best_lag")[0] for o in models]
+        rates = [find_metric(o, sec, "lat_rate_rms")[0] for o in models]
+        me_l, me_r = find_metric(m, sec, "lat_best_lag")[0], find_metric(m, sec, "lat_rate_rms")[0]
         bits = []
-        if lags.get(ref) and all(x is None or x["value"] >= lags[ref]["value"] for x in lags.values()):
-            bits.append("the quickest steering response of all models here")
-        if rough.get(ref) and all(x is None or x["value"] <= rough[ref]["value"] for x in rough.values()):
-            bits.append("the roughest steering")
-        return "The model this G-Wagon drives with, and the reference for every comparison" + \
-               (f": {join_words(bits)}." if bits else ".")
+        if me_r and all(x is None or x["value"] <= me_r["value"] for x in rates):
+            bits.append("highest lateral action rate")
+        if me_l and all(x is None or x["value"] >= me_l["value"] for x in lags):
+            bits.append("lowest lateral lag")
+        if bits:
+            t = join_words(bits)
+            out += " " + t[0].upper() + t[1:] + " of the models scored."
+        return out
+
+    def pct_vs_ref(key):
+        x, _ = find_metric(m, sec, key)
+        p = x and x["paired"].get(ref)
+        if not p:
+            return None, None, None
+        base = find_metric(idx[ref], sec, key)[0]["value"]
+        return verdict_of(x, p), 100 * p["delta"] / base, p["n"]
+
+    parts, n = [], None
+    for key, always in (("lat_rate_rms", False), ("lat_mae", True), ("lon_mae", False)):
+        v, pc, nn = pct_vs_ref(key)
+        if v is None or (not always and v not in ("better", "worse")):
+            continue
+        n = n or nn
+        if v == "tie":
+            parts.append(f"{TERMS[key]} not separated")
+        else:
+            parts.append(f"{TERMS[key]} {round(abs(pc))}% {'lower' if pc < 0 else 'higher'}")
     out = []
-    r, _ = find_metric(m, "public_open_loop", "lat_rate_rms")
-    e, _ = find_metric(m, "public_open_loop", "lat_mae")
-    clauses = []
-    if r and ref in r["paired"] and verdict_of(r, r["paired"][ref]) == "better":
-        base = find_metric(idx[ref], "public_open_loop", "lat_rate_rms")[0]["value"]
-        clauses.append(f'{round(-100 * r["paired"][ref]["delta"] / base)}% smoother steering than lebowski')
-    if e and ref in e["paired"]:
-        v = verdict_of(e, e["paired"][ref])
-        base = find_metric(idx[ref], "public_open_loop", "lat_mae")[0]["value"]
-        pc = round(100 * abs(e["paired"][ref]["delta"]) / base)
-        if v == "worse":
-            clauses.append(f"{pc}% more tracking error")
-        elif v == "better":
-            clauses.append(f"{pc}% less tracking error")
-        elif v == "tie":
-            clauses.append("about the same tracking error")
-    a, _ = find_metric(m, "public_open_loop", "lon_mae")
-    if a and ref in a["paired"] and verdict_of(a, a["paired"][ref]) in ("better", "worse"):
-        base = find_metric(idx[ref], "public_open_loop", "lon_mae")[0]["value"]
-        pc = round(100 * abs(a["paired"][ref]["delta"]) / base)
-        clauses.append(f'{pc}% {"more" if a["paired"][ref]["delta"] > 0 else "less"} acceleration error')
-    if clauses:
-        out.append(clauses[0][0].upper() + clauses[0][1:] + (", with " + join_words(clauses[1:]) if clauses[1:] else "") + ".")
+    if parts:
+        t = join_words(parts)
+        out.append(t[0].upper() + t[1:] + f" than lebowski ({n} segments).")
     prev = previous_of(m, ref)
     if prev and prev in idx:
-        better, worse = [], []
-        for k, (tb, tw) in TERMS.items():
-            x, _ = find_metric(m, "public_open_loop", k)
+        lower, higher = [], []
+        for k, term in TERMS.items():
+            x, _ = find_metric(m, sec, k)
             p = x and x["paired"].get(prev)
-            if not p:
-                continue
-            v = verdict_of(x, p)
-            (better if v == "better" else worse if v == "worse" else []).append(tb if v == "better" else tw)
+            if p and verdict_of(x, p) in ("better", "worse"):
+                (lower if p["delta"] < 0 else higher).append(term)
         pn = short_name(idx[prev])
-        if better or worse:
-            out.append(f"Against {pn}: " + join_words(better + worse) + ".")
-        else:
-            out.append(f"No clear difference from {pn}.")
+        bits = ([f"lower {join_words(lower)}"] if lower else []) + ([f"higher {join_words(higher)}"] if higher else [])
+        out.append(f"Against {pn}: " + "; ".join(bits) + "." if bits else f"No metric separates from {pn}.")
     if m["model"]["id"] == "96244b1f_12800":
-        out.append("Scored without its navigation inputs.")
+        out.append("Navigation inputs fed zeros.")
     return " ".join(out)
 
 
@@ -532,8 +529,8 @@ def model_list(models: list[dict], cfg: dict) -> str:
             f'<p class="m-st"><span class="m-date">{esc(first_public(m))}</span> {esc(status_text(m))}</p></div>'
             f'<p class="m-v">{esc(verdict_line(m, models, cfg))}</p>'
             f'<div class="m-bars">{bars(m, models, cfg, KEY_METRICS, scales, True)}</div></li>')
-    head = ('<div class="mlist-head" aria-hidden="true"><span>Model</span><span>In one line</span>'
-            '<span>On comma\'s public drives; lower is better, the tick is lebowski</span></div>')
+    head = ('<div class="mlist-head" aria-hidden="true"><span>Model</span><span>Summary</span>'
+            '<span>comma\'s public segments, open loop; lower is better; tick = lebowski</span></div>')
     return f'{head}<ol class="mlist" reversed>{"".join(rows)}</ol>'
 
 
@@ -574,7 +571,7 @@ def summary_table(models, cfg) -> str:
             cells.append(f'<td class="n">{inner}</td>')
         body.append(f'<tr><th scope="row">{name_html(m, "models/" + m["model"]["id"] + ".html")}</th>{"".join(cells)}</tr>')
     return (f'<div class="tw"><table class="sum"><caption>Mean with its 95% interval, then the paired difference from lebowski '
-            f'on the units both have. The G-Wagon sections come from four drives or fewer and carry no interval.</caption>'
+            f'on the units both have. The G55 sections come from four drives or fewer and carry no interval.</caption>'
             f'<thead><tr><th scope="col">Model</th>{th}</tr></thead><tbody>{"".join(body)}</tbody></table></div>')
 
 
@@ -620,37 +617,37 @@ def overview(models, cfg, root) -> str:
                            f'{esc(landed(mm))}.')
     return f"""<section class="hero">
 <div class="hero-t">
-<h1>openpilot's driving models, tested on a car they've never seen</h1>
-<p class="lede">Every comma.ai openpilot driving model, scored the same way on comma's public drives and on a 2011 Mercedes G-Wagon. New models are scored within a day of release.</p>
+<h1>openpilot driving model evaluations</h1>
+<p class="lede">Every comma.ai openpilot driving model, including Hugging Face uploads, scored with one fixed suite on comma's public drives and on drives from a 2011 Mercedes G55, in open loop and in closed loop. Each new model is scored within a day of its release.</p>
 <p class="newest">Newest scored: {name_html(newest, "models/" + newest["model"]["id"] + ".html")}, first public {esc(first_public(newest))} ({esc(lc_status(newest))}).{master_line} <a href="#models">All models</a></p>
 </div>
 {hero_chart(models, cfg)}
 </section>
 
 <section id="found" class="found">
-<h2>What we found</h2>
-<p class="asof">Measured by this suite, as of {esc(cfg.get("findings_date", ""))}. lebowski is the July 2026 model this G-Wagon drives with; every other model is compared with it.</p>
+<h2>Results</h2>
+<p class="asof">Measured by this suite, as of {esc(cfg.get("findings_date", ""))}. The reference is lebowski (877M parameters, July 2026), the model the G55 drives with.</p>
 <ul class="findings">{findings}</ul>
 </section>
 
 <section id="models">
 <h2>The models</h2>
-<p class="sub">Newest first, by the date the weights were first public. Each one links to its full scores.</p>
+<p class="sub">Newest first, by the date the weights were first public. Each links to its full scores.</p>
 {model_list(models, cfg)}
 </section>
 
 <section id="how" class="prose">
 <h2>How it works</h2>
 <div class="how">
-<div><h3>Open loop</h3><p>The model watches recorded video, and its steering and speed requests are compared with what the car did next.</p></div>
-<div><h3>Closed loop</h3><p>The model drives. comma's public world model, <code>worldmodel-4B</code>, draws each next camera frame from the model's own steering, so mistakes build up as they would on a road.</p></div>
-<div><h3>Why a G-Wagon</h3><p>It is a tall, heavy 2011 Mercedes G55 with slow recirculating-ball steering. openpilot does not support it, so no openpilot model has learned from its data. Scores on it show how a model copes with a car it has never seen.</p></div>
+<div><h3>Open loop</h3><p>The model runs on recorded camera frames. Its lateral and longitudinal requests are compared with the car's measured motion that followed.</p></div>
+<div><h3>Closed loop</h3><p>The model's requests move a simulated car, and comma's public world model, <code>worldmodel-4B</code>, generates the next camera frame from the new position, 7.2 s per episode. Scored as distance from the recorded path.</p></div>
+<div><h3>The G55</h3><p>A 2011 Mercedes G55 (W463) with recirculating-ball steering and the camera 1.45 m above the road. openpilot does not support it, so its drives are not in comma's training data. Its closed loop uses a model of the G55's steering and powertrain in place of comma's ideal car.</p></div>
 </div>
-<p>comma publishes its own test reports in <a href="https://commaai.github.io/model_reports/">model_reports</a>; the newest there is Cinque v3, from 2026-09-18. The tests here line up with theirs where they can:</p>
+<p>comma publishes its own test reports in <a href="https://commaai.github.io/model_reports/">model_reports</a>; the newest there is Cinque v3, from 2026-09-18. Nearest equivalents:</p>
 <div class="tw"><table class="vocab"><thead><tr><th scope="col">Here</th><th scope="col">Nearest test in comma's model_reports</th></tr></thead><tbody>
-<tr><th scope="row">Steering roughness, open loop</th><td>jitter</td></tr>
-<tr><th scope="row">Off the path in the world model, comma's ideal car</th><td>MLSim lateral (<code>analyse_lat_mlsim</code>), their world model as the simulator</td></tr>
-<tr><th scope="row">G-Wagon recovery: pushed 0.5 m sideways or 2° off heading</th><td>no direct match; closest is hugging, recovery under a lateral bias</td></tr>
+<tr><th scope="row">Lateral action rate, open loop</th><td>jitter</td></tr>
+<tr><th scope="row">Distance from path, closed loop, comma's ideal car</th><td>MLSim lateral (<code>analyse_lat_mlsim</code>), their world model as the simulator</td></tr>
+<tr><th scope="row">G55 recovery: 0.5 m lateral offset or 2° heading error</th><td>no direct match; closest is hugging, recovery under a lateral bias</td></tr>
 <tr><th scope="row">Braking lead car (not built yet)</th><td>unintended lead following</td></tr>
 </tbody></table></div>
 <p><a href="method.html">The full method</a></p>
@@ -659,10 +656,10 @@ def overview(models, cfg, root) -> str:
 <section id="research" class="research">
 <h2>For researchers</h2>
 <ul class="plain">
-<li>Every number is a mean over units: a 60 s segment of a public drive, or a window of a G-Wagon drive. Units are grouped by the drive they come from, and the 95% intervals resample whole drives. Below 10 drives there is no interval, so the G-Wagon sections report means and win counts only.</li>
+<li>Every number is a mean over units: a 60 s segment of a public drive, or a window of a G55 drive. Units are grouped by the drive they come from, and the 95% intervals resample whole drives. Below 10 drives there is no interval, so the G55 sections report means and win counts only.</li>
 <li>A paired difference compares two models on the units both were scored on; the count beside it is the units where the model did better.</li>
 <li>Per-segment CSVs, one results file per model (<a href="{esc(cfg['repo_url'])}/blob/main/eval/SCHEMA.md">schema</a>) and the code are public; <code>python -m geval.reproduce</code> recomputes every public interval from the CSVs. <a href="method.html#downloads">Downloads</a></li>
-<li>The G-Wagon drives stay private; their scores are published, not the frames.</li>
+<li>The G55 drives stay private; their scores are published, not the frames.</li>
 </ul>
 {legend()}
 {summary_table(models, cfg)}
@@ -775,7 +772,7 @@ def method(models, cfg) -> str:
                     f'<td>{", ".join(csvs) or "none"}</td></tr>')
     table = ('<section id="downloads" class="prose"><h2>Downloads</h2><p>One results file per model, in the format described in '
              f'<a href="{esc(cfg["repo_url"])}/blob/main/eval/SCHEMA.md">SCHEMA.md</a>, and one CSV per public section with a row per segment. '
-             'G-Wagon sections publish scores only.</p>'
+             'G55 sections publish scores only.</p>'
              '<div class="tw"><table><thead><tr><th scope="col">Model</th><th scope="col">Results</th><th scope="col">Per-segment CSVs</th></tr></thead>'
              f'<tbody>{"".join(rows)}</tbody></table></div></section>')
     return prose + table
@@ -806,11 +803,11 @@ def main() -> None:
         (out / "models" / f"{mid}.html").write_text(
             page(cfg, f"{plain_name(m)} – {tag}", f"{plain_name(m)}: {status_text(m)}. {verdict_line(m, models, cfg)}",
                  model_page(m, models, cfg, root, out), 1, "model", f"models/{mid}.html"))
-    desc = ("Every comma.ai openpilot driving model, scored the same way on comma's public drives and on a "
-            "2011 Mercedes G-Wagon, within a day of release.")
-    (out / "index.html").write_text(page(cfg, f"{cfg['site_name']}: openpilot's driving models, tested on a car they've never seen",
+    desc = ("Every comma.ai openpilot driving model, including Hugging Face uploads, scored on comma's public drives "
+            "and on drives from a 2011 Mercedes G55, in open and closed loop, within a day of release.")
+    (out / "index.html").write_text(page(cfg, f"openpilot driving model evaluations – {cfg['site_name']}",
                                          desc, overview(models, cfg, root), 0, "overview", ""))
-    (out / "method.html").write_text(page(cfg, f"Method – {cfg['site_name']}", "How the openpilot G-Wagon evals score each model: "
+    (out / "method.html").write_text(page(cfg, f"Method – {cfg['site_name']}", "How each openpilot driving model is scored: "
                                           "open and closed loop, intervals, limits and downloads.", method(models, cfg), 0, "method", "method.html"))
     print(f"{len(models)} models -> {out}")
 

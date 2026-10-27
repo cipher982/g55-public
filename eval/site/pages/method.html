@@ -26,7 +26,7 @@ drives stay private, so only their scores are published.</p>
 <td>Speed and lateral error against what the truck did, and lateral gain: the model's lateral action over the truck's actual lateral motion, where 1 is right.</td></tr>
 <tr><th scope="row">Truck, closed loop</th>
 <td>The truck windows, run through <code>worldmodel-4B</code> with the G55's measured steering response in place of the ideal car.</td>
-<td>Distance from the driven path at 2, 4 and 7.2 s, and how smooth the requested steering is. 18 windows from four drives,
+<td>Distance from the driven path at 2, 4 and 7.2 s, and the RMS lateral and longitudinal jerk of the requests. 18 windows from four drives,
 9 by day and 9 at night.</td></tr>
 <tr><th scope="row">Truck, recovery tests</th>
 <td>Closed loop after a disturbance: pushed 0.5 m sideways, or turned 2° off heading. A test behind a braking lead car is
@@ -55,8 +55,8 @@ fraction beside it counts the units where the model did better.</p>
 models; a dash means there is no interval. Each page shows dozens of these comparisons with no correction for multiple
 tests, so a delta whose interval only just excludes zero is weak evidence. Where one segment dominates a mean, the
 median beside it shows it.</p>
-<p>Two measures need care. The steering delay is the shift, searched from 0 to 1.5 s, at which the model's steering
-request best matches the car's own turning; a value at either end of the search is only a bound and is left out, so its
+<p>Two measures need care. The lateral lag is the shift, searched from 0 to 1.5 s, at which the model's lateral
+request best correlates with the car's measured lateral motion; a value at either end of the search is only a bound and is left out, so its
 count can be below the section's. The plan speed error at 3 s reads the model's plan output, which does not separate
 models built on one frozen base: it is identical for the four October models on base <code>f22e06e5</code>.</p>
 <p>Every public interval can be recomputed from the per-segment CSVs: <code>uv run python -m geval.reproduce</code> in
@@ -68,12 +68,13 @@ models built on one frozen base: it is identical for the four October models on 
 <p>Open loop asks whether the model's output matches what a human did on a recorded drive. The output never changes the
 next frame, so a model can copy the human closely and still drift once its own steering moves the car. Closed loop feeds
 the steering back through a world model, and small errors build up.</p>
-<p>The October 2026 runs show the two disagreeing. comma's recent models are a frozen base policy with a residual head
+<p>Measured in the 2026-10-27 deep dive, the two disagree. comma's recent models are a frozen base policy with a residual head
 trained by reinforcement learning on top. With the residual switched off, the base had the lowest open-loop lateral error
 of any model on comma's public segments (0.074 m/s², against lebowski's 0.109). In the first closed-loop run on nine truck
 windows (before the current eighteen), after a small yaw disturbance, the same base ended about 1.8 m from the driven path at 4 s. lebowski ended 0.4 m away, and
-a policy that does not steer at all 2.3 m. The residual smooths the action and delays it by a few tenths of a second.
-Open-loop scoring counts that delay as error, yet the residual is what lets these models hold a lane.</p>
+a policy that does not steer at all 2.3 m; the same models with their residual ended 1.2 to 1.3 m closer to the path than
+their base alone, in 9 of 9 windows. On comma's public segments the residual lowers the lateral action rate by 33 to 40%
+and moves the best-correlating lateral lag by +0.17 to +0.32 s; open-loop scoring counts that shift as error.</p>
 <p>This matches published work: on the nuPlan benchmark, open-loop and closed-loop planning scores were negatively
 correlated (<a href="https://doi.org/10.48550/arxiv.2306.07962">Dauner et al., 2023</a>). The site reports both kinds of
 score side by side and does not combine them.</p>
