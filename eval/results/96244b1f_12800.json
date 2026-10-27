@@ -16,9 +16,9 @@
   "notes": "Uploaded as \"add N16 nav model\"; never shipped. Takes a navigation map and route inputs, fed zeros here (no route). Vision base 2931d3d9 with an RL residual head."
  },
  "scored": {
-  "date": "2026-10-27T18:29:03Z",
-  "suite": "geval-1 (backfill of the 2026-10-27 deep dive)",
-  "code": "043bb5c9d7c9"
+  "date": "2026-10-27T19:13:32Z",
+  "suite": "geval-1",
+  "code": "489f946cb43d"
  },
  "baselines": [
   "lebowski_877m",
@@ -390,7 +390,7 @@
    "status": "not_run",
    "unit_of_evidence": "segment",
    "n": 0,
-   "condition": "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to the recording car's own path. Seeds 0 and 1, averaged per segment.",
+   "condition": "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to the recording car's own path. One window per segment, nearest the middle, where the car holds at least 5 m/s for the window and the 4.8 s before it; segments with no such stretch are left out. Seeds 0 and 1, averaged per segment.",
    "metrics": [],
    "per_unit_file": null
   },
@@ -420,6 +420,15 @@
        ],
        "n": 4,
        "wins": 0
+      },
+      "870a4823_12864": {
+       "delta": 0.02305,
+       "ci": [
+        0.0127,
+        0.03341
+       ],
+       "n": 4,
+       "wins": 0
       }
      }
     },
@@ -440,6 +449,15 @@
        "ci": [
         0.01327,
         0.03141
+       ],
+       "n": 4,
+       "wins": 0
+      },
+      "870a4823_12864": {
+       "delta": 0.01622,
+       "ci": [
+        0.008083,
+        0.02436
        ],
        "n": 4,
        "wins": 0
@@ -466,6 +484,15 @@
        ],
        "n": 4,
        "wins": 0
+      },
+      "870a4823_12864": {
+       "delta": -0.01575,
+       "ci": [
+        -0.02401,
+        -0.01065
+       ],
+       "n": 4,
+       "wins": 0
       }
      }
     },
@@ -486,6 +513,15 @@
        "ci": [
         -0.1683,
         -0.08689
+       ],
+       "n": 4,
+       "wins": 0
+      },
+      "870a4823_12864": {
+       "delta": -0.02839,
+       "ci": [
+        -0.03206,
+        -0.02552
        ],
        "n": 4,
        "wins": 0
@@ -512,6 +548,15 @@
        ],
        "n": 4,
        "wins": 4
+      },
+      "870a4823_12864": {
+       "delta": 0.01909,
+       "ci": [
+        -0.02925,
+        0.06823
+       ],
+       "n": 4,
+       "wins": 1
       }
      }
     },
@@ -532,6 +577,15 @@
        "ci": [
         0.075,
         0.35
+       ],
+       "n": 4,
+       "wins": 0
+      },
+      "870a4823_12864": {
+       "delta": 0.1,
+       "ci": [
+        0.0625,
+        0.1375
        ],
        "n": 4,
        "wins": 0
@@ -558,6 +612,15 @@
        ],
        "n": 4,
        "wins": 0
+      },
+      "870a4823_12864": {
+       "delta": 0.012,
+       "ci": [
+        -0.002719,
+        0.03367
+       ],
+       "n": 4,
+       "wins": 1
       }
      }
     },
@@ -581,6 +644,15 @@
        ],
        "n": 4,
        "wins": 0
+      },
+      "870a4823_12864": {
+       "delta": -0.003186,
+       "ci": [
+        -0.04947,
+        0.04737
+       ],
+       "n": 4,
+       "wins": 2
       }
      }
     },
@@ -601,6 +673,15 @@
        "ci": [
         -0.008837,
         0.09256
+       ],
+       "n": 4,
+       "wins": 1
+      },
+      "870a4823_12864": {
+       "delta": 0.01937,
+       "ci": [
+        -0.00886,
+        0.06287
        ],
        "n": 4,
        "wins": 1
@@ -627,6 +708,15 @@
        ],
        "n": 4,
        "wins": 2
+      },
+      "870a4823_12864": {
+       "delta": 0.1376,
+       "ci": [
+        -0.0382,
+        0.3307
+       ],
+       "n": 4,
+       "wins": 1
       }
      }
     },
@@ -647,6 +737,15 @@
        "ci": [
         0.09042,
         1.12
+       ],
+       "n": 4,
+       "wins": 1
+      },
+      "870a4823_12864": {
+       "delta": 0.267,
+       "ci": [
+        0.005522,
+        0.5284
        ],
        "n": 4,
        "wins": 1
