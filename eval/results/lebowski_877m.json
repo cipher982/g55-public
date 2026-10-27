@@ -16,9 +16,9 @@
   "notes": "877M ConvNeXt encoder, host-kept history, no RL residual. Checkpoint 6f5c8d09/ecc73f48. The model the G55 runs."
  },
  "scored": {
-  "date": "2026-10-27T18:26:33Z",
+  "date": "2026-10-27T18:29:03Z",
   "suite": "geval-1 (backfill of the 2026-10-27 deep dive)",
-  "code": "7a1100ad0d1b"
+  "code": "043bb5c9d7c9"
  },
  "baselines": [],
  "sections": {

@@ -16,9 +16,9 @@
   "notes": "On openpilot master as MD v3 (2026-10-14, PR #39087) and again as Flip Flop (2026-10-24, PR #39156), same weights. Scored from the 2026-10-24 Hugging Face re-upload, weights identical to the 2026-10-16 upload. Vision base f22e06e5 with an RL residual head."
  },
  "scored": {
-  "date": "2026-10-27T18:26:33Z",
+  "date": "2026-10-27T18:29:03Z",
   "suite": "geval-1 (backfill of the 2026-10-27 deep dive)",
-  "code": "7a1100ad0d1b"
+  "code": "043bb5c9d7c9"
  },
  "baselines": [
   "lebowski_877m",
