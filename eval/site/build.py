@@ -618,7 +618,7 @@ def overview(models, cfg, root) -> str:
     return f"""<section class="hero">
 <div class="hero-t">
 <h1>openpilot driving model evaluations</h1>
-<p class="lede">Every comma.ai openpilot driving model, including Hugging Face uploads, scored with one fixed suite on comma's public drives and on drives from a 2011 Mercedes G55, in open loop and in closed loop. Each new model is scored within a day of its release.</p>
+<p class="lede">Every comma.ai openpilot driving model, including Hugging Face uploads, scored with one fixed suite on comma's public drives and on drives from a 2011 Mercedes G55, in open loop and in closed loop.</p>
 <p class="newest">Newest scored: {name_html(newest, "models/" + newest["model"]["id"] + ".html")}, first public {esc(first_public(newest))} ({esc(lc_status(newest))}).{master_line} <a href="#models">All models</a></p>
 </div>
 {hero_chart(models, cfg)}
@@ -804,7 +804,7 @@ def main() -> None:
             page(cfg, f"{plain_name(m)} – {tag}", f"{plain_name(m)}: {status_text(m)}. {verdict_line(m, models, cfg)}",
                  model_page(m, models, cfg, root, out), 1, "model", f"models/{mid}.html"))
     desc = ("Every comma.ai openpilot driving model, including Hugging Face uploads, scored on comma's public drives "
-            "and on drives from a 2011 Mercedes G55, in open and closed loop, within a day of release.")
+            "and on drives from a 2011 Mercedes G55, in open and closed loop.")
     (out / "index.html").write_text(page(cfg, f"openpilot driving model evaluations – {cfg['site_name']}",
                                          desc, overview(models, cfg, root), 0, "overview", ""))
     (out / "method.html").write_text(page(cfg, f"Method – {cfg['site_name']}", "How each openpilot driving model is scored: "
