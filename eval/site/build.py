@@ -223,7 +223,7 @@ def page(cfg: dict, title: str, body: str, depth: int, current: str) -> str:
 {body}
 </main>
 <footer class="wrap foot">
-<p>Run by David Rose. Not affiliated with comma.ai or Mercedes-Benz. Results come from one truck and a few dozen public segments; each number carries its sample size.
+<p>Run by David Rose. Results come from one truck and a few dozen public segments; each number carries its sample size.
 <a href="{esc(cfg['repo_url'])}/tree/main/eval">Code and schema</a>.</p>
 </footer>
 <div id="tip" class="tip" role="status" hidden></div>
