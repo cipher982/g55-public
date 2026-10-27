@@ -1,8 +1,8 @@
 # G-Wagon eval
 
 A fixed suite that scores each of comma's openpilot driving models the day it appears, against
-lebowski (comma's 877M model of 2026-07-01) and against the model comma had on openpilot master
-before it. One results file per model, `results/<model-id>.json`, in the format of
+lebowski (comma's 877M model of 2026-07-01) and against the previous model on the timeline (the
+scored model with the latest `model.source.date` before its own, ties broken by id). One results file per model, `results/<model-id>.json`, in the format of
 [SCHEMA.md](SCHEMA.md); the site is built from those files only.
 
 | Section | What | Reproducible by others |

@@ -29,13 +29,14 @@ def segments() -> dict:
 
 
 def baselines(model_id: str, reg: dict) -> list:
-    """lebowski, then the newest scored model that was on openpilot master before this one appeared."""
+    """lebowski, then the previous model on the site's timeline: the scored model with the latest
+    model.source.date before this one's (ties broken by id)."""
     me = reg[model_id]
     out = [] if model_id == "lebowski_877m" else ["lebowski_877m"]
-    prior = [m for m in reg.values() if m["id"] != model_id and m.get("on_master")
-             and m["on_master"] < me["first_public"]]
+    key = lambda m: (m["source"]["date"], m["id"])  # noqa: E731
+    prior = [m for m in reg.values() if m["id"] != model_id and key(m) < key(me)]
     if prior:
-        prev = max(prior, key=lambda m: m["on_master"])["id"]
+        prev = max(prior, key=key)["id"]
         if prev not in out:
             out.append(prev)
     return out

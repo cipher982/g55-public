@@ -1,5 +1,5 @@
 {
-  "_doc": "Known comma big driving models. first_public: the first date the weights were public (openpilot master or Hugging Face). on_master: the date they were merged to openpilot master, null if never. The second baseline of a model is the newest scored model that was on master before the model's first_public date. Lineage facts are borrowed from comma's GitHub PRs and Hugging Face upload history; 'same weights' claims were checked by tensor bytes (deep dive 2026-10-27).",
+  "_doc": "Known comma big driving models. first_public: the first date the weights were public (openpilot master or Hugging Face). on_master: the date they were merged to openpilot master, null if never. The second baseline of a model is the scored model with the latest source.date before its own (ties broken by id), the order of the site's timeline. Lineage facts are borrowed from comma's GitHub PRs and Hugging Face upload history; 'same weights' claims were checked by tensor bytes (deep dive 2026-10-27).",
   "hf_repo": "commaai/openpilot_driving_models",
   "models": [
     {
