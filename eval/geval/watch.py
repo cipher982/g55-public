@@ -20,7 +20,8 @@ Optionally a pass then commits newly scored models' results to a repository chec
 its main (publish_repo; files matching a publish_block pattern are never copied).
 
 Settings, [watch] in the private TOML: sections (default: public and truck open loop, truck
-closed loop, truck recovery), github_calls (default 25), publish_repo, publish_block, author.
+closed loop, truck recovery), github_calls (default 25), publish_repo, publish_block, author,
+and [watch.offload] (command, match, suffix, cwd) to run the GPU jobs elsewhere.
 """
 from __future__ import annotations
 
@@ -170,7 +171,32 @@ class Watch:
         self.state["pending_ckpts"].pop(mid, None)
         self.save()
         self.log(f"queued {mid} from {ref}: {len(jobs)} jobs")
+        self.offload(jobs)
         R.ensure_runner(self.cfg)
+
+    def offload(self, jobs):
+        """Hand matching jobs to another executor (`[watch.offload]`: command, match, suffix): each
+        <job>.sh not yet started is renamed <job>.sh<suffix>, which the queue runner never globs,
+        and `command + jobs` is started detached. The executor writes the usual markers."""
+        import fnmatch
+        import subprocess
+        o = self.cfg.get("watch", {}).get("offload")
+        if not o:
+            return
+        jdir = self.cfg.work / "queue" / "jobs"
+        held = []
+        for j in jobs:
+            if not any(fnmatch.fnmatch(j, m) for m in o.get("match", [])):
+                continue
+            src = jdir / f"{j}.sh"
+            if src.exists() and Q.state(src) is None:
+                src.rename(jdir / f"{j}.sh{o.get('suffix', '.held')}")
+                held.append(j)
+        if held:
+            log = open(self.cfg.work / "queue" / "logs" / "offload.out", "a")
+            subprocess.Popen(list(o["command"]) + held, stdout=log, stderr=subprocess.STDOUT, start_new_session=True,
+                             cwd=o.get("cwd"))
+            self.log(f"offloaded {held}")
 
     def score_finished(self):
         from . import run as R
