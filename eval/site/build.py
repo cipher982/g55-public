@@ -1,17 +1,21 @@
 # /// script
 # requires-python = ">=3.11"
 # ///
-"""Build the G-Wagon eval site from results/*.json.
+"""Build the openpilot G-Wagon evals site from results/*.json.
 
-    uv run eval/site/build.py                       # real results, out to eval/site/_site
-    uv run eval/site/build.py --root eval/site/fixtures
+    uv run python site/build.py                       # real results, out to site/_site
+    uv run python site/build.py --root site/fixtures
 
---root is the directory holding results/, per_unit/ and stills/ (default: eval/).
-The results files are the only input (SCHEMA.md); the method prose is pages/method.html.
+--root holds results/, per_unit/ and stills/ (default: eval/). The results files and the per-unit
+CSVs are the only data read; every number on the site comes from them. config.json holds the
+editorial parts: the findings (prose with placeholders that pull their numbers from the results,
+so a missing number fails the build) and the models the hero chart names. pages/method.html is
+the method prose.
 """
 from __future__ import annotations
 
 import argparse
+import csv
 import html
 import json
 import math
@@ -23,16 +27,34 @@ SITE = Path(__file__).resolve().parent
 EVAL = SITE.parent
 
 SECTIONS = {
-    "public_open_loop": "Public segments, open loop",
-    "public_closed_loop": "Public segments, closed loop",
-    "truck_open_loop": "Truck, open loop",
-    "truck_closed_loop": "Truck, closed loop",
-    "truck_recovery": "Truck, recovery tests",
+    "public_open_loop": "comma's public drives, open loop",
+    "public_closed_loop": "comma's public drives, closed loop",
+    "truck_open_loop": "G-Wagon, open loop",
+    "truck_closed_loop": "G-Wagon, closed loop",
+    "truck_recovery": "G-Wagon, recovery tests",
 }
 UNIT_WORD = {"segment": ("segment", "segments"), "window": ("window", "windows")}
-BETTER_TEXT = {"lower": "lower is better", "higher": "higher is better", "near1": "closer to 1 is better"}
+BETTER_TEXT = {"lower": "lower is better", "higher": "higher is better",
+               "near1": "closer to 1 is better; the delta is the change in distance from 1"}
 MINUS = "−"
-WORDS = {2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine"}
+# The three numbers every model has, in plain words (public open loop; lower is better on all three).
+KEY_METRICS = [
+    ("public_open_loop", "lat_rate_rms", "Steering roughness", "How fast the steering request changes (RMS)"),
+    ("public_open_loop", "lat_best_lag", "Steering delay", "How far the steering trails the car's own turning"),
+    ("public_open_loop", "lat_mae", "Tracking error", "Steering request against what the car did next"),
+]
+MORE_METRICS = [
+    ("public_closed_loop", "xtrack_4s", "Off the path in the world model, 4 s", "Median over segments, comma's ideal car"),
+    ("truck_closed_loop", "xtrack_4s", "G-Wagon off the path, 4 s", "Median over windows, G55 steering"),
+    ("truck_recovery", "offcentre_xtrack_4s", "G-Wagon after a 0.5 m push, 4 s", "Median over windows"),
+]
+# Plain names for the per-model verdict line: (better, worse).
+TERMS = {
+    "lat_rate_rms": ("smoother steering", "rougher steering"),
+    "lat_best_lag": ("less steering delay", "more steering delay"),
+    "lat_mae": ("lower tracking error", "higher tracking error"),
+    "lon_mae": ("lower acceleration error", "higher acceleration error"),
+}
 
 
 def esc(x) -> str:
@@ -41,7 +63,7 @@ def esc(x) -> str:
 
 # ---------------------------------------------------------------- numbers
 
-def decimals_for(v: float | None) -> int:
+def decimals_for(v) -> int:
     if v is None or v == 0:
         return 3
     a = abs(v)
@@ -54,7 +76,7 @@ def num(v, d: int, signed: bool = False) -> str:
     s = f"{abs(v):.{d}f}"
     if v < 0 and float(s) != 0:
         return MINUS + s
-    return ("+" + s) if signed else s
+    return ("+" + s) if signed and float(s) != 0 else s
 
 
 def ci_text(ci, d: int, signed: bool = False) -> str:
@@ -64,52 +86,27 @@ def ci_text(ci, d: int, signed: bool = False) -> str:
 
 
 def verdict_of(metric: dict, paired: dict) -> str:
-    """better | worse | tie | diff (separated, direction unclear) | none (no interval)."""
+    """better | worse | tie | none (no interval). For near1 the delta is already a change in
+    distance from 1, so negative is better, as for lower."""
     ci = paired.get("ci")
     if not ci:
         return "none"
     if not (ci[0] > 0 or ci[1] < 0):
         return "tie"
-    delta, better = paired["delta"], metric["better"]
-    if better == "lower":
-        return "better" if delta < 0 else "worse"
-    if better == "higher":
-        return "better" if delta > 0 else "worse"
-    v = metric["value"]
-    if v is None:
-        return "diff"
-    base = v - delta
-    if abs(v - 1) < abs(base - 1):
-        return "better"
-    if abs(v - 1) > abs(base - 1):
-        return "worse"
-    return "diff"
+    good = paired["delta"] > 0 if metric["better"] == "higher" else paired["delta"] < 0
+    return "better" if good else "worse"
 
 
 MARK_TEXT = {
-    "better": "better, interval excludes zero",
-    "worse": "worse, interval excludes zero",
-    "diff": "different, interval excludes zero",
-    "tie": "interval includes zero",
-    "none": "no interval",
+    "better": "better, 95% interval excludes zero",
+    "worse": "worse, 95% interval excludes zero",
+    "tie": "not separated, interval includes zero",
+    "none": "no interval (too few drives)",
 }
 
 
 def mark(v: str) -> str:
     return f'<span class="mk mk-{v}" aria-hidden="true"></span><span class="sr">{MARK_TEXT[v]}</span>'
-
-
-def lc(label: str) -> str:
-    """Sentence-internal form of a metric label: 'Lateral gain (1 = ...)' -> 'lateral gain'."""
-    label = re.sub(r"\s*\([^)]*\)$", "", label)
-    label = re.sub(r",\s*RMS$", "", label)
-    if len(label) > 1 and label[0].isupper() and label[1].islower():
-        return label[0].lower() + label[1:]
-    return label
-
-
-def unit_and_better(x: dict) -> str:
-    return ", ".join(p for p in (x["unit"], BETTER_TEXT[x["better"]]) if p)
 
 
 def join_words(items: list[str]) -> str:
@@ -119,6 +116,10 @@ def join_words(items: list[str]) -> str:
 
 
 # ---------------------------------------------------------------- data
+
+def first_public(m: dict) -> str:
+    return m["model"].get("first_public") or m["model"]["source"]["date"]
+
 
 def load(root: Path) -> list[dict]:
     files = sorted((root / "results").glob("*.json"))
@@ -133,12 +134,8 @@ def load(root: Path) -> list[dict]:
             raise SystemExit(f"{f}: model.id {d['model']['id']!r} does not match the file name")
         d["_file"] = f
         models.append(d)
-    models.sort(key=lambda d: (d["model"]["source"]["date"], d["scored"]["date"], d["model"]["id"]))
+    models.sort(key=lambda d: (first_public(d), d["model"]["id"]))  # the timeline, oldest first
     return models
-
-
-def name_of(m: dict) -> str:
-    return m["model"]["name"] or m["model"]["id"]
 
 
 def short_hash(m: dict) -> str:
@@ -147,10 +144,49 @@ def short_hash(m: dict) -> str:
     return h if len(h) == 8 and all(c in "0123456789abcdef" for c in h) else ""
 
 
-def hash_code(m: dict) -> str:
-    """The checkpoint hash beside a model's name; an unnamed model's id already shows it."""
-    h = short_hash(m) if m["model"]["name"] else ""
-    return f" <code>{h}</code>" if h else ""
+def plain_name(m: dict) -> str:
+    """'Mountain Dew (8d736683)', or the hash alone for an unnamed model."""
+    n, h = m["model"]["name"], short_hash(m)
+    if n:
+        return f"{n} ({h})" if h else n
+    return h or m["model"]["id"]
+
+
+def short_name(m: dict) -> str:
+    return m["model"]["name"] or short_hash(m) or m["model"]["id"]
+
+
+def name_html(m: dict, link: str | None = None) -> str:
+    n, h = m["model"]["name"], short_hash(m)
+    if n:
+        inner = f'<span class="nm">{esc(n)}</span>' + (f' <code class="hx">{h}</code>' if h else "")
+    else:
+        inner = f'<code class="nm hx-only">{esc(h or m["model"]["id"])}</code>'
+    return f'<a class="mlink" href="{esc(link)}">{inner}</a>' if link else inner
+
+
+def status_text(m: dict) -> str:
+    md, src = m["model"], m["model"]["source"]
+    if src["kind"] == "release":
+        s = f'Shipped in openpilot {src["ref"]}'
+        if md.get("on_master"):
+            s += f', on master from {md["on_master"]}'
+        return s
+    if md.get("on_master"):
+        s = f'Merged to openpilot master {md["on_master"]}'
+        if src["kind"] == "openpilot-master" and src["date"] != md["on_master"]:
+            s += f', again {src["date"]}'
+        return s
+    return "Hugging Face upload only, not shipped"
+
+
+def lc_status(m: dict) -> str:
+    t = status_text(m)
+    return t if t.startswith("Hugging") else t[0].lower() + t[1:]
+
+
+def by_id(models) -> dict:
+    return {m["model"]["id"]: m for m in models}
 
 
 def find_metric(m: dict, section: str, key: str):
@@ -163,61 +199,129 @@ def find_metric(m: dict, section: str, key: str):
     return None, s
 
 
-def headline_metrics(models: list[dict], cfg: dict) -> list[tuple[str, str, dict]]:
-    """(section, key, an example metric) for each configured headline metric present somewhere."""
-    out = []
-    for section, key in cfg["headline"]:
-        for m in models:
-            x, _ = find_metric(m, section, key)
-            if x:
-                out.append((section, key, x))
-                break
-    if out:
-        return out
-    seen = set()
-    for m in models:  # nothing configured matched: the first metric of each section
-        for section, s in m["sections"].items():
-            if s["status"] == "ok" and s["metrics"] and section not in seen:
-                seen.add(section)
-                out.append((section, s["metrics"][0]["key"], s["metrics"][0]))
-    return out
+def section_bases(m: dict, section: str) -> list:
+    s = m["sections"].get(section) or {}
+    return s.get("baselines", m.get("baselines", []))
 
 
-def previous_baseline(m: dict, ref: str):
-    rest = [b for b in m["baselines"] if b != ref]
+def previous_of(m: dict, ref: str, section: str = "public_open_loop"):
+    rest = [b for b in section_bases(m, section) if b != ref]
     return rest[0] if rest else None
+
+
+# ---------------------------------------------------------------- findings: prose with numbers from the results
+
+def fmt(v: float, f: str) -> str:
+    if f == "cm":
+        return f"{round(v * 100):d}"
+    if f == "pct":
+        return f"{round(abs(v)):d}"
+    if f.startswith("d"):  # d2 = two decimals
+        return num(v, int(f[1:]))
+    if f == "int":
+        return f"{int(v)}"
+    raise SystemExit(f"unknown number format {f!r}")
+
+
+def fill(text: str, models: list[dict], root: Path) -> str:
+    """Replace {op args... fmt} with a number from the results. Ops:
+      v S K M stat fmt         a model's value or median        d S K M B field fmt  a paired field
+      pct S K M B              |delta| over B's value, in %      pctlo/pcthi S K B   range of pct over all models
+      lo/hi S K M1,M2 stat fmt range of values across models     max S K M fmt       largest per-unit value (CSV)
+    """
+    idx = by_id(models)
+
+    def metric(s, k, mid):
+        x, _ = find_metric(idx[mid], s, k)
+        if not x:
+            raise SystemExit(f"finding needs {mid} {s} {k}, which has no score")
+        return x
+
+    def pct(s, k, mid, b):
+        p = metric(s, k, mid)["paired"].get(b)
+        if not p:
+            raise SystemExit(f"finding needs {mid} {s} {k} paired with {b}")
+        return 100 * p["delta"] / metric(s, k, b)["value"]
+
+    def op(mo):
+        a = mo.group(1).split()
+        o = a[0]
+        if o == "v":
+            return fmt(metric(a[1], a[2], a[3])[a[4]], a[5])
+        if o == "d":
+            p = metric(a[1], a[2], a[3])["paired"].get(a[4])
+            if not p:
+                raise SystemExit(f"finding needs {a[3]} {a[1]} {a[2]} paired with {a[4]}")
+            return fmt(p[a[5]], a[6])
+        if o == "pct":
+            return fmt(pct(a[1], a[2], a[3], a[4]), "pct")
+        if o in ("pctlo", "pcthi"):
+            vals = [abs(pct(a[1], a[2], m["model"]["id"], a[3])) for m in models
+                    if m["model"]["id"] != a[3] and find_metric(m, a[1], a[2])[0]]
+            return fmt(min(vals) if o == "pctlo" else max(vals), "pct")
+        if o in ("lo", "hi"):
+            vals = [metric(a[1], a[2], mid)[a[4]] for mid in a[3].split(",")]
+            return fmt(min(vals) if o == "lo" else max(vals), a[5])
+        if o == "max":
+            s = idx[a[3]]["sections"][a[1]]
+            with open(root / s["per_unit_file"]) as f:
+                vals = [float(r[a[2]]) for r in csv.DictReader(f) if r[a[2]] != ""]
+            return fmt(max(vals), a[4])
+        raise SystemExit(f"unknown finding op {o!r}")
+
+    return re.sub(r"\{([a-z]+ [^{}]+)\}", op, text)
 
 
 # ---------------------------------------------------------------- page shell
 
-def page(cfg: dict, title: str, body: str, depth: int, current: str) -> str:
+def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, path: str) -> str:
     up = "../" * depth
     umami = ""
     if cfg.get("umami_website_id"):
+        dom = f' data-domains="{esc(cfg["umami_domains"])}"' if cfg.get("umami_domains") else ""
         umami = (f'<script defer src="{esc(cfg["umami_src"])}" '
-                 f'data-website-id="{esc(cfg["umami_website_id"])}"></script>')
+                 f'data-website-id="{esc(cfg["umami_website_id"])}"{dom}></script>')
     nav = []
-    for href, label, key in (("index.html", "Overview", "overview"), ("method.html", "Method", "method")):
+    for href, label, key in (("index.html#models", "Models", "models"), ("index.html#how", "How it works", "how"),
+                             ("method.html", "Method", "method")):
         cur = ' aria-current="page"' if key == current else ""
         nav.append(f'<a href="{up}{href}"{cur}>{label}</a>')
-    full = f"{title} | {cfg['site_name']}" if title != cfg["site_name"] else title
+    site = cfg["site_url"].rstrip("/")
+    og = f"{site}/og.png"
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{esc(full)}</title>
-<meta name="description" content="Independent scores for each comma.ai openpilot driving model, on comma's public segments and on one 2011 Mercedes G55.">
+<title>{esc(title)}</title>
+<meta name="description" content="{esc(desc)}">
+<link rel="canonical" href="{esc(site)}/{esc(path)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{esc(cfg['site_name'])}">
+<meta property="og:title" content="{esc(title)}">
+<meta property="og:description" content="{esc(desc)}">
+<meta property="og:url" content="{esc(site)}/{esc(path)}">
+<meta property="og:image" content="{esc(og)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="openpilot's driving models, tested on a car they've never seen">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{esc(title)}">
+<meta name="twitter:description" content="{esc(desc)}">
+<meta name="twitter:image" content="{esc(og)}">
+<meta name="color-scheme" content="light dark">
+<script>try{{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}}catch(e){{}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;500&family=Atkinson+Hyperlegible+Next:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600&family=Overpass:ital,wght@0,400;0,600;0,800;1,400&display=swap">
 <link rel="stylesheet" href="{up}style.css">
+<link rel="icon" href="{up}favicon.svg" type="image/svg+xml">
 {umami}
 </head>
 <body>
 <header class="top"><div class="wrap top-in">
 <a class="word" href="{up}index.html">{esc(cfg['site_name'])}</a>
-<nav>{''.join(nav)}</nav>
+<nav aria-label="Site">{''.join(nav)}<button class="theme" type="button" aria-label="Switch light or dark theme"><span aria-hidden="true"></span></button></nav>
 </div></header>
 <main class="wrap">
 {body}
@@ -233,228 +337,337 @@ def page(cfg: dict, title: str, body: str, depth: int, current: str) -> str:
 """
 
 
-# ---------------------------------------------------------------- overview
+# ---------------------------------------------------------------- the hero chart
 
-def nice_ticks(lo: float, hi: float, n: int = 4) -> tuple[list[float], int]:
-    """Round tick values across [lo, hi] and the decimals their labels need."""
-    span = hi - lo or 1.0
-    raw = span / n
-    mag = 10 ** math.floor(math.log10(raw))
-    step = next(s * mag for s in (1, 2, 2.5, 5, 10) if s * mag >= raw)
-    d = max(0, -math.floor(math.log10(step) + 1e-9))
-    if abs(round(step * 10 ** d) - step * 10 ** d) > 1e-9:
-        d += 1
-    t = math.ceil(lo / step) * step
-    out = []
-    while t <= hi + 1e-12:
-        out.append(round(t, 10))
-        t += step
-    return out, d
-
-
-def forest(models, ref, section, key, example):
-    rows = []
+def hero_chart(models: list[dict], cfg: dict) -> str:
+    """Steering delay (x) against steering roughness (y), one dot per model, public open loop.
+    Lower-left is better on both. The reference and the models config.json names are labelled."""
+    ref = cfg["reference_model"]
+    hl = cfg.get("hero", {}).get("highlight", [])  # [[model id, css class, label, "left" or "right"], ...]
+    pts = []
     for m in models:
-        if m["model"]["id"] == ref:
-            continue
-        x, s = find_metric(m, section, key)
-        p = x and x["paired"].get(ref)
-        rows.append((m, x, s, p))
-    if not any(p for *_, p in rows):
+        x, sx = find_metric(m, "public_open_loop", "lat_best_lag")
+        y, _ = find_metric(m, "public_open_loop", "lat_rate_rms")
+        if x and y:
+            pts.append((m, x, y, sx))
+    if len(pts) < 2:
         return ""
-    vals = [0.0]
-    for _, _, _, p in rows:
-        if p:
-            vals += [p["delta"]] + (p["ci"] or [])
-    lo, hi = min(vals), max(vals)
-    pad = (hi - lo) * 0.08 or 0.01
-    lo, hi = lo - pad, hi + pad
-    pos = lambda v: (v - lo) / (hi - lo) * 100
-    d = decimals_for(example["value"])
-    out = [f'<figure class="forest"><figcaption><span class="f-t">{esc(example["label"])}</span>'
-           f'<span class="f-s">{esc(SECTIONS.get(section, section))}, {esc(unit_and_better(example))}</span></figcaption><div class="f-rows">']
-    missing = []
-    for m, x, s, p in rows:
-        label = f'<a href="models/{esc(m["model"]["id"])}.html">{esc(name_of(m))}</a>'
-        if not p:
-            missing.append(name_of(m))
+    W, H, L, R, T, B = 560, 400, 58, 20, 18, 62
+    xs, ys = [p[1]["value"] for p in pts], [p[2]["value"] for p in pts]
+    x0, x1 = math.floor((min(xs) - 0.03) * 10) / 10, math.ceil((max(xs) + 0.12) * 10) / 10
+    y0, y1 = math.floor((min(ys) - 0.03) * 10) / 10, math.ceil((max(ys) + 0.03) * 10) / 10
+    px = lambda v: L + (v - x0) / (x1 - x0) * (W - L - R)  # noqa: E731
+    py = lambda v: H - B - (v - y0) / (y1 - y0) * (H - T - B)  # noqa: E731
+    g = []
+    t = x0
+    while t <= x1 + 1e-9:
+        X = px(t)
+        g.append(f'<line class="grid" x1="{X:.1f}" x2="{X:.1f}" y1="{T}" y2="{H - B}"/>'
+                 f'<text class="tick" x="{X:.1f}" y="{H - B + 20}" text-anchor="middle">{t:.1f}</text>')
+        t += 0.1
+    t = y0
+    while t <= y1 + 1e-9:
+        Y = py(t)
+        g.append(f'<line class="grid" x1="{L}" x2="{W - R}" y1="{Y:.1f}" y2="{Y:.1f}"/>'
+                 f'<text class="tick" x="{L - 8}" y="{Y + 4:.1f}" text-anchor="end">{t:.1f}</text>')
+        t += 0.1
+    g.append(f'<text class="axis" x="{(L + W - R) / 2:.0f}" y="{H - 14}" text-anchor="middle">'
+             'Steering delay behind the car\'s own turning (s)</text>')
+    g.append(f'<text class="axis" transform="translate(16 {(T + H - B) / 2:.0f}) rotate(-90)" text-anchor="middle">'
+             'Steering roughness (m/s³)</text>')
+    g.append(f'<text class="better" x="{L + 10}" y="{H - B - 12}">Better: lower and further left</text>')
+    style = {h[0]: (h[1], h[2]) for h in hl}
+    pos = {}
+    dots, labels = [], []
+    for m, x, y, s in sorted(pts, key=lambda p: p[0]["model"]["id"] in style):
+        mid = m["model"]["id"]
+        X, Y = px(x["value"]), py(y["value"])
+        pos[mid] = (X, Y)
+        cls = style.get(mid, ("other", None))[0]
+        tip = (f'{plain_name(m)}: delay {num(x["value"], 2)} s over {x["n"]} segments, '
+               f'roughness {num(y["value"], 2)} m/s³ over {y["n"]} segments')
+        r = 7 if cls != "other" else 5.5
+        dots.append(f'<circle class="dot d-{cls}" cx="{X:.1f}" cy="{Y:.1f}" r="{r}" tabindex="0" '
+                    f'data-tip="{esc(tip)}" aria-label="{esc(tip)}"/>')
+    for mid, cls, label, side in hl:
+        if mid not in pos:
             continue
-        v = verdict_of(x, p)
-        uw = UNIT_WORD.get(s["unit_of_evidence"], (s["unit_of_evidence"],) * 2)
-        tip = (f'{name_of(m)} minus lebowski: {num(p["delta"], d, True)}{(" " + x["unit"]) if x["unit"] else ""} '
-               f'{ci_text(p["ci"], d, True)}; better on {p["wins"]} of {p["n"]} {uw[1]}; {MARK_TEXT[v]}')
-        whisk = ""
-        if p["ci"]:
-            a, b = pos(p["ci"][0]), pos(p["ci"][1])
-            whisk = f'<span class="f-ci" style="left:{a:.2f}%;width:{b - a:.2f}%"></span>'
-        out.append(
-            f'<div class="f-row"><div class="f-l">{label}</div>'
-            f'<div class="f-track" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}">'
-            f'<span class="f-zero" style="left:{pos(0):.2f}%"></span>{whisk}'
-            f'<span class="f-dot v-{v}" style="left:{pos(p["delta"]):.2f}%"></span></div></div>')
-    tv, td = nice_ticks(lo, hi)
-    ticks = "".join(f'<span style="left:{pos(t):.2f}%">{num(t, td, True) if t else "0"}</span>' for t in tv)
-    out.append(f'<div class="f-row f-axis"><div class="f-l"></div><div class="f-ticks">{ticks}</div></div></div>')
-    if missing:
-        out.append(f'<p class="f-miss">No score: {esc(join_words(missing))}.</p>')
-    out.append('</figure>')
+        X, Y = pos[mid]
+        anchor, dx = ("end", -13) if side == "left" else ("start", 13)
+        labels.append(f'<text class="lbl" x="{X + dx:.1f}" y="{Y + 5:.1f}" text-anchor="{anchor}">{esc(label)}</text>')
+    arrow = ""
+    a = cfg.get("hero", {}).get("arrow")
+    if a and a[0] in pos and a[1] in pos:
+        (ax, ay), (bx, by) = pos[a[0]], pos[a[1]]
+        dx, dy = bx - ax, by - ay
+        d = (dx * dx + dy * dy) ** 0.5 or 1
+        sx, sy, ex, ey = ax + dx / d * 11, ay + dy / d * 11, bx - dx / d * 12, by - dy / d * 12
+        arrow = (f'<path class="arrow" d="M{sx:.1f},{sy:.1f} L{ex:.1f},{ey:.1f}" marker-end="url(#ah)"/>')
+    legend = "".join(f'<span><i class="key k-{h[1]}"></i>{esc(h[2])}</span>' for h in hl)
+    legend += '<span><i class="key k-other"></i>Other comma models</span>'
+    rows = "".join(f'<tr><th scope="row">{esc(plain_name(m))}</th><td class="n">{num(x["value"], 2)}</td>'
+                   f'<td class="n">{num(y["value"], 2)}</td></tr>' for m, x, y, s in reversed(pts))
+    n = max(s["n"] for *_, s in pts)
+    return f"""<figure class="hero-fig">
+<p class="fig-t">{esc(cfg.get("hero", {}).get("title", ""))}</p>
+<div class="legend-row">{legend}</div>
+<svg class="scatter" viewBox="0 0 {W} {H}" role="img" aria-label="Scatter of steering delay against steering roughness for each scored model">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+{''.join(g)}{arrow}{''.join(dots)}{''.join(labels)}
+</svg>
+<figcaption>Each dot is one comma model, scored on the same {n} public drive segments. Steering delay is the shift at which the model's steering request best matches the car's own turning; roughness is how fast that request changes.
+<details><summary>Numbers behind the chart</summary><div class="tw"><table><thead><tr><th scope="col">Model</th><th class="n" scope="col">Delay (s)</th><th class="n" scope="col">Roughness (m/s³)</th></tr></thead><tbody>{rows}</tbody></table></div></details>
+</figcaption>
+</figure>"""
+
+
+# ---------------------------------------------------------------- per-model verdict and bars
+
+def verdict_line(m: dict, models: list[dict], cfg: dict) -> str:
+    """One readable sentence from the public open-loop numbers: smoothness and tracking against
+    lebowski, then every separated difference from the previous model. config.json "verdicts"
+    {model id: text} replaces it."""
+    over = cfg.get("verdicts", {}).get(m["model"]["id"])
+    if over:
+        return fill(over, models, EVAL)
+    ref = cfg["reference_model"]
+    idx = by_id(models)
+    if m["model"]["id"] == ref:
+        lags = {o["model"]["id"]: find_metric(o, "public_open_loop", "lat_best_lag")[0] for o in models}
+        rough = {o["model"]["id"]: find_metric(o, "public_open_loop", "lat_rate_rms")[0] for o in models}
+        bits = []
+        if lags.get(ref) and all(x is None or x["value"] >= lags[ref]["value"] for x in lags.values()):
+            bits.append("the quickest steering response of all models here")
+        if rough.get(ref) and all(x is None or x["value"] <= rough[ref]["value"] for x in rough.values()):
+            bits.append("the roughest steering")
+        return "The model this G-Wagon drives with, and the reference for every comparison" + \
+               (f": {join_words(bits)}." if bits else ".")
+    out = []
+    r, _ = find_metric(m, "public_open_loop", "lat_rate_rms")
+    e, _ = find_metric(m, "public_open_loop", "lat_mae")
+    clauses = []
+    if r and ref in r["paired"] and verdict_of(r, r["paired"][ref]) == "better":
+        base = find_metric(idx[ref], "public_open_loop", "lat_rate_rms")[0]["value"]
+        clauses.append(f'{round(-100 * r["paired"][ref]["delta"] / base)}% smoother steering than lebowski')
+    if e and ref in e["paired"]:
+        v = verdict_of(e, e["paired"][ref])
+        base = find_metric(idx[ref], "public_open_loop", "lat_mae")[0]["value"]
+        pc = round(100 * abs(e["paired"][ref]["delta"]) / base)
+        if v == "worse":
+            clauses.append(f"{pc}% more tracking error")
+        elif v == "better":
+            clauses.append(f"{pc}% less tracking error")
+        elif v == "tie":
+            clauses.append("about the same tracking error")
+    a, _ = find_metric(m, "public_open_loop", "lon_mae")
+    if a and ref in a["paired"] and verdict_of(a, a["paired"][ref]) in ("better", "worse"):
+        base = find_metric(idx[ref], "public_open_loop", "lon_mae")[0]["value"]
+        pc = round(100 * abs(a["paired"][ref]["delta"]) / base)
+        clauses.append(f'{pc}% {"more" if a["paired"][ref]["delta"] > 0 else "less"} acceleration error')
+    if clauses:
+        out.append(clauses[0][0].upper() + clauses[0][1:] + (", with " + join_words(clauses[1:]) if clauses[1:] else "") + ".")
+    prev = previous_of(m, ref)
+    if prev and prev in idx:
+        better, worse = [], []
+        for k, (tb, tw) in TERMS.items():
+            x, _ = find_metric(m, "public_open_loop", k)
+            p = x and x["paired"].get(prev)
+            if not p:
+                continue
+            v = verdict_of(x, p)
+            (better if v == "better" else worse if v == "worse" else []).append(tb if v == "better" else tw)
+        pn = short_name(idx[prev])
+        if better or worse:
+            out.append(f"Against {pn}: " + join_words(better + worse) + ".")
+        else:
+            out.append(f"No clear difference from {pn}.")
+    if m["model"]["id"] == "96244b1f_12800":
+        out.append("Scored without its navigation inputs.")
+    return " ".join(out)
+
+
+def bar_scale(models, section, key) -> float:
+    vals = [find_metric(m, section, key)[0] for m in models]
+    vals = [x for x in vals if x]
+    stat = "median" if section != "public_open_loop" else "value"
+    return max(x.get(stat, x["value"]) for x in vals) * 1.15 if vals else 1.0
+
+
+def bars(m: dict, models: list[dict], cfg: dict, metrics, scales: dict, compact: bool) -> str:
+    ref = by_id(models).get(cfg["reference_model"])
+    out = []
+    for section, key, label, sub in metrics:
+        x, s = find_metric(m, section, key)
+        stat = "median" if section != "public_open_loop" and x and x.get("median") is not None else "value"
+        head = (f'<span class="b-l">{esc(label)}</span>' if compact else
+                f'<span class="b-l">{esc(label)}<span class="b-s">{esc(sub)}</span></span>')
+        if not x:
+            st = "not run yet" if not s or s["status"] == "not_run" else s["status"]
+            out.append(f'<div class="b-row b-off">{head}<span class="b-na">{esc(st)}</span></div>')
+            continue
+        mx = scales[(section, key)]
+        w = x[stat] / mx * 100
+        rx = find_metric(ref, section, key)[0] if ref else None
+        tick = ""
+        if rx and m is not ref:
+            tick = f'<span class="b-ref" style="left:{rx[stat] / mx * 100:.1f}%" title="lebowski"></span>'
+        u = x["unit"]
+        d = 2
+        tip = (f'{plain_name(m)}, {label.lower()}: {num(x[stat], d)} {u} ({"median" if stat == "median" else "mean"} over {x.get("n", s["n"])} '
+               f'{UNIT_WORD.get(s["unit_of_evidence"], ("unit", "units"))[1]})'
+               + (f'; lebowski {num(rx[stat], d)} {u}' if rx and m is not ref else ""))
+        out.append(f'<div class="b-row">{head}<span class="b-track" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}">'
+                   f'<span class="b-bar{" b-refbar" if m is ref else ""}" style="width:{w:.1f}%"></span>{tick}</span>'
+                   f'<span class="b-v">{num(x[stat], d)}<span class="b-u"> {esc(u)}</span></span></div>')
     return "".join(out)
 
+
+def model_list(models: list[dict], cfg: dict) -> str:
+    scales = {(s, k): bar_scale(models, s, k) for s, k, *_ in KEY_METRICS}
+    rows = []
+    for m in reversed(models):
+        mid = m["model"]["id"]
+        rows.append(
+            f'<li class="mrow"><div class="m-id"><h3>{name_html(m, f"models/{mid}.html")}</h3>'
+            f'<p class="m-st"><span class="m-date">{esc(first_public(m))}</span> {esc(status_text(m))}</p></div>'
+            f'<p class="m-v">{esc(verdict_line(m, models, cfg))}</p>'
+            f'<div class="m-bars">{bars(m, models, cfg, KEY_METRICS, scales, True)}</div></li>')
+    head = ('<div class="mlist-head" aria-hidden="true"><span>Model</span><span>In one line</span>'
+            '<span>On comma\'s public drives; lower is better, the tick is lebowski</span></div>')
+    return f'{head}<ol class="mlist" reversed>{"".join(rows)}</ol>'
+
+
+# ---------------------------------------------------------------- researchers' table
 
 def delta_cell(x, p, d) -> str:
     if not p:
         return '<td class="na">not paired</td>'
     v = verdict_of(x, p)
+    if p.get("ties") and p["ties"] == p["n"]:
+        return f'<td class="n">{mark("tie")}identical<span class="wins">on all {p["n"]}</span></td>'
+    extra = ""
+    if not p.get("ci") and p.get("clusters"):
+        extra = f'<span class="wins">{p["cluster_wins"]}/{p["clusters"]} drives</span>'
     return (f'<td class="n">{mark(v)}{num(p["delta"], d, True)}'
             f'<span class="ci">{ci_text(p["ci"], d, True)}</span>'
-            f'<span class="wins">{p["wins"]}/{p["n"]}</span></td>')
+            f'<span class="wins">better on {p["wins"]}/{p["n"]}</span>{extra}</td>')
 
 
-def delta_table(models, ref, heads, by_model, caption):
-    """by_model(m) -> baseline id to compare against, or None to skip the row."""
-    th = "".join(f'<th class="n" scope="col">{esc(x["label"])}<span class="th-s">{esc(", ".join(p for p in (SECTIONS.get(s, s), x["unit"]) if p))}</span></th>'
-                 for s, k, x in heads)
+def summary_table(models, cfg) -> str:
+    ref = cfg["reference_model"]
+    cols = [(s, k, lab) for s, k, lab, _ in KEY_METRICS] + [(s, k, lab) for s, k, lab, _ in MORE_METRICS]
+    th = "".join(f'<th class="n" scope="col">{esc(lab)}<span class="th-s">{esc(SECTIONS[s])}</span></th>' for s, k, lab in cols)
     body = []
-    for m in models:
-        b = by_model(m)
-        if not b:
-            continue
-        bname = next((name_of(o) for o in models if o["model"]["id"] == b), b)
+    for m in reversed(models):
         cells = []
-        for s, k, ex in heads:
+        for s, k, _ in cols:
             x, sec = find_metric(m, s, k)
             if not x:
-                st = sec["status"].replace("_", " ") if sec else "not run"
-                cells.append(f'<td class="na">{esc(st)}</td>')
+                cells.append(f'<td class="na">{"not run" if not sec or sec["status"] == "not_run" else esc(sec["status"])}</td>')
                 continue
-            cells.append(delta_cell(x, x["paired"].get(b), decimals_for(x["value"])))
-        body.append(f'<tr><th scope="row"><a href="models/{esc(m["model"]["id"])}.html">{esc(name_of(m))}</a>'
-                    f'<span class="th-s">vs {esc(bname)}</span></th>{"".join(cells)}</tr>')
-    if not body:
-        return ""
-    return (f'<p class="cap">{caption}</p><div class="tw"><table aria-label="{esc(caption)}"><thead><tr><th scope="col">Model</th>{th}</tr></thead>'
-            f'<tbody>{"".join(body)}</tbody></table></div>')
+            d = decimals_for(x["value"])
+            p = x["paired"].get(ref)
+            inner = f'{num(x["value"], d)}<span class="ci">{ci_text(x["ci"], d)}</span>'
+            if p:
+                v = verdict_of(x, p)
+                inner += f'<span class="dl">{mark(v)}{num(p["delta"], d, True)} vs lebowski</span>'
+            cells.append(f'<td class="n">{inner}</td>')
+        body.append(f'<tr><th scope="row">{name_html(m, "models/" + m["model"]["id"] + ".html")}</th>{"".join(cells)}</tr>')
+    return (f'<div class="tw"><table class="sum"><caption>Mean with its 95% interval, then the paired difference from lebowski '
+            f'on the units both have. The G-Wagon sections come from four drives or fewer and carry no interval.</caption>'
+            f'<thead><tr><th scope="col">Model</th>{th}</tr></thead><tbody>{"".join(body)}</tbody></table></div>')
 
 
 def legend() -> str:
-    return ('<p class="legend"><span>' + mark("better") + ' Better than the baseline, 95% interval excludes zero</span>'
+    return ('<p class="legend"><span>' + mark("better") + ' Better, 95% interval excludes zero</span>'
             '<span>' + mark("worse") + ' Worse, interval excludes zero</span>'
-            '<span>' + mark("tie") + ' Not separated: the interval includes zero</span>'
-            '<span>Delta is model minus baseline; the fraction is units where the model did better.</span></p>')
+            '<span>' + mark("tie") + ' Not separated</span>'
+            '<span>' + mark("none") + ' No interval: fewer than 10 drives</span></p>')
 
 
-def verdict_sentences(newest, models, ref, heads, cfg) -> str:
-    """Two short sentences, one per baseline, naming only headline metrics whose interval excludes zero.
-
-    config.json "verdicts" {model id: text} replaces the generated text; "verdict_terms"
-    {"section.key": name, or {"better": phrase, "worse": phrase}} gives each metric its short name.
-    """
-    override = cfg.get("verdicts", {}).get(newest["model"]["id"])
-    if override:
-        return override
-    terms = cfg.get("verdict_terms", {})
-
-    def clause(bid):
-        worse, better, phrases = [], [], []
-        for s, k, _ in heads:
-            x, _ = find_metric(newest, s, k)
-            p = x and x["paired"].get(bid)
-            if not p:
-                continue
-            v = verdict_of(x, p)
-            if v not in ("better", "worse", "diff"):
-                continue
-            t = terms.get(f"{s}.{k}", lc(x["label"]))
-            if isinstance(t, dict):
-                phrases.append(t.get(v) or f'{v} on {lc(x["label"])}')
-            elif v == "diff":
-                phrases.append(f"different on {t}")
-            else:
-                (better if v == "better" else worse).append(t)
-        parts = ([f"worse on {join_words(worse)}"] if worse else []) + \
-                ([f"better on {join_words(better)}"] if better else []) + phrases
-        return ", ".join(parts) if parts else "no clear difference"
-
-    if newest["model"]["id"] == ref:
-        return "No paired scores against lebowski yet."
-    lines = [f"Against lebowski: {clause(ref)}."]
-    prev = previous_baseline(newest, ref)
-    if prev:
-        pname = next((name_of(o) for o in models if o["model"]["id"] == prev), prev)
-        lines.append(f"Against {pname}: {clause(prev)}.")
-    return " ".join(lines)
-
-
-def evidence_line(newest) -> str:
-    parts = []
-    for key, s in newest["sections"].items():
-        if s["status"] == "ok":
-            uw = UNIT_WORD.get(s["unit_of_evidence"], (s["unit_of_evidence"],) * 2)
-            parts.append(f'{s["n"]} {uw[1] if s["n"] != 1 else uw[0]} ({lc(SECTIONS.get(key, key))})')
-    not_run = [lc(SECTIONS.get(k, k)) for k, s in newest["sections"].items() if s["status"] != "ok"]
-    out = "Scored on " + join_words(parts) + "." if parts else "No section has scores yet."
-    if not_run:
-        out += " Not scored: " + join_words(not_run) + "."
-    return out
-
-
-def timeline(models) -> str:
-    """Scored models link to their pages; models.json adds comma models with no results file, greyed."""
-    extra_f = SITE / "models.json"
-    extra = json.loads(extra_f.read_text())["unscored"] if extra_f.exists() else []
-    rows = []
-    for m in models:
-        md = m["model"]
-        rows.append((md["source"]["date"], md["params_m"], (
-            f'<th scope="row"><a href="models/{esc(md["id"])}.html">{esc(name_of(m))}</a>{hash_code(m)}</th>',
-            num(md["params_m"], 0) + "M" if md["params_m"] is not None else "n/a",
-            num(md["gmac"], 1), esc(md["family"])), ""))
+def unscored() -> str:
+    f = SITE / "models.json"
+    extra = json.loads(f.read_text())["unscored"] if f.exists() else []
+    if not extra:
+        return ""
+    items = []
     for e in extra:
-        name = esc(e["name"]) + (f' <code>{esc(e["checkpoint"])}</code>' if e.get("checkpoint") else "")
+        name = esc(e["name"]) + (f' <code class="hx">{esc(e["checkpoint"])}</code>' if e.get("checkpoint") else "")
         why = esc(e["why"])
         if e.get("url"):
             why = f'<a href="{esc(e["url"])}">{why}</a>'
-        rows.append((e.get("date"), e.get("params_m"), (
-            f'<th scope="row">{name}</th>', esc(e.get("size") or "n/a"), "n/a", f"Not scored. {why}"), "off"))
-    rows.sort(key=lambda r: (r[0] is None, r[0] or ""))
-    mx = max((r[1] or 0) for r in rows) or 1
-    body = []
-    for date, params, (name, size, gmac, note), cls in rows:
-        w = (params or 0) / mx * 100
-        body.append(f'<tr class="{cls}"><td class="n">{esc(date or "unknown")}</td>{name}'
-                    f'<td class="n size"><span class="bar" style="width:{w:.1f}%"></span><span>{size}</span></td>'
-                    f'<td class="n">{gmac}</td><td>{note}</td></tr>')
-    cap = ("Oldest first. Parameters are counted from the weights; GMAC is multiply-accumulates per model step."
-           + (" Grey rows are comma models with no score here." if extra else ""))
-    return (f'<p class="cap">{cap}</p><div class="tw"><table class="tl" aria-label="comma\'s models">'
-            '<thead><tr><th class="n" scope="col">Published</th><th scope="col">Model</th><th class="n" scope="col">Parameters</th>'
-            f'<th class="n" scope="col">GMAC</th><th scope="col">Family or status</th></tr></thead><tbody>{"".join(body)}</tbody></table></div>')
+        items.append(f'<li>{name}, {esc(e.get("date") or "date unknown")}, {esc(e.get("size") or "size unknown")}: {why}.</li>')
+    return f'<h3>comma models not scored here</h3><ul class="plain">{"".join(items)}</ul>'
 
 
-def overview(models, cfg) -> str:
-    ref = cfg["reference_model"]
-    heads = headline_metrics(models, cfg)
+# ---------------------------------------------------------------- overview
+
+def overview(models, cfg, root) -> str:
+    findings = "".join(
+        f'<li><span class="f-fig">{esc(fill(f["figure"], models, root))}</span>'
+        f'<p>{esc(fill(f["text"], models, root))}</p></li>' for f in cfg.get("findings", []))
     newest = models[-1]
-    nm = newest["model"]
-    hero = (f'<section class="hero"><p class="hero-k">Newest model: <a href="models/{esc(nm["id"])}.html">{esc(name_of(newest))}</a>{hash_code(newest)}, published {esc(nm["source"]["date"])}, scored {esc(newest["scored"]["date"][:10])}</p>'
-            f'<p class="hero-v">{esc(verdict_sentences(newest, models, ref, heads, cfg))}</p>'
-            f'<p class="hero-n">{esc(evidence_line(newest))} Open-loop error counts a smoother, later action as error, '
-            'which is what comma\'s RL models produce by design; the closed-loop rows are the closer test of driving.</p></section>')
-    intro = ('<p class="intro">Each comma.ai openpilot driving model, scored with one fixed suite on comma\'s public segments and on '
-             'recorded drives from one 2011 Mercedes G55. Every score is compared with lebowski, the 877M model from July 2026, which '
-             'this truck runs, and with the comma model released before it. '
-             '<a href="method.html">How the scores are made</a>.</p>')
-    charts = "".join(forest(models, ref, s, k, x) for s, k, x in heads)
-    vs_ref = delta_table(models, ref, heads, lambda m: ref if m["model"]["id"] != ref and m["baselines"] and ref in m["baselines"] else None,
-                         "Paired delta against lebowski, with its 95% interval and units won")
-    vs_prev = delta_table(models, ref, heads, lambda m: previous_baseline(m, ref),
-                          "Paired delta against the comma model released before it")
-    return (hero + intro
-            + '<section><h2>Against lebowski</h2>' + legend()
-            + (f'<div class="forests">{charts}</div>' if charts else '<p>No model has paired scores against lebowski yet.</p>')
-            + vs_ref + '</section>'
-            + ('<section><h2>Against the previous model</h2>' + vs_prev + '</section>' if vs_prev else '')
-            + '<section><h2>comma\'s models</h2>' + timeline(models) + '</section>')
+
+    def landed(m):  # the latest date this model's weights went onto openpilot master
+        md, src = m["model"], m["model"]["source"]
+        return src["date"] if src["kind"] == "openpilot-master" else md.get("on_master")
+    on_master = [m for m in models if landed(m)]
+    master_line = ""
+    if on_master:
+        mm = max(on_master, key=lambda m: (landed(m), m["model"]["id"]))
+        if mm is not newest:
+            master_line = (f' Newest on openpilot master: {name_html(mm, "models/" + mm["model"]["id"] + ".html")}, '
+                           f'{esc(landed(mm))}.')
+    return f"""<section class="hero">
+<div class="hero-t">
+<h1>openpilot's driving models, tested on a car they've never seen</h1>
+<p class="lede">Every comma.ai openpilot driving model, scored the same way on comma's public drives and on a 2011 Mercedes G-Wagon. New models are scored within a day of release.</p>
+<p class="newest">Newest scored: {name_html(newest, "models/" + newest["model"]["id"] + ".html")}, first public {esc(first_public(newest))} ({esc(lc_status(newest))}).{master_line} <a href="#models">All models</a></p>
+</div>
+{hero_chart(models, cfg)}
+</section>
+
+<section id="found" class="found">
+<h2>What we found</h2>
+<p class="asof">Measured by this suite, as of {esc(cfg.get("findings_date", ""))}. lebowski is the July 2026 model this G-Wagon drives with; every other model is compared with it.</p>
+<ul class="findings">{findings}</ul>
+</section>
+
+<section id="models">
+<h2>The models</h2>
+<p class="sub">Newest first, by the date the weights were first public. Each one links to its full scores.</p>
+{model_list(models, cfg)}
+</section>
+
+<section id="how" class="prose">
+<h2>How it works</h2>
+<div class="how">
+<div><h3>Open loop</h3><p>The model watches recorded video, and its steering and speed requests are compared with what the car did next.</p></div>
+<div><h3>Closed loop</h3><p>The model drives. comma's public world model, <code>worldmodel-4B</code>, draws each next camera frame from the model's own steering, so mistakes build up as they would on a road.</p></div>
+<div><h3>Why a G-Wagon</h3><p>It is a tall, heavy 2011 Mercedes G55 with slow recirculating-ball steering. openpilot does not support it, so no openpilot model has learned from its data. Scores on it show how a model copes with a car it has never seen.</p></div>
+</div>
+<p>comma publishes its own test reports in <a href="https://commaai.github.io/model_reports/">model_reports</a>; the newest there is Cinque v3, from 2026-09-18. The tests here line up with theirs where they can:</p>
+<div class="tw"><table class="vocab"><thead><tr><th scope="col">Here</th><th scope="col">Nearest test in comma's model_reports</th></tr></thead><tbody>
+<tr><th scope="row">Steering roughness, open loop</th><td>jitter</td></tr>
+<tr><th scope="row">Off the path in the world model, comma's ideal car</th><td>MLSim lateral (<code>analyse_lat_mlsim</code>), their world model as the simulator</td></tr>
+<tr><th scope="row">G-Wagon recovery: pushed 0.5 m sideways or 2° off heading</th><td>no direct match; closest is hugging, recovery under a lateral bias</td></tr>
+<tr><th scope="row">Braking lead car (not built yet)</th><td>unintended lead following</td></tr>
+</tbody></table></div>
+<p><a href="method.html">The full method</a></p>
+</section>
+
+<section id="research" class="research">
+<h2>For researchers</h2>
+<ul class="plain">
+<li>Every number is a mean over units: a 60 s segment of a public drive, or a window of a G-Wagon drive. Units are grouped by the drive they come from, and the 95% intervals resample whole drives. Below 10 drives there is no interval, so the G-Wagon sections report means and win counts only.</li>
+<li>A paired difference compares two models on the units both were scored on; the count beside it is the units where the model did better.</li>
+<li>Per-segment CSVs, one results file per model (<a href="{esc(cfg['repo_url'])}/blob/main/eval/SCHEMA.md">schema</a>) and the code are public; <code>python -m geval.reproduce</code> recomputes every public interval from the CSVs. <a href="method.html#downloads">Downloads</a></li>
+<li>The G-Wagon drives stay private; their scores are published, not the frames.</li>
+</ul>
+{legend()}
+{summary_table(models, cfg)}
+{unscored()}
+</section>"""
 
 
 # ---------------------------------------------------------------- model page
@@ -463,26 +676,28 @@ def section_block(m, key, s, models, root, out) -> str:
     title = SECTIONS.get(key, key)
     st = s["status"]
     if st != "ok":
-        msg = {"not_run": "Not run for this model.", "failed": "The run failed; there are no scores."}.get(st, st)
-        cond = f'<p class="cond">{esc(s["condition"])}</p>' if s.get("condition") else ""
-        return f'<section class="sec sec-off"><h3>{esc(title)}</h3><p><strong>{msg}</strong></p>{cond}</section>'
+        msg = {"not_run": "Not run for this model yet.", "failed": "The run failed; there are no scores."}.get(st, st)
+        return f'<section class="sec sec-off"><h3>{esc(title)}</h3><p>{msg}</p></section>'
     uw = UNIT_WORD.get(s["unit_of_evidence"], (s["unit_of_evidence"],) * 2)
-    bases = [b for b in m["baselines"]]
-    bname = {o["model"]["id"]: name_of(o) for o in models}
+    bases = s.get("baselines", m.get("baselines", []))
+    bname = {o["model"]["id"]: short_name(o) for o in models}
     th = "".join(f'<th class="n" scope="col">vs {esc(bname.get(b, b))}</th>' for b in bases)
     rows = []
     for x in s["metrics"]:
         d = decimals_for(x["value"])
         cells = "".join(delta_cell(x, x["paired"].get(b), d) for b in bases)
-        rows.append(f'<tr><th scope="row">{esc(x["label"])}<span class="th-s">{esc(unit_and_better(x))}</span></th>'
-                    f'<td class="n">{num(x["value"], d)}<span class="ci">{ci_text(x["ci"], d)}</span></td>{cells}</tr>')
+        nnote = f'<span class="wins">n = {x["n"]}</span>' if x.get("n") and x["n"] != s["n"] else ""
+        med = f'<span class="med">median {num(x["median"], d)}</span>' if x.get("median") is not None else ""
+        rows.append(f'<tr><th scope="row">{esc(x["label"])}<span class="th-s">{esc(", ".join(p for p in (x["unit"], BETTER_TEXT[x["better"]]) if p))}</span></th>'
+                    f'<td class="n">{num(x["value"], d)}<span class="ci">{ci_text(x["ci"], d)}</span>{med}{nnote}</td>{cells}</tr>')
     dl = ""
     if s.get("per_unit_file"):
         dl = f' <a href="../{esc(copy_rel(root, out, s["per_unit_file"]))}">Per-{uw[0]} CSV</a>.'
+    cl = f' from {s["clusters"]} drives' if s.get("clusters") else ""
     return (f'<section class="sec"><h3>{esc(title)}</h3>'
-            f'<p class="sec-m"><strong>{s["n"]} {uw[1] if s["n"] != 1 else uw[0]}.</strong>{dl}</p>'
+            f'<p class="sec-m"><strong>{s["n"]} {uw[1] if s["n"] != 1 else uw[0]}{cl}.</strong>{dl}</p>'
             f'<p class="cond">{esc(s["condition"])}</p>'
-            f'<div class="tw"><table><thead><tr><th scope="col">Metric</th><th class="n" scope="col">Value</th>{th}</tr></thead>'
+            f'<div class="tw"><table><thead><tr><th scope="col">Metric</th><th class="n" scope="col">Mean</th>{th}</tr></thead>'
             f'<tbody>{"".join(rows)}</tbody></table></div></section>')
 
 
@@ -507,10 +722,10 @@ def model_page(m, models, cfg, root, out) -> str:
     ident = [
         ("Model id", f'<code>{esc(md["id"])}</code>'),
         ("SHA-256", f'<code class="hash">{esc(md["sha256"])}</code>'),
-        ("Source", f'{esc(src["kind"])}, <code>{esc(src["ref"])}</code> (<a href="{esc(src["url"])}">link</a>)'),
-        ("Published", esc(src["date"])),
+        ("File scored", f'{esc(src["kind"])}, <code>{esc(src["ref"])}</code> (<a href="{esc(src["url"])}">link</a>), {esc(src["date"])}'),
+        ("First public", esc(first_public(m))),
         ("Parameters", (f'{num(md["params_m"], 1)}M' if md["params_m"] is not None else "not counted")),
-        ("GMAC", num(md["gmac"], 1)),
+        ("GMAC per step", num(md["gmac"], 1)),
         ("Family", esc(md["family"])),
         ("Scored", f'{esc(sc["date"][:16].replace("T", " "))} UTC, suite <code>{esc(sc["suite"])}</code>, code {code_html}'),
     ]
@@ -519,6 +734,8 @@ def model_page(m, models, cfg, root, out) -> str:
     dl = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in ident)
     order = [k for k in SECTIONS if k in m["sections"]] + [k for k in m["sections"] if k not in SECTIONS]
     secs = "".join(section_block(m, k, m["sections"][k], models, root, out) for k in order)
+    mets = KEY_METRICS + MORE_METRICS
+    scales = {(s, k): bar_scale(models, s, k) for s, k, *_ in mets}
     stills = ""
     if m.get("stills"):
         figs = "".join(
@@ -528,28 +745,37 @@ def model_page(m, models, cfg, root, out) -> str:
         stills = f'<section><h2>Stills</h2><div class="stills">{figs}</div></section>'
     limits = "".join(f"<li>{esc(x)}</li>" for x in m.get("limits", []))
     jrel = f'results/{md["id"]}.json'
-    return (f'<section class="mhead"><h1>{esc(name_of(m))}{hash_code(m)}</h1><dl class="ident">{dl}</dl></section>'
-            f'<section><h2>Scores</h2>{legend()}{secs}</section>{stills}'
+    prev = previous_of(m, cfg["reference_model"])
+    prevt = ""
+    if prev:
+        po = by_id(models).get(prev)
+        prevt = f' Compared with lebowski and with {name_html(po, prev + ".html") if po else esc(prev)}, the model first public before it.'
+    return (f'<section class="mhead"><p class="crumb"><a href="../index.html#models">All models</a></p>'
+            f'<h1>{name_html(m)}</h1><p class="m-st"><span class="m-date">{esc(first_public(m))}</span> {esc(status_text(m))}</p>'
+            f'<p class="m-verdict">{esc(verdict_line(m, models, cfg))}</p></section>'
+            f'<section><h2>Key numbers</h2><p class="sub">Lower is better on all of these; the tick is lebowski.{prevt}</p>'
+            f'<div class="kbars">{bars(m, models, cfg, mets, scales, False)}</div></section>'
+            f'<section><h2>All scores</h2>{legend()}{secs}</section>{stills}'
             + (f'<section><h2>Limits</h2><ul class="limits">{limits}</ul></section>' if limits else "")
-            + f'<section><h2>Download</h2><p><a href="../{esc(jrel)}">Results file</a> (<code>{esc(jrel)}</code>, '
-              f'schema 1). Per-segment CSVs are linked from each public section.</p></section>')
+            + f'<section><h2>The model file</h2><dl class="ident">{dl}</dl>'
+              f'<p><a href="../{esc(jrel)}">Results file</a> (<code>{esc(jrel)}</code>, schema 1).</p></section>')
 
 
 # ---------------------------------------------------------------- method page
 
-def method(models, cfg, out) -> str:
+def method(models, cfg) -> str:
     prose = (SITE / "pages" / "method.html").read_text()
     rows = []
-    for m in models:
+    for m in reversed(models):
         md = m["model"]
         csvs = [f'<a href="{esc(s["per_unit_file"])}">{esc(SECTIONS.get(k, k))}</a>'
                 for k, s in m["sections"].items() if s.get("per_unit_file")]
-        rows.append(f'<tr><th scope="row"><a href="models/{esc(md["id"])}.html">{esc(name_of(m))}</a>{hash_code(m)}</th>'
+        rows.append(f'<tr><th scope="row">{name_html(m, "models/" + md["id"] + ".html")}</th>'
                     f'<td><a href="results/{esc(md["id"])}.json">{esc(md["id"])}.json</a></td>'
                     f'<td>{", ".join(csvs) or "none"}</td></tr>')
-    table = ('<section id="downloads"><h2>Downloads</h2><p>One results file per model, in the format described in '
+    table = ('<section id="downloads" class="prose"><h2>Downloads</h2><p>One results file per model, in the format described in '
              f'<a href="{esc(cfg["repo_url"])}/blob/main/eval/SCHEMA.md">SCHEMA.md</a>, and one CSV per public section with a row per segment. '
-             'Truck sections publish scores only.</p>'
+             'G-Wagon sections publish scores only.</p>'
              '<div class="tw"><table><thead><tr><th scope="col">Model</th><th scope="col">Results</th><th scope="col">Per-segment CSVs</th></tr></thead>'
              f'<tbody>{"".join(rows)}</tbody></table></div></section>')
     return prose + table
@@ -570,14 +796,22 @@ def main() -> None:
         shutil.rmtree(out)
     (out / "models").mkdir(parents=True)
     (out / "results").mkdir()
-    for f in ("style.css", "site.js"):
-        shutil.copy2(SITE / "static" / f, out / f)
+    for f in (SITE / "static").iterdir():
+        if f.is_file():
+            shutil.copy2(f, out / f.name)
+    tag = "openpilot model eval"
     for m in models:
         shutil.copy2(m["_file"], out / "results" / m["_file"].name)
-        (out / "models" / f'{m["model"]["id"]}.html').write_text(
-            page(cfg, name_of(m), model_page(m, models, cfg, root, out), 1, "model"))
-    (out / "index.html").write_text(page(cfg, cfg["site_name"], overview(models, cfg), 0, "overview"))
-    (out / "method.html").write_text(page(cfg, "Method", method(models, cfg, out), 0, "method"))
+        mid = m["model"]["id"]
+        (out / "models" / f"{mid}.html").write_text(
+            page(cfg, f"{plain_name(m)} – {tag}", f"{plain_name(m)}: {status_text(m)}. {verdict_line(m, models, cfg)}",
+                 model_page(m, models, cfg, root, out), 1, "model", f"models/{mid}.html"))
+    desc = ("Every comma.ai openpilot driving model, scored the same way on comma's public drives and on a "
+            "2011 Mercedes G-Wagon, within a day of release.")
+    (out / "index.html").write_text(page(cfg, f"{cfg['site_name']}: openpilot's driving models, tested on a car they've never seen",
+                                         desc, overview(models, cfg, root), 0, "overview", ""))
+    (out / "method.html").write_text(page(cfg, f"Method – {cfg['site_name']}", "How the openpilot G-Wagon evals score each model: "
+                                          "open and closed loop, intervals, limits and downloads.", method(models, cfg), 0, "method", "method.html"))
     print(f"{len(models)} models -> {out}")
 
 

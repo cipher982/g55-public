@@ -1,5 +1,12 @@
-// Hover and focus readout for the forest plots. Every value it shows is also in the table below each chart.
+// Hover and focus readout for chart marks and bars (every value is also in a table), and the theme switch.
 (() => {
+  const root = document.documentElement;
+  const btn = document.querySelector(".theme");
+  if (btn) btn.addEventListener("click", () => {
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("theme", root.dataset.theme); } catch (e) { /* private window: the choice lasts this page only */ }
+  });
   const tip = document.getElementById("tip");
   if (!tip) return;
   const show = (el) => {
@@ -19,7 +26,6 @@
     el.addEventListener("focus", () => show(el));
     el.addEventListener("blur", hide);
   }
-  // Scrolling hides a hover readout but keeps a keyboard-focused one next to its row.
   window.addEventListener("scroll", () => {
     const el = document.activeElement;
     if (el && el.dataset && el.dataset.tip) show(el); else hide();
