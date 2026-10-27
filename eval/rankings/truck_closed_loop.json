@@ -1,0 +1,28 @@
+{
+ "section": "truck_closed_loop",
+ "key": "xtrack_2s",
+ "unit": "m",
+ "models": {
+  "1365126a_12864": {
+   "median": 0.1622,
+   "ci": null,
+   "n": 18,
+   "clusters": 4,
+   "rank": 1
+  },
+  "8d736683_12864": {
+   "median": 0.1585,
+   "ci": null,
+   "n": 18,
+   "clusters": 4,
+   "rank": 1
+  },
+  "lebowski_877m": {
+   "median": 0.227,
+   "ci": null,
+   "n": 18,
+   "clusters": 4,
+   "rank": 1
+  }
+ }
+}

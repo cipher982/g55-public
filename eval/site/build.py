@@ -27,7 +27,9 @@ from pathlib import Path
 SITE = Path(__file__).resolve().parent
 EVAL = SITE.parent
 sys.path.insert(0, str(EVAL))
-from geval import ranking  # noqa: E402  the front-page ranking, computed from the per-unit CSVs
+from geval import ranking  # noqa: E402  the rankings: public from the per-unit CSVs, G55 from rankings/
+sys.path.insert(0, str(SITE))
+from truck_hero import truck_hero  # noqa: E402  the front-page hero: recorded G55 footage
 
 SECTIONS = {
     "public_open_loop": "comma's public drives, open loop",
@@ -515,7 +517,8 @@ def delta_cell(x, p, d) -> str:
 
 def summary_table(models, cfg) -> str:
     ref = cfg["reference_model"]
-    cols = [(s, k, lab) for s, k, lab, _ in KEY_METRICS] + [(s, k, lab) for s, k, lab, _ in MORE_METRICS]
+    more = [(s, k, lab) for s, k, lab, _ in MORE_METRICS]
+    cols = [c for c in more if c[0].startswith("truck_")] + [(s, k, lab) for s, k, lab, _ in KEY_METRICS] + [c for c in more if not c[0].startswith("truck_")]
     th = "".join(f'<th class="n" scope="col">{esc(lab)}<span class="th-s">{esc(SECTIONS[s])}</span></th>' for s, k, lab in cols)
     body = []
     for m in reversed(models):
@@ -533,8 +536,10 @@ def summary_table(models, cfg) -> str:
                 inner += f'<span class="dl">{mark(v)}{num(p["delta"], d, True)} vs lebowski</span>'
             cells.append(f'<td class="n">{inner}</td>')
         body.append(f'<tr><th scope="row">{name_html(m, "models/" + m["model"]["id"] + ".html")}</th>{"".join(cells)}</tr>')
+    nd = max([(m["sections"].get(s) or {}).get("clusters", 0) for m in models for s in m["sections"] if s.startswith("truck_")] + [0])
+    g55 = (f"The G55 sections come from {nd} drives or fewer and carry no interval." if nd < 10 else "")
     return (f'<div class="tw"><table class="sum"><caption>Mean with its 95% interval, then the paired difference from lebowski '
-            f'on the units both have. The G55 sections come from four drives or fewer and carry no interval.</caption>'
+            f'on the units both have. {g55}</caption>'
             f'<thead><tr><th scope="col">Model</th>{th}</tr></thead><tbody>{"".join(body)}</tbody></table></div>')
 
 
@@ -561,7 +566,7 @@ def unscored() -> str:
     return f'<h3>comma models not scored here</h3><ul class="plain">{"".join(items)}</ul>'
 
 
-# ---------------------------------------------------------------- the closed-loop hero
+# ---------------------------------------------------------------- the closed-loop example (method page)
 
 # the road camera at the world model's 256x128 (focal length and principal point, px) and comma's camera
 # height (m): the geometry the earlier hero video drew its paths with
@@ -660,11 +665,11 @@ def hero_visual(models, cfg) -> str:
 
 # ---------------------------------------------------------------- the front-page ranking
 
-TRUCK_COLS = [  # (section, metric, header, sub-header): wins against the reference at 2 s
-    ("truck_closed_loop", "xtrack_2s", "G55", "closer to the recorded path than lebowski at 2 s"),
-    ("truck_recovery", "heading_xtrack_2s", "G55, 2° heading error", "closer than lebowski at 2 s"),
-    ("truck_recovery", "offcentre_xtrack_2s", "G55, 0.5 m offset", "closer than lebowski at 2 s"),
+RECOVERY_COLS = [  # (section, metric, header): G55 recovery, windows closer than the reference at 2 s
+    ("truck_recovery", "heading_xtrack_2s", "G55, 2° heading error"),
+    ("truck_recovery", "offcentre_xtrack_2s", "G55, 0.5 m offset"),
 ]
+G55 = ("truck_closed_loop", "xtrack_2s")
 
 
 def cm(v: float) -> str:
@@ -676,105 +681,188 @@ def model_class(m, cfg) -> str:
     return {h[0]: h[1] for h in cfg.get("hero", {}).get("highlight", [])}.get(m["model"]["id"], "other")
 
 
-def win_bar(m, ref, section, key, label) -> str:
+def win_bar(m, ref, section, key, label, big=False) -> str:
+    """Windows closer to the recorded path than the reference at 2 s, as a bar filled to the share
+    of windows, with a tick at half."""
     x, sec = find_metric(m, section, key)
+    cls = "wb wb-big" if big else "wb"
     if not x:
         st = "pending" if not sec or sec["status"] == "not_run" else sec["status"]
-        return f'<div class="wb wb-na" data-l="{esc(label)}"><span class="wb-t">{esc(st)}</span></div>'
+        return f'<div class="{cls} wb-na" data-l="{esc(label)}"><span class="wb-t">{esc(st)}</span></div>'
     if m["model"]["id"] == ref:
-        tip = f'lebowski, {label}: the reference; median {cm(x["median"])} cm over {x["n"]} windows'
-        return (f'<div class="wb wb-ref" data-l="{esc(label)}" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}">'
-                f'<span class="wb-t">reference</span></div>')
+        tip = f'lebowski, {label}: the reference; median {cm(x["median"])} cm over {x["n"]} windows from {x["clusters"]} drives'
+        med = f', median {cm(x["median"])} cm' if big else ""
+        return (f'<div class="{cls} wb-ref" data-l="{esc(label)}" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}">'
+                f'<span class="wb-t">reference{med}</span></div>')
     p = x["paired"].get(ref)
     if not p:
-        return f'<div class="wb wb-na" data-l="{esc(label)}"><span class="wb-t">not paired</span></div>'
+        return f'<div class="{cls} wb-na" data-l="{esc(label)}"><span class="wb-t">not paired</span></div>'
     tip = (f'{plain_name(m)}, {label}: closer to the recorded path than lebowski at 2 s in {p["wins"]} of {p["n"]} '
            f'windows and on the mean of {p["cluster_wins"]} of {p["clusters"]} drives; median {cm(x["median"])} cm')
-    segs = "".join(f'<i{" class=on" if k < p["wins"] else ""}></i>' for k in range(p["n"]))
-    return (f'<div class="wb" data-l="{esc(label)}" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}">'
-            f'<span class="wb-bar wb-{model_class(m, CFG)}" aria-hidden="true">{segs}</span>'
-            f'<span class="wb-t">{p["wins"]}<span class="wb-n">/{p["n"]}</span></span></div>')
+    share = p["wins"] / p["n"] * 100
+    extra = f' <span class="wb-n">windows; {p["cluster_wins"]} of {p["clusters"]} drives; median {cm(x["median"])} cm</span>' if big else ""
+    return (f'<div class="{cls}" data-l="{esc(label)}" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}">'
+            f'<span class="wb-bar wb-{model_class(m, CFG)}" aria-hidden="true"><i class="on" style="width:{share:.1f}%"></i><b></b></span>'
+            f'<span class="wb-t">{p["wins"]}<span class="wb-n">/{p["n"]}</span>{extra}</span></div>')
+
+
+def g55_ranked(root) -> dict | None:
+    """The G55 closed-loop ranking once it has intervals (10 or more drives), else None."""
+    t = ranking.truck_scores(root)
+    if t and any(s["ci"] for s in t["models"].values()):
+        return t["models"]
+    return None
+
+
+def g55_counts(models) -> tuple[int, int]:
+    """Windows and drives of the G55 closed loop, the largest any model was scored on."""
+    secs = [m["sections"].get(G55[0]) or {} for m in models]
+    ok = [s for s in secs if s.get("status") == "ok"]
+    return (max((s["n"] for s in ok), default=0), max((s["clusters"] for s in ok), default=0))
+
+
+def dot_track(s, c, top, unit_word, label) -> str:
+    """A model's median (dot) on its interval, on a 0..top cm track."""
+    pos = lambda v: f"{v * 100 / top * 100:.2f}%"  # noqa: E731  metres -> % of the track
+    grid = "".join(f'<i style="left:{t / top * 100:.2f}%"></i>' for t in range(0, top + 1, tick_step(top)))
+    ci = s["ci"]
+    tip = (f'{label}: median {cm(s["median"])} cm from the recorded path at 2 s, 95% interval '
+           + (f'{cm(ci[0])} to {cm(ci[1])} cm' if ci else "none") + f', {s["n"]} {unit_word} from {s["clusters"]} drives')
+    bar = (f'<span class="rk-ci ci-{c}" style="left:{pos(ci[0])};width:calc({pos(ci[1])} - {pos(ci[0])})"></span>' if ci else "")
+    return (f'<div class="rk-track" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}"><span class="rk-grid">{grid}</span>'
+            f'{bar}<span class="rk-dot dot-{c}" style="left:{pos(s["median"])}"></span>'
+            f'<span class="rk-v" style="left:{pos(ci[1] if ci else s["median"])}">{cm(s["median"])} cm</span></div>')
+
+
+def top_cm(r: dict) -> int:
+    """cm, past the widest interval: a multiple of 2 up to 16 cm, of 5 beyond (see tick_step)."""
+    hi = max([s["ci"][1] for s in r.values() if s["ci"]] + [s["median"] for s in r.values()] + [0.01]) * 100
+    top = math.ceil(hi / 2 + 0.25) * 2
+    return top if top <= 16 else math.ceil(hi / 5 + 0.25) * 5
+
+
+def tick_step(top: int) -> int:
+    return 2 if top <= 16 else 5
 
 
 def ranking_table(models, cfg, root) -> str:
-    """Every model by closed-loop driving, as a chart: a row per model in rank order, shared ranks
-    grouped; a dot (median distance from the recorded path at 2 s, comma's public segments) on its
-    drive-clustered interval; then the G55 tests as windows closer than lebowski. Pending models are
-    empty rows. The numbers are in a table below it."""
+    """Every model by G55 closed-loop driving, as a chart: a row per model. With intervals (10 or more
+    drives) the rows are ranked by the median distance from the recorded path at 2 s, shared ranks
+    grouped, a dot on its drive-clustered interval. Before that, rows are ordered by the windows closer
+    to the recorded path than lebowski at 2 s, with no rank. Then the G55 recovery tests as win bars;
+    comma's public segments as a line under the name. Numbers in a table below."""
     ref = cfg["reference_model"]
-    r = ranking.scores(root)["models"]
-    ranked = sorted((m for m in models if m["model"]["id"] in r), key=first_public, reverse=True)
-    ranked.sort(key=lambda m: r[m["model"]["id"]]["rank"])  # by rank, newest first within a rank
-    pending = sorted((m for m in models if m["model"]["id"] not in r), key=first_public, reverse=True)
-    hi = max([s["ci"][1] for s in r.values() if s["ci"]] + [s["median"] for s in r.values()] + [0.01])
-    top = math.ceil(hi * 100 / 2 + 0.25) * 2  # cm, an even number past the widest interval
-    pos = lambda v: f"{v * 100 / top * 100:.2f}%"  # noqa: E731  metres -> % of the track
-    ticks = "".join(f'<span class="rk-tk" style="left:{t / top * 100:.2f}%">{t}</span>' for t in range(0, top + 1, 2))
-    grid = "".join(f'<i style="left:{t / top * 100:.2f}%"></i>' for t in range(0, top + 1, 2))
+    pub = ranking.scores(root)["models"]
+    g = g55_ranked(root)
+    nw, nd = g55_counts(models)
+    scored = [m for m in models if (m["sections"].get(G55[0]) or {}).get("status") == "ok"]
+    pending = sorted((m for m in models if m not in scored), key=first_public, reverse=True)
 
-    def name(m):
-        return (f'<div class="rk-name"><span class="rk-sw sw-{model_class(m, cfg)}" aria-hidden="true"></span>'
-                f'<span>{name_html(m, "models/" + m["model"]["id"] + ".html")}'
-                f'<span class="rk-st">{esc(first_public(m))}, {esc(lc_status(m))}</span></span></div>')
+    def wins_of(m):
+        x, _ = find_metric(m, *G55)
+        p = x and x["paired"].get(ref)
+        return p["wins"] / p["n"] if p else (0.5 if m["model"]["id"] == ref else -1)
 
-    def row(m):
+    def name(m, pend=False):
         mid = m["model"]["id"]
-        s = r[mid]
-        c = model_class(m, cfg)
-        ci = s["ci"]
-        tip = (f'{plain_name(m)}: median {cm(s["median"])} cm from the recorded path at 2 s, 95% interval '
-               + (f'{cm(ci[0])} to {cm(ci[1])} cm' if ci else "none") + f', {s["n"]} segments from {s["clusters"]} drives')
-        bar = (f'<span class="rk-ci ci-{c}" style="left:{pos(ci[0])};width:calc({pos(ci[1])} - {pos(ci[0])})"></span>'
-               if ci else "")
-        track = (f'<div class="rk-track" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}"><span class="rk-grid">{grid}</span>'
-                 f'{bar}<span class="rk-dot dot-{c}" style="left:{pos(s["median"])}"></span>'
-                 f'<span class="rk-v" style="left:{pos(ci[1] if ci else s["median"])}">{cm(s["median"])} cm</span></div>')
-        wins = "".join(win_bar(m, ref, sec, k, f"{h}") for sec, k, h, _ in TRUCK_COLS)
-        return f'<div class="rk-row">{name(m)}{track}<div class="rk-wins">{wins}</div></div>'
+        s = pub.get(mid)
+        sub = f'{esc(first_public(m))}, {esc(lc_status(m))}'
+        if s:
+            sub += f'<br>comma\'s segments: {cm(s["median"])} cm at 2 s'
+        return (f'<div class="rk-name"><span class="rk-sw sw-{model_class(m, cfg)}" aria-hidden="true"></span>'
+                f'<span>{name_html(m, "models/" + mid + ".html")}<span class="rk-st">{sub}</span></span></div>')
 
+    def recovery(m):
+        return "".join(win_bar(m, ref, sec, k, h) for sec, k, h in RECOVERY_COLS)
+
+    groups = []
+    if g:
+        top = top_cm(g)
+        ranked = sorted((m for m in scored if m["model"]["id"] in g), key=first_public, reverse=True)
+        ranked.sort(key=lambda m: g[m["model"]["id"]]["rank"])
+        for rank in sorted({g[m["model"]["id"]]["rank"] for m in ranked}):
+            ms = [m for m in ranked if g[m["model"]["id"]]["rank"] == rank]
+            rows = "".join(f'<div class="rk-row">{name(m)}{dot_track(g[m["model"]["id"]], model_class(m, cfg), top, "windows", plain_name(m))}'
+                           f'<div class="rk-wins">{recovery(m)}</div></div>' for m in ms)
+            groups.append(f'<div class="rk-group"><div class="rk-rank">{rank}<span>{"shared" if len(ms) > 1 else ""}</span></div><div class="rk-rows">{rows}</div></div>')
+        ticks = "".join(f'<span class="rk-tk" style="left:{t / top * 100:.2f}%">{t}</span>' for t in range(0, top + 1, tick_step(top)))
+        axis = f'<div class="rk-axis"><span class="rk-al">cm from the recorded path at 2 s, G55</span>{ticks}</div>'
+        title = "G55 closed loop: median distance from the recorded path at 2 s"
+        how = (f"{nw} windows from {nd} drives. Each model drives a model of the G55's steering and powertrain in "
+               "<code>worldmodel-4B</code> from recorded G55 windows; 95% interval resampling drives.")
+        rule = "Rank: 1 plus the number of models with a lower median whose paired interval of the difference excludes zero. Rows that share a rank are not separated."
+    else:
+        ordered = sorted(scored, key=lambda m: (-wins_of(m), m["model"]["id"] != ref, first_public(m)))
+        rows = "".join(f'<div class="rk-row">{name(m)}<div class="rk-track rk-wtrack">{win_bar(m, ref, *G55, "G55 closed loop", big=True)}</div>'
+                       f'<div class="rk-wins">{recovery(m)}</div></div>' for m in ordered)
+        groups.append(f'<div class="rk-group rk-nogroup"><div class="rk-rank rk-rank-p">–</div><div class="rk-rows">{rows}</div></div>')
+        axis = '<div class="rk-axis"><span class="rk-al">G55 closed loop, primary: windows closer than lebowski at 2 s</span></div>'
+        title = "G55 closed loop (primary): windows closer to the recorded path than lebowski at 2 s"
+        how = (f"{nw} windows from {nd} drives. Each model drives a model of the G55's steering and powertrain in "
+               "<code>worldmodel-4B</code> from recorded G55 windows. Intervals and ranks need 10 or more drives; "
+               "until then models are ordered by this count, with no rank.")
+        rule = "The tick in each bar is half the windows."
+    if pending:
+        prow = "".join(f'<div class="rk-row rk-pend">{name(m)}<div class="rk-track rk-empty"><span class="rk-pt">G55 closed loop pending</span></div>'
+                       f'<div class="rk-wins"></div></div>' for m in pending)
+        groups.append(f'<div class="rk-group"><div class="rk-rank rk-rank-p">–</div><div class="rk-rows">{prow}</div></div>')
+    wh = "".join(f'<span>{esc(h)}, closer than lebowski at 2 s</span>' for _, _, h in RECOVERY_COLS)
+
+    trows = []
+    for m in sorted(scored, key=lambda m: (g[m["model"]["id"]]["rank"] if g and m["model"]["id"] in g else 0, -wins_of(m))) + pending:
+        mid = m["model"]["id"]
+        cells = ""
+        if g:
+            s = g.get(mid)
+            cells += (f'<td class="n">{s["rank"]}</td><td class="n">{cm(s["median"])}</td>'
+                      f'<td class="n">{"[" + cm(s["ci"][0]) + ", " + cm(s["ci"][1]) + "]" if s["ci"] else "none"}</td>') if s else '<td class="na" colspan="3">pending</td>'
+        for sec, k in [G55] + [(c[0], c[1]) for c in RECOVERY_COLS]:
+            x, _ = find_metric(m, sec, k)
+            p = x and x["paired"].get(ref)
+            cells += (f'<td class="n">{p["wins"]}/{p["n"]} windows, {p["cluster_wins"]}/{p["clusters"]} drives; median {cm(x["median"])}</td>' if p
+                      else f'<td class="n">reference; median {cm(x["median"])}</td>' if x else '<td class="na">pending</td>')
+        s = pub.get(mid)
+        cells += f'<td class="n">{cm(s["median"])}</td>' if s else '<td class="na">pending</td>'
+        trows.append(f'<tr><th scope="row">{esc(plain_name(m))}</th>{cells}</tr>')
+    th = ('<th class="n" scope="col">Rank</th><th class="n" scope="col">G55 median at 2 s (cm)</th><th class="n" scope="col">95% interval (cm)</th>' if g else "")
+    th += '<th class="n" scope="col">G55 closed loop, closer than lebowski</th>'
+    th += "".join(f'<th class="n" scope="col">{esc(h)}, closer than lebowski</th>' for _, _, h in RECOVERY_COLS)
+    th += '<th class="n" scope="col">comma\'s segments, median at 2 s (cm)</th>'
+    return f"""<figure class="rk{'' if g else ' rk-w'}" aria-labelledby="rk-t">
+<figcaption class="rk-cap"><p id="rk-t" class="fig-t">{esc(title)}</p>
+<p>{how} Under each name: comma's public segments with comma's ideal car, the <a href="#harness">harness check</a>.</p></figcaption>
+<div class="rk-head" aria-hidden="true"><span></span>{axis}<div class="rk-wh">{wh}</div></div>
+{"".join(groups)}
+<div class="rk-notes">
+<p>{rule} Medians in cm are distance from the recorded path at 2 s.</p>
+<p>Why 2 s: in a separate test on 18 G55 windows from 4 drives, <code>worldmodel-4B</code> followed an added yaw command through 2 s, but 3 to 4 s after an added yaw or lateral command it showed 0 to 20% of the 1.2 to 2.1 m of extra offset. After 2 s a lateral error can shrink in the simulation without the driving model correcting it.</p>
+<details><summary>Numbers behind the chart</summary><div class="tw"><table><thead><tr><th scope="col">Model</th>{th}</tr></thead><tbody>{"".join(trows)}</tbody></table></div></details>
+</div>
+</figure>"""
+
+
+def public_chart(models, cfg, root) -> str:
+    """comma's public segments in closed loop: median distance at 2 s, interval, rank. The harness check."""
+    r = ranking.scores(root)["models"]
+    if not r:
+        return ""
+    top = top_cm(r)
+    ranked = sorted((m for m in models if m["model"]["id"] in r), key=first_public, reverse=True)
+    ranked.sort(key=lambda m: r[m["model"]["id"]]["rank"])
     groups = []
     for rank in sorted({r[m["model"]["id"]]["rank"] for m in ranked}):
         ms = [m for m in ranked if r[m["model"]["id"]]["rank"] == rank]
-        lab = f'{rank}<span>{"shared" if len(ms) > 1 else ""}</span>'
-        groups.append(f'<div class="rk-group"><div class="rk-rank">{lab}</div><div class="rk-rows">{"".join(row(m) for m in ms)}</div></div>')
-    if pending:
-        prow = "".join(f'<div class="rk-row rk-pend">{name(m)}<div class="rk-track rk-empty"><span class="rk-grid">{grid}</span>'
-                       f'<span class="rk-pt">closed loop pending</span></div><div class="rk-wins"></div></div>' for m in pending)
-        groups.append(f'<div class="rk-group"><div class="rk-rank rk-rank-p">–</div><div class="rk-rows">{prow}</div></div>')
-    any_s = next(iter(r.values()), None)
-    tsec = next((m["sections"]["truck_closed_loop"] for m in models
-                 if (m["sections"].get("truck_closed_loop") or {}).get("status") == "ok"), None)
-    pub_n = f'{any_s["n"]} segments from {any_s["clusters"]} drives' if any_s else "no segments yet"
-    tr_n = f'{tsec["n"]} windows from {tsec["clusters"]} drives' if tsec else "no windows yet"
-    wh = "".join(f'<span>{esc(h)}</span>' for _, _, h, _ in TRUCK_COLS)
-
-    # the same numbers as a table, for researchers
-    trows = []
-    for m in ranked + pending:
-        mid = m["model"]["id"]
-        if mid in r:
-            s = r[mid]
-            cells = (f'<td class="n">{r[mid]["rank"]}</td><td class="n">{cm(s["median"])}</td>'
-                     f'<td class="n">{"[" + cm(s["ci"][0]) + ", " + cm(s["ci"][1]) + "]" if s["ci"] else "none"}</td>')
-            for sec, k, *_ in TRUCK_COLS:
-                x, _ = find_metric(m, sec, k)
-                p = x and x["paired"].get(ref)
-                cells += (f'<td class="n">{p["wins"]}/{p["n"]} windows, {p["cluster_wins"]}/{p["clusters"]} drives; median {cm(x["median"])}</td>' if p
-                          else f'<td class="n">reference; median {cm(x["median"])}</td>' if x else '<td class="na">pending</td>')
-        else:
-            cells = f'<td class="na" colspan="{3 + len(TRUCK_COLS)}">closed loop pending</td>'
-        trows.append(f'<tr><th scope="row">{esc(plain_name(m))}</th>{cells}</tr>')
-    th = "".join(f'<th class="n" scope="col">{esc(h)}, closer than lebowski</th>' for _, _, h, _ in TRUCK_COLS)
-    return f"""<figure class="rk" aria-labelledby="rk-t">
-<figcaption class="rk-cap"><p id="rk-t" class="fig-t">Closed loop: median distance from the recorded path at 2 s</p>
-<p>comma's public segments with comma's ideal car ({esc(pub_n)}), 95% interval resampling drives. G55 with a model of its steering and powertrain ({esc(tr_n)}): windows closer than lebowski, no interval.</p></figcaption>
-<div class="rk-head" aria-hidden="true"><span></span><div class="rk-axis"><span class="rk-al">cm from the recorded path at 2 s, comma's segments</span>{ticks}</div><div class="rk-wh">{wh}</div></div>
+        rows = "".join(f'<div class="rk-row"><div class="rk-name"><span class="rk-sw sw-{model_class(m, cfg)}" aria-hidden="true"></span>'
+                       f'<span>{name_html(m, "models/" + m["model"]["id"] + ".html")}</span></div>'
+                       f'{dot_track(r[m["model"]["id"]], model_class(m, cfg), top, "segments", plain_name(m))}</div>' for m in ms)
+        groups.append(f'<div class="rk-group"><div class="rk-rank">{rank}<span>{"shared" if len(ms) > 1 else ""}</span></div><div class="rk-rows">{rows}</div></div>')
+    any_s = next(iter(r.values()))
+    ticks = "".join(f'<span class="rk-tk" style="left:{t / top * 100:.2f}%">{t}</span>' for t in range(0, top + 1, tick_step(top)))
+    return f"""<figure class="rk rk-pub" aria-labelledby="rkp-t">
+<figcaption class="rk-cap"><p id="rkp-t" class="fig-t">Closed loop on comma's public segments: median distance from the recorded path at 2 s</p>
+<p>{any_s["n"]} segments from {any_s["clusters"]} drives, comma's ideal car in <code>worldmodel-4B</code>; 95% interval resampling drives. Rank as in the G55 chart.</p></figcaption>
+<div class="rk-head" aria-hidden="true"><span></span><div class="rk-axis"><span class="rk-al">cm from the recorded path at 2 s, comma's segments</span>{ticks}</div></div>
 {"".join(groups)}
-<div class="rk-notes">
-<p>Rank: 1 plus the number of models with a lower median whose paired interval of the difference excludes zero. Rows that share a rank are not separated.</p>
-<p>Why 2 s: in a separate test on 18 G55 windows from 4 drives, <code>worldmodel-4B</code> followed an added yaw command through 2 s, but 3 to 4 s after an added yaw or lateral command it showed 0 to 20% of the 1.2 to 2.1 m of extra offset. After 2 s a lateral error can shrink in the simulation without the driving model correcting it.</p>
-<details><summary>Numbers behind the chart</summary><div class="tw"><table><thead><tr><th scope="col">Model</th><th class="n" scope="col">Rank</th><th class="n" scope="col">Median at 2 s (cm)</th><th class="n" scope="col">95% interval (cm)</th>{th}</tr></thead><tbody>{"".join(trows)}</tbody></table></div></details>
-</div>
 </figure>"""
 
 
@@ -795,12 +883,16 @@ def shipped(m) -> bool:
 def status_strip(models, cfg, root) -> str:
     latest = max(models, key=lambda m: (scored_at(m), m["model"]["id"]))
     newest = max(models, key=lambda m: (first_public(m), m["model"]["id"]))
-    r = ranking.scores(root)["models"]
+    nw, nd = g55_counts(models)
+    ng = sum(1 for m in models if (m["sections"].get(G55[0]) or {}).get("status") == "ok")
     w = cfg.get("watch", {})
     when = latest["scored"]["date"].replace("T", " ").rstrip("Z")[:16] + " UTC"
+    g55 = (f"{nw} closed-loop windows from {nd} drives; "
+           + ("ranked with 95% intervals" if g55_ranked(root) else "ranks and intervals from 10 drives"))
     items = [
+        ("G55 drives", esc(g55)),
+        ("Models", f"{len(models)} tracked, {ng} scored on the G55 in closed loop"),
         ("Last scored", esc(when)),
-        ("Models", f"{len(models)} tracked, {len(r)} with closed loop"),
         ("Newest", f'{name_html(newest, "models/" + newest["model"]["id"] + ".html")}, first public {esc(first_public(newest))}, '
                    f'scored {esc(scored_at(newest)[:10])}'),
         ("New models", esc(w.get("text", "checked manually"))),
@@ -812,12 +904,20 @@ def _date(s: str) -> _dt.date:
     return _dt.date.fromisoformat(s[:10])
 
 
-TRENDS = [  # (title, unit, how to read one model; None = no value)
-    ("Closed loop, comma's segments: median distance from the recorded path at 2 s (cm)", "cm", "rank"),
-    ("G55 closed loop: windows closer to the recorded path than lebowski at 2 s", "windows", "truck"),
-    ("Lateral action rate, open loop, comma's segments (m/s³)", "m/s³", ("public_open_loop", "lat_rate_rms")),
-    ("Lead of the lateral request over the car's motion, open loop (s)", "s", ("public_open_loop", "lat_best_lag")),
+TRENDS_G55 = [  # (title, unit, how to read one model)
+    ("G55 closed loop: windows closer to the recorded path than lebowski at 2 s", "windows", ("wins", "truck_closed_loop", "xtrack_2s")),
+    ("G55, 2° heading error: windows closer than lebowski at 2 s", "windows", ("wins", "truck_recovery", "heading_xtrack_2s")),
+    ("G55, 0.5 m offset: windows closer than lebowski at 2 s", "windows", ("wins", "truck_recovery", "offcentre_xtrack_2s")),
 ]
+TREND_G55_RANK = ("G55 closed loop: median distance from the recorded path at 2 s (cm)", "cm", "g55rank")
+TRENDS_PUBLIC = [  # the public closed loop is the harness check's chart above these
+    ("Lateral action rate, open loop, comma's segments (m/s³)", "m/s³", ("public_open_loop", "lat_rate_rms")),
+    ("Lead of the lateral request over the car's motion, open loop, comma's segments (s)", "s", ("public_open_loop", "lat_best_lag")),
+]
+
+
+def is_wins(kind) -> bool:
+    return isinstance(kind, tuple) and kind[0] == "wins"
 
 
 def trend_values(kind, models, ref, r):
@@ -825,17 +925,17 @@ def trend_values(kind, models, ref, r):
     out, line = {}, None
     for m in models:
         mid = m["model"]["id"]
-        if kind == "rank":
+        if kind in ("rank", "g55rank"):
             s = r.get(mid)
             if s:
                 v = (s["median"] * 100, s["ci"][0] * 100 if s["ci"] else None, s["ci"][1] * 100 if s["ci"] else None,
-                     f'{s["n"]} segments from {s["clusters"]} drives')
+                     f'{s["n"]} {"segments" if kind == "rank" else "windows"} from {s["clusters"]} drives')
                 if mid == ref:
                     line = v
                 else:
                     out[mid] = v
-        elif kind == "truck":
-            x, _ = find_metric(m, "truck_closed_loop", "xtrack_2s")
+        elif is_wins(kind):
+            x, _ = find_metric(m, kind[1], kind[2])
             p = x and x["paired"].get(ref)
             if mid == ref and x:
                 line = (x["n"] / 2, None, None, f'{x["n"]} windows')
@@ -866,7 +966,7 @@ def trend_panel(title, unit, kind, models, cfg, r) -> str:
     ys = [v[0] for v in vals.values()] + [v[i] for v in vals.values() for i in (1, 2) if v[i] is not None]
     if line:
         ys.append(line[0])
-    if kind == "truck":
+    if is_wins(kind):
         n = max([int(v[3].split()[0]) for v in vals.values()] + [int(line[3].split()[0]) if line else 18])
         y0, y1 = 0.0, float(n)
     else:
@@ -891,7 +991,7 @@ def trend_panel(title, unit, kind, models, cfg, r) -> str:
         d = (d.replace(day=28) + _dt.timedelta(days=4)).replace(day=1)
     refl = ""
     if line:
-        lab = f"{line[0]:g} of {int(line[0] * 2)}" if kind == "truck" else "lebowski"
+        lab = f"{line[0]:g} of {int(line[0] * 2)}" if is_wins(kind) else "lebowski"
         refl = (f'<line class="refl" x1="{L}" x2="{W - Rr}" y1="{Y(line[0]):.1f}" y2="{Y(line[0]):.1f}"/>'
                 f'<text class="refl-t" x="{W - Rr}" y="{Y(line[0]) - 5:.1f}" text-anchor="end">{lab}</text>')
     ordered = sorted((m for m in others if m["model"]["id"] in vals), key=lambda m: (first_public(m), m["model"]["id"]))
@@ -904,7 +1004,7 @@ def trend_panel(title, unit, kind, models, cfg, r) -> str:
         c = model_class(m, cfg)
         if lo is not None:
             marks.append(f'<line class="tw-ci st-{c}" x1="{cx:.1f}" x2="{cx:.1f}" y1="{Y(lo):.1f}" y2="{Y(hi):.1f}"/>')
-        vt = f"{v:.0f} of {nw}" if kind == "truck" else f"{num(v, 1 if unit == 'cm' else 2)} {unit}" + (f" [{num(lo, 1 if unit == 'cm' else 2)}, {num(hi, 1 if unit == 'cm' else 2)}]" if lo is not None else "") + f", {nw}"
+        vt = f"{v:.0f} of {nw}" if is_wins(kind) else f"{num(v, 1 if unit == 'cm' else 2)} {unit}" + (f" [{num(lo, 1 if unit == 'cm' else 2)}, {num(hi, 1 if unit == 'cm' else 2)}]" if lo is not None else "") + f", {nw}"
         tip = f'{plain_name(m)}, first public {first_public(m)}, {"on openpilot master or shipped" if shipped(m) else "Hugging Face upload only"}: {vt}'
         fill = f"fl-{c}" if shipped(m) else "hollow"
         marks.append(f'<circle class="tp st-{c} {fill}" cx="{cx:.1f}" cy="{cy:.1f}" r="5" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}"/>')
@@ -916,9 +1016,9 @@ def trend_panel(title, unit, kind, models, cfg, r) -> str:
     latest = ordered[-1] if ordered else None
     if latest:
         v, lo, hi, nw = vals[latest["model"]["id"]]
-        nv = f"{v:.0f} of {nw.split()[0]} windows" if kind == "truck" else f"{num(v, 1 if unit == 'cm' else 2)} {unit}"
-        cap = f'Newest model here: {esc(short_name(latest))} (first public {esc(first_public(latest))}), {esc(nv)} ({esc(nw if kind != "truck" else nw.split(" from ")[1] if " from " in nw else nw)})'
-        if line and kind != "truck":
+        nv = f"{v:.0f} of {nw.split()[0]} windows" if is_wins(kind) else f"{num(v, 1 if unit == 'cm' else 2)} {unit}"
+        cap = f'Newest model here: {esc(short_name(latest))} (first public {esc(first_public(latest))}), {esc(nv)} ({esc(nw if not is_wins(kind) else nw.split(" from ")[1] if " from " in nw else nw)})'
+        if line and not is_wins(kind):
             cap += f'; lebowski {num(line[0], 1 if unit == "cm" else 2)} {unit}'
         cap += "."
         if pend:
@@ -944,19 +1044,37 @@ def _fmt_tick(t: float, step: float) -> str:
     return f"{t:.{d}f}"
 
 
-def over_time(models, cfg, root) -> str:
-    r = ranking.scores(root)["models"]
-    panels = "".join(trend_panel(t, u, k, models, cfg, r) for t, u, k in TRENDS)
+def trend_legend(cfg) -> str:
     sw = "".join(f'<span><i class="sw sw-{h[1]}"></i>{esc(h[2])}</span>' for h in cfg.get("hero", {}).get("highlight", [])
                  if h[0] != cfg["reference_model"])
-    legend = ('<p class="trend-key">' + sw + '<span><i class="sw sw-other"></i>other comma models</span>'
-              '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-fill"/></svg>on openpilot master or shipped</span>'
-              '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-hollow"/></svg>Hugging Face upload only</span>'
-              '<span><svg width="20" height="12" aria-hidden="true"><line x1="0" x2="20" y1="6" y2="6" class="refl"/></svg>lebowski, July 2026</span>'
-              '<span><svg width="12" height="12" aria-hidden="true"><path class="pend" d="M3,3 l6,6 m0,-6 l-6,6"/></svg>not scored yet</span>'
-              '<span>bars: 95% interval</span></p>')
+    return ('<p class="trend-key">' + sw + '<span><i class="sw sw-other"></i>other comma models</span>'
+            '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-fill"/></svg>on openpilot master or shipped</span>'
+            '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-hollow"/></svg>Hugging Face upload only</span>'
+            '<span><svg width="20" height="12" aria-hidden="true"><line x1="0" x2="20" y1="6" y2="6" class="refl"/></svg>lebowski, July 2026 (win panels: half the windows)</span>'
+            '<span><svg width="12" height="12" aria-hidden="true"><path class="pend" d="M3,3 l6,6 m0,-6 l-6,6"/></svg>not scored yet</span>'
+            '<span>bars: 95% interval</span></p>')
+
+
+def over_time(models, cfg, root) -> str:
+    """The G55 panels: the ranked median once the G55 closed loop has intervals, then the win counts."""
+    g = g55_ranked(root)
+    trends = ([TREND_G55_RANK] if g else []) + TRENDS_G55
+    panels = "".join(trend_panel(t, u, k, models, cfg, g or {}) for t, u, k in trends)
     return (f'<p class="sub">Each model at the date its weights were first public, joined in that order. A new model is added when it is scored.</p>'
-            f'{legend}<div class="trends">{panels}</div>')
+            f'{trend_legend(cfg)}<div class="trends">{panels}</div>')
+
+
+def harness_trends(models, cfg, root) -> str:
+    r = ranking.scores(root)["models"]
+    return '<div class="trends">' + "".join(trend_panel(t, u, k, models, cfg, r) for t, u, k in TRENDS_PUBLIC) + "</div>"
+
+
+def harness(models, cfg, root, heading="h2") -> str:
+    """comma's public drives: a check of the harness, rerunnable by anyone."""
+    return f"""<{heading}>Harness check on comma's public drives</{heading}>
+<p class="sub">Purpose: to check that the harness reproduces sensible behaviour on comma's own data, and to let others rerun it. The same suite runs on comma's public segments, open loop and closed loop with comma's ideal car; per-segment results and code are published, and <code>python -m geval.reproduce</code> recomputes every interval from them.</p>
+{public_chart(models, cfg, root)}
+{harness_trends(models, cfg, root)}"""
 
 
 def changelog(root) -> list:
@@ -1030,10 +1148,10 @@ def overview(models, cfg, root) -> str:
     return f"""<section class="hero">
 <div class="hero-t">
 <h1>openpilot driving model evaluations</h1>
-<p class="lede">Every comma.ai openpilot driving model, including Hugging Face uploads, scored with one fixed suite on comma's public drives and on drives from a 2011 Mercedes G55, in open loop and in closed loop.</p>
+<p class="lede">Every comma.ai openpilot driving model, including Hugging Face uploads, scored with one fixed suite on drives from a 2011 Mercedes G55, a car openpilot does not support, in closed loop and open loop. The same suite runs on comma's public drives as a check of the harness.</p>
 {status_strip(models, cfg, root)}
 </div>
-{hero_visual(models, cfg)}
+{truck_hero(models, cfg)}
 {ranking_table(models, cfg, root)}
 </section>
 
@@ -1069,7 +1187,11 @@ def overview(models, cfg, root) -> str:
 <tr><th scope="row">G55 recovery: 0.5 m lateral offset or 2° heading error</th><td>no direct match; closest is hugging, recovery under a lateral bias</td></tr>
 <tr><th scope="row">Braking lead car (not built yet)</th><td>unintended lead following</td></tr>
 </tbody></table></div>
-<p><a href="method.html">The full method</a></p>
+<p><a href="method.html">The full method</a>, with a closed-loop example from <code>worldmodel-4B</code>.</p>
+</section>
+
+<section id="harness" class="harness">
+{harness(models, cfg, root)}
 </section>
 
 <section id="research" class="research">
@@ -1179,8 +1301,10 @@ def model_page(m, models, cfg, root, out) -> str:
 
 # ---------------------------------------------------------------- method page
 
-def method(models, cfg) -> str:
+def method(models, cfg, root) -> str:
     prose = (SITE / "pages" / "method.html").read_text()
+    prose = prose.replace("<!-- closed-loop example -->", f'<section id="closed-loop-example" class="cl-ex"><h2>A closed-loop example</h2>{hero_visual(models, cfg)}</section>')
+    prose = prose.replace("<!-- harness check -->", f'<section id="harness" class="harness">{harness(models, cfg, root)}</section>')
     rows = []
     for m in reversed(models):
         md = m["model"]
@@ -1229,7 +1353,7 @@ def main() -> None:
     (out / "index.html").write_text(page(cfg, f"openpilot driving model evaluations – {cfg['site_name']}",
                                          desc, overview(models, cfg, root), 0, "overview", ""))
     (out / "method.html").write_text(page(cfg, f"Method – {cfg['site_name']}", "How each openpilot driving model is scored: "
-                                          "open and closed loop, intervals, limits and downloads.", method(models, cfg), 0, "method", "method.html"))
+                                          "open and closed loop, intervals, limits and downloads.", method(models, cfg, root), 0, "method", "method.html"))
     print(f"{len(models)} models -> {out}")
 
 

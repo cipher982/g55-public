@@ -256,6 +256,12 @@ class Watch:
                 shutil.copyfile(f, dst)
                 paths.append(str(dst.relative_to(repo)))
             self.state["models"][mid]["published"] = True
+        rk = res.parent / "rankings" / "truck_closed_loop.json"   # aggregates only (geval.ranking.write_truck)
+        if paths and rk.exists() and not any(b.search(rk.read_text()) for b in block):
+            dst = repo / "eval" / "rankings" / rk.name
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(rk, dst)
+            paths.append(str(dst.relative_to(repo)))
         if not paths:
             return
         git("add", "--", *paths)

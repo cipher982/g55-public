@@ -146,13 +146,30 @@ p, ul, ol { margin: 0; max-width: 70ch; }
 .rk-pend .nm, .rk-pend .hx-only { color: var(--ink2); }
 .rk-wins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .wb { display: grid; gap: 3px; font-size: 12px; }
-.wb-bar { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 1px; height: 10px; }
-.wb-bar i { background: var(--wash); border-radius: 1px; }
+.wb-bar { position: relative; display: block; height: 10px; background: var(--wash); border-radius: 2px; overflow: hidden; }
+.wb-bar i { position: absolute; left: 0; top: 0; bottom: 0; }
+.wb-bar b { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--panel); }
+.wb-big { gap: 5px; }
+.wb-big .wb-bar { height: 16px; border-radius: 3px; }
+.wb-big .wb-t { font-size: 17px; }
+.wb-big .wb-n { font-size: 13px; }
+.rk-wtrack { height: auto; padding: 4px 0; }
 .wb-ref .wb-t, .wb-na .wb-t { color: var(--muted); }
 .wb-ref { align-self: center; }
 .wb-ref i, .wb-ref .wb-bar { display: none; }
 .wb-ref .wb-t { border: 1px dashed var(--rule2); border-radius: 3px; padding: 1px 6px; width: fit-content; }
 .wb-ff i.on { background: var(--c-ff); } .wb-md i.on { background: var(--c-md); } .wb-ref i.on { background: var(--c-ref); } .wb-other i.on { background: var(--c-other); }
+.rk-nogroup .rk-rank { border-right-color: transparent; }
+.rk-w .rk-axis { height: auto; display: flex; align-items: flex-end; }
+.rk-w .rk-al { position: static; white-space: normal; }
+/* The harness check: comma's public drives, smaller than the G55 sections. */
+.harness h2 { font-size: 22px; }
+.harness .rk-pub { margin-bottom: 14px; }
+.harness .rk-pub .rk-row { grid-template-columns: 15rem minmax(0, 1fr); }
+.harness .rk-pub .rk-head { grid-template-columns: 15rem minmax(0, 1fr); }
+.harness .fig-t { font-size: 16px; }
+.cl-ex { display: grid; gap: 14px; }
+@media (max-width: 760px) { .harness .rk-pub .rk-row, .harness .rk-pub .rk-head { grid-template-columns: minmax(0, 1fr); } }
 .wb-t { font-weight: 700; font-size: 13px; }
 .wb-n { font-weight: 400; color: var(--muted); }
 .rk-notes { display: grid; gap: 6px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
@@ -310,11 +327,12 @@ table.vocab th[scope="row"] { min-width: 12rem; white-space: normal; }
 .strip dt { font-size: 13px; color: var(--muted); }
 .strip dd { margin: 0; font-size: 15px; line-height: 1.4; }
 .strip .mlink { font-weight: 600; }
-@media (min-width: 900px) { .strip { grid-template-columns: 0.8fr 0.9fr 1.3fr 2fr; } .strip > div + div { padding-left: 16px; border-left: 1px solid var(--rule); } }
+@media (min-width: 900px) { .strip { grid-template-columns: 1.1fr 1fr 0.8fr 1.3fr 1.6fr; } .strip > div + div { padding-left: 16px; border-left: 1px solid var(--rule); } }
 
 /* Over time: small multiples, release date on x. */
 .trends { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
 @media (min-width: 760px) { .trends { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .time .trends { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .trend { margin: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 12px 10px; display: grid; gap: 6px; min-width: 0; }
 .trend-t { font-weight: 700; font-size: 15px; line-height: 1.3; }
 .trend svg { width: 100%; height: auto; display: block; overflow: visible; }

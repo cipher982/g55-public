@@ -7,7 +7,8 @@ truck runs, and with the model whose weights were first public just before it (i
 latest earlier model that was).</p>
 <p>The suite has two halves. The public half uses comma's public data and models, and anyone can rerun it from the
 published code. The truck half uses recorded drives from one 2011 Mercedes G55, which openpilot does not support. Those
-drives stay private, so only their scores are published.</p>
+drives stay private, so only their scores are published. The front page leads with the truck half; the public half is a
+check of the harness (<a href="#harness">below</a>).</p>
 </section>
 
 <section class="prose">
@@ -63,10 +64,14 @@ better direction. A value at either end of the search is only a bound and is lef
 count can be below the section's. The plan speed error at 3 s reads the model's plan output, which does not separate
 models built on one frozen base: it is identical for the four October models on base <code>f22e06e5</code>.</p>
 <p>Every public interval can be recomputed from the per-segment CSVs: <code>uv run python -m geval.reproduce</code> in
-<code>eval/</code>. The front-page ranking ranks models by the median distance from the recorded path at 2 s on comma's
-public segments, closed loop, with a 95% interval of the median that resamples drives. Two models are separated when the
-interval of the difference of their medians, on the segments both have, excludes zero; a model's rank is 1 plus the number
-of models separated from it with a lower median. <code>uv run python -m geval.ranking</code> prints it.</p>
+<code>eval/</code>. A ranking ranks models by the median distance from the recorded path at 2 s in closed loop, with a 95%
+interval of the median that resamples drives. Two models are separated when the interval of the difference of their
+medians, on the units both have, excludes zero; a model's rank is 1 plus the number of models separated from it with a
+lower median. The front page ranks by the G55 closed loop once it has 10 or more drives; the window values stay private,
+so the ranking is published as <code>rankings/truck_closed_loop.json</code> (medians, intervals, counts, ranks). Until then
+the front page orders models by the G55 windows closer to the recorded path than lebowski at 2 s, with no rank. The
+harness check ranks comma's public segments the same way; <code>uv run python -m geval.ranking</code> prints it from the
+published CSVs.</p>
 </section>
 
 <section class="prose">
@@ -88,6 +93,8 @@ correlated (<a href="https://doi.org/10.48550/arxiv.2306.07962">Dauner et al., 2
 score side by side and does not combine them.</p>
 </section>
 
+<!-- closed-loop example -->
+
 <section class="prose">
 <h2>What the truck sections can and cannot show</h2>
 <p>They show how each model behaves with a camera height, a vehicle and a steering response that comma's fleet does not
@@ -104,3 +111,5 @@ showed 0 to 20% of an added lateral offset 3 to 4 s after it, so the front-page 
 <p>Stills are a few camera frames per condition with the model's path drawn on them, each checked so that nothing in it
 identifies the truck, its owner or the place.</p>
 </section>
+
+<!-- harness check -->

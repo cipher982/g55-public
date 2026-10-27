@@ -47,6 +47,8 @@ def cmd_build(cfg, ids):
     for mid in ids or [m for m in reg if any(store.load(cfg.work, s, m) for s in S.SECTIONS)]:
         arch, sha = model_arch(cfg, mid)
         print(results.build(cfg.work, mid, arch, res, pu, sha256=sha, drives=results.truck_drives(cfg)))
+    from .ranking import write_truck
+    print(write_truck(cfg.work, res.parent))
 
 
 def main(argv=None):
