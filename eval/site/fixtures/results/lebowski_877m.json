@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "model": {
+    "id": "lebowski_877m",
+    "name": "lebowski",
+    "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "source": {
+      "kind": "openpilot-master",
+      "ref": "fixture",
+      "url": "https://github.com/commaai/openpilot/commit/fa0c6876d3",
+      "date": "2026-07-01"
+    },
+    "params_m": 877.0,
+    "gmac": 101.0,
+    "family": "lebowski",
+    "notes": "Fixture for the site generator. Every number is illustrative, not a measurement."
+  },
+  "scored": {
+    "date": "2026-10-27T16:30:00Z",
+    "suite": "fixture-0",
+    "code": "0000000"
+  },
+  "baselines": [],
+  "sections": {
+    "public_open_loop": {
+      "status": "ok",
+      "unit_of_evidence": "segment",
+      "n": 39,
+      "condition": "native intrinsics, both cameras",
+      "metrics": [
+        {
+          "key": "lat_mae",
+          "label": "Lateral error",
+          "unit": "m/s²",
+          "better": "lower",
+          "value": 0.109,
+          "ci": [
+            0.092,
+            0.127
+          ],
+          "paired": {}
+        },
+        {
+          "key": "speed_err_3s",
+          "label": "Speed error at 3 s",
+          "unit": "m/s",
+          "better": "lower",
+          "value": 0.72,
+          "ci": [
+            0.61,
+            0.84
+          ],
+          "paired": {}
+        },
+        {
+          "key": "lat_rate_rms",
+          "label": "Lateral action rate",
+          "unit": "m/s³",
+          "better": "lower",
+          "value": 0.66,
+          "ci": [
+            0.58,
+            0.75
+          ],
+          "paired": {}
+        }
+      ],
+      "per_unit_file": "per_unit/lebowski_877m/public_open_loop.csv"
+    },
+    "public_closed_loop": {
+      "status": "not_run",
+      "unit_of_evidence": "segment",
+      "n": 0,
+      "condition": "worldmodel-4B, comma's ideal car",
+      "metrics": [],
+      "per_unit_file": null
+    },
+    "truck_open_loop": {
+      "status": "ok",
+      "unit_of_evidence": "window",
+      "n": 4,
+      "condition": "plane:1.45, narrow camera at 1.45 m",
+      "metrics": [
+        {
+          "key": "speed_err",
+          "label": "Speed error",
+          "unit": "relative",
+          "better": "lower",
+          "value": 0.049,
+          "ci": [
+            0.038,
+            0.061
+          ],
+          "paired": {}
+        },
+        {
+          "key": "lat_gain",
+          "label": "Lateral gain",
+          "unit": "ratio",
+          "better": "near1",
+          "value": 0.96,
+          "ci": [
+            0.9,
+            1.03
+          ],
+          "paired": {}
+        }
+      ],
+      "per_unit_file": null
+    },
+    "truck_closed_loop": {
+      "status": "ok",
+      "unit_of_evidence": "window",
+      "n": 18,
+      "condition": "worldmodel-4B, G55 steering response",
+      "metrics": [
+        {
+          "key": "dist_4s",
+          "label": "Distance from driven path at 4 s",
+          "unit": "m",
+          "better": "lower",
+          "value": 0.31,
+          "ci": [
+            0.22,
+            0.41
+          ],
+          "paired": {}
+        },
+        {
+          "key": "recovery_4s",
+          "label": "Distance at 4 s after a 2°/s yaw kick",
+          "unit": "m",
+          "better": "lower",
+          "value": 0.37,
+          "ci": [
+            0.27,
+            0.49
+          ],
+          "paired": {}
+        }
+      ],
+      "per_unit_file": null
+    },
+    "truck_recovery": {
+      "status": "not_run",
+      "unit_of_evidence": "window",
+      "n": 0,
+      "condition": "0.5 m off centre, 2° off heading, braking lead",
+      "metrics": [],
+      "per_unit_file": null
+    }
+  },
+  "stills": [],
+  "limits": [
+    "FIXTURE: not a result."
+  ]
+}

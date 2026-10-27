@@ -3,3 +3,4 @@ __pycache__/
 .venv/
 cad/views/
 cad/generated/
+eval/site/_site/

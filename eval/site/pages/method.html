@@ -1,0 +1,81 @@
+<section class="prose">
+<h1>Method</h1>
+<p>When comma publishes a new driving model, as a changed model file on openpilot master or as an upload to
+<a href="https://huggingface.co/commaai/openpilot_driving_models">commaai/openpilot_driving_models</a>, one fixed suite
+scores it and the site gets a page for it. Each score is compared with lebowski, the 877M model from July 2026 that many
+openpilot users still run, and with the comma model released before it.</p>
+<p>The suite has two halves. The public half uses comma's public data and models, and anyone can rerun it from the
+published code. The truck half uses recorded drives from one 2011 Mercedes G55, which openpilot does not support. Those
+drives stay private, so only their scores are published.</p>
+</section>
+
+<section class="prose">
+<h2>What each section measures</h2>
+<div class="tw"><table>
+<thead><tr><th scope="col">Section</th><th scope="col">Input</th><th scope="col">What is scored</th></tr></thead>
+<tbody>
+<tr><th scope="row">Public segments, open loop</th>
+<td>comma's public segments that have both road cameras, one segment as the unit, each car's own camera intrinsics. Segments where the car never moves are dropped.</td>
+<td>The model runs on the recorded frames. Its outputs are compared with what the human driver did next: lateral error, speed error a few seconds ahead, and how fast the action changes.</td></tr>
+<tr><th scope="row">Public segments, closed loop</th>
+<td>The same kind of segments, run through comma's public <code>worldmodel-4B</code> with comma's ideal car, a vehicle that follows each command exactly.</td>
+<td>The model's own steering moves the car and the world model renders what the camera would see next. Scored as distance from the path the human drove.</td></tr>
+<tr><th scope="row">Truck, open loop</th>
+<td>Windows from the truck's recorded drives, fed to the model the way the truck runs it: the narrow camera, mounted 1.45 m up. A replay of lebowski on these windows matches the truck's live records (correlation 0.99 to 1.000 on the lateral action).</td>
+<td>Speed and lateral error against what the truck did, and lateral gain: the model's lateral action over the truck's actual lateral motion, where 1 is right.</td></tr>
+<tr><th scope="row">Truck, closed loop</th>
+<td>The truck windows, run through <code>worldmodel-4B</code> with the G55's measured steering response in place of the ideal car.</td>
+<td>Distance from the driven path, and the same after a small yaw disturbance.</td></tr>
+<tr><th scope="row">Truck, recovery tests</th>
+<td>Closed loop from a start 0.5 m off centre, 2° off heading, or behind a braking lead car.</td>
+<td>How far off the model is after each start, and how it handles the lead car.</td></tr>
+</tbody></table></div>
+<p>Each section on a model page lists its own metrics, units, sample size and condition. A section that was not run for a
+model says so; it is never filled in from another model.</p>
+</section>
+
+<section class="prose">
+<h2>Unit of evidence and intervals</h2>
+<p>Every value is a mean over units: a segment in the public sections, a window (one stretch of one recorded drive) in the
+truck sections. The interval beside it is a 95% bootstrap over those units: resample the units with replacement,
+recompute the mean, repeat, and keep the 2.5th and 97.5th percentiles.</p>
+<p>A delta compares a model with a baseline on the units both were scored on. It is model minus baseline, computed per
+unit and then bootstrapped the same way, so differences between cars, roads and light that affect both models cancel. The
+fraction beside it counts the units where the model did better.</p>
+<p>A filled mark means the delta's interval excludes zero. A ring means the data does not separate the two models. Units are
+not fully independent: several segments can come from one car and several windows from one drive, so a plain bootstrap
+over units can give an interval narrower than the real uncertainty. A delta whose interval only just excludes zero is
+weak evidence.</p>
+</section>
+
+<section class="prose">
+<h2>Why open loop and closed loop can disagree</h2>
+<p>Open loop asks whether the model's output matches what a human did on a recorded drive. The output never changes the
+next frame, so a model can copy the human closely and still drift once its own steering moves the car. Closed loop feeds
+the steering back through a world model, and small errors build up.</p>
+<p>The October 2026 runs show the two disagreeing. comma's recent models are a frozen base policy with a residual head
+trained by reinforcement learning on top. With the residual switched off, the base had the lowest open-loop lateral error
+of any model on comma's public segments (0.074 m/s², against lebowski's 0.109). In closed loop on nine truck windows,
+after a small yaw disturbance, the same base ended about 1.8 m from the driven path at 4 s. lebowski ended 0.4 m away, and
+a policy that does not steer at all 2.3 m. The residual smooths the action and delays it by a few tenths of a second.
+Open-loop scoring counts that delay as error, yet the residual is what lets these models hold a lane.</p>
+<p>This matches published work: on the nuPlan benchmark, open-loop and closed-loop planning scores were negatively
+correlated (<a href="https://doi.org/10.48550/arxiv.2306.07962">Dauner et al., 2023</a>). The site reports both kinds of
+score side by side and does not combine them.</p>
+</section>
+
+<section class="prose">
+<h2>What the truck sections can and cannot show</h2>
+<p>They show how each model behaves with a camera height, a vehicle and a steering response that comma's fleet does not
+cover, and whether a ranking on comma's cars holds on a vehicle unlike them.</p>
+<ul>
+<li>They come from one truck. Nothing in them says how a model drives another vehicle.</li>
+<li>There are few windows. Each section shows its count, and the conditions (day, night, speed, camera setup) are not balanced.</li>
+<li>Others cannot reproduce them: the drives are private, and only aggregate scores and a few checked stills are published.</li>
+<li>Closed loop is a simulation. The world model is weakest at night, rolls out 7.2 s at most, and pulls late frames toward
+what was actually recorded, so differences that appear only past about 4 s carry little weight.</li>
+<li>No newer model has steered the truck. It drives on lebowski, and every other model is scored by replay.</li>
+</ul>
+<p>Stills are a few camera frames per condition with the model's path drawn on them, each checked so that nothing in it
+identifies the truck, its owner or the place.</p>
+</section>

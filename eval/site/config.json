@@ -1,0 +1,15 @@
+{
+  "site_name": "G-Wagon eval",
+  "reference_model": "lebowski_877m",
+  "umami_src": "https://analytics.drose.io/script.js",
+  "umami_website_id": "",
+  "repo_url": "https://github.com/cipher982/g55-public",
+  "headline": [
+    ["public_open_loop", "lat_mae"],
+    ["public_open_loop", "speed_err_3s"],
+    ["public_closed_loop", "dist_4s"],
+    ["truck_open_loop", "speed_err"],
+    ["truck_closed_loop", "dist_4s"],
+    ["truck_closed_loop", "recovery_4s"]
+  ]
+}

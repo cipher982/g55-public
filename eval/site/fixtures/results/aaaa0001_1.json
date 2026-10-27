@@ -1,0 +1,230 @@
+{
+  "schema": 1,
+  "model": {
+    "id": "aaaa0001_1",
+    "name": "Sample A",
+    "sha256": "aaaa0001aaaa0001aaaa0001aaaa0001aaaa0001aaaa0001aaaa0001aaaa0001",
+    "source": {
+      "kind": "huggingface",
+      "ref": "fixture",
+      "url": "https://huggingface.co/commaai/openpilot_driving_models",
+      "date": "2026-10-14"
+    },
+    "params_m": 395.0,
+    "gmac": 46.7,
+    "family": "residual",
+    "notes": "Fixture for the site generator. Every number is illustrative, not a measurement."
+  },
+  "scored": {
+    "date": "2026-10-27T16:30:00Z",
+    "suite": "fixture-0",
+    "code": "0000000"
+  },
+  "baselines": [
+    "lebowski_877m"
+  ],
+  "sections": {
+    "public_open_loop": {
+      "status": "ok",
+      "unit_of_evidence": "segment",
+      "n": 39,
+      "condition": "native intrinsics, both cameras",
+      "metrics": [
+        {
+          "key": "lat_mae",
+          "label": "Lateral error",
+          "unit": "m/s²",
+          "better": "lower",
+          "value": 0.14300000000000002,
+          "ci": [
+            0.124,
+            0.164
+          ],
+          "paired": {
+            "lebowski_877m": {
+              "delta": 0.034,
+              "ci": [
+                0.022000000000000002,
+                0.048
+              ],
+              "n": 39,
+              "wins": 3
+            }
+          }
+        },
+        {
+          "key": "speed_err_3s",
+          "label": "Speed error at 3 s",
+          "unit": "m/s",
+          "better": "lower",
+          "value": 0.76,
+          "ci": [
+            0.64,
+            0.88
+          ],
+          "paired": {
+            "lebowski_877m": {
+              "delta": 0.04,
+              "ci": [
+                -0.01,
+                0.09
+              ],
+              "n": 39,
+              "wins": 17
+            }
+          }
+        },
+        {
+          "key": "lat_rate_rms",
+          "label": "Lateral action rate",
+          "unit": "m/s³",
+          "better": "lower",
+          "value": 0.46,
+          "ci": [
+            0.4,
+            0.52
+          ],
+          "paired": {
+            "lebowski_877m": {
+              "delta": -0.2,
+              "ci": [
+                -0.25,
+                -0.14
+              ],
+              "n": 39,
+              "wins": 37
+            }
+          }
+        }
+      ],
+      "per_unit_file": "per_unit/aaaa0001_1/public_open_loop.csv"
+    },
+    "public_closed_loop": {
+      "status": "not_run",
+      "unit_of_evidence": "segment",
+      "n": 0,
+      "condition": "worldmodel-4B, comma's ideal car",
+      "metrics": [],
+      "per_unit_file": null
+    },
+    "truck_open_loop": {
+      "status": "ok",
+      "unit_of_evidence": "window",
+      "n": 4,
+      "condition": "plane:1.45, narrow camera at 1.45 m",
+      "metrics": [
+        {
+          "key": "speed_err",
+          "label": "Speed error",
+          "unit": "relative",
+          "better": "lower",
+          "value": 0.062,
+          "ci": [
+            0.05,
+            0.075
+          ],
+          "paired": {
+            "lebowski_877m": {
+              "delta": 0.013,
+              "ci": [
+                0.006,
+                0.021
+              ],
+              "n": 4,
+              "wins": 0
+            }
+          }
+        },
+        {
+          "key": "lat_gain",
+          "label": "Lateral gain",
+          "unit": "ratio",
+          "better": "near1",
+          "value": 0.82,
+          "ci": [
+            0.76,
+            0.86
+          ],
+          "paired": {
+            "lebowski_877m": {
+              "delta": -0.14,
+              "ci": [
+                -0.2,
+                -0.09000000000000001
+              ],
+              "n": 4,
+              "wins": 1
+            }
+          }
+        }
+      ],
+      "per_unit_file": null
+    },
+    "truck_closed_loop": {
+      "status": "ok",
+      "unit_of_evidence": "window",
+      "n": 18,
+      "condition": "worldmodel-4B, G55 steering response",
+      "metrics": [
+        {
+          "key": "dist_4s",
+          "label": "Distance from driven path at 4 s",
+          "unit": "m",
+          "better": "lower",
+          "value": 0.33,
+          "ci": [
+            0.2,
+            0.45
+          ],
+          "paired": {
+            "lebowski_877m": {
+              "delta": 0.02,
+              "ci": [
+                -0.26,
+                0.1
+              ],
+              "n": 18,
+              "wins": 11
+            }
+          }
+        },
+        {
+          "key": "recovery_4s",
+          "label": "Distance at 4 s after a 2°/s yaw kick",
+          "unit": "m",
+          "better": "lower",
+          "value": 0.38,
+          "ci": [
+            0.27,
+            0.5
+          ],
+          "paired": {
+            "lebowski_877m": {
+              "delta": 0.01,
+              "ci": [
+                -0.18,
+                0.15
+              ],
+              "n": 18,
+              "wins": 8
+            }
+          }
+        }
+      ],
+      "per_unit_file": null
+    },
+    "truck_recovery": {
+      "status": "not_run",
+      "unit_of_evidence": "window",
+      "n": 0,
+      "condition": "0.5 m off centre, 2° off heading, braking lead",
+      "metrics": [],
+      "per_unit_file": null
+    }
+  },
+  "stills": [],
+  "limits": [
+    "FIXTURE: not a result.",
+    "The world model is weakest at night and rolls out 7.2 s at most."
+  ]
+}
