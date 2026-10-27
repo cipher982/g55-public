@@ -2,7 +2,7 @@
   "site_name": "openpilot G-Wagon evals",
   "reference_model": "lebowski_877m",
   "umami_src": "https://analytics.drose.io/script.js",
-  "umami_website_id": "",
+  "umami_website_id": "5372a249-0411-4e7e-9f27-d994d2eb9791",
   "repo_url": "https://github.com/cipher982/g55-public",
   "headline": [
     ["public_open_loop", "lat_mae"],

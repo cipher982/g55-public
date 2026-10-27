@@ -70,3 +70,10 @@ every results file.
 
 Backfill: the first edition comes from the 2026-10-27 deep dive's outputs (`geval backfill`
 regenerates it from them).
+
+## Site
+
+`uv run python site/build.py` writes the static site to `site/_site/` (index, method, one page per
+model, the results files) from `results/` and `per_unit/`; there is no server side. The public copy
+at https://openpilot-gwagon-evals.drose.io is republished from a clean checkout of `main` by one
+deploy command, kept with the operator's private notes, that runs this build first.
