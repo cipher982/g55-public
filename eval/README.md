@@ -51,7 +51,9 @@ branches anonymously (a branch counts when its change touches the model director
 openpilot ships compiled models only, so a checkpoint id named there is held until its ONNX is on
 Hugging Face), queues the suite for anything new at the jobs' normal names, and scores models whose
 jobs have finished. Its first pass only records what exists. It touches no GPU itself and posts
-nothing; state and log are in `<work>/watch/`.
+nothing anywhere; with `[watch] publish_repo` set it commits each newly scored model's results to
+that checkout and pushes main, after checking every file against the private `publish_block`
+patterns. State and log are in `<work>/watch/`.
 
 Engines: `engines/route_replay.py` (comma segments, both cameras, lockstep), `engines/wm_closed_loop.py`
 (comma's worldmodel-4B; same initial noise for every policy at every step, so a model run alone

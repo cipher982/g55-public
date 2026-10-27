@@ -14,10 +14,13 @@ Sources (read only, anonymous):
 Each pass, in order: discover, queue (`geval submit` jobs at their normal names, so the shared
 runner starts them in its usual order under the host's GPU lock; nothing here touches the GPU),
 then score every queued model whose jobs have all finished and rewrite its results file. State
-and a log live in <work>/watch/. Nothing is posted or published.
+and a log live in <work>/watch/. Nothing is posted anywhere.
+
+Optionally a pass then commits newly scored models' results to a repository checkout and pushes
+its main (publish_repo; files matching a publish_block pattern are never copied).
 
 Settings, [watch] in the private TOML: sections (default: public and truck open loop, truck
-closed loop, truck recovery), github_calls (default 25).
+closed loop, truck recovery), github_calls (default 25), publish_repo, publish_block, author.
 """
 from __future__ import annotations
 
@@ -189,6 +192,64 @@ class Watch:
             m.update(status="scored", scored_at=now(), failed_jobs=failed, scored_sections=have)
             self.log(f"scored {mid}: {have}" + (f"; failed jobs {failed}" if failed else ""))
 
+    def publish(self):
+        """Commit each scored, unpublished model's results file and public per-unit CSVs to the
+        repository checkout `[watch] publish_repo` and push its main. A file matching any of the
+        private patterns `[watch] publish_block` is never copied. Commit author: `[watch] author`."""
+        import re as _re
+        import shutil
+        import subprocess
+        w = self.cfg.get("watch", {})
+        repo = w.get("publish_repo")
+        todo = [mid for mid, m in self.state["models"].items() if m.get("status") == "scored" and not m.get("published")]
+        if not repo or not todo or self.dry:
+            return
+        from .cli import out_dirs
+        res, pu = out_dirs(self.cfg)
+        block = [_re.compile(x) for x in w.get("publish_block", [])]
+        repo = Path(repo)
+
+        def git(*args, **kw):
+            return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True, **kw)
+
+        git("fetch", "-q", "origin", "main")
+        git("checkout", "-q", "-B", "main", "origin/main")
+        paths = []
+        for mid in todo:
+            files = [res / f"{mid}.json"] + sorted((pu / mid).glob("*.csv"))
+            hits = [str(f.name) for f in files if f.exists() and any(b.search(f.read_text()) for b in block)]
+            if hits:
+                self.state["models"][mid]["published"] = False
+                self.log(f"not publishing {mid}: private pattern in {hits}")
+                continue
+            for f in files:
+                if not f.exists():
+                    continue
+                dst = repo / "eval" / ("results" if f.suffix == ".json" else f"per_unit/{mid}") / f.name
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(f, dst)
+                paths.append(str(dst.relative_to(repo)))
+            self.state["models"][mid]["published"] = True
+        if not paths:
+            return
+        git("add", "--", *paths)
+        if not git("diff", "--cached", "--name-only").stdout.strip():
+            self.log("publish: nothing changed")
+            return
+        a = w.get("author", {})
+        env = {**__import__("os").environ, "GIT_AUTHOR_NAME": a.get("name", "geval watch"),
+               "GIT_AUTHOR_EMAIL": a.get("email", "geval-watch@localhost"),
+               "GIT_COMMITTER_NAME": a.get("name", "geval watch"), "GIT_COMMITTER_EMAIL": a.get("email", "geval-watch@localhost")}
+        names = ", ".join(m for m in todo if self.state["models"][m].get("published"))
+        git("commit", "-q", "-m", f"results: {names} (release watcher)", env=env)
+        try:
+            git("push", "-q", "origin", "HEAD:main")
+            self.log(f"published {names}: {len(paths)} files, {git('rev-parse', '--short=12', 'HEAD').stdout.strip()}")
+        except subprocess.CalledProcessError as e:
+            for m in todo:
+                self.state["models"][m]["published"] = False      # retried next pass on a fresh main
+            self.log(f"publish push failed: {e.stderr.strip()[:300]}")
+
     def run_pass(self):
         self.log("pass start")
         known = self.known()
@@ -215,6 +276,10 @@ class Watch:
         if waiting:
             self.log(f"named on openpilot branches, not yet on Hugging Face: {waiting}")
         self.score_finished()
+        try:
+            self.publish()
+        except Exception as e:                  # a publish problem never stops discovery or scoring
+            self.log(f"publish failed: {type(e).__name__}: {str(e)[:300]}")
         self.state["last_pass"] = now()
         self.save()
         self.log("pass end")
