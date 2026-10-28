@@ -18,9 +18,9 @@
   "notes": "Shipped in openpilot 0.9.8 and 0.9.9. The first split model: a vision model and a policy on a 5 Hz feature history. The policy's desired-curvature head is the steering command. No acceleration command (the longitudinal MPC planned it), so no longitudinal scores. Vision 817b824f/500, policy e07ce1de/700."
  },
  "scored": {
-  "date": "2026-10-28T00:27:38Z",
+  "date": "2026-10-28T01:48:14Z",
   "suite": "geval-1",
-  "code": "073457cffe66"
+  "code": "e1af6a09df98"
  },
  "baselines": [
   "lebowski_877m",
@@ -347,9 +347,9 @@
   "truck_open_loop": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 4,
-   "clusters": 3,
-   "condition": "Measured. The G55's recorded drives replayed as the truck runs the model: narrow camera only, road-plane warp to 1.45 m (plane:1.45). Truth is the truck's CAN speed and yaw rate. Window = unit. 4 windows: 3 on an earlier camera mount, 1 on the current mount; 2 at night.",
+   "n": 119,
+   "clusters": 12,
+   "condition": "Measured. The G55's recorded drives replayed through the model with both of the truck's cameras (each setup's own wide-camera calibration), road-plane warp to 1.45 m. Where the narrow lens does not cover comma's narrow view (the 8 mm lens in the V13 case), those pixels come from the wide camera, brightness matched. Truth is the truck's CAN speed and yaw rate. 30 s windows after a 5 s warm-up; window = unit, drive = cluster; results are also given per camera setup. Corpus windows of 30 s from the truck's recorded drives, scored per camera setup.",
    "baselines": [
     "lebowski_877m",
     "north_dakota"
@@ -360,31 +360,40 @@
      "label": "Lateral error",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.2332,
-     "median": 0.2752,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.1978,
+     "median": 0.1899,
+     "ci": [
+      0.162,
+      0.2069
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.1056,
-       "median": 0.1304,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": 0.025,
+       "median": 0.02146,
+       "ci": [
+        0.01758,
+        0.03703
+       ],
+       "n": 119,
+       "wins": 31,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 2
       },
       "north_dakota": {
-       "delta": 0.01023,
-       "median": 0.01919,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": -0.01628,
+       "median": -0.01506,
+       "ci": [
+        -0.02095,
+        -0.002216
+       ],
+       "n": 119,
+       "wins": 86,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 2
+       "clusters": 12,
+       "cluster_wins": 8
       }
      }
     },
@@ -393,31 +402,40 @@
      "label": "Lateral error at the model's own best lead",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.2319,
-     "median": 0.275,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.1933,
+     "median": 0.1854,
+     "ci": [
+      0.1579,
+      0.2025
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.1055,
-       "median": 0.1301,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": 0.02884,
+       "median": 0.02179,
+       "ci": [
+        0.02077,
+        0.04027
+       ],
+       "n": 119,
+       "wins": 28,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 2
       },
       "north_dakota": {
-       "delta": 0.009183,
-       "median": 0.02001,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": -0.01669,
+       "median": -0.01557,
+       "ci": [
+        -0.02167,
+        -0.001588
+       ],
+       "n": 119,
+       "wins": 86,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 2
+       "clusters": 12,
+       "cluster_wins": 8
       }
      }
     },
@@ -426,31 +444,40 @@
      "label": "Lateral correlation with the car's later motion",
      "unit": "",
      "better": "higher",
-     "value": 0.9026,
-     "median": 0.931,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.8203,
+     "median": 0.8987,
+     "ci": [
+      0.7755,
+      0.8413
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.05761,
-       "median": -0.03492,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": 0.05349,
+       "median": 0.01955,
+       "ci": [
+        0.002739,
+        0.06769
+       ],
+       "n": 119,
+       "wins": 85,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 6
       },
       "north_dakota": {
-       "delta": 0.009445,
-       "median": 0.01978,
-       "ci": null,
-       "n": 4,
-       "wins": 3,
+       "delta": 0.02098,
+       "median": 0.02281,
+       "ci": [
+        0.01255,
+        0.02501
+       ],
+       "n": 119,
+       "wins": 95,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 2
+       "clusters": 12,
+       "cluster_wins": 10
       }
      }
     },
@@ -459,31 +486,40 @@
      "label": "Lateral gain (1 = same size as the car's motion)",
      "unit": "",
      "better": "near1",
-     "value": 1.012,
-     "median": 0.9886,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.9359,
+     "median": 0.9176,
+     "ci": [
+      0.897,
+      1.019
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.01763,
-       "median": -0.02289,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": -0.03317,
+       "median": -0.03795,
+       "ci": [
+        -0.06021,
+        0.05245
+       ],
+       "n": 119,
+       "wins": 70,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 2
+       "clusters": 12,
+       "cluster_wins": 4
       },
       "north_dakota": {
-       "delta": -0.03464,
-       "median": -0.01927,
-       "ci": null,
-       "n": 4,
-       "wins": 3,
+       "delta": 0.01845,
+       "median": 0.01228,
+       "ci": [
+        -0.002989,
+        0.04015
+       ],
+       "n": 119,
+       "wins": 50,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 3
+       "clusters": 12,
+       "cluster_wins": 4
       }
      }
     },
@@ -492,31 +528,40 @@
      "label": "Lateral action rate, RMS (smoothness)",
      "unit": "m/s³",
      "better": "lower",
-     "value": 1.588,
-     "median": 1.829,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 1.584,
+     "median": 1.351,
+     "ci": [
+      1.035,
+      1.741
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.6319,
-       "median": 0.8511,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": -0.7059,
+       "median": -0.5269,
+       "ci": [
+        -0.972,
+        -0.1759
+       ],
+       "n": 119,
+       "wins": 103,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 11
       },
       "north_dakota": {
-       "delta": -4.842,
-       "median": -5.221,
-       "ci": null,
-       "n": 4,
-       "wins": 4,
+       "delta": -3.746,
+       "median": -3.208,
+       "ci": [
+        -4.264,
+        -1.866
+       ],
+       "n": 119,
+       "wins": 119,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 3
+       "clusters": 12,
+       "cluster_wins": 12
       }
      }
     },
@@ -525,31 +570,40 @@
      "label": "Lead of the lateral request over the car's motion",
      "unit": "s",
      "better": "lower",
-     "value": 0.4375,
-     "median": 0.425,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.5889,
+     "median": 0.6,
+     "ci": [
+      0.5622,
+      0.651
+     ],
+     "n": 117,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.1,
-       "median": 0.1,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
-       "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "delta": -0.03632,
+       "median": 0.0,
+       "ci": [
+        -0.0872,
+        0.1
+       ],
+       "n": 117,
+       "wins": 49,
+       "ties": 13,
+       "clusters": 12,
+       "cluster_wins": 5
       },
       "north_dakota": {
-       "delta": 0.0,
-       "median": 0.025,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
-       "ties": 1,
-       "clusters": 3,
-       "cluster_wins": 1
+       "delta": 0.02821,
+       "median": 0.05,
+       "ci": [
+        0.008331,
+        0.05872
+       ],
+       "n": 117,
+       "wins": 34,
+       "ties": 24,
+       "clusters": 12,
+       "cluster_wins": 3
       }
      }
     },
@@ -558,36 +612,1127 @@
      "label": "Plan speed error at 3 s",
      "unit": "m/s",
      "better": "lower",
-     "value": 1.745,
-     "median": 1.524,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 2.433,
+     "median": 2.412,
+     "ci": [
+      1.683,
+      2.998
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.7173,
-       "median": 0.534,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": 0.436,
+       "median": 0.3584,
+       "ci": [
+        0.1371,
+        0.9926
+       ],
+       "n": 119,
+       "wins": 29,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 1
       },
       "north_dakota": {
-       "delta": -2.008,
-       "median": -2.197,
-       "ci": null,
-       "n": 4,
-       "wins": 4,
+       "delta": -1.957,
+       "median": -2.106,
+       "ci": [
+        -2.364,
+        -0.8773
+       ],
+       "n": 119,
+       "wins": 109,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 3
+       "clusters": 12,
+       "cluster_wins": 10
       }
      }
     }
    ],
-   "per_unit_file": null
+   "per_unit_file": null,
+   "by_group": {
+    "stock-aimedup": {
+     "n": 4,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.11,
+       "median": 0.1102,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03109,
+         "median": -0.03394,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "north_dakota": {
+         "delta": -0.02254,
+         "median": -0.02734,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1076,
+       "median": 0.1089,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.032,
+         "median": -0.03448,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "north_dakota": {
+         "delta": -0.02331,
+         "median": -0.02948,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8101,
+       "median": 0.9251,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01494,
+         "median": 0.02018,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "north_dakota": {
+         "delta": 0.02622,
+         "median": 0.01766,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.8195,
+       "median": 0.9236,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1272,
+         "median": -0.1604,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "north_dakota": {
+         "delta": -0.1296,
+         "median": -0.1516,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.9038,
+       "median": 0.9234,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.2491,
+         "median": -0.2358,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "north_dakota": {
+         "delta": -1.877,
+         "median": -1.949,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.5667,
+       "median": 0.55,
+       "ci": null,
+       "n": 3,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.1167,
+         "median": 0.2,
+         "ci": null,
+         "n": 3,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": 0.05,
+         "median": 0.1,
+         "ci": null,
+         "n": 3,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 2.915,
+       "median": 2.963,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.5261,
+         "median": 0.5656,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": 0.1214,
+         "median": 0.5052,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      }
+     ]
+    },
+    "stock-dual": {
+     "n": 13,
+     "clusters": 4,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1823,
+       "median": 0.171,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03711,
+         "median": 0.03299,
+         "ci": null,
+         "n": 13,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": 0.01057,
+         "median": 0.007799,
+         "ci": null,
+         "n": 13,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.177,
+       "median": 0.1728,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03773,
+         "median": 0.03248,
+         "ci": null,
+         "n": 13,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": 0.01203,
+         "median": 0.00937,
+         "ci": null,
+         "n": 13,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8246,
+       "median": 0.8413,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01125,
+         "median": 0.002042,
+         "ci": null,
+         "n": 13,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        },
+        "north_dakota": {
+         "delta": 0.007246,
+         "median": 0.01423,
+         "ci": null,
+         "n": 13,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 1.014,
+       "median": 0.8897,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.1069,
+         "median": 0.08614,
+         "ci": null,
+         "n": 13,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": 0.05718,
+         "median": 0.03828,
+         "ci": null,
+         "n": 13,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.9691,
+       "median": 0.8696,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.2068,
+         "median": -0.189,
+         "ci": null,
+         "n": 13,
+         "wins": 11,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        },
+        "north_dakota": {
+         "delta": -1.209,
+         "median": -0.6771,
+         "ci": null,
+         "n": 13,
+         "wins": 13,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.6333,
+       "median": 0.675,
+       "ci": null,
+       "n": 12,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.09583,
+         "median": 0.05,
+         "ci": null,
+         "n": 12,
+         "wins": 2,
+         "ties": 2,
+         "clusters": 4,
+         "cluster_wins": 1
+        },
+        "north_dakota": {
+         "delta": 0.01667,
+         "median": 0.0,
+         "ci": null,
+         "n": 12,
+         "wins": 5,
+         "ties": 3,
+         "clusters": 4,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 1.231,
+       "median": 1.198,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.39,
+         "median": 0.365,
+         "ci": null,
+         "n": 13,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -0.3406,
+         "median": -0.3313,
+         "ci": null,
+         "n": 13,
+         "wins": 11,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 3
+        }
+       }
+      }
+     ]
+    },
+    "stock-newcase": {
+     "n": 2,
+     "clusters": 1,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.2073,
+       "median": 0.2073,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.07295,
+         "median": 0.07295,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -0.02203,
+         "median": -0.02203,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.2076,
+       "median": 0.2076,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.07244,
+         "median": 0.07244,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -0.02022,
+         "median": -0.02022,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8159,
+       "median": 0.8159,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03165,
+         "median": -0.03165,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": 0.001462,
+         "median": 0.001462,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.8735,
+       "median": 0.8735,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.08356,
+         "median": -0.08356,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "north_dakota": {
+         "delta": -0.01741,
+         "median": -0.01741,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 1.746,
+       "median": 1.746,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.4704,
+         "median": 0.4704,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -1.859,
+         "median": -1.859,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.35,
+       "median": 0.35,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.15,
+         "median": -0.15,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 1,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "north_dakota": {
+         "delta": -0.125,
+         "median": -0.125,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 1.943,
+       "median": 1.943,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1509,
+         "median": -0.1509,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "north_dakota": {
+         "delta": -0.8679,
+         "median": -0.8679,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      }
+     ]
+    },
+    "v13-8mm": {
+     "n": 92,
+     "clusters": 3,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.2066,
+       "median": 0.1965,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.02501,
+         "median": 0.02097,
+         "ci": null,
+         "n": 92,
+         "wins": 25,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -0.01924,
+         "median": -0.01657,
+         "ci": null,
+         "n": 92,
+         "wins": 69,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.2022,
+       "median": 0.1929,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03001,
+         "median": 0.02184,
+         "ci": null,
+         "n": 92,
+         "wins": 22,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -0.02002,
+         "median": -0.0173,
+         "ci": null,
+         "n": 92,
+         "wins": 70,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8188,
+       "median": 0.9067,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.07034,
+         "median": 0.03047,
+         "ci": null,
+         "n": 92,
+         "wins": 71,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "north_dakota": {
+         "delta": 0.02316,
+         "median": 0.02391,
+         "ci": null,
+         "n": 92,
+         "wins": 75,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.9325,
+       "median": 0.9183,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.05271,
+         "median": -0.04878,
+         "ci": null,
+         "n": 92,
+         "wins": 61,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        },
+        "north_dakota": {
+         "delta": 0.02277,
+         "median": 0.01606,
+         "ci": null,
+         "n": 92,
+         "wins": 38,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 1.749,
+       "median": 1.536,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.869,
+         "median": -0.6945,
+         "ci": null,
+         "n": 92,
+         "wins": 82,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "north_dakota": {
+         "delta": -4.314,
+         "median": -3.858,
+         "ci": null,
+         "n": 92,
+         "wins": 92,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.5826,
+       "median": 0.575,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.07772,
+         "median": 0.0,
+         "ci": null,
+         "n": 92,
+         "wins": 45,
+         "ties": 8,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "north_dakota": {
+         "delta": 0.03315,
+         "median": 0.05,
+         "ci": null,
+         "n": 92,
+         "wins": 24,
+         "ties": 19,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 2.68,
+       "median": 2.587,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.446,
+         "median": 0.3547,
+         "ci": null,
+         "n": 92,
+         "wins": 23,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -2.277,
+         "median": -2.305,
+         "ci": null,
+         "n": 92,
+         "wins": 87,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      }
+     ]
+    },
+    "v14-8mm": {
+     "n": 8,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1626,
+       "median": 0.1591,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.02123,
+         "median": 0.01577,
+         "ci": null,
+         "n": 8,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -0.0213,
+         "median": -0.02392,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1575,
+       "median": 0.1582,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.02045,
+         "median": 0.01087,
+         "ci": null,
+         "n": 8,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -0.02093,
+         "median": -0.0196,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8369,
+       "median": 0.9134,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.0311,
+         "median": 0.0003009,
+         "ci": null,
+         "n": 8,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": 0.02053,
+         "median": 0.02655,
+         "ci": null,
+         "n": 8,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.9219,
+       "median": 0.9607,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.0236,
+         "median": 0.02044,
+         "ci": null,
+         "n": 8,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -0.01121,
+         "median": -0.001775,
+         "ci": null,
+         "n": 8,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.9923,
+       "median": 0.8083,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1633,
+         "median": -0.1718,
+         "ci": null,
+         "n": 8,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "north_dakota": {
+         "delta": -2.748,
+         "median": -3.03,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.6625,
+       "median": 0.6,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.2125,
+         "median": 0.2,
+         "ci": null,
+         "n": 8,
+         "wins": 0,
+         "ties": 2,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": 0.01875,
+         "median": 0.025,
+         "ci": null,
+         "n": 8,
+         "wins": 2,
+         "ties": 2,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 1.429,
+       "median": 1.451,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.4967,
+         "median": 0.5193,
+         "ci": null,
+         "n": 8,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "north_dakota": {
+         "delta": -2.211,
+         "median": -2.211,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      }
+     ]
+    }
+   }
   },
   "truck_closed_loop": {
    "status": "not_run",
@@ -615,7 +1760,7 @@
   "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below 10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
   "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its distance from 1); wins count units where the model is better in the metric's direction.",
   "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best correlates with the car's later lateral motion; a larger value means the request comes earlier. A value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
-  "Truck open loop pools few windows (camera mounts changed between drives); read it as a check that a model works on the truck's camera, not a ranking.",
+  "Truck open loop comes from few drives, and the camera setup changed between them (lens, housing, aim); the pooled number mixes setups, so read the per-setup numbers too. The 8 mm setups' wide camera recorded about 7-10 fps, so its frame can be up to ~60 ms from the narrow one. On the V14 setup up to 7 of a window's 700 steps are ~100 ms (one camera frame dropped). The camera's aim is the truck's live calibration learned on each drive; drives whose recorded calibration was carried over from another drive are left out.",
   "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 400 frames of one route): the plan's lateral position is 0.070 m RMS from comma's output; every other model here is 1.53 m or more from it on the same check.",
   "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
   "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",

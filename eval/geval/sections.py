@@ -115,11 +115,16 @@ LIMITS_COMMON = [
 LIMITS = {
     "truck_open_loop": "Truck open loop comes from few drives, and the camera setup changed between them (lens, "
                        "housing, aim); the pooled number mixes setups, so read the per-setup numbers too. "
-                       "The 8 mm setups' wide camera recorded about 8-10 fps, so its frame can be up to ~60 ms "
-                       "from the narrow one.",
+                       "The 8 mm setups' wide camera recorded about 7-10 fps, so its frame can be up to ~60 ms "
+                       "from the narrow one. On the V14 setup up to 7 of a window's 700 steps are ~100 ms "
+                       "(one camera frame dropped). The camera's aim is the truck's live calibration learned "
+                       "on each drive; drives whose recorded calibration was carried over from another drive "
+                       "are left out.",
     "truck_closed_loop": "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not "
                          "validated on it in closed loop; the reference is the driver's own line, not the lane "
-                         "centre.",
+                         "centre. On the V14 setup the wide frame can be up to 90 ms from the simulated one "
+                         "(its camera recorded 7-9 fps).",
     "truck_recovery": "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame "
-                      "jump it does not, so none is used). The braking-lead test has 2 windows from one drive.",
+                      "jump it does not, so none is used). The braking-lead test has 2 windows from one drive, "
+                      "whose recorded calibration was carried over from an earlier drive.",
 }

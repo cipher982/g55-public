@@ -18,9 +18,9 @@
   "notes": "Uploaded as \"mountain dew model\"; never shipped. Vision base f22e06e5 with an RL residual head."
  },
  "scored": {
-  "date": "2026-10-28T00:14:16Z",
+  "date": "2026-10-28T01:48:17Z",
   "suite": "geval-1",
-  "code": "139121bc1a13"
+  "code": "e1af6a09df98"
  },
  "baselines": [
   "lebowski_877m",
@@ -814,9 +814,9 @@
   "truck_open_loop": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 4,
-   "clusters": 3,
-   "condition": "Measured. The G55's recorded drives replayed as the truck runs the model: narrow camera only, road-plane warp to 1.45 m (plane:1.45). Truth is the truck's CAN speed and yaw rate. Window = unit. 4 windows: 3 on an earlier camera mount, 1 on the current mount; 2 at night.",
+   "n": 119,
+   "clusters": 12,
+   "condition": "Measured. The G55's recorded drives replayed through the model with both of the truck's cameras (each setup's own wide-camera calibration), road-plane warp to 1.45 m. Where the narrow lens does not cover comma's narrow view (the 8 mm lens in the V13 case), those pixels come from the wide camera, brightness matched. Truth is the truck's CAN speed and yaw rate. 30 s windows after a 5 s warm-up; window = unit, drive = cluster; results are also given per camera setup. Corpus windows of 30 s from the truck's recorded drives, scored per camera setup.",
    "baselines": [
     "lebowski_877m",
     "f78ed37d_12864"
@@ -827,31 +827,40 @@
      "label": "Lateral error",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.1418,
-     "median": 0.1542,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.1573,
+     "median": 0.1491,
+     "ci": [
+      0.1286,
+      0.1687
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.01417,
-       "median": 0.01486,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": -0.01546,
+       "median": -0.01306,
+       "ci": [
+        -0.02156,
+        -0.00391
+       ],
+       "n": 119,
+       "wins": 86,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 8
       },
       "f78ed37d_12864": {
-       "delta": -0.005613,
-       "median": -0.005954,
-       "ci": null,
-       "n": 4,
-       "wins": 4,
+       "delta": -0.009318,
+       "median": -0.009106,
+       "ci": [
+        -0.02154,
+        -0.006384
+       ],
+       "n": 119,
+       "wins": 85,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 3
+       "clusters": 12,
+       "cluster_wins": 11
       }
      }
     },
@@ -860,31 +869,40 @@
      "label": "Lateral error at the model's own best lead",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.1335,
-     "median": 0.1412,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.1438,
+     "median": 0.1292,
+     "ci": [
+      0.1188,
+      0.1536
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.007115,
-       "median": 0.003517,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": -0.02068,
+       "median": -0.01854,
+       "ci": [
+        -0.02495,
+        -0.009532
+       ],
+       "n": 119,
+       "wins": 96,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 9
       },
       "f78ed37d_12864": {
-       "delta": -0.008013,
-       "median": -0.008831,
-       "ci": null,
-       "n": 4,
-       "wins": 4,
+       "delta": -0.01262,
+       "median": -0.01206,
+       "ci": [
+        -0.02235,
+        -0.0083
+       ],
+       "n": 119,
+       "wins": 93,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 3
+       "clusters": 12,
+       "cluster_wins": 12
       }
      }
     },
@@ -893,31 +911,40 @@
      "label": "Lateral correlation with the car's later motion",
      "unit": "",
      "better": "higher",
-     "value": 0.9425,
-     "median": 0.9458,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.8169,
+     "median": 0.9106,
+     "ci": [
+      0.7759,
+      0.8447
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.01772,
-       "median": -0.019,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": 0.05013,
+       "median": 0.0197,
+       "ci": [
+        0.01873,
+        0.05944
+       ],
+       "n": 119,
+       "wins": 93,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 9
       },
       "f78ed37d_12864": {
-       "delta": -0.003108,
-       "median": -0.001153,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": -0.003051,
+       "median": -0.003433,
+       "ci": [
+        -0.008442,
+        0.01938
+       ],
+       "n": 119,
+       "wins": 42,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 7
       }
      }
     },
@@ -926,31 +953,40 @@
      "label": "Lateral gain (1 = same size as the car's motion)",
      "unit": "",
      "better": "near1",
-     "value": 0.8412,
-     "median": 0.8374,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.8087,
+     "median": 0.8373,
+     "ci": [
+      0.7921,
+      0.8786
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.101,
-       "median": 0.1064,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": -0.01465,
+       "median": -0.00623,
+       "ci": [
+        -0.02963,
+        0.01649
+       ],
+       "n": 119,
+       "wins": 63,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 6
       },
       "f78ed37d_12864": {
-       "delta": 0.006438,
-       "median": 0.004694,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": -0.005709,
+       "median": -0.007839,
+       "ci": [
+        -0.04607,
+        0.009177
+       ],
+       "n": 119,
+       "wins": 66,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 10
       }
      }
     },
@@ -959,31 +995,40 @@
      "label": "Lateral action rate, RMS (smoothness)",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.5264,
-     "median": 0.542,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 1.084,
+     "median": 0.8072,
+     "ci": [
+      0.5967,
+      1.321
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.4302,
-       "median": -0.4503,
-       "ci": null,
-       "n": 4,
-       "wins": 4,
+       "delta": -1.206,
+       "median": -1.135,
+       "ci": [
+        -1.332,
+        -0.5569
+       ],
+       "n": 119,
+       "wins": 118,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 3
+       "clusters": 12,
+       "cluster_wins": 12
       },
       "f78ed37d_12864": {
-       "delta": 0.01423,
-       "median": -0.001408,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": 0.1647,
+       "median": 0.07102,
+       "ci": [
+        -0.03871,
+        0.2398
+       ],
+       "n": 119,
+       "wins": 39,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 2
+       "clusters": 12,
+       "cluster_wins": 7
       }
      }
     },
@@ -992,31 +1037,40 @@
      "label": "Lead of the lateral request over the car's motion",
      "unit": "s",
      "better": "lower",
-     "value": 0.4625,
-     "median": 0.525,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.6504,
+     "median": 0.6,
+     "ci": [
+      0.5778,
+      0.702
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.125,
-       "median": 0.15,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
-       "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "delta": 0.02815,
+       "median": 0.05,
+       "ci": [
+        -0.04205,
+        0.109
+       ],
+       "n": 119,
+       "wins": 36,
+       "ties": 23,
+       "clusters": 12,
+       "cluster_wins": 4
       },
       "f78ed37d_12864": {
-       "delta": 0.0375,
-       "median": 0.025,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
-       "ties": 2,
-       "clusters": 3,
-       "cluster_wins": 0
+       "delta": 0.02966,
+       "median": 0.0,
+       "ci": [
+        -0.03273,
+        0.05448
+       ],
+       "n": 118,
+       "wins": 18,
+       "ties": 46,
+       "clusters": 12,
+       "cluster_wins": 4
       }
      }
     },
@@ -1025,31 +1079,40 @@
      "label": "Longitudinal error",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.3274,
-     "median": 0.3313,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.358,
+     "median": 0.3533,
+     "ci": [
+      0.2771,
+      0.4087
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.01293,
-       "median": 0.01168,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": -0.01069,
+       "median": -0.01331,
+       "ci": [
+        -0.0232,
+        0.01638
+       ],
+       "n": 119,
+       "wins": 69,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 5
       },
       "f78ed37d_12864": {
-       "delta": 0.01019,
-       "median": 0.007178,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": 0.03727,
+       "median": 0.02946,
+       "ci": [
+        0.009631,
+        0.05358
+       ],
+       "n": 119,
+       "wins": 19,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 2
+       "clusters": 12,
+       "cluster_wins": 0
       }
      }
     },
@@ -1058,31 +1121,40 @@
      "label": "Longitudinal correlation",
      "unit": "",
      "better": "higher",
-     "value": 0.5435,
-     "median": 0.5729,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.3376,
+     "median": 0.2921,
+     "ci": [
+      0.2835,
+      0.5978
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.03888,
-       "median": -0.02215,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": 0.01072,
+       "median": 0.02445,
+       "ci": [
+        -0.0241,
+        0.04796
+       ],
+       "n": 119,
+       "wins": 68,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 5
       },
       "f78ed37d_12864": {
-       "delta": -0.01987,
-       "median": 0.004495,
-       "ci": null,
-       "n": 4,
-       "wins": 3,
+       "delta": -0.05462,
+       "median": -0.03671,
+       "ci": [
+        -0.08073,
+        -0.001
+       ],
+       "n": 119,
+       "wins": 40,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 2
+       "clusters": 12,
+       "cluster_wins": 3
       }
      }
     },
@@ -1091,31 +1163,40 @@
      "label": "Longitudinal error while braking",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.5364,
-     "median": 0.5522,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.4722,
+     "median": 0.4651,
+     "ci": [
+      0.4401,
+      0.5886
+     ],
+     "n": 81,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.02093,
-       "median": 0.03521,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": -0.02665,
+       "median": -0.03469,
+       "ci": [
+        -0.05073,
+        0.03018
+       ],
+       "n": 81,
+       "wins": 51,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 7
       },
       "f78ed37d_12864": {
-       "delta": -0.04796,
-       "median": -0.05903,
-       "ci": null,
-       "n": 4,
-       "wins": 4,
+       "delta": -0.01847,
+       "median": -0.02161,
+       "ci": [
+        -0.0317,
+        0.02596
+       ],
+       "n": 81,
+       "wins": 51,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 3
+       "clusters": 12,
+       "cluster_wins": 5
       }
      }
     },
@@ -1124,31 +1205,40 @@
      "label": "Longitudinal action rate, RMS (smoothness)",
      "unit": "m/s³",
      "better": "lower",
-     "value": 1.685,
-     "median": 1.22,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 4.463,
+     "median": 4.332,
+     "ci": [
+      2.069,
+      5.795
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.06443,
-       "median": -0.2764,
-       "ci": null,
-       "n": 4,
-       "wins": 3,
+       "delta": -1.147,
+       "median": -1.238,
+       "ci": [
+        -1.714,
+        -0.7655
+       ],
+       "n": 119,
+       "wins": 90,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 2
+       "clusters": 12,
+       "cluster_wins": 11
       },
       "f78ed37d_12864": {
-       "delta": 0.4171,
-       "median": 0.006182,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": 2.089,
+       "median": 1.828,
+       "ci": [
+        0.334,
+        3.155
+       ],
+       "n": 119,
+       "wins": 13,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 3
       }
      }
     },
@@ -1157,36 +1247,1727 @@
      "label": "Plan speed error at 3 s",
      "unit": "m/s",
      "better": "lower",
-     "value": 1.304,
-     "median": 1.032,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 1.889,
+     "median": 1.838,
+     "ci": [
+      1.152,
+      2.301
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.2761,
-       "median": 0.1205,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": -0.1086,
+       "median": -0.1249,
+       "ci": [
+        -0.3518,
+        0.306
+       ],
+       "n": 119,
+       "wins": 78,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 5
       },
       "f78ed37d_12864": {
-       "delta": 0.2557,
-       "median": 0.04288,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": 0.05808,
+       "median": 0.03675,
+       "ci": [
+        -0.1388,
+        0.3123
+       ],
+       "n": 119,
+       "wins": 52,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 2
+       "clusters": 12,
+       "cluster_wins": 7
       }
      }
     }
    ],
-   "per_unit_file": null
+   "per_unit_file": null,
+   "by_group": {
+    "stock-aimedup": {
+     "n": 4,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1067,
+       "median": 0.101,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03441,
+         "median": -0.04299,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": -0.04368,
+         "median": -0.04471,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1017,
+       "median": 0.1002,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03791,
+         "median": -0.0483,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": -0.03987,
+         "median": -0.03391,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8343,
+       "median": 0.903,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03917,
+         "median": 0.02948,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": 0.09025,
+         "median": 0.1123,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.7722,
+       "median": 0.8463,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1082,
+         "median": -0.0831,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": -0.1754,
+         "median": -0.2323,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.8354,
+       "median": 0.7923,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.3175,
+         "median": -0.3364,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": -0.2664,
+         "median": -0.2844,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.575,
+       "median": 0.525,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.0625,
+         "median": 0.125,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 1,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": -0.1375,
+         "median": -0.225,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.6866,
+       "median": 0.6522,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.091,
+         "median": -0.1014,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": 0.1047,
+         "median": 0.1222,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.5942,
+       "median": 0.6775,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.05877,
+         "median": 0.04534,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": 0.0408,
+         "median": 0.04342,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.2525,
+       "median": 0.2525,
+       "ci": null,
+       "n": 2,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.0645,
+         "median": 0.0645,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": -0.02647,
+         "median": -0.02647,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 2.041,
+       "median": 1.925,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -1.253,
+         "median": -1.184,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": 0.4827,
+         "median": 0.438,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 1.443,
+       "median": 1.507,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.9457,
+         "median": -0.9688,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": -0.8253,
+         "median": -0.75,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      }
+     ]
+    },
+    "stock-dual": {
+     "n": 13,
+     "clusters": 4,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1406,
+       "median": 0.1245,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.004567,
+         "median": -0.002744,
+         "ci": null,
+         "n": 13,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": -0.01426,
+         "median": -0.01058,
+         "ci": null,
+         "n": 13,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1288,
+       "median": 0.1162,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.01042,
+         "median": -0.007014,
+         "ci": null,
+         "n": 13,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 3
+        },
+        "f78ed37d_12864": {
+         "delta": -0.01673,
+         "median": -0.01432,
+         "ci": null,
+         "n": 13,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8409,
+       "median": 0.8586,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.02755,
+         "median": 0.001447,
+         "ci": null,
+         "n": 13,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 3
+        },
+        "f78ed37d_12864": {
+         "delta": 0.008941,
+         "median": 0.001106,
+         "ci": null,
+         "n": 13,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.9181,
+       "median": 0.8719,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.02616,
+         "median": 0.02494,
+         "ci": null,
+         "n": 13,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": -0.02754,
+         "median": -0.01214,
+         "ci": null,
+         "n": 13,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.5937,
+       "median": 0.5646,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.5822,
+         "median": -0.5462,
+         "ci": null,
+         "n": 13,
+         "wins": 13,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        },
+        "f78ed37d_12864": {
+         "delta": 0.04914,
+         "median": 0.03037,
+         "ci": null,
+         "n": 13,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.65,
+       "median": 0.65,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.1385,
+         "median": 0.1,
+         "ci": null,
+         "n": 13,
+         "wins": 2,
+         "ties": 2,
+         "clusters": 4,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": 0.05385,
+         "median": 0.0,
+         "ci": null,
+         "n": 13,
+         "wins": 2,
+         "ties": 5,
+         "clusters": 4,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.2654,
+       "median": 0.2676,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.0372,
+         "median": 0.02865,
+         "ci": null,
+         "n": 13,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": 0.02303,
+         "median": 0.01841,
+         "ci": null,
+         "n": 13,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.5899,
+       "median": 0.7324,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.04425,
+         "median": 0.004358,
+         "ci": null,
+         "n": 13,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": -0.07229,
+         "median": -0.0266,
+         "ci": null,
+         "n": 13,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.6002,
+       "median": 0.6584,
+       "ci": null,
+       "n": 6,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.04712,
+         "median": -0.04838,
+         "ci": null,
+         "n": 6,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": 0.005405,
+         "median": 0.00716,
+         "ci": null,
+         "n": 6,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 1.181,
+       "median": 1.185,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -1.033,
+         "median": -1.156,
+         "ci": null,
+         "n": 13,
+         "wins": 13,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        },
+        "f78ed37d_12864": {
+         "delta": 0.01051,
+         "median": 0.01901,
+         "ci": null,
+         "n": 13,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 0.8066,
+       "median": 0.8323,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03457,
+         "median": -0.06044,
+         "ci": null,
+         "n": 13,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": 0.02784,
+         "median": 0.04065,
+         "ci": null,
+         "n": 13,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        }
+       }
+      }
+     ]
+    },
+    "stock-newcase": {
+     "n": 2,
+     "clusters": 1,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1304,
+       "median": 0.1304,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.003891,
+         "median": -0.003891,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": -0.03135,
+         "median": -0.03135,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1259,
+       "median": 0.1259,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.009307,
+         "median": -0.009307,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": -0.03421,
+         "median": -0.03421,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8351,
+       "median": 0.8351,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.01243,
+         "median": -0.01243,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": 0.0001777,
+         "median": 0.0001777,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.8176,
+       "median": 0.8176,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.02766,
+         "median": -0.02766,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": -0.05329,
+         "median": -0.05329,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.774,
+       "median": 0.774,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.5016,
+         "median": -0.5016,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": -0.04244,
+         "median": -0.04244,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.475,
+       "median": 0.475,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.025,
+         "median": -0.025,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": 0.0,
+         "median": 0.0,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 2,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.3675,
+       "median": 0.3675,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.005027,
+         "median": 0.005027,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": 0.0165,
+         "median": 0.0165,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.5575,
+       "median": 0.5575,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.07087,
+         "median": 0.07087,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": -0.02508,
+         "median": -0.02508,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.3833,
+       "median": 0.3833,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.12,
+         "median": -0.12,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": 0.02548,
+         "median": 0.02548,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 2.425,
+       "median": 2.425,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.9314,
+         "median": -0.9314,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": 0.491,
+         "median": 0.491,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 2.129,
+       "median": 2.129,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03487,
+         "median": 0.03487,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": -0.3672,
+         "median": -0.3672,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      }
+     ]
+    },
+    "v13-8mm": {
+     "n": 92,
+     "clusters": 3,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1628,
+       "median": 0.1564,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.01877,
+         "median": -0.01561,
+         "ci": null,
+         "n": 92,
+         "wins": 73,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "f78ed37d_12864": {
+         "delta": -0.006191,
+         "median": -0.007323,
+         "ci": null,
+         "n": 92,
+         "wins": 63,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1484,
+       "median": 0.133,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.02381,
+         "median": -0.02146,
+         "ci": null,
+         "n": 92,
+         "wins": 80,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "f78ed37d_12864": {
+         "delta": -0.01007,
+         "median": -0.01062,
+         "ci": null,
+         "n": 92,
+         "wins": 71,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8089,
+       "median": 0.9117,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.06044,
+         "median": 0.02504,
+         "ci": null,
+         "n": 92,
+         "wins": 79,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "f78ed37d_12864": {
+         "delta": -0.009206,
+         "median": -0.006426,
+         "ci": null,
+         "n": 92,
+         "wins": 27,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.7875,
+       "median": 0.8175,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.02121,
+         "median": -0.007247,
+         "ci": null,
+         "n": 92,
+         "wins": 50,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "f78ed37d_12864": {
+         "delta": 0.007271,
+         "median": -0.0006248,
+         "ci": null,
+         "n": 92,
+         "wins": 46,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 1.216,
+       "median": 0.9481,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -1.401,
+         "median": -1.307,
+         "ci": null,
+         "n": 92,
+         "wins": 91,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "f78ed37d_12864": {
+         "delta": 0.2201,
+         "median": 0.09504,
+         "ci": null,
+         "n": 92,
+         "wins": 25,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.6652,
+       "median": 0.6,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.004891,
+         "median": 0.0,
+         "ci": null,
+         "n": 92,
+         "wins": 32,
+         "ties": 17,
+         "clusters": 3,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": 0.03681,
+         "median": 0.0,
+         "ci": null,
+         "n": 91,
+         "wins": 11,
+         "ties": 35,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.3573,
+       "median": 0.3704,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.01871,
+         "median": -0.01868,
+         "ci": null,
+         "n": 92,
+         "wins": 59,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "f78ed37d_12864": {
+         "delta": 0.03693,
+         "median": 0.03017,
+         "ci": null,
+         "n": 92,
+         "wins": 15,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.2553,
+       "median": 0.2378,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.02157,
+         "median": 0.03745,
+         "ci": null,
+         "n": 92,
+         "wins": 55,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": -0.05634,
+         "median": -0.04196,
+         "ci": null,
+         "n": 92,
+         "wins": 32,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.4537,
+       "median": 0.4651,
+       "ci": null,
+       "n": 65,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03544,
+         "median": -0.04038,
+         "ci": null,
+         "n": 65,
+         "wins": 43,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "f78ed37d_12864": {
+         "delta": -0.02666,
+         "median": -0.02422,
+         "ci": null,
+         "n": 65,
+         "wins": 44,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 5.065,
+       "median": 5.093,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -1.268,
+         "median": -1.538,
+         "ci": null,
+         "n": 92,
+         "wins": 68,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "f78ed37d_12864": {
+         "delta": 2.514,
+         "median": 2.575,
+         "ci": null,
+         "n": 92,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 2.125,
+       "median": 1.978,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1094,
+         "median": -0.2267,
+         "ci": null,
+         "n": 92,
+         "wins": 63,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": 0.1205,
+         "median": 0.05814,
+         "ci": null,
+         "n": 92,
+         "wins": 36,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      }
+     ]
+    },
+    "v14-8mm": {
+     "n": 8,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1528,
+       "median": 0.1562,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01142,
+         "median": 0.01173,
+         "ci": null,
+         "n": 8,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": -0.01455,
+         "median": -0.01226,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1416,
+       "median": 0.1404,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.004464,
+         "median": 0.004159,
+         "ci": null,
+         "n": 8,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": -0.01621,
+         "median": -0.01408,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8573,
+       "median": 0.9252,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.01066,
+         "median": -0.0001918,
+         "ci": null,
+         "n": 8,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": 0.0007968,
+         "median": -0.003292,
+         "ci": null,
+         "n": 8,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.8899,
+       "median": 0.8782,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.04456,
+         "median": 0.03097,
+         "ci": null,
+         "n": 8,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": -0.02278,
+         "median": -0.03079,
+         "ci": null,
+         "n": 8,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.5633,
+       "median": 0.4946,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.5922,
+         "median": -0.5059,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "f78ed37d_12864": {
+         "delta": -0.01697,
+         "median": -0.02519,
+         "ci": null,
+         "n": 8,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.5625,
+       "median": 0.5,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.1125,
+         "median": 0.1,
+         "ci": null,
+         "n": 8,
+         "wins": 0,
+         "ties": 3,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": -2.082e-17,
+         "median": 0.0,
+         "ci": null,
+         "n": 8,
+         "wins": 2,
+         "ties": 4,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.3494,
+       "median": 0.2838,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.04007,
+         "median": 0.03585,
+         "ci": null,
+         "n": 8,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": 0.03567,
+         "median": 0.02767,
+         "ci": null,
+         "n": 8,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.6909,
+       "median": 0.7232,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.06377,
+         "median": -0.03522,
+         "ci": null,
+         "n": 8,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": -0.0613,
+         "median": -0.05105,
+         "ci": null,
+         "n": 8,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.6475,
+       "median": 0.7275,
+       "ci": null,
+       "n": 6,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.08986,
+         "median": 0.04654,
+         "ci": null,
+         "n": 6,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": 0.03432,
+         "median": 0.005476,
+         "ci": null,
+         "n": 6,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 4.594,
+       "median": 4.453,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.06123,
+         "median": 0.1742,
+         "ci": null,
+         "n": 8,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "f78ed37d_12864": {
+         "delta": 1.786,
+         "median": 2.022,
+         "ci": null,
+         "n": 8,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 1.095,
+       "median": 1.065,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.1622,
+         "median": 0.1656,
+         "ci": null,
+         "n": 8,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "f78ed37d_12864": {
+         "delta": -0.0631,
+         "median": -0.08635,
+         "ci": null,
+         "n": 8,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      }
+     ]
+    }
+   }
   },
   "truck_closed_loop": {
    "status": "ok",
@@ -1752,8 +3533,8 @@
   "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below 10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
   "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its distance from 1); wins count units where the model is better in the metric's direction.",
   "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best correlates with the car's later lateral motion; a larger value means the request comes earlier. A value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
-  "Truck open loop pools few windows (camera mounts changed between drives); read it as a check that a model works on the truck's camera, not a ranking.",
-  "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not validated on it in closed loop; the reference is the driver's own line, not the lane centre.",
-  "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame jump it does not, so none is used). The braking-lead test is not built yet: the drives the truck closed loop can use hold no window where a car ahead brakes."
+  "Truck open loop comes from few drives, and the camera setup changed between them (lens, housing, aim); the pooled number mixes setups, so read the per-setup numbers too. The 8 mm setups' wide camera recorded about 7-10 fps, so its frame can be up to ~60 ms from the narrow one. On the V14 setup up to 7 of a window's 700 steps are ~100 ms (one camera frame dropped). The camera's aim is the truck's live calibration learned on each drive; drives whose recorded calibration was carried over from another drive are left out.",
+  "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not validated on it in closed loop; the reference is the driver's own line, not the lane centre. On the V14 setup the wide frame can be up to 90 ms from the simulated one (its camera recorded 7-9 fps).",
+  "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame jump it does not, so none is used). The braking-lead test has 2 windows from one drive, whose recorded calibration was carried over from an earlier drive."
  ]
 }

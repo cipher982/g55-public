@@ -18,9 +18,9 @@
   "notes": "In the openpilot 0.10.3 tag. Plan only, commands from modeld's get_action_from_model. Vision 6a7d09ad/200, policy 4b78e2e6/400."
  },
  "scored": {
-  "date": "2026-10-28T00:27:39Z",
+  "date": "2026-10-28T01:48:15Z",
   "suite": "geval-1",
-  "code": "073457cffe66"
+  "code": "e1af6a09df98"
  },
  "baselines": [
   "lebowski_877m",
@@ -515,9 +515,9 @@
   "truck_open_loop": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 4,
-   "clusters": 3,
-   "condition": "Measured. The G55's recorded drives replayed as the truck runs the model: narrow camera only, road-plane warp to 1.45 m (plane:1.45). Truth is the truck's CAN speed and yaw rate. Window = unit. 4 windows: 3 on an earlier camera mount, 1 on the current mount; 2 at night.",
+   "n": 119,
+   "clusters": 12,
+   "condition": "Measured. The G55's recorded drives replayed through the model with both of the truck's cameras (each setup's own wide-camera calibration), road-plane warp to 1.45 m. Where the narrow lens does not cover comma's narrow view (the 8 mm lens in the V13 case), those pixels come from the wide camera, brightness matched. Truth is the truck's CAN speed and yaw rate. 30 s windows after a 5 s warm-up; window = unit, drive = cluster; results are also given per camera setup. Corpus windows of 30 s from the truck's recorded drives, scored per camera setup.",
    "baselines": [
     "lebowski_877m",
     "the_cool_peoples"
@@ -528,31 +528,40 @@
      "label": "Lateral error",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.1686,
-     "median": 0.1763,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.172,
+     "median": 0.1626,
+     "ci": [
+      0.145,
+      0.1894
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.04095,
-       "median": 0.03696,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": -0.0007356,
+       "median": -0.004906,
+       "ci": [
+        -0.01607,
+        0.02545
+       ],
+       "n": 119,
+       "wins": 66,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 5
       },
       "the_cool_peoples": {
-       "delta": 0.01028,
-       "median": 0.004457,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": 0.004043,
+       "median": 0.00531,
+       "ci": [
+        -0.0005742,
+        0.008421
+       ],
+       "n": 119,
+       "wins": 49,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 4
       }
      }
     },
@@ -561,31 +570,40 @@
      "label": "Lateral error at the model's own best lead",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.1662,
-     "median": 0.1731,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.1682,
+     "median": 0.1632,
+     "ci": [
+      0.1414,
+      0.1866
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.03974,
-       "median": 0.03548,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": 0.003684,
+       "median": 0.00137,
+       "ci": [
+        -0.01197,
+        0.03046
+       ],
+       "n": 119,
+       "wins": 59,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 4
       },
       "the_cool_peoples": {
-       "delta": 0.01031,
-       "median": 0.005306,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": 0.004484,
+       "median": 0.00634,
+       "ci": [
+        -0.001188,
+        0.008031
+       ],
+       "n": 119,
+       "wins": 53,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 4
       }
      }
     },
@@ -594,31 +612,40 @@
      "label": "Lateral correlation with the car's later motion",
      "unit": "",
      "better": "higher",
-     "value": 0.9354,
-     "median": 0.9446,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.8277,
+     "median": 0.9069,
+     "ci": [
+      0.7861,
+      0.8489
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.02477,
-       "median": -0.0181,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": 0.06085,
+       "median": 0.02707,
+       "ci": [
+        0.0166,
+        0.07405
+       ],
+       "n": 119,
+       "wins": 94,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 7
       },
       "the_cool_peoples": {
-       "delta": -0.005968,
-       "median": -0.005325,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": -0.004203,
+       "median": -0.0007657,
+       "ci": [
+        -0.01516,
+        0.0002377
+       ],
+       "n": 119,
+       "wins": 58,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 2
       }
      }
     },
@@ -627,31 +654,40 @@
      "label": "Lateral gain (1 = same size as the car's motion)",
      "unit": "",
      "better": "near1",
-     "value": 0.9174,
-     "median": 0.9121,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.9304,
+     "median": 0.9092,
+     "ci": [
+      0.893,
+      1.024
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.026,
-       "median": 0.01821,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": -0.04416,
+       "median": -0.03268,
+       "ci": [
+        -0.0751,
+        0.03544
+       ],
+       "n": 119,
+       "wins": 75,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 6
       },
       "the_cool_peoples": {
-       "delta": 0.01244,
-       "median": 0.01197,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": 0.003363,
+       "median": 0.008937,
+       "ci": [
+        -0.01089,
+        0.02789
+       ],
+       "n": 119,
+       "wins": 54,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 5
       }
      }
     },
@@ -660,31 +696,40 @@
      "label": "Lateral action rate, RMS (smoothness)",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.523,
-     "median": 0.5654,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.7178,
+     "median": 0.635,
+     "ci": [
+      0.4409,
+      0.7817
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.4336,
-       "median": -0.4029,
-       "ci": null,
-       "n": 4,
-       "wins": 4,
+       "delta": -1.572,
+       "median": -1.362,
+       "ci": [
+        -1.851,
+        -0.7614
+       ],
+       "n": 119,
+       "wins": 119,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 3
+       "clusters": 12,
+       "cluster_wins": 12
       },
       "the_cool_peoples": {
-       "delta": 0.03872,
-       "median": 0.0347,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": -0.06308,
+       "median": -0.04217,
+       "ci": [
+        -0.08866,
+        0.01222
+       ],
+       "n": 119,
+       "wins": 84,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 6
       }
      }
     },
@@ -693,31 +738,40 @@
      "label": "Lead of the lateral request over the car's motion",
      "unit": "s",
      "better": "lower",
-     "value": 0.5625,
-     "median": 0.575,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.7004,
+     "median": 0.65,
+     "ci": [
+      0.6712,
+      0.7291
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.225,
-       "median": 0.225,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
-       "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "delta": 0.07815,
+       "median": 0.15,
+       "ci": [
+        0.015,
+        0.1803
+       ],
+       "n": 119,
+       "wins": 29,
+       "ties": 8,
+       "clusters": 12,
+       "cluster_wins": 2
       },
       "the_cool_peoples": {
-       "delta": 0.0,
+       "delta": 0.007563,
        "median": 0.0,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
-       "ties": 4,
-       "clusters": 3,
-       "cluster_wins": 0
+       "ci": [
+        -0.01367,
+        0.05758
+       ],
+       "n": 119,
+       "wins": 37,
+       "ties": 31,
+       "clusters": 12,
+       "cluster_wins": 5
       }
      }
     },
@@ -726,31 +780,40 @@
      "label": "Longitudinal error",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.3252,
-     "median": 0.3193,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.3257,
+     "median": 0.3081,
+     "ci": [
+      0.276,
+      0.3618
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.01076,
-       "median": 0.01155,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": -0.04302,
+       "median": -0.03394,
+       "ci": [
+        -0.0664,
+        0.01446
+       ],
+       "n": 119,
+       "wins": 82,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 5
       },
       "the_cool_peoples": {
-       "delta": -0.005479,
-       "median": -0.002715,
-       "ci": null,
-       "n": 4,
-       "wins": 3,
+       "delta": 0.006396,
+       "median": 0.004434,
+       "ci": [
+        0.001331,
+        0.01806
+       ],
+       "n": 119,
+       "wins": 50,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 2
+       "clusters": 12,
+       "cluster_wins": 3
       }
      }
     },
@@ -759,31 +822,40 @@
      "label": "Longitudinal correlation",
      "unit": "",
      "better": "higher",
-     "value": 0.5395,
-     "median": 0.5875,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.3616,
+     "median": 0.3446,
+     "ci": [
+      0.2861,
+      0.5455
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.04292,
-       "median": -0.04866,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": 0.03474,
+       "median": 0.03701,
+       "ci": [
+        -0.09271,
+        0.06815
+       ],
+       "n": 119,
+       "wins": 76,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 6
       },
       "the_cool_peoples": {
-       "delta": -0.01148,
-       "median": -0.01272,
-       "ci": null,
-       "n": 4,
-       "wins": 2,
+       "delta": 0.000429,
+       "median": 0.006433,
+       "ci": [
+        -0.04602,
+        0.01189
+       ],
+       "n": 119,
+       "wins": 65,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 6
       }
      }
     },
@@ -792,31 +864,40 @@
      "label": "Longitudinal error while braking",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.6836,
-     "median": 0.7044,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.6701,
+     "median": 0.6575,
+     "ci": [
+      0.5139,
+      0.7361
+     ],
+     "n": 81,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.1681,
-       "median": 0.1608,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": 0.1713,
+       "median": 0.1663,
+       "ci": [
+        -0.03933,
+        0.2563
+       ],
+       "n": 81,
+       "wins": 21,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 7
       },
       "the_cool_peoples": {
-       "delta": 0.04392,
-       "median": 0.0519,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": 0.03043,
+       "median": 0.04372,
+       "ci": [
+        -0.07356,
+        0.06899
+       ],
+       "n": 81,
+       "wins": 33,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 10
       }
      }
     },
@@ -825,31 +906,40 @@
      "label": "Longitudinal action rate, RMS (smoothness)",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.4003,
-     "median": 0.3891,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 0.5919,
+     "median": 0.5879,
+     "ci": [
+      0.496,
+      0.6355
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": -1.349,
-       "median": -1.23,
-       "ci": null,
-       "n": 4,
-       "wins": 4,
+       "delta": -5.018,
+       "median": -4.311,
+       "ci": [
+        -6.119,
+        -2.727
+       ],
+       "n": 119,
+       "wins": 119,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 3
+       "clusters": 12,
+       "cluster_wins": 12
       },
       "the_cool_peoples": {
-       "delta": 0.02994,
-       "median": 0.03392,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": -0.04883,
+       "median": -0.014,
+       "ci": [
+        -0.09539,
+        0.02724
+       ],
+       "n": 119,
+       "wins": 66,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 4
       }
      }
     },
@@ -858,36 +948,1727 @@
      "label": "Plan speed error at 3 s",
      "unit": "m/s",
      "better": "lower",
-     "value": 1.314,
-     "median": 1.335,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
+     "value": 2.445,
+     "median": 2.271,
+     "ci": [
+      1.453,
+      3.269
+     ],
+     "n": 119,
+     "clusters": 12,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.2858,
-       "median": 0.2158,
-       "ci": null,
-       "n": 4,
-       "wins": 0,
+       "delta": 0.4478,
+       "median": 0.3189,
+       "ci": [
+        0.002916,
+        1.262
+       ],
+       "n": 119,
+       "wins": 38,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 0
+       "clusters": 12,
+       "cluster_wins": 4
       },
       "the_cool_peoples": {
-       "delta": 0.107,
-       "median": 0.174,
-       "ci": null,
-       "n": 4,
-       "wins": 1,
+       "delta": 0.07088,
+       "median": 0.06922,
+       "ci": [
+        -0.02648,
+        0.2631
+       ],
+       "n": 119,
+       "wins": 49,
        "ties": 0,
-       "clusters": 3,
-       "cluster_wins": 1
+       "clusters": 12,
+       "cluster_wins": 3
       }
      }
     }
    ],
-   "per_unit_file": null
+   "per_unit_file": null,
+   "by_group": {
+    "stock-aimedup": {
+     "n": 4,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1157,
+       "median": 0.1168,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.02545,
+         "median": -0.03302,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": 0.01318,
+         "median": 0.01189,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1079,
+       "median": 0.1079,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03164,
+         "median": -0.04275,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": 0.007653,
+         "median": 0.00701,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8218,
+       "median": 0.9234,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.02668,
+         "median": 0.01843,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": -0.04441,
+         "median": -0.02468,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.8196,
+       "median": 0.8951,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.07191,
+         "median": -0.1319,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": 0.04417,
+         "median": 0.04694,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.3721,
+       "median": 0.3818,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.7809,
+         "median": -0.8079,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": 0.01504,
+         "median": 0.0004982,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.875,
+       "median": 0.925,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.3625,
+         "median": 0.325,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.1625,
+         "median": 0.175,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.4971,
+       "median": 0.4623,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.2806,
+         "median": -0.2682,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": -0.007554,
+         "median": -0.03756,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.1765,
+       "median": -0.001676,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.3589,
+         "median": -0.357,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": -0.1508,
+         "median": -0.1258,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 1.014,
+       "median": 1.014,
+       "ci": null,
+       "n": 2,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.8257,
+         "median": 0.8257,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": -0.04676,
+         "median": -0.04676,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 0.435,
+       "median": 0.413,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -2.859,
+         "median": -2.95,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": -0.0299,
+         "median": 0.02292,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 2.329,
+       "median": 2.327,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.05988,
+         "median": 0.3679,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": 0.624,
+         "median": 0.7611,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      }
+     ]
+    },
+    "stock-dual": {
+     "n": 13,
+     "clusters": 4,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1424,
+       "median": 0.1273,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.002785,
+         "median": -0.001805,
+         "ci": null,
+         "n": 13,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": -0.004744,
+         "median": -0.009879,
+         "ci": null,
+         "n": 13,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1383,
+       "median": 0.1246,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.0009633,
+         "median": 0.002698,
+         "ci": null,
+         "n": 13,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": -0.004941,
+         "median": -0.01028,
+         "ci": null,
+         "n": 13,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8454,
+       "median": 0.8399,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03207,
+         "median": 0.002477,
+         "ci": null,
+         "n": 13,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": -0.008145,
+         "median": -0.003681,
+         "ci": null,
+         "n": 13,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.9715,
+       "median": 0.9255,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.0273,
+         "median": 0.01298,
+         "ci": null,
+         "n": 13,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": 0.01581,
+         "median": 0.0382,
+         "ci": null,
+         "n": 13,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.3968,
+       "median": 0.3451,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.7791,
+         "median": -0.76,
+         "ci": null,
+         "n": 13,
+         "wins": 13,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        },
+        "the_cool_peoples": {
+         "delta": 0.007914,
+         "median": 0.002478,
+         "ci": null,
+         "n": 13,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.6615,
+       "median": 0.6,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.15,
+         "median": 0.15,
+         "ci": null,
+         "n": 13,
+         "wins": 1,
+         "ties": 1,
+         "clusters": 4,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.01154,
+         "median": 0.0,
+         "ci": null,
+         "n": 13,
+         "wins": 5,
+         "ties": 2,
+         "clusters": 4,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.2814,
+       "median": 0.2668,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.05313,
+         "median": 0.04763,
+         "ci": null,
+         "n": 13,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.01926,
+         "median": 0.01282,
+         "ci": null,
+         "n": 13,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.5756,
+       "median": 0.6725,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.05854,
+         "median": -0.0229,
+         "ci": null,
+         "n": 13,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": -0.04228,
+         "median": -0.000489,
+         "ci": null,
+         "n": 13,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.5818,
+       "median": 0.5351,
+       "ci": null,
+       "n": 6,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.06547,
+         "median": -0.07472,
+         "ci": null,
+         "n": 6,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 3
+        },
+        "the_cool_peoples": {
+         "delta": -0.05363,
+         "median": -0.05703,
+         "ci": null,
+         "n": 6,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 0.416,
+       "median": 0.4084,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -1.798,
+         "median": -1.815,
+         "ci": null,
+         "n": 13,
+         "wins": 13,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        },
+        "the_cool_peoples": {
+         "delta": 0.02132,
+         "median": 0.01832,
+         "ci": null,
+         "n": 13,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 1.11,
+       "median": 1.055,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.2691,
+         "median": 0.2675,
+         "ci": null,
+         "n": 13,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": 0.1376,
+         "median": 0.07868,
+         "ci": null,
+         "n": 13,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        }
+       }
+      }
+     ]
+    },
+    "stock-newcase": {
+     "n": 2,
+     "clusters": 1,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1736,
+       "median": 0.1736,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03926,
+         "median": 0.03926,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.01037,
+         "median": 0.01037,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.17,
+       "median": 0.17,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.0348,
+         "median": 0.0348,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.01016,
+         "median": 0.01016,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8475,
+       "median": 0.8475,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -8.999e-05,
+         "median": -8.999e-05,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.01433,
+         "median": 0.01433,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.8109,
+       "median": 0.8109,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.02106,
+         "median": -0.02106,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": -0.04482,
+         "median": -0.04482,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.6263,
+       "median": 0.6263,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.6493,
+         "median": -0.6493,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": 0.1643,
+         "median": 0.1643,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.55,
+       "median": 0.55,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.05,
+         "median": 0.05,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 1,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": -0.05,
+         "median": -0.05,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 1,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.416,
+       "median": 0.416,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.05345,
+         "median": 0.05345,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.02639,
+         "median": 0.02639,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.4682,
+       "median": 0.4682,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.01845,
+         "median": -0.01845,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.01106,
+         "median": 0.01106,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.3227,
+       "median": 0.3227,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1806,
+         "median": -0.1806,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": -0.03148,
+         "median": -0.03148,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 0.5999,
+       "median": 0.5999,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -2.756,
+         "median": -2.756,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": 0.02492,
+         "median": 0.02492,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 2.147,
+       "median": 2.147,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.05331,
+         "median": 0.05331,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.07152,
+         "median": 0.07152,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      }
+     ]
+    },
+    "v13-8mm": {
+     "n": 92,
+     "clusters": 3,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1802,
+       "median": 0.1706,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.001361,
+         "median": -0.006174,
+         "ci": null,
+         "n": 92,
+         "wins": 53,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": 0.00546,
+         "median": 0.006005,
+         "ci": null,
+         "n": 92,
+         "wins": 33,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1763,
+       "median": 0.1669,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.004086,
+         "median": -0.002466,
+         "ci": null,
+         "n": 92,
+         "wins": 49,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": 0.006226,
+         "median": 0.00756,
+         "ci": null,
+         "n": 92,
+         "wins": 36,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8235,
+       "median": 0.9077,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.07502,
+         "median": 0.0283,
+         "ci": null,
+         "n": 92,
+         "wins": 78,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "the_cool_peoples": {
+         "delta": -0.001839,
+         "median": 0.001432,
+         "ci": null,
+         "n": 92,
+         "wins": 49,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.9288,
+       "median": 0.9049,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.06009,
+         "median": -0.05223,
+         "ci": null,
+         "n": 92,
+         "wins": 61,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": 0.003704,
+         "median": 0.008966,
+         "ci": null,
+         "n": 92,
+         "wins": 40,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.8017,
+       "median": 0.7418,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -1.816,
+         "median": -1.639,
+         "ci": null,
+         "n": 92,
+         "wins": 92,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "the_cool_peoples": {
+         "delta": -0.08587,
+         "median": -0.07203,
+         "ci": null,
+         "n": 92,
+         "wins": 72,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.7049,
+       "median": 0.65,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.04457,
+         "median": 0.1,
+         "ci": null,
+         "n": 92,
+         "wins": 28,
+         "ties": 6,
+         "clusters": 3,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": -0.00163,
+         "median": 0.0,
+         "ci": null,
+         "n": 92,
+         "wins": 31,
+         "ties": 23,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.3198,
+       "median": 0.3077,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.05627,
+         "median": -0.05298,
+         "ci": null,
+         "n": 92,
+         "wins": 76,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "the_cool_peoples": {
+         "delta": 0.00334,
+         "median": 0.001659,
+         "ci": null,
+         "n": 92,
+         "wins": 42,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.3019,
+       "median": 0.3011,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.06819,
+         "median": 0.07625,
+         "ci": null,
+         "n": 92,
+         "wins": 66,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "the_cool_peoples": {
+         "delta": 0.01249,
+         "median": 0.01554,
+         "ci": null,
+         "n": 92,
+         "wins": 52,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.6927,
+       "median": 0.671,
+       "ci": null,
+       "n": 65,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.2036,
+         "median": 0.2172,
+         "ci": null,
+         "n": 65,
+         "wins": 10,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": 0.05423,
+         "median": 0.06194,
+         "ci": null,
+         "n": 65,
+         "wins": 19,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 0.6239,
+       "median": 0.608,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -5.709,
+         "median": -5.407,
+         "ci": null,
+         "n": 92,
+         "wins": 92,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        },
+        "the_cool_peoples": {
+         "delta": -0.06436,
+         "median": -0.03137,
+         "ci": null,
+         "n": 92,
+         "wins": 57,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 2.769,
+       "median": 2.674,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.5347,
+         "median": 0.3931,
+         "ci": null,
+         "n": 92,
+         "wins": 31,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": 0.05479,
+         "median": 0.09695,
+         "ci": null,
+         "n": 92,
+         "wins": 37,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      }
+     ]
+    },
+    "v14-8mm": {
+     "n": 8,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1535,
+       "median": 0.1606,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01214,
+         "median": 0.01559,
+         "ci": null,
+         "n": 8,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": -0.004121,
+         "median": -0.007493,
+         "ci": null,
+         "n": 8,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1536,
+       "median": 0.1583,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.0165,
+         "median": 0.01856,
+         "ci": null,
+         "n": 8,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": -0.003248,
+         "median": -0.007754,
+         "ci": null,
+         "n": 8,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.845,
+       "median": 0.9264,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.02301,
+         "median": 0.009447,
+         "ci": null,
+         "n": 8,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": -0.00951,
+         "median": 0.0002507,
+         "ci": null,
+         "n": 8,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.9668,
+       "median": 0.9558,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.031,
+         "median": 0.02528,
+         "ci": null,
+         "n": 8,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": -0.02915,
+         "median": -0.007439,
+         "ci": null,
+         "n": 8,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 0.4706,
+       "median": 0.4254,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.685,
+         "median": -0.5796,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": -0.01218,
+         "median": -0.002814,
+         "ci": null,
+         "n": 8,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.6625,
+       "median": 0.6,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.2125,
+         "median": 0.2,
+         "ci": null,
+         "n": 8,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.04375,
+         "median": 0.0,
+         "ci": null,
+         "n": 8,
+         "wins": 0,
+         "ties": 5,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.3572,
+       "median": 0.2959,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.04781,
+         "median": 0.02571,
+         "ci": null,
+         "n": 8,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "the_cool_peoples": {
+         "delta": 0.02261,
+         "median": 0.01901,
+         "ci": null,
+         "n": 8,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.7664,
+       "median": 0.7819,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01172,
+         "median": 0.02804,
+         "ci": null,
+         "n": 8,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": 0.004125,
+         "median": 0.01088,
+         "ci": null,
+         "n": 8,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.5148,
+       "median": 0.5947,
+       "ci": null,
+       "n": 6,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.04283,
+         "median": -0.02311,
+         "ci": null,
+         "n": 6,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": -0.09701,
+         "median": -0.07967,
+         "ci": null,
+         "n": 6,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 0.5862,
+       "median": 0.5465,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -3.947,
+         "median": -3.624,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "the_cool_peoples": {
+         "delta": -0.01212,
+         "median": -0.01543,
+         "ci": null,
+         "n": 8,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 1.025,
+       "median": 0.9662,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.09212,
+         "median": 0.0624,
+         "ci": null,
+         "n": 8,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "the_cool_peoples": {
+         "delta": -0.1292,
+         "median": -0.1387,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      }
+     ]
+    }
+   }
   },
   "truck_closed_loop": {
    "status": "not_run",
@@ -915,7 +2696,7 @@
   "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below 10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
   "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its distance from 1); wins count units where the model is better in the metric's direction.",
   "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best correlates with the car's later lateral motion; a larger value means the request comes earlier. A value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
-  "Truck open loop pools few windows (camera mounts changed between drives); read it as a check that a model works on the truck's camera, not a ranking.",
+  "Truck open loop comes from few drives, and the camera setup changed between them (lens, housing, aim); the pooled number mixes setups, so read the per-setup numbers too. The 8 mm setups' wide camera recorded about 7-10 fps, so its frame can be up to ~60 ms from the narrow one. On the V14 setup up to 7 of a window's 700 steps are ~100 ms (one camera frame dropped). The camera's aim is the truck's live calibration learned on each drive; drives whose recorded calibration was carried over from another drive are left out.",
   "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 60 frames of one route): the plan's lateral position is 0.067 m RMS from comma's output; every other model here is 0.98 m or more from it on the same check.",
   "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
   "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",

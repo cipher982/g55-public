@@ -18,11 +18,13 @@
   "notes": "877M ConvNeXt encoder, host-kept history, no RL residual. Checkpoint 6f5c8d09/ecc73f48. The model the G55 runs."
  },
  "scored": {
-  "date": "2026-10-28T00:03:15Z",
+  "date": "2026-10-28T01:48:16Z",
   "suite": "geval-1",
-  "code": "139121bc1a13"
+  "code": "e1af6a09df98"
  },
- "baselines": [],
+ "baselines": [
+  "wmi"
+ ],
  "sections": {
   "public_open_loop": {
    "status": "ok",
@@ -30,7 +32,9 @@
    "n": 39,
    "clusters": 23,
    "condition": "Measured. comma's public two-camera segments (openpilot CI data), native intrinsics and the device's own calibration, both cameras; every model on the same decoded frames. Truth is what the recording car did next: carState speed and acceleration, yaw rate from the device's cameraOdometry. Segments where the car never moves have no data. 39 of the 45 listed segments have a score, from 23 drives and 20 cars.",
-   "baselines": [],
+   "baselines": [
+    "wmi"
+   ],
    "metrics": [
     {
      "key": "lat_mae",
@@ -45,7 +49,21 @@
      ],
      "n": 39,
      "clusters": 23,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": -0.03462,
+       "median": -0.02248,
+       "ci": [
+        -0.04909,
+        -0.02222
+       ],
+       "n": 39,
+       "wins": 35,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 20
+      }
+     }
     },
     {
      "key": "lat_mae_bl",
@@ -60,7 +78,21 @@
      ],
      "n": 39,
      "clusters": 23,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": -0.03855,
+       "median": -0.02968,
+       "ci": [
+        -0.05239,
+        -0.02697
+       ],
+       "n": 39,
+       "wins": 36,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 22
+      }
+     }
     },
     {
      "key": "lat_corr",
@@ -75,7 +107,21 @@
      ],
      "n": 39,
      "clusters": 23,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": 0.05118,
+       "median": 0.01704,
+       "ci": [
+        0.009631,
+        0.1193
+       ],
+       "n": 39,
+       "wins": 31,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 19
+      }
+     }
     },
     {
      "key": "lat_gain",
@@ -90,7 +136,21 @@
      ],
      "n": 39,
      "clusters": 23,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": -0.01473,
+       "median": -0.0002165,
+       "ci": [
+        -0.05477,
+        0.01598
+       ],
+       "n": 39,
+       "wins": 20,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 14
+      }
+     }
     },
     {
      "key": "lat_rate_rms",
@@ -105,7 +165,21 @@
      ],
      "n": 39,
      "clusters": 23,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": 0.1707,
+       "median": 0.1462,
+       "ci": [
+        0.139,
+        0.1991
+       ],
+       "n": 39,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 0
+      }
+     }
     },
     {
      "key": "lat_best_lag",
@@ -120,7 +194,21 @@
      ],
      "n": 35,
      "clusters": 22,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": -0.1561,
+       "median": -0.1,
+       "ci": [
+        -0.2307,
+        -0.09516
+       ],
+       "n": 33,
+       "wins": 25,
+       "ties": 6,
+       "clusters": 21,
+       "cluster_wins": 16
+      }
+     }
     },
     {
      "key": "lon_mae",
@@ -135,7 +223,21 @@
      ],
      "n": 39,
      "clusters": 23,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": -0.03484,
+       "median": -0.04056,
+       "ci": [
+        -0.05542,
+        -0.01582
+       ],
+       "n": 39,
+       "wins": 32,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 19
+      }
+     }
     },
     {
      "key": "lon_corr",
@@ -150,7 +252,21 @@
      ],
      "n": 39,
      "clusters": 23,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": 0.05241,
+       "median": 0.02221,
+       "ci": [
+        0.01091,
+        0.102
+       ],
+       "n": 39,
+       "wins": 29,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 18
+      }
+     }
     },
     {
      "key": "lon_brake_mae",
@@ -165,7 +281,21 @@
      ],
      "n": 30,
      "clusters": 21,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": -0.05552,
+       "median": -0.03184,
+       "ci": [
+        -0.1073,
+        -0.008448
+       ],
+       "n": 30,
+       "wins": 19,
+       "ties": 0,
+       "clusters": 21,
+       "cluster_wins": 15
+      }
+     }
     },
     {
      "key": "lon_rate_rms",
@@ -180,7 +310,21 @@
      ],
      "n": 39,
      "clusters": 23,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": 0.9126,
+       "median": 0.8803,
+       "ci": [
+        0.7682,
+        1.073
+       ],
+       "n": 39,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 0
+      }
+     }
     },
     {
      "key": "v3_mae",
@@ -195,7 +339,21 @@
      ],
      "n": 39,
      "clusters": 23,
-     "paired": {}
+     "paired": {
+      "wmi": {
+       "delta": -0.2845,
+       "median": -0.2897,
+       "ci": [
+        -0.363,
+        -0.1966
+       ],
+       "n": 39,
+       "wins": 33,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 20
+      }
+     }
     }
    ],
    "per_unit_file": "per_unit/lebowski_877m/public_open_loop.csv"
@@ -319,145 +477,1466 @@
   "truck_open_loop": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 4,
-   "clusters": 3,
-   "condition": "Measured. The G55's recorded drives replayed as the truck runs the model: narrow camera only, road-plane warp to 1.45 m (plane:1.45). Truth is the truck's CAN speed and yaw rate. Window = unit. 4 windows: 3 on an earlier camera mount, 1 on the current mount; 2 at night.",
-   "baselines": [],
+   "n": 119,
+   "clusters": 12,
+   "condition": "Measured. The G55's recorded drives replayed through the model with both of the truck's cameras (each setup's own wide-camera calibration), road-plane warp to 1.45 m. Where the narrow lens does not cover comma's narrow view (the 8 mm lens in the V13 case), those pixels come from the wide camera, brightness matched. Truth is the truck's CAN speed and yaw rate. 30 s windows after a 5 s warm-up; window = unit, drive = cluster; results are also given per camera setup. Corpus windows of 30 s from the truck's recorded drives, scored per camera setup.",
+   "baselines": [
+    "wmi"
+   ],
    "metrics": [
     {
      "key": "lat_mae",
      "label": "Lateral error",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.1276,
-     "median": 0.1393,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 0.1728,
+     "median": 0.1678,
+     "ci": [
+      0.1379,
+      0.184
+     ],
+     "n": 119,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": -0.0579,
+       "median": -0.04539,
+       "ci": [
+        -0.09505,
+        -0.03869
+       ],
+       "n": 119,
+       "wins": 106,
+       "ties": 0,
+       "clusters": 12,
+       "cluster_wins": 12
+      }
+     }
     },
     {
      "key": "lat_mae_bl",
      "label": "Lateral error at the model's own best lead",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.1264,
-     "median": 0.1377,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 0.1645,
+     "median": 0.1595,
+     "ci": [
+      0.1322,
+      0.1749
+     ],
+     "n": 119,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": -0.06179,
+       "median": -0.04932,
+       "ci": [
+        -0.0987,
+        -0.04259
+       ],
+       "n": 119,
+       "wins": 107,
+       "ties": 0,
+       "clusters": 12,
+       "cluster_wins": 12
+      }
+     }
     },
     {
      "key": "lat_corr",
      "label": "Lateral correlation with the car's later motion",
      "unit": "",
      "better": "higher",
-     "value": 0.9602,
-     "median": 0.9627,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 0.7668,
+     "median": 0.8796,
+     "ci": [
+      0.7249,
+      0.8217
+     ],
+     "n": 119,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": -0.0189,
+       "median": -0.003058,
+       "ci": [
+        -0.03853,
+        0.0292
+       ],
+       "n": 119,
+       "wins": 55,
+       "ties": 0,
+       "clusters": 12,
+       "cluster_wins": 7
+      }
+     }
     },
     {
      "key": "lat_gain",
      "label": "Lateral gain (1 = same size as the car's motion)",
      "unit": "",
      "better": "near1",
-     "value": 0.9422,
-     "median": 0.9303,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 0.7991,
+     "median": 0.8491,
+     "ci": [
+      0.769,
+      0.8999
+     ],
+     "n": 119,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": -0.03594,
+       "median": -0.02201,
+       "ci": [
+        -0.161,
+        0.0238
+       ],
+       "n": 119,
+       "wins": 66,
+       "ties": 0,
+       "clusters": 12,
+       "cluster_wins": 8
+      }
+     }
     },
     {
      "key": "lat_rate_rms",
      "label": "Lateral action rate, RMS (smoothness)",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.9566,
-     "median": 0.9354,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 2.29,
+     "median": 2.095,
+     "ci": [
+      1.193,
+      2.618
+     ],
+     "n": 119,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": 1.472,
+       "median": 1.264,
+       "ci": [
+        0.6495,
+        1.77
+       ],
+       "n": 119,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 12,
+       "cluster_wins": 0
+      }
+     }
     },
     {
      "key": "lat_best_lag",
      "label": "Lead of the lateral request over the car's motion",
      "unit": "s",
      "better": "lower",
-     "value": 0.3375,
-     "median": 0.35,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 0.6223,
+     "median": 0.55,
+     "ci": [
+      0.5097,
+      0.6915
+     ],
+     "n": 119,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": -0.1374,
+       "median": -0.15,
+       "ci": [
+        -0.2672,
+        -0.1041
+       ],
+       "n": 119,
+       "wins": 88,
+       "ties": 9,
+       "clusters": 12,
+       "cluster_wins": 12
+      }
+     }
     },
     {
      "key": "lon_mae",
      "label": "Longitudinal error",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.3145,
-     "median": 0.3093,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 0.3687,
+     "median": 0.3597,
+     "ci": [
+      0.2825,
+      0.419
+     ],
+     "n": 119,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": -0.07064,
+       "median": -0.01743,
+       "ci": [
+        -0.1292,
+        0.0329
+       ],
+       "n": 119,
+       "wins": 78,
+       "ties": 0,
+       "clusters": 12,
+       "cluster_wins": 7
+      }
+     }
     },
     {
      "key": "lon_corr",
      "label": "Longitudinal correlation",
      "unit": "",
      "better": "higher",
-     "value": 0.5824,
-     "median": 0.6362,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 0.3269,
+     "median": 0.2712,
+     "ci": [
+      0.2604,
+      0.6213
+     ],
+     "n": 119,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": -0.02119,
+       "median": -0.03683,
+       "ci": [
+        -0.03968,
+        0.03396
+       ],
+       "n": 119,
+       "wins": 54,
+       "ties": 0,
+       "clusters": 12,
+       "cluster_wins": 6
+      }
+     }
     },
     {
      "key": "lon_brake_mae",
      "label": "Longitudinal error while braking",
      "unit": "m/s²",
      "better": "lower",
-     "value": 0.5155,
-     "median": 0.5159,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 0.4988,
+     "median": 0.5131,
+     "ci": [
+      0.4705,
+      0.5786
+     ],
+     "n": 81,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": 0.08963,
+       "median": 0.07537,
+       "ci": [
+        -0.08148,
+        0.1313
+       ],
+       "n": 81,
+       "wins": 23,
+       "ties": 0,
+       "clusters": 12,
+       "cluster_wins": 7
+      }
+     }
     },
     {
      "key": "lon_rate_rms",
      "label": "Longitudinal action rate, RMS (smoothness)",
      "unit": "m/s³",
      "better": "lower",
-     "value": 1.749,
-     "median": 1.619,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 5.61,
+     "median": 4.88,
+     "ci": [
+      3.234,
+      6.719
+     ],
+     "n": 119,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": 5.051,
+       "median": 4.395,
+       "ci": [
+        2.823,
+        6.085
+       ],
+       "n": 119,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 12,
+       "cluster_wins": 0
+      }
+     }
     },
     {
      "key": "v3_mae",
      "label": "Plan speed error at 3 s",
      "unit": "m/s",
      "better": "lower",
-     "value": 1.028,
-     "median": 0.9592,
-     "ci": null,
-     "n": 4,
-     "clusters": 3,
-     "paired": {}
+     "value": 1.997,
+     "median": 2.101,
+     "ci": [
+      1.249,
+      2.181
+     ],
+     "n": 119,
+     "clusters": 12,
+     "paired": {
+      "wmi": {
+       "delta": -0.8192,
+       "median": -0.7149,
+       "ci": [
+        -1.122,
+        -0.1173
+       ],
+       "n": 119,
+       "wins": 92,
+       "ties": 0,
+       "clusters": 12,
+       "cluster_wins": 7
+      }
+     }
     }
    ],
-   "per_unit_file": null
+   "per_unit_file": null,
+   "by_group": {
+    "stock-aimedup": {
+     "n": 4,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1411,
+       "median": 0.1442,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.1262,
+         "median": -0.07297,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1396,
+       "median": 0.1435,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.1175,
+         "median": -0.05637,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.7951,
+       "median": 0.8347,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": 0.02084,
+         "median": 0.009227,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.6639,
+       "median": 0.6602,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.205,
+         "median": -0.132,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 1.153,
+       "median": 1.197,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": 0.408,
+         "median": 0.4473,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.5125,
+       "median": 0.5,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.4,
+         "median": -0.4,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.7776,
+       "median": 0.718,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": 0.1614,
+         "median": 0.1514,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.5354,
+       "median": 0.7182,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": 0.02822,
+         "median": 0.07609,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.188,
+       "median": 0.188,
+       "ci": null,
+       "n": 2,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.1029,
+         "median": -0.1029,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 3.294,
+       "median": 3.362,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": 2.951,
+         "median": 3.078,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 2.389,
+       "median": 2.476,
+       "ci": null,
+       "n": 4,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": 0.7315,
+         "median": 0.6648,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      }
+     ]
+    },
+    "stock-dual": {
+     "n": 13,
+     "clusters": 4,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1452,
+       "median": 0.1459,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": -0.04678,
+         "median": -0.0382,
+         "ci": null,
+         "n": 13,
+         "wins": 12,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1393,
+       "median": 0.1444,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": -0.04759,
+         "median": -0.05008,
+         "ci": null,
+         "n": 13,
+         "wins": 12,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8133,
+       "median": 0.8366,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": 0.01512,
+         "median": 0.02601,
+         "ci": null,
+         "n": 13,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.9644,
+       "median": 0.9221,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": -0.0141,
+         "median": -0.0226,
+         "ci": null,
+         "n": 13,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 1.176,
+       "median": 1.117,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": 0.7006,
+         "median": 0.6394,
+         "ci": null,
+         "n": 13,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.5115,
+       "median": 0.45,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": -0.2538,
+         "median": -0.25,
+         "ci": null,
+         "n": 13,
+         "wins": 12,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.2282,
+       "median": 0.2185,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": -0.04393,
+         "median": -0.03168,
+         "ci": null,
+         "n": 13,
+         "wins": 13,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.6342,
+       "median": 0.6626,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": 0.06125,
+         "median": 0.05313,
+         "ci": null,
+         "n": 13,
+         "wins": 10,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.6473,
+       "median": 0.5994,
+       "ci": null,
+       "n": 6,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": -0.1119,
+         "median": -0.101,
+         "ci": null,
+         "n": 6,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 4
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 2.214,
+       "median": 2.329,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": 1.858,
+         "median": 1.88,
+         "ci": null,
+         "n": 13,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 0.8412,
+       "median": 0.7155,
+       "ci": null,
+       "n": 13,
+       "clusters": 4,
+       "paired": {
+        "wmi": {
+         "delta": -0.3023,
+         "median": -0.292,
+         "ci": null,
+         "n": 13,
+         "wins": 11,
+         "ties": 0,
+         "clusters": 4,
+         "cluster_wins": 3
+        }
+       }
+      }
+     ]
+    },
+    "stock-newcase": {
+     "n": 2,
+     "clusters": 1,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1343,
+       "median": 0.1343,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": -0.04172,
+         "median": -0.04172,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1352,
+       "median": 0.1352,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": -0.03976,
+         "median": -0.03976,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.8476,
+       "median": 0.8476,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": 0.01616,
+         "median": 0.01616,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.7899,
+       "median": 0.7899,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": 0.06158,
+         "median": 0.06158,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 1.276,
+       "median": 1.276,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": 0.5976,
+         "median": 0.5976,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.5,
+       "median": 0.5,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": -0.15,
+         "median": -0.15,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.3625,
+       "median": 0.3625,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": -0.001431,
+         "median": -0.001431,
+         "ci": null,
+         "n": 2,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.4866,
+       "median": 0.4866,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": -0.07357,
+         "median": -0.07357,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.5033,
+       "median": 0.5033,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": 0.05124,
+         "median": 0.05124,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 3.356,
+       "median": 3.356,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": 2.834,
+         "median": 2.834,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 2.094,
+       "median": 2.094,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "wmi": {
+         "delta": 0.3011,
+         "median": 0.3011,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      }
+     ]
+    },
+    "v13-8mm": {
+     "n": 92,
+     "clusters": 3,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1816,
+       "median": 0.1808,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": -0.05785,
+         "median": -0.04393,
+         "ci": null,
+         "n": 92,
+         "wins": 80,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1722,
+       "median": 0.1687,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": -0.06275,
+         "median": -0.04911,
+         "ci": null,
+         "n": 92,
+         "wins": 81,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.7485,
+       "median": 0.8762,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": -0.03233,
+         "median": -0.007223,
+         "ci": null,
+         "n": 92,
+         "wins": 37,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.7709,
+       "median": 0.8378,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": -0.033,
+         "median": -0.005379,
+         "ci": null,
+         "n": 92,
+         "wins": 47,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 2.618,
+       "median": 2.254,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": 1.718,
+         "median": 1.538,
+         "ci": null,
+         "n": 92,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.6603,
+       "median": 0.6,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": -0.09565,
+         "median": -0.15,
+         "ci": null,
+         "n": 92,
+         "wins": 62,
+         "ties": 9,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.376,
+       "median": 0.3795,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": -0.08888,
+         "median": -0.01959,
+         "ci": null,
+         "n": 92,
+         "wins": 57,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.2337,
+       "median": 0.2038,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": -0.03873,
+         "median": -0.05942,
+         "ci": null,
+         "n": 92,
+         "wins": 36,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.4891,
+       "median": 0.4654,
+       "ci": null,
+       "n": 65,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": 0.1323,
+         "median": 0.1244,
+         "ci": null,
+         "n": 65,
+         "wins": 10,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 6.333,
+       "median": 6.081,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": 5.731,
+         "median": 5.435,
+         "ci": null,
+         "n": 92,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 2.234,
+       "median": 2.186,
+       "ci": null,
+       "n": 92,
+       "clusters": 3,
+       "paired": {
+        "wmi": {
+         "delta": -1.044,
+         "median": -0.96,
+         "ci": null,
+         "n": 92,
+         "wins": 76,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      }
+     ]
+    },
+    "v14-8mm": {
+     "n": 8,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "lat_mae",
+       "value": 0.1414,
+       "median": 0.1385,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.04643,
+         "median": -0.04551,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_mae_bl",
+       "value": 0.1371,
+       "median": 0.1333,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.05146,
+         "median": -0.05228,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_corr",
+       "value": 0.868,
+       "median": 0.9176,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": 0.05162,
+         "median": 0.02725,
+         "ci": null,
+         "n": 8,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_gain",
+       "value": 0.9255,
+       "median": 0.9512,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.04516,
+         "median": -0.04855,
+         "ci": null,
+         "n": 8,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_rate_rms",
+       "value": 1.156,
+       "median": 1.001,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": 0.6441,
+         "median": 0.4901,
+         "ci": null,
+         "n": 8,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_best_lag",
+       "value": 0.45,
+       "median": 0.45,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.2938,
+         "median": -0.2,
+         "ci": null,
+         "n": 8,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lon_mae",
+       "value": 0.3094,
+       "median": 0.2702,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.03762,
+         "median": -0.0379,
+         "ci": null,
+         "n": 8,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_corr",
+       "value": 0.7547,
+       "median": 0.7518,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": 0.03497,
+         "median": 0.0243,
+         "ci": null,
+         "n": 8,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_brake_mae",
+       "value": 0.5576,
+       "median": 0.5559,
+       "ci": null,
+       "n": 6,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.09393,
+         "median": -0.1026,
+         "ci": null,
+         "n": 6,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lon_rate_rms",
+       "value": 4.533,
+       "median": 4.2,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": 4.022,
+         "median": 3.763,
+         "ci": null,
+         "n": 8,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "v3_mae",
+       "value": 0.9324,
+       "median": 0.9269,
+       "ci": null,
+       "n": 8,
+       "clusters": 2,
+       "paired": {
+        "wmi": {
+         "delta": -0.1284,
+         "median": -0.1101,
+         "ci": null,
+         "n": 8,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      }
+     ]
+    }
+   }
   },
   "truck_closed_loop": {
    "status": "ok",
@@ -681,8 +2160,8 @@
   "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below 10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
   "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its distance from 1); wins count units where the model is better in the metric's direction.",
   "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best correlates with the car's later lateral motion; a larger value means the request comes earlier. A value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
-  "Truck open loop pools few windows (camera mounts changed between drives); read it as a check that a model works on the truck's camera, not a ranking.",
-  "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not validated on it in closed loop; the reference is the driver's own line, not the lane centre.",
-  "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame jump it does not, so none is used). The braking-lead test is not built yet: the drives the truck closed loop can use hold no window where a car ahead brakes."
+  "Truck open loop comes from few drives, and the camera setup changed between them (lens, housing, aim); the pooled number mixes setups, so read the per-setup numbers too. The 8 mm setups' wide camera recorded about 7-10 fps, so its frame can be up to ~60 ms from the narrow one. On the V14 setup up to 7 of a window's 700 steps are ~100 ms (one camera frame dropped). The camera's aim is the truck's live calibration learned on each drive; drives whose recorded calibration was carried over from another drive are left out.",
+  "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not validated on it in closed loop; the reference is the driver's own line, not the lane centre. On the V14 setup the wide frame can be up to 90 ms from the simulated one (its camera recorded 7-9 fps).",
+  "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame jump it does not, so none is used). The braking-lead test has 2 windows from one drive, whose recorded calibration was carried over from an earlier drive."
  ]
 }
