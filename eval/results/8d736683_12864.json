@@ -18,9 +18,9 @@
   "notes": "Shipped in openpilot 0.11.2 (master 2026-10-10, PR #39047). Scored from the Hugging Face upload of 2026-10-14, whose tensors match the release's compiled model byte for byte. Vision base f22e06e5 with an RL residual head."
  },
  "scored": {
-  "date": "2026-10-27T21:27:17Z",
+  "date": "2026-10-28T00:03:17Z",
   "suite": "geval-1",
-  "code": "102710f59c6a"
+  "code": "139121bc1a13"
  },
  "baselines": [
   "lebowski_877m",
@@ -1103,7 +1103,8 @@
    "clusters": 4,
    "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 18 windows (9 day, 9 night).",
    "baselines": [
-    "lebowski_877m"
+    "lebowski_877m",
+    "870a4823_12864"
    ],
    "metrics": [
     {
@@ -1126,6 +1127,16 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 4
+      },
+      "870a4823_12864": {
+       "delta": -0.0008078,
+       "median": 0.005315,
+       "ci": null,
+       "n": 18,
+       "wins": 8,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 2
       }
      }
     },
@@ -1149,6 +1160,16 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 3
+      },
+      "870a4823_12864": {
+       "delta": 0.02984,
+       "median": -0.01173,
+       "ci": null,
+       "n": 18,
+       "wins": 11,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 1
       }
      }
     },
@@ -1172,6 +1193,16 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 1
+      },
+      "870a4823_12864": {
+       "delta": -0.07106,
+       "median": -0.05202,
+       "ci": null,
+       "n": 18,
+       "wins": 12,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
       }
      }
     },
@@ -1193,6 +1224,16 @@
        "n": 18,
        "wins": 2,
        "ties": 12,
+       "clusters": 4,
+       "cluster_wins": 1
+      },
+      "870a4823_12864": {
+       "delta": 0.02778,
+       "median": 0.0,
+       "ci": null,
+       "n": 18,
+       "wins": 1,
+       "ties": 15,
        "clusters": 4,
        "cluster_wins": 1
       }
@@ -1218,6 +1259,16 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 4
+      },
+      "870a4823_12864": {
+       "delta": -0.02294,
+       "median": -0.004233,
+       "ci": null,
+       "n": 18,
+       "wins": 10,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
       }
      }
     },
@@ -1241,6 +1292,16 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 0
+      },
+      "870a4823_12864": {
+       "delta": 0.01362,
+       "median": -0.003984,
+       "ci": null,
+       "n": 18,
+       "wins": 10,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 1
       }
      }
     },
@@ -1264,6 +1325,16 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 3
+      },
+      "870a4823_12864": {
+       "delta": -0.04407,
+       "median": -0.06413,
+       "ci": null,
+       "n": 18,
+       "wins": 13,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
       }
      }
     }
@@ -1273,11 +1344,12 @@
   "truck_recovery": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 18,
-   "clusters": 4,
-   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night).",
+   "n": 20,
+   "clusters": 5,
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
    "baselines": [
-    "lebowski_877m"
+    "lebowski_877m",
+    "870a4823_12864"
    ],
    "metrics": [
     {
@@ -1300,6 +1372,16 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 2
+      },
+      "870a4823_12864": {
+       "delta": -0.02753,
+       "median": -0.02821,
+       "ci": null,
+       "n": 18,
+       "wins": 16,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 4
       }
      }
     },
@@ -1320,6 +1402,16 @@
        "ci": null,
        "n": 18,
        "wins": 7,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 2
+      },
+      "870a4823_12864": {
+       "delta": -0.01938,
+       "median": -0.02854,
+       "ci": null,
+       "n": 18,
+       "wins": 12,
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 2
@@ -1346,6 +1438,16 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 4
+      },
+      "870a4823_12864": {
+       "delta": 0.08092,
+       "median": 0.009209,
+       "ci": null,
+       "n": 18,
+       "wins": 8,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 1
       }
      }
     },
@@ -1369,6 +1471,16 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 4
+      },
+      "870a4823_12864": {
+       "delta": -0.02533,
+       "median": -0.02549,
+       "ci": null,
+       "n": 18,
+       "wins": 15,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
       }
      }
     },
@@ -1392,6 +1504,16 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 3
+      },
+      "870a4823_12864": {
+       "delta": -0.05054,
+       "median": -0.03832,
+       "ci": null,
+       "n": 18,
+       "wins": 12,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 4
       }
      }
     },
@@ -1415,6 +1537,115 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 4
+      },
+      "870a4823_12864": {
+       "delta": -0.008405,
+       "median": -0.01077,
+       "ci": null,
+       "n": 18,
+       "wins": 10,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
+      }
+     }
+    },
+    {
+     "key": "brake_ahead_4s",
+     "label": "Braking lead: distance ahead of the recorded car at 4 s",
+     "unit": "m",
+     "better": "lower",
+     "value": -0.6489,
+     "median": -0.6489,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 1.145,
+       "median": 1.145,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "870a4823_12864": {
+       "delta": 0.7023,
+       "median": 0.7023,
+       "ci": null,
+       "n": 2,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      }
+     }
+    },
+    {
+     "key": "brake_gap_min",
+     "label": "Braking lead: smallest gap to the lead (derived)",
+     "unit": "m",
+     "better": "higher",
+     "value": 25.86,
+     "median": 25.86,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -3.423,
+       "median": -3.423,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "870a4823_12864": {
+       "delta": -1.704,
+       "median": -1.704,
+       "ci": null,
+       "n": 2,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      }
+     }
+    },
+    {
+     "key": "brake_speed_err",
+     "label": "Braking lead: speed error against the recorded speed, RMS",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 1.128,
+     "median": 1.128,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.06056,
+       "median": 0.06056,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "870a4823_12864": {
+       "delta": -0.3306,
+       "median": -0.3306,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 1
       }
      }
     }

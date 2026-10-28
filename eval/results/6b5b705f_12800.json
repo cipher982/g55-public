@@ -18,9 +18,9 @@
   "notes": "Never shipped. Same frozen base as MD v3 (f22e06e5/56320, bit-identical), different RL residual head."
  },
  "scored": {
-  "date": "2026-10-27T21:27:17Z",
+  "date": "2026-10-28T00:14:21Z",
   "suite": "geval-1",
-  "code": "102710f59c6a"
+  "code": "139121bc1a13"
  },
  "baselines": [
   "lebowski_877m",
@@ -504,13 +504,312 @@
    "per_unit_file": "per_unit/6b5b705f_12800/public_open_loop.csv"
   },
   "public_closed_loop": {
-   "status": "not_run",
+   "status": "ok",
    "unit_of_evidence": "segment",
-   "n": 0,
-   "condition": "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to the recording car's own path. One window per segment, nearest the middle, where the car holds at least 5 m/s for the window and the 4.8 s before it; segments with no such stretch are left out. Seeds 0 and 1, averaged per segment.",
-   "baselines": [],
-   "metrics": [],
-   "per_unit_file": null
+   "n": 28,
+   "clusters": 19,
+   "condition": "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to the recording car's own path. One window per segment, nearest the middle, where the car holds at least 5 m/s for the window and the 4.8 s before it; segments with no such stretch are left out. Seeds 0 and 1, averaged per segment. 28 of the 45 listed segments have a score, from 19 drives and 17 cars.",
+   "baselines": [
+    "lebowski_877m",
+    "96244b1f_12800"
+   ],
+   "metrics": [
+    {
+     "key": "xtrack_2s",
+     "label": "Distance from the recorded path at 2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.1146,
+     "median": 0.05992,
+     "ci": [
+      0.05477,
+      0.2194
+     ],
+     "n": 28,
+     "clusters": 19,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.03313,
+       "median": -0.01006,
+       "ci": [
+        -0.06378,
+        -0.008695
+       ],
+       "n": 28,
+       "wins": 17,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 12
+      },
+      "96244b1f_12800": {
+       "delta": 0.02619,
+       "median": 0.007084,
+       "ci": [
+        0.001437,
+        0.06237
+       ],
+       "n": 28,
+       "wins": 11,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 6
+      }
+     }
+    },
+    {
+     "key": "xtrack_4s",
+     "label": "Distance from the recorded path at 4 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.2413,
+     "median": 0.1199,
+     "ci": [
+      0.1071,
+      0.4602
+     ],
+     "n": 28,
+     "clusters": 19,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.03702,
+       "median": -0.00498,
+       "ci": [
+        -0.07501,
+        -0.002356
+       ],
+       "n": 28,
+       "wins": 14,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 10
+      },
+      "96244b1f_12800": {
+       "delta": 0.07103,
+       "median": -0.00634,
+       "ci": [
+        -0.00684,
+        0.2152
+       ],
+       "n": 28,
+       "wins": 15,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 9
+      }
+     }
+    },
+    {
+     "key": "xtrack_7s",
+     "label": "Distance from the recorded path at 7.2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 1.125,
+     "median": 0.3277,
+     "ci": [
+      0.4077,
+      2.048
+     ],
+     "n": 28,
+     "clusters": 19,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.08104,
+       "median": 0.04283,
+       "ci": [
+        -0.5261,
+        0.6981
+       ],
+       "n": 28,
+       "wins": 12,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 6
+      },
+      "96244b1f_12800": {
+       "delta": -0.003708,
+       "median": 0.01813,
+       "ci": [
+        -0.2938,
+        0.2499
+       ],
+       "n": 28,
+       "wins": 12,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 7
+      }
+     }
+    },
+    {
+     "key": "fail_1m",
+     "label": "Share of episodes ever more than 1 m off the path",
+     "unit": "",
+     "better": "lower",
+     "value": 0.2143,
+     "median": 0.0,
+     "ci": [
+      0.07143,
+      0.375
+     ],
+     "n": 28,
+     "clusters": 19,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.01786,
+       "median": 0.0,
+       "ci": [
+        -0.1111,
+        0.05172
+       ],
+       "n": 28,
+       "wins": 1,
+       "ties": 26,
+       "clusters": 19,
+       "cluster_wins": 1
+      },
+      "96244b1f_12800": {
+       "delta": -0.01786,
+       "median": 0.0,
+       "ci": [
+        -0.125,
+        0.07143
+       ],
+       "n": 28,
+       "wins": 2,
+       "ties": 24,
+       "clusters": 19,
+       "cluster_wins": 2
+      }
+     }
+    },
+    {
+     "key": "lat_jerk",
+     "label": "Requested lateral jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.1923,
+     "median": 0.09458,
+     "ci": [
+      0.1228,
+      0.266
+     ],
+     "n": 28,
+     "clusters": 19,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.1333,
+       "median": -0.09429,
+       "ci": [
+        -0.1924,
+        -0.07745
+       ],
+       "n": 28,
+       "wins": 25,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 16
+      },
+      "96244b1f_12800": {
+       "delta": -0.01263,
+       "median": -0.008068,
+       "ci": [
+        -0.03973,
+        0.01226
+       ],
+       "n": 28,
+       "wins": 18,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 15
+      }
+     }
+    },
+    {
+     "key": "long_jerk",
+     "label": "Requested longitudinal jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.3439,
+     "median": 0.3176,
+     "ci": [
+      0.2698,
+      0.434
+     ],
+     "n": 28,
+     "clusters": 19,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.002534,
+       "median": -0.04448,
+       "ci": [
+        -0.04653,
+        0.05358
+       ],
+       "n": 28,
+       "wins": 18,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 12
+      },
+      "96244b1f_12800": {
+       "delta": -0.04659,
+       "median": -0.01749,
+       "ci": [
+        -0.1036,
+        0.004842
+       ],
+       "n": 28,
+       "wins": 17,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 12
+      }
+     }
+    },
+    {
+     "key": "speed_err",
+     "label": "Speed error against the recorded speed, RMS",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 1.357,
+     "median": 0.7189,
+     "ci": [
+      0.9319,
+      1.783
+     ],
+     "n": 28,
+     "clusters": 19,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.2562,
+       "median": 0.2651,
+       "ci": [
+        -0.01344,
+        0.5088
+       ],
+       "n": 28,
+       "wins": 8,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 6
+      },
+      "96244b1f_12800": {
+       "delta": -0.0441,
+       "median": -0.08008,
+       "ci": [
+        -0.2081,
+        0.0991
+       ],
+       "n": 28,
+       "wins": 18,
+       "ties": 0,
+       "clusters": 19,
+       "cluster_wins": 12
+      }
+     }
+    }
+   ],
+   "per_unit_file": "per_unit/6b5b705f_12800/public_closed_loop.csv"
   },
   "truck_open_loop": {
    "status": "ok",
@@ -890,21 +1189,559 @@
    "per_unit_file": null
   },
   "truck_closed_loop": {
-   "status": "not_run",
+   "status": "ok",
    "unit_of_evidence": "window",
-   "n": 0,
-   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window.",
-   "baselines": [],
-   "metrics": [],
+   "n": 18,
+   "clusters": 4,
+   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 18 windows (9 day, 9 night).",
+   "baselines": [
+    "lebowski_877m",
+    "96244b1f_12800"
+   ],
+   "metrics": [
+    {
+     "key": "xtrack_2s",
+     "label": "Distance from the recorded path at 2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.2027,
+     "median": 0.1381,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.06559,
+       "median": -0.03796,
+       "ci": null,
+       "n": 18,
+       "wins": 13,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
+      },
+      "96244b1f_12800": {
+       "delta": -0.03596,
+       "median": -0.03093,
+       "ci": null,
+       "n": 18,
+       "wins": 12,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
+      }
+     }
+    },
+    {
+     "key": "xtrack_4s",
+     "label": "Distance from the recorded path at 4 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.488,
+     "median": 0.4174,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.07397,
+       "median": 0.03274,
+       "ci": null,
+       "n": 18,
+       "wins": 7,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 2
+      },
+      "96244b1f_12800": {
+       "delta": -0.0556,
+       "median": -0.004712,
+       "ci": null,
+       "n": 18,
+       "wins": 10,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "xtrack_7s",
+     "label": "Distance from the recorded path at 7.2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 2.097,
+     "median": 0.8686,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.4925,
+       "median": 0.3729,
+       "ci": null,
+       "n": 18,
+       "wins": 6,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 1
+      },
+      "96244b1f_12800": {
+       "delta": 0.7423,
+       "median": 0.06053,
+       "ci": null,
+       "n": 18,
+       "wins": 6,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 0
+      }
+     }
+    },
+    {
+     "key": "fail_1m",
+     "label": "Share of episodes ever more than 1 m off the path",
+     "unit": "",
+     "better": "lower",
+     "value": 0.4444,
+     "median": 0.5,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.08333,
+       "median": 0.0,
+       "ci": null,
+       "n": 18,
+       "wins": 1,
+       "ties": 13,
+       "clusters": 4,
+       "cluster_wins": 1
+      },
+      "96244b1f_12800": {
+       "delta": 0.1111,
+       "median": 0.0,
+       "ci": null,
+       "n": 18,
+       "wins": 1,
+       "ties": 12,
+       "clusters": 4,
+       "cluster_wins": 0
+      }
+     }
+    },
+    {
+     "key": "lat_jerk",
+     "label": "Requested lateral jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.6544,
+     "median": 0.2405,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.1096,
+       "median": -0.1609,
+       "ci": null,
+       "n": 18,
+       "wins": 15,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
+      },
+      "96244b1f_12800": {
+       "delta": 0.3381,
+       "median": 0.01363,
+       "ci": null,
+       "n": 18,
+       "wins": 8,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "long_jerk",
+     "label": "Requested longitudinal jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.422,
+     "median": 0.343,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.06067,
+       "median": -0.01158,
+       "ci": null,
+       "n": 18,
+       "wins": 9,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 1
+      },
+      "96244b1f_12800": {
+       "delta": 0.02881,
+       "median": 0.02547,
+       "ci": null,
+       "n": 18,
+       "wins": 4,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "speed_err",
+     "label": "Speed error against the recorded speed, RMS",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 0.9927,
+     "median": 0.8957,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.06505,
+       "median": 0.001693,
+       "ci": null,
+       "n": 18,
+       "wins": 9,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
+      },
+      "96244b1f_12800": {
+       "delta": 0.01667,
+       "median": -0.006592,
+       "ci": null,
+       "n": 18,
+       "wins": 9,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
+      }
+     }
+    }
+   ],
    "per_unit_file": null
   },
   "truck_recovery": {
-   "status": "not_run",
+   "status": "ok",
    "unit_of_evidence": "window",
-   "n": 0,
-   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran.",
-   "baselines": [],
-   "metrics": [],
+   "n": 20,
+   "clusters": 5,
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
+   "baselines": [
+    "lebowski_877m",
+    "96244b1f_12800"
+   ],
+   "metrics": [
+    {
+     "key": "heading_xtrack_2s",
+     "label": "2° off heading: distance from the path at 2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.4006,
+     "median": 0.3422,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.02628,
+       "median": -0.01344,
+       "ci": null,
+       "n": 18,
+       "wins": 10,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
+      },
+      "96244b1f_12800": {
+       "delta": 0.003711,
+       "median": 0.005433,
+       "ci": null,
+       "n": 18,
+       "wins": 8,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 2
+      }
+     }
+    },
+    {
+     "key": "heading_xtrack_4s",
+     "label": "2° off heading: distance from the path at 4 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.56,
+     "median": 0.5268,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.01634,
+       "median": 0.02219,
+       "ci": null,
+       "n": 18,
+       "wins": 5,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 2
+      },
+      "96244b1f_12800": {
+       "delta": -0.02531,
+       "median": 0.02709,
+       "ci": null,
+       "n": 18,
+       "wins": 6,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "heading_lat_jerk",
+     "label": "2° off heading: requested lateral jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.3694,
+     "median": 0.2908,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.4575,
+       "median": -0.4841,
+       "ci": null,
+       "n": 18,
+       "wins": 17,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 4
+      },
+      "96244b1f_12800": {
+       "delta": -0.06928,
+       "median": -0.03656,
+       "ci": null,
+       "n": 18,
+       "wins": 13,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 4
+      }
+     }
+    },
+    {
+     "key": "offcentre_xtrack_2s",
+     "label": "0.5 m off centre: distance from the path at 2 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.3283,
+     "median": 0.2734,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.02053,
+       "median": -0.009895,
+       "ci": null,
+       "n": 18,
+       "wins": 11,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 4
+      },
+      "96244b1f_12800": {
+       "delta": 0.005563,
+       "median": 0.004031,
+       "ci": null,
+       "n": 18,
+       "wins": 7,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 2
+      }
+     }
+    },
+    {
+     "key": "offcentre_xtrack_4s",
+     "label": "0.5 m off centre: distance from the path at 4 s",
+     "unit": "m",
+     "better": "lower",
+     "value": 0.5485,
+     "median": 0.4061,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.1106,
+       "median": -0.02394,
+       "ci": null,
+       "n": 18,
+       "wins": 11,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 2
+      },
+      "96244b1f_12800": {
+       "delta": -0.112,
+       "median": 0.009129,
+       "ci": null,
+       "n": 18,
+       "wins": 7,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 2
+      }
+     }
+    },
+    {
+     "key": "offcentre_lat_jerk",
+     "label": "0.5 m off centre: requested lateral jerk, RMS",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.8201,
+     "median": 0.4553,
+     "ci": null,
+     "n": 18,
+     "clusters": 4,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.3529,
+       "median": -0.5855,
+       "ci": null,
+       "n": 18,
+       "wins": 16,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 3
+      },
+      "96244b1f_12800": {
+       "delta": 0.2486,
+       "median": -0.02095,
+       "ci": null,
+       "n": 18,
+       "wins": 10,
+       "ties": 0,
+       "clusters": 4,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "brake_ahead_4s",
+     "label": "Braking lead: distance ahead of the recorded car at 4 s",
+     "unit": "m",
+     "better": "lower",
+     "value": -0.7022,
+     "median": -0.7022,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 1.091,
+       "median": 1.091,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "96244b1f_12800": {
+       "delta": -0.3588,
+       "median": -0.3588,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "brake_gap_min",
+     "label": "Braking lead: smallest gap to the lead (derived)",
+     "unit": "m",
+     "better": "higher",
+     "value": 25.78,
+     "median": 25.78,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -3.501,
+       "median": -3.501,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "96244b1f_12800": {
+       "delta": 0.8502,
+       "median": 0.8502,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "brake_speed_err",
+     "label": "Braking lead: speed error against the recorded speed, RMS",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 1.794,
+     "median": 1.794,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.7273,
+       "median": 0.7273,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "96244b1f_12800": {
+       "delta": 0.3054,
+       "median": 0.3054,
+       "ci": null,
+       "n": 2,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      }
+     }
+    }
+   ],
    "per_unit_file": null
   }
  },
@@ -915,6 +1752,8 @@
   "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below 10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
   "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its distance from 1); wins count units where the model is better in the metric's direction.",
   "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best correlates with the car's later lateral motion; a larger value means the request comes earlier. A value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
-  "Truck open loop pools few windows (camera mounts changed between drives); read it as a check that a model works on the truck's camera, not a ranking."
+  "Truck open loop pools few windows (camera mounts changed between drives); read it as a check that a model works on the truck's camera, not a ranking.",
+  "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not validated on it in closed loop; the reference is the driver's own line, not the lane centre.",
+  "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame jump it does not, so none is used). The braking-lead test is not built yet: the drives the truck closed loop can use hold no window where a car ahead brakes."
  ]
 }

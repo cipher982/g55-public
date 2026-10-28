@@ -10,8 +10,43 @@
    "clusters": 4,
    "rank": 1
   },
+  "1a421175_12864": {
+   "median": 0.1408,
+   "ci": null,
+   "n": 18,
+   "clusters": 4,
+   "rank": 1
+  },
+  "6b5b705f_12800": {
+   "median": 0.1381,
+   "ci": null,
+   "n": 18,
+   "clusters": 4,
+   "rank": 1
+  },
+  "870a4823_12864": {
+   "median": 0.1351,
+   "ci": null,
+   "n": 18,
+   "clusters": 4,
+   "rank": 1
+  },
   "8d736683_12864": {
    "median": 0.1585,
+   "ci": null,
+   "n": 18,
+   "clusters": 4,
+   "rank": 1
+  },
+  "96244b1f_12800": {
+   "median": 0.196,
+   "ci": null,
+   "n": 18,
+   "clusters": 4,
+   "rank": 1
+  },
+  "f78ed37d_12864": {
+   "median": 0.159,
    "ci": null,
    "n": 18,
    "clusters": 4,

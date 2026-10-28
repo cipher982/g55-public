@@ -18,9 +18,9 @@
   "notes": "877M ConvNeXt encoder, host-kept history, no RL residual. Checkpoint 6f5c8d09/ecc73f48. The model the G55 runs."
  },
  "scored": {
-  "date": "2026-10-27T21:27:16Z",
+  "date": "2026-10-28T00:03:15Z",
   "suite": "geval-1",
-  "code": "102710f59c6a"
+  "code": "139121bc1a13"
  },
  "baselines": [],
  "sections": {
@@ -557,9 +557,9 @@
   "truck_recovery": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 18,
-   "clusters": 4,
-   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night).",
+   "n": 20,
+   "clusters": 5,
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
    "baselines": [],
    "metrics": [
     {
@@ -632,6 +632,42 @@
      "ci": null,
      "n": 18,
      "clusters": 4,
+     "paired": {}
+    },
+    {
+     "key": "brake_ahead_4s",
+     "label": "Braking lead: distance ahead of the recorded car at 4 s",
+     "unit": "m",
+     "better": "lower",
+     "value": -1.794,
+     "median": -1.794,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {}
+    },
+    {
+     "key": "brake_gap_min",
+     "label": "Braking lead: smallest gap to the lead (derived)",
+     "unit": "m",
+     "better": "higher",
+     "value": 29.29,
+     "median": 29.29,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {}
+    },
+    {
+     "key": "brake_speed_err",
+     "label": "Braking lead: speed error against the recorded speed, RMS",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 1.067,
+     "median": 1.067,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
      "paired": {}
     }
    ],

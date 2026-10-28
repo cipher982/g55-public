@@ -18,9 +18,9 @@
   "notes": "On openpilot master as MD v3 (2026-10-14, PR #39087) and again as Flip Flop (2026-10-24, PR #39156), same weights. Scored from the 2026-10-24 Hugging Face re-upload, weights identical to the 2026-10-16 upload. Vision base f22e06e5 with an RL residual head."
  },
  "scored": {
-  "date": "2026-10-27T21:27:17Z",
+  "date": "2026-10-28T00:03:19Z",
   "suite": "geval-1",
-  "code": "102710f59c6a"
+  "code": "139121bc1a13"
  },
  "baselines": [
   "lebowski_877m",
@@ -1436,9 +1436,9 @@
   "truck_recovery": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 18,
-   "clusters": 4,
-   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night).",
+   "n": 20,
+   "clusters": 5,
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
    "baselines": [
     "lebowski_877m",
     "8d736683_12864"
@@ -1639,6 +1639,105 @@
        "ties": 0,
        "clusters": 4,
        "cluster_wins": 2
+      }
+     }
+    },
+    {
+     "key": "brake_ahead_4s",
+     "label": "Braking lead: distance ahead of the recorded car at 4 s",
+     "unit": "m",
+     "better": "lower",
+     "value": -0.9712,
+     "median": -0.9712,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.8224,
+       "median": 0.8224,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "8d736683_12864": {
+       "delta": -0.3223,
+       "median": -0.3223,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "brake_gap_min",
+     "label": "Braking lead: smallest gap to the lead (derived)",
+     "unit": "m",
+     "better": "higher",
+     "value": 26.96,
+     "median": 26.96,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -2.327,
+       "median": -2.327,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "8d736683_12864": {
+       "delta": 1.097,
+       "median": 1.097,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "brake_speed_err",
+     "label": "Braking lead: speed error against the recorded speed, RMS",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 1.712,
+     "median": 1.712,
+     "ci": null,
+     "n": 2,
+     "clusters": 1,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.6445,
+       "median": 0.6445,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "8d736683_12864": {
+       "delta": 0.5839,
+       "median": 0.5839,
+       "ci": null,
+       "n": 2,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
       }
      }
     }
