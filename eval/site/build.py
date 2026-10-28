@@ -245,6 +245,7 @@ def fill(text: str, models: list[dict], root: Path) -> str:
       unitlo/unithi S K U fmt  range of unit U's value (CSV)      maxexcept S K U fmt largest value on any other unit
       count S                  models with section S scored
       num S K M1,M2            how many models M1,M2 names
+      best/worst S K M1,M2 stat  name of the model with the lowest/highest value
     M1,M2 can be "all" (every model with the metric), "others" (all but the reference), "after" or
     "before" (first public after or before the reference).
     """
@@ -311,6 +312,9 @@ def fill(text: str, models: list[dict], root: Path) -> str:
             return fmt(min(vals) if o == "unitlo" else max(vals), a[4])
         if o == "maxexcept":
             return fmt(max(v for u in units(a[1], a[2]).values() for k, v in u.items() if k != a[3]), a[4])
+        if o in ("best", "worst"):  # the plain name of the model with the lowest (best) or highest value
+            got = [(metric(a[1], a[2], mid)[a[4]], mid) for mid in ids(a[3], a[1], a[2])]
+            return plain_name(idx[(min if o == "best" else max)(got)[1]])
         if o == "num":
             return str(len(ids(a[3], a[1], a[2])))
         if o == "count":
