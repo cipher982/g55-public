@@ -321,6 +321,7 @@ def fill(text: str, models: list[dict], root: Path) -> str:
 
 
 CFG: dict = {}
+MODELS: list = []  # every model, set in main(); model_class() needs the reference's date
 cfg_ref = ["lebowski_877m"]  # set from config.json in main(); fill() reads it for "others"
 
 
@@ -559,7 +560,7 @@ def hero_visual(models, cfg) -> str:
     h = json.loads(f.read_text())
     idx = by_id(models)
     order = [mid for mid in h["paths"] if mid in idx]
-    cls = {mid: model_class(idx[mid], cfg) for mid in order}
+    cls = {mid: highlight_class(idx[mid], cfg) for mid in order}
     # bird's-eye: forward up, left to the left; metres, sideways stretched (both axes ticked)
     ref = h["ref"]
     pts = [p for mid in order for p in h["paths"][mid]["xy"]] + ref
@@ -648,7 +649,18 @@ def cm(v: float) -> str:
 
 
 def model_class(m, cfg) -> str:
-    """The colour a model wears everywhere on the site: the hero models by config.json, the rest grey."""
+    """The colour a model wears on the front page, by what it is: the reference (lebowski), a model first
+    public before it, one shipped or on openpilot master, or a Hugging Face upload only."""
+    ref = cfg["reference_model"]
+    if m["model"]["id"] == ref:
+        return "ref"
+    if first_public(m) < first_public(by_id(MODELS)[ref]):
+        return "old"
+    return "ship" if shipped(m) else "hf"
+
+
+def highlight_class(m, cfg) -> str:
+    """The world-model player's colours: the models named in config.json "hero", the rest grey."""
     return {h[0]: h[1] for h in cfg.get("hero", {}).get("highlight", [])}.get(m["model"]["id"], "other")
 
 
@@ -658,6 +670,12 @@ def g55_ranked(root) -> dict | None:
     if t and any(s["ci"] for s in t["models"].values()):
         return t["models"]
     return None
+
+
+def ol_counts(models) -> str:
+    """'N windows from D drives.' for the G55 open loop, the most any model was scored on."""
+    secs = [s for s in ((m["sections"].get("truck_open_loop") or {}) for m in models) if s.get("status") == "ok"]
+    return f'{max((s["n"] for s in secs), default=0)} windows from {max((s["clusters"] for s in secs), default=0)} drives.'
 
 
 def g55_counts(models) -> tuple[int, int]:
@@ -693,47 +711,81 @@ def tick_step(top: int) -> int:
     return 2 if top <= 16 else 5
 
 
+MEDAL = {1: "🥇", 2: "🥈", 3: "🥉"}
+
+
 def g55_table(models, cfg, root) -> str:
-    """The front page's table: every model scored on the G55 in closed loop, newest first, one line each.
-    The closed-loop median as a dot on a shared cm axis (on its interval, with a rank, from 10 drives),
-    then the recovery medians and the open-loop lateral error as numbers. Lower is better in every column."""
+    """The front page's leaderboard: every model scored on the G55 in closed loop, best first by the
+    closed-loop median at 2 s (a bar from zero, lebowski's value as a line through every row), medals for
+    the first three. Under 10 drives the order is by median alone; from 10 drives, by rank (shared ranks
+    where the paired interval does not exclude zero). Then the recovery medians and the open-loop lateral
+    error as shaded cells, stronger shading for better. A toggle re-sorts by first public date."""
     ref = cfg["reference_model"]
     t = (ranking.truck_scores(root) or {"models": {}})["models"]
     g = g55_ranked(root)
     if g:
         t = g
     top = top_cm(t) if t else 16
-    shown = sorted((m for m in models if m["model"]["id"] in t), key=lambda m: (first_public(m), m["model"]["id"]), reverse=True)
+    shown = sorted((m for m in models if m["model"]["id"] in t),
+                   key=lambda m: (t[m["model"]["id"]]["rank"] if g else 0, t[m["model"]["id"]]["median"]))
+    place = {m["model"]["id"]: (t[m["model"]["id"]]["rank"] if g else i + 1) for i, m in enumerate(shown)}
+    newest = max(first_public(m) for m in shown) if shown else ""
+    cols = [("truck_recovery", "heading_xtrack_2s", "median", 100, 1),
+            ("truck_recovery", "offcentre_xtrack_2s", "median", 100, 1),
+            ("truck_open_loop", "lat_mae", "value", 1, 2)]
+    span = {}
+    for c in cols:
+        vs = [x[c[2]] for x in (find_metric(m, c[0], c[1])[0] for m in shown) if x]
+        span[c] = (min(vs), max(vs)) if vs else (0, 0)
 
-    def val(m, sec, key, stat, k, d):
-        x = find_metric(m, sec, key)[0]
-        return num(x[stat] * k, d) if x else "–"
+    def cell(m, c, label):
+        x = find_metric(m, c[0], c[1])[0]
+        if not x:
+            return f'<span class="gt-n gt-c" data-l="{label}">–</span>'
+        lo, hi = span[c]
+        h = (hi - x[c[2]]) / (hi - lo) if hi > lo else 0
+        best = " gt-best" if x[c[2]] == lo else ""
+        return f'<span class="gt-n gt-c{best}" data-l="{label}" style="--h:{h:.2f}">{num(x[c[2]] * c[3], c[4])}</span>'
 
+    rx = t.get(ref)
+    # Positions as a fraction of the scale (--p); the CSS keeps room after the scale for the value label.
+    refline = (f'<i class="gt-refl" style="--p:{rx["median"] * 100 / top:.4f}" aria-hidden="true"></i>' if rx else "")
     rows = []
     for m in shown:
         mid = m["model"]["id"]
-        rk = f'<span class="gt-rk">{g[mid]["rank"]}</span>' if g else ""
+        s_ = t[mid]
+        pl = place[mid]
+        med = MEDAL.get(pl, "")
+        tier = f" gt-m{pl}" if med else ""
+        tags = ('<span class="gt-tag gt-new">newest</span>' if first_public(m) == newest else "") + \
+               ('<span class="gt-tag">reference</span>' if mid == ref else "")
+        w = s_["median"] * 100 / top
+        tip = f'{plain_name(m)}: median {cm(s_["median"])} cm from the recorded path at 2 s, {s_["n"]} windows from {s_["clusters"]} drives'
+        ci = (f'<span class="gt-ci" style="--p:{s_["ci"][0] * 100 / top:.4f};--q:{(s_["ci"][1] - s_["ci"][0]) * 100 / top:.4f}"></span>'
+              if s_["ci"] else "")
         rows.append(
-            f'<div class="gt-row{" gt-ref" if mid == ref else ""}">'
-            f'<div class="gt-name">{rk}{name_html(m, "models/" + mid + ".html")}'
-            + ('<span class="gt-tag">reference</span>' if mid == ref else "") + '</div>'
-            f'<span class="gt-d">{esc(first_public(m))}</span>'
-            f'{dot_track(t[mid], model_class(m, cfg), top, "windows", plain_name(m))}'
-            f'<span class="gt-n" data-l="2° heading error">{val(m, "truck_recovery", "heading_xtrack_2s", "median", 100, 1)}</span>'
-            f'<span class="gt-n" data-l="0.5 m offset">{val(m, "truck_recovery", "offcentre_xtrack_2s", "median", 100, 1)}</span>'
-            f'<span class="gt-n" data-l="open loop, m/s²">{val(m, "truck_open_loop", "lat_mae", "value", 1, 2)}</span></div>')
-    ticks = "".join(f'<span class="rk-tk" style="left:{x / top * 100:.2f}%">{x}</span>' for x in range(0, top + 1, tick_step(top)))
-    head = ('<div class="gt-row gt-head" aria-hidden="true"><span>Model</span><span>First public</span>'
+            f'<div class="gt-row{tier}{" gt-ref" if mid == ref else ""}" data-place="{pl}" data-date="{esc(first_public(m))}">'
+            f'<span class="gt-rk" aria-label="place {pl}">{med or pl}</span>'
+            f'<div class="gt-name"><span class="gt-nm">{name_html(m, "models/" + mid + ".html")}{tags}</span>'
+            f'<span class="gt-d">{esc(first_public(m))}</span></div>'
+            f'<div class="gt-bar" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}">{refline}'
+            f'<span class="gt-fill gt-f-{model_class(m, cfg)}" style="--p:{w:.4f}"></span>{ci}'
+            f'<span class="gt-v" style="--p:{w:.4f}">{cm(s_["median"])} cm</span></div>'
+            f'{cell(m, cols[0], "2° heading error, cm")}{cell(m, cols[1], "0.5 m offset, cm")}{cell(m, cols[2], "open loop, m/s²")}</div>')
+    ticks = "".join(f'<span class="rk-tk gt-tk" style="--p:{x / top:.4f}">{x}</span>' for x in range(0, top + 1, tick_step(top)))
+    head = ('<div class="gt-row gt-head" aria-hidden="true"><span></span><span>Model</span>'
             f'<div class="rk-axis"><span class="rk-al">Closed loop: cm from the recorded path at 2 s</span>{ticks}</div>'
             '<span class="gt-n">2° heading<br>error, cm</span><span class="gt-n">0.5 m<br>offset, cm</span>'
             '<span class="gt-n">Open loop,<br>m/s²</span></div>')
     nw, nd = g55_counts(models)
-    rule = ("Rank: 1 plus the number of models with a lower median whose paired interval of the difference excludes zero."
-            if g else "No ranks or intervals until 10 drives.")
+    order = ("Ranked with 95% intervals; rows that share a rank are not separated." if g else
+             f"Ordered by median. With {nd} drives the differences are not yet separable; ranks with intervals start at 10 drives.")
     return f"""<figure class="gt" aria-labelledby="gt-t">
-<figcaption class="gt-cap"><p id="gt-t" class="fig-t">The G55, newest model first</p><p class="gt-ph">Dot: closed loop, cm from the recorded path at 2 s, on a 0 to {top} cm line. Lower is better.</p></figcaption>
-{head}{"".join(rows)}
-<p class="gt-note">Closed loop and recovery: {nw} windows from {nd} drives, each model driving a model of the G55's steering and powertrain in <code>worldmodel-4B</code>. Open loop: lateral request against what the truck did. Lower is better in every column. {rule} <a href="method.html">Method</a>, including why 2 s.</p>
+<figcaption class="gt-cap"><p id="gt-t" class="fig-t">Leaderboard: the G55 in closed loop</p>
+<div class="gt-sort" role="group" aria-label="Sort"><button type="button" aria-pressed="true" data-sort="place">Best first</button><button type="button" aria-pressed="false" data-sort="date">Newest first</button></div>
+<p class="gt-ph">Bar: closed loop, cm from the recorded path at 2 s, 0 to {top} cm. Lower is better.</p></figcaption>
+{head}<div class="gt-body">{"".join(rows)}</div>
+<p class="gt-note">{order} Closed loop and recovery: {nw} windows from {nd} drives, each model driving a model of the G55's steering and powertrain in <code>worldmodel-4B</code>; the dashed line is lebowski. Open loop: lateral request against what the truck did. Lower is better in every column; stronger shading is better within a column. <a href="method.html">Method</a>, including why 2 s.</p>
 </figure>"""
 
 
@@ -866,7 +918,7 @@ def trend_panel(title, unit, kind, models, cfg, r, W=360, H=190) -> str:
     else:
         lo, hi = (min(ys), max(ys)) if ys else (0.0, 1.0)
         pad = (hi - lo) * 0.15 or 0.1
-        y0, y1 = 0.0, hi + pad  # every panel is a magnitude: from zero, so small differences look small
+        y0, y1 = max(0.0, lo - pad), hi + pad
     Y = lambda v: H - B - (v - y0) / (y1 - y0) * (H - T - B)  # noqa: E731
     step = _nice((y1 - y0) / 4)
     g = []
@@ -889,7 +941,8 @@ def trend_panel(title, unit, kind, models, cfg, r, W=360, H=190) -> str:
     refl = ""
     if line:
         lab = f"{line[0]:g} of {int(line[0] * 2)}" if is_wins(kind) else "lebowski"
-        refl = (f'<line class="refl" x1="{L}" x2="{W - Rr}" y1="{Y(line[0]):.1f}" y2="{Y(line[0]):.1f}"/>'
+        better = "" if is_wins(kind) else f'<rect class="better" x="{L}" y="{Y(line[0]):.1f}" width="{W - Rr - L}" height="{H - B - Y(line[0]):.1f}"/>'
+        refl = (better + f'<line class="refl" x1="{L}" x2="{W - Rr}" y1="{Y(line[0]):.1f}" y2="{Y(line[0]):.1f}"/>'
                 f'<text class="refl-t" x="{L + 4}" y="{Y(line[0]) - 5:.1f}">{lab}</text>')
     ordered = sorted((m for m in others if m["model"]["id"] in vals), key=lambda m: (first_public(m), m["model"]["id"]))
     path = " ".join(f'{X(_date(first_public(m))):.1f},{Y(vals[m["model"]["id"]][0]):.1f}' for m in ordered)
@@ -903,7 +956,7 @@ def trend_panel(title, unit, kind, models, cfg, r, W=360, H=190) -> str:
             marks.append(f'<line class="tw-ci st-{c}" x1="{cx:.1f}" x2="{cx:.1f}" y1="{Y(lo):.1f}" y2="{Y(hi):.1f}"/>')
         vt = f"{v:.0f} of {nw}" if is_wins(kind) else f"{num(v, 1 if unit == 'cm' else 2)} {unit}" + (f" [{num(lo, 1 if unit == 'cm' else 2)}, {num(hi, 1 if unit == 'cm' else 2)}]" if lo is not None else "") + f", {nw}"
         tip = f'{plain_name(m)}, first public {first_public(m)}, {"on openpilot master or shipped" if shipped(m) else "Hugging Face upload only"}: {vt}'
-        fill = f"fl-{c}" if shipped(m) else "hollow"
+        fill = "hollow" if c == "hf" else f"fl-{c}"
         marks.append(f'<circle class="tp st-{c} {fill}" cx="{cx:.1f}" cy="{cy:.1f}" r="5" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}"/>')
     pend = [m for m in others if m["model"]["id"] not in vals]
     for m in pend:
@@ -942,12 +995,14 @@ def _fmt_tick(t: float, step: float) -> str:
 
 
 def trend_legend(cfg, bars: bool = True, pend: bool = True) -> str:
-    sw = "".join(f'<span><i class="sw sw-{h[1]}"></i>{esc(h[2])}</span>' for h in cfg.get("hero", {}).get("highlight", [])
-                 if h[0] != cfg["reference_model"])
-    return ('<p class="trend-key">' + sw + '<span><i class="sw sw-other"></i>other comma models</span>'
-            '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-fill"/></svg>shipped or on master</span>'
-            '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-hollow"/></svg>Hugging Face only</span>'
-            '<span><svg width="20" height="12" aria-hidden="true"><line x1="0" x2="20" y1="6" y2="6" class="refl"/></svg>lebowski, July 2026</span>'
+    dot = lambda c, hollow=False: (f'<svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" '  # noqa: E731
+                                   f'class="st-{c} {"hollow" if hollow else "fl-" + c}" stroke-width="2"/></svg>')
+    return ('<p class="trend-key">'
+            f'<span>{dot("ship")}shipped or on openpilot master</span>'
+            f'<span>{dot("hf", True)}Hugging Face upload only</span>'
+            f'<span>{dot("ref")}lebowski, the reference (July 2026)</span>'
+            f'<span>{dot("old")}earlier models</span>'
+            '<span><i class="key-better" aria-hidden="true"></i>better than lebowski</span>'
             + ('<span><svg width="12" height="12" aria-hidden="true"><path class="pend" d="M3,3 l6,6 m0,-6 l-6,6"/></svg>not scored yet</span>' if pend else '')
             + ('<span>bars: 95% interval</span>' if bars else '') + '</p>')
 
@@ -1054,8 +1109,8 @@ def overview(models, cfg, root) -> str:
 <p class="lede">Every comma.ai driving model, scored on drives from a 2011 Mercedes G55, a car openpilot does not support.</p>
 {status_strip(models, cfg, root)}
 </div>
-<div id="time" class="time">{over_time(models, cfg, root)}</div>
 {g55_table(models, cfg, root)}
+<div id="time" class="time"><p class="fig-t">Over time, by the date each model was first public</p><p class="meta">Closed loop and recovery: {g55_counts(models)[0]} windows from {g55_counts(models)[1]} drives. Open loop: {ol_counts(models)} Lower is better in all four.</p>{over_time(models, cfg, root)}</div>
 </section>
 
 <section id="findings">
@@ -1236,6 +1291,7 @@ def main() -> None:
     CFG.update(cfg)
     root, out = a.root.resolve(), a.out.resolve()
     models = load(root)
+    MODELS[:] = models
     if out.exists():
         shutil.rmtree(out)
     (out / "models").mkdir(parents=True)

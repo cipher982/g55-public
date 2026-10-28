@@ -170,3 +170,18 @@
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) { t = LAST / d.fps; setPlaying(false); draw(); }
   else setPlaying(true);
 })();
+
+// The leaderboard's sort toggle: best first (data-place) or newest first (data-date).
+(function () {
+  for (const fig of document.querySelectorAll(".gt")) {
+    const body = fig.querySelector(".gt-body");
+    const btns = fig.querySelectorAll(".gt-sort button");
+    for (const b of btns) b.addEventListener("click", () => {
+      const k = b.dataset.sort;
+      const rows = [...body.children];
+      rows.sort((x, y) => k === "date" ? y.dataset.date.localeCompare(x.dataset.date) : x.dataset.place - y.dataset.place);
+      body.append(...rows);
+      for (const o of btns) o.setAttribute("aria-pressed", String(o === b));
+    });
+  }
+})();
