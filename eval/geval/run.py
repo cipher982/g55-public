@@ -324,9 +324,14 @@ def score(cfg, mid: str, sections: list):
                        f"{len({segs[u]['car'] for u in units if u in segs})} cars, one 7.2 s window each."})
     wins = episodes_from(work / "out" / "truck_closed_loop", mid)
     if "truck_closed_loop" in sections:
-        units = closedloop.window_units(wins, mid, "g55", "nominal", seeds)
+        # the old suite windows of the backfilled models live only in the backfill files; keep them beside new runs
+        old, old_night = backfill.model_units(cfg, mid, "nominal")
+        new = closedloop.window_units(wins, mid, "g55", "nominal", seeds)
+        units = {**old, **new}
         if units:
-            meta = {"condition": describe(wins, units)}
+            night = len((old_night - new.keys()) | {f"{w['drive']}:{w['start']}" for w in wins
+                                                   if f"{w['drive']}:{w['start']}" in new and w.get("night")})
+            meta = {"condition": f"{len(units)} windows ({len(units) - night} day, {night} night)."}
             groups = backfill.truck_groups(cfg)
             if groups:
                 meta["groups"] = {u: groups[u] for u in units if u in groups}

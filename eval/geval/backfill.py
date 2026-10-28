@@ -89,6 +89,15 @@ def closed_loop_episodes(cfg):
     return eps
 
 
+def model_units(cfg, mid, cond) -> tuple[dict, set]:
+    """One model's backfilled truck closed-loop units for one condition, and which of them are night windows."""
+    if "backfill" not in cfg:
+        return {}, set()
+    by_window = closed_loop_episodes(cfg).get((mid, cond), {})
+    night = {wid for wid, w in by_window.items() if next(iter(w.values()))[3]}
+    return window_means(by_window), night
+
+
 def window_means(by_window: dict) -> dict:
     out = {}
     for wid, by_seed in by_window.items():

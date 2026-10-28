@@ -18,9 +18,9 @@
   "notes": "In the openpilot 0.10.3 tag. Plan only, commands from modeld's get_action_from_model. Vision 6a7d09ad/200, policy 4b78e2e6/400."
  },
  "scored": {
-  "date": "2026-10-28T01:48:15Z",
+  "date": "2026-10-28T04:04:40Z",
   "suite": "geval-1",
-  "code": "e1af6a09df98"
+  "code": "b47aaab777de"
  },
  "baselines": [
   "lebowski_877m",

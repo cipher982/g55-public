@@ -18,9 +18,9 @@
   "notes": "In the openpilot 0.10.1 tag; named in the 0.10.3 release notes. Same vision model as North Nevada (2cc530ac/500), new policy fd9a6816/400. Plan only, commands from modeld's get_action_from_model."
  },
  "scored": {
-  "date": "2026-10-28T01:48:15Z",
+  "date": "2026-10-28T04:04:39Z",
   "suite": "geval-1",
-  "code": "e1af6a09df98"
+  "code": "b47aaab777de"
  },
  "baselines": [
   "lebowski_877m",

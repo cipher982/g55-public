@@ -122,7 +122,8 @@ LIMITS = {
                        "are left out.",
     "truck_closed_loop": "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not "
                          "validated on it in closed loop; the reference is the driver's own line, not the lane "
-                         "centre. On the V14 setup the wide frame can be up to 90 ms from the simulated one "
+                         "centre. The pooled number mixes camera setups, so read the per-setup numbers too. "
+                         "On the V14 setup the wide frame can be up to 90 ms from the simulated one "
                          "(its camera recorded 7-9 fps).",
     "truck_recovery": "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame "
                       "jump it does not, so none is used). The braking-lead test has 2 windows from one drive, "

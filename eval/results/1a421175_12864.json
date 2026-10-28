@@ -18,9 +18,9 @@
   "notes": "On openpilot master 2026-09-11 (PR #38850). Vision base b9facbcc, history in the graph, no residual head."
  },
  "scored": {
-  "date": "2026-10-28T01:48:16Z",
+  "date": "2026-10-28T04:04:41Z",
   "suite": "geval-1",
-  "code": "e1af6a09df98"
+  "code": "b47aaab777de"
  },
  "baselines": [
   "lebowski_877m"
@@ -2041,9 +2041,9 @@
   "truck_closed_loop": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 18,
-   "clusters": 4,
-   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 18 windows (9 day, 9 night).",
+   "n": 98,
+   "clusters": 13,
+   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 98 windows (59 day, 39 night).",
    "baselines": [
     "lebowski_877m"
    ],
@@ -2053,21 +2053,27 @@
      "label": "Distance from the recorded path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.2467,
-     "median": 0.1408,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.2165,
+     "median": 0.132,
+     "ci": [
+      0.1678,
+      0.2775
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.0216,
-       "median": -0.01673,
-       "ci": null,
-       "n": 18,
-       "wins": 11,
+       "delta": -0.02276,
+       "median": -0.01411,
+       "ci": [
+        -0.04397,
+        0.0009735
+       ],
+       "n": 98,
+       "wins": 54,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 3
+       "clusters": 13,
+       "cluster_wins": 9
       }
      }
     },
@@ -2076,21 +2082,27 @@
      "label": "Distance from the recorded path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.5369,
-     "median": 0.4119,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.6047,
+     "median": 0.3174,
+     "ci": [
+      0.4371,
+      0.8154
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.02508,
-       "median": 0.006773,
-       "ci": null,
-       "n": 18,
-       "wins": 8,
+       "delta": 0.008746,
+       "median": 0.0006946,
+       "ci": [
+        -0.02356,
+        0.04246
+       ],
+       "n": 98,
+       "wins": 48,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 2
+       "clusters": 13,
+       "cluster_wins": 5
       }
      }
     },
@@ -2099,21 +2111,27 @@
      "label": "Distance from the recorded path at 7.2 s",
      "unit": "m",
      "better": "lower",
-     "value": 1.416,
-     "median": 0.8671,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 2.1,
+     "median": 0.8742,
+     "ci": [
+      1.446,
+      2.8
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.1892,
-       "median": 0.03108,
-       "ci": null,
-       "n": 18,
-       "wins": 7,
+       "delta": 0.05549,
+       "median": 0.0152,
+       "ci": [
+        -0.4277,
+        0.5728
+       ],
+       "n": 98,
+       "wins": 45,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 1
+       "clusters": 13,
+       "cluster_wins": 4
       }
      }
     },
@@ -2122,21 +2140,27 @@
      "label": "Share of episodes ever more than 1 m off the path",
      "unit": "",
      "better": "lower",
-     "value": 0.5,
+     "value": 0.4439,
      "median": 0.5,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "ci": [
+      0.3667,
+      0.5275
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.1389,
+       "delta": 0.0102,
        "median": 0.0,
-       "ci": null,
-       "n": 18,
-       "wins": 2,
-       "ties": 11,
-       "clusters": 4,
-       "cluster_wins": 1
+       "ci": [
+        -0.04464,
+        0.07739
+       ],
+       "n": 98,
+       "wins": 13,
+       "ties": 71,
+       "clusters": 13,
+       "cluster_wins": 5
       }
      }
     },
@@ -2145,21 +2169,27 @@
      "label": "Requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.236,
-     "median": 0.1529,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.2391,
+     "median": 0.1846,
+     "ci": [
+      0.2057,
+      0.2719
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.3088,
-       "median": -0.2611,
-       "ci": null,
-       "n": 18,
-       "wins": 18,
+       "delta": -0.3292,
+       "median": -0.2548,
+       "ci": [
+        -0.3819,
+        -0.2746
+       ],
+       "n": 98,
+       "wins": 97,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 4
+       "clusters": 13,
+       "cluster_wins": 13
       }
      }
     },
@@ -2168,21 +2198,27 @@
      "label": "Requested longitudinal jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.206,
-     "median": 0.1874,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.2091,
+     "median": 0.1813,
+     "ci": [
+      0.1797,
+      0.2348
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.1553,
-       "median": -0.1376,
-       "ci": null,
-       "n": 18,
-       "wins": 16,
+       "delta": -0.1839,
+       "median": -0.1608,
+       "ci": [
+        -0.2112,
+        -0.1572
+       ],
+       "n": 98,
+       "wins": 93,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 4
+       "clusters": 13,
+       "cluster_wins": 13
       }
      }
     },
@@ -2191,33 +2227,771 @@
      "label": "Speed error against the recorded speed, RMS",
      "unit": "m/s",
      "better": "lower",
-     "value": 1.167,
-     "median": 1.01,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 1.179,
+     "median": 0.9863,
+     "ci": [
+      0.9554,
+      1.415
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.1091,
-       "median": 0.1521,
-       "ci": null,
-       "n": 18,
-       "wins": 7,
+       "delta": 0.05548,
+       "median": 0.03761,
+       "ci": [
+        -0.09277,
+        0.1999
+       ],
+       "n": 98,
+       "wins": 45,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 2
+       "clusters": 13,
+       "cluster_wins": 6
       }
      }
     }
    ],
-   "per_unit_file": null
+   "per_unit_file": null,
+   "by_group": {
+    "stock-aimedup": {
+     "n": 14,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "xtrack_2s",
+       "value": 0.1788,
+       "median": 0.1028,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.02183,
+         "median": -0.01997,
+         "ci": null,
+         "n": 14,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.5104,
+       "median": 0.3174,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.01968,
+         "median": -0.05091,
+         "ci": null,
+         "n": 14,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 2.497,
+       "median": 1.682,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.636,
+         "median": 0.31,
+         "ci": null,
+         "n": 14,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.5714,
+       "median": 0.75,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.0,
+         "median": 0.0,
+         "ci": null,
+         "n": 14,
+         "wins": 3,
+         "ties": 7,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.2846,
+       "median": 0.2345,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.3719,
+         "median": -0.2882,
+         "ci": null,
+         "n": 14,
+         "wins": 14,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.2464,
+       "median": 0.2187,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.2313,
+         "median": -0.2632,
+         "ci": null,
+         "n": 14,
+         "wins": 13,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "speed_err",
+       "value": 1.753,
+       "median": 1.686,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1023,
+         "median": -0.1545,
+         "ci": null,
+         "n": 14,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      }
+     ]
+    },
+    "stock-dual": {
+     "n": 43,
+     "clusters": 5,
+     "metrics": [
+      {
+       "key": "xtrack_2s",
+       "value": 0.2101,
+       "median": 0.1484,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03623,
+         "median": -0.02157,
+         "ci": null,
+         "n": 43,
+         "wins": 26,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.5208,
+       "median": 0.3604,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01689,
+         "median": -0.001931,
+         "ci": null,
+         "n": 43,
+         "wins": 22,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 1.557,
+       "median": 0.6762,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.4331,
+         "median": -0.05633,
+         "ci": null,
+         "n": 43,
+         "wins": 24,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.3953,
+       "median": 0.0,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01163,
+         "median": 0.0,
+         "ci": null,
+         "n": 43,
+         "wins": 6,
+         "ties": 31,
+         "clusters": 5,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.2386,
+       "median": 0.1603,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.3079,
+         "median": -0.2464,
+         "ci": null,
+         "n": 43,
+         "wins": 43,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 5
+        }
+       }
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.2117,
+       "median": 0.1849,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1731,
+         "median": -0.1493,
+         "ci": null,
+         "n": 43,
+         "wins": 41,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 5
+        }
+       }
+      },
+      {
+       "key": "speed_err",
+       "value": 1.163,
+       "median": 0.9898,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.06035,
+         "median": 0.05571,
+         "ci": null,
+         "n": 43,
+         "wins": 20,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 2
+        }
+       }
+      }
+     ]
+    },
+    "stock-newcase": {
+     "n": 4,
+     "clusters": 1,
+     "metrics": [
+      {
+       "key": "xtrack_2s",
+       "value": 0.04693,
+       "median": 0.04661,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03994,
+         "median": -0.03291,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.1875,
+       "median": 0.2129,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03119,
+         "median": 0.01291,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 1.26,
+       "median": 1.275,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.04902,
+         "median": 0.06532,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.5,
+       "median": 0.5,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.125,
+         "median": 0.0,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 3,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.2548,
+       "median": 0.1971,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.3125,
+         "median": -0.2618,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.1574,
+       "median": 0.1578,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1634,
+         "median": -0.148,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "speed_err",
+       "value": 0.8255,
+       "median": 0.8534,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.2271,
+         "median": 0.1316,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      }
+     ]
+    },
+    "v13-8mm": {
+     "n": 18,
+     "clusters": 3,
+     "metrics": [
+      {
+       "key": "xtrack_2s",
+       "value": 0.3476,
+       "median": 0.1552,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.002564,
+         "median": 0.0007042,
+         "ci": null,
+         "n": 18,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.9608,
+       "median": 0.2504,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.02194,
+         "median": 0.01964,
+         "ci": null,
+         "n": 18,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 2.735,
+       "median": 0.8809,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1748,
+         "median": 0.07411,
+         "ci": null,
+         "n": 18,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.3611,
+       "median": 0.0,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.05556,
+         "median": 0.0,
+         "ci": null,
+         "n": 18,
+         "wins": 0,
+         "ties": 16,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.2277,
+       "median": 0.151,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.26,
+         "median": -0.1899,
+         "ci": null,
+         "n": 18,
+         "wins": 17,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.1426,
+       "median": 0.1272,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1734,
+         "median": -0.1443,
+         "ci": null,
+         "n": 18,
+         "wins": 18,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "speed_err",
+       "value": 0.802,
+       "median": 0.5586,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.2108,
+         "median": -0.07665,
+         "ci": null,
+         "n": 18,
+         "wins": 12,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        }
+       }
+      }
+     ]
+    },
+    "v14-8mm": {
+     "n": 19,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "xtrack_2s",
+       "value": 0.1703,
+       "median": 0.1342,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.008485,
+         "median": 0.002705,
+         "ci": null,
+         "n": 19,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.6142,
+       "median": 0.3479,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.04873,
+         "median": 0.01981,
+         "ci": null,
+         "n": 19,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 2.609,
+       "median": 0.9418,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.953,
+         "median": 0.004523,
+         "ci": null,
+         "n": 19,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.5263,
+       "median": 0.5,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.0,
+         "median": 0.0,
+         "ci": null,
+         "n": 19,
+         "wins": 3,
+         "ties": 14,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.2145,
+       "median": 0.2038,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.415,
+         "median": -0.3404,
+         "ci": null,
+         "n": 19,
+         "wins": 19,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.2499,
+       "median": 0.1977,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1875,
+         "median": -0.1445,
+         "ci": null,
+         "n": 19,
+         "wins": 18,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "speed_err",
+       "value": 1.226,
+       "median": 0.9951,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.3769,
+         "median": 0.2502,
+         "ci": null,
+         "n": 19,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      }
+     ]
+    }
+   }
   },
   "truck_recovery": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 20,
-   "clusters": 5,
-   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
+   "n": 100,
+   "clusters": 14,
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 98 windows (59 day, 39 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 98 windows (59 day, 39 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
    "baselines": [
     "lebowski_877m"
    ],
@@ -2227,21 +3001,27 @@
      "label": "2° off heading: distance from the path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.4346,
-     "median": 0.3814,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.5327,
+     "median": 0.426,
+     "ci": [
+      0.4192,
+      0.6706
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.00771,
-       "median": 0.007908,
-       "ci": null,
-       "n": 18,
-       "wins": 9,
+       "delta": 0.05083,
+       "median": 0.02263,
+       "ci": [
+        0.01124,
+        0.09465
+       ],
+       "n": 98,
+       "wins": 42,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 2
+       "clusters": 13,
+       "cluster_wins": 5
       }
      }
     },
@@ -2250,21 +3030,27 @@
      "label": "2° off heading: distance from the path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.6489,
-     "median": 0.4776,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.8174,
+     "median": 0.5487,
+     "ci": [
+      0.595,
+      1.113
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.1052,
-       "median": 0.06598,
-       "ci": null,
-       "n": 18,
-       "wins": 7,
+       "delta": 0.05024,
+       "median": 0.0381,
+       "ci": [
+        -0.01696,
+        0.1117
+       ],
+       "n": 98,
+       "wins": 43,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 0
+       "clusters": 13,
+       "cluster_wins": 3
       }
      }
     },
@@ -2273,21 +3059,27 @@
      "label": "2° off heading: requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.3117,
-     "median": 0.2736,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.3506,
+     "median": 0.3153,
+     "ci": [
+      0.3136,
+      0.3857
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.5152,
-       "median": -0.5052,
-       "ci": null,
-       "n": 18,
-       "wins": 18,
+       "delta": -0.5371,
+       "median": -0.4637,
+       "ci": [
+        -0.6091,
+        -0.481
+       ],
+       "n": 98,
+       "wins": 98,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 4
+       "clusters": 13,
+       "cluster_wins": 13
       }
      }
     },
@@ -2296,21 +3088,27 @@
      "label": "0.5 m off centre: distance from the path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.3476,
-     "median": 0.2691,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.3301,
+     "median": 0.2468,
+     "ci": [
+      0.2849,
+      0.3792
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.001279,
-       "median": -0.004954,
-       "ci": null,
-       "n": 18,
-       "wins": 9,
+       "delta": 0.0165,
+       "median": 0.01197,
+       "ci": [
+        -0.003223,
+        0.03972
+       ],
+       "n": 98,
+       "wins": 44,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 1
+       "clusters": 13,
+       "cluster_wins": 6
       }
      }
     },
@@ -2319,21 +3117,27 @@
      "label": "0.5 m off centre: distance from the path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.6685,
-     "median": 0.3848,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.7369,
+     "median": 0.4486,
+     "ci": [
+      0.6012,
+      0.881
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.009467,
-       "median": -0.00479,
-       "ci": null,
-       "n": 18,
-       "wins": 9,
+       "delta": -0.01281,
+       "median": 0.01496,
+       "ci": [
+        -0.09498,
+        0.05115
+       ],
+       "n": 98,
+       "wins": 46,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 2
+       "clusters": 13,
+       "cluster_wins": 4
       }
      }
     },
@@ -2342,21 +3146,27 @@
      "label": "0.5 m off centre: requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.4199,
-     "median": 0.4047,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.4485,
+     "median": 0.4172,
+     "ci": [
+      0.4255,
+      0.4701
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.753,
-       "median": -0.7035,
-       "ci": null,
-       "n": 18,
-       "wins": 18,
+       "delta": -0.6582,
+       "median": -0.6404,
+       "ci": [
+        -0.7215,
+        -0.5913
+       ],
+       "n": 98,
+       "wins": 98,
        "ties": 0,
-       "clusters": 4,
-       "cluster_wins": 4
+       "clusters": 13,
+       "cluster_wins": 13
       }
      }
     },
@@ -2430,7 +3240,699 @@
      }
     }
    ],
-   "per_unit_file": null
+   "per_unit_file": null,
+   "by_group": {
+    "stock-aimedup": {
+     "n": 14,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "heading_xtrack_2s",
+       "value": 0.3905,
+       "median": 0.3356,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03118,
+         "median": -0.03013,
+         "ci": null,
+         "n": 14,
+         "wins": 11,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "heading_xtrack_4s",
+       "value": 0.5642,
+       "median": 0.3889,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.05142,
+         "median": -0.0501,
+         "ci": null,
+         "n": 14,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 0.3433,
+       "median": 0.3103,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.427,
+         "median": -0.3239,
+         "ci": null,
+         "n": 14,
+         "wins": 14,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.2892,
+       "median": 0.2296,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.01372,
+         "median": -0.03118,
+         "ci": null,
+         "n": 14,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 0.6033,
+       "median": 0.4514,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01369,
+         "median": 0.1102,
+         "ci": null,
+         "n": 14,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "offcentre_lat_jerk",
+       "value": 0.5081,
+       "median": 0.4909,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.5987,
+         "median": -0.5715,
+         "ci": null,
+         "n": 14,
+         "wins": 14,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      }
+     ]
+    },
+    "stock-dual": {
+     "n": 45,
+     "clusters": 6,
+     "metrics": [
+      {
+       "key": "heading_xtrack_2s",
+       "value": 0.4554,
+       "median": 0.4192,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03311,
+         "median": 0.02201,
+         "ci": null,
+         "n": 43,
+         "wins": 19,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "heading_xtrack_4s",
+       "value": 0.6971,
+       "median": 0.5561,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.09453,
+         "median": 0.02753,
+         "ci": null,
+         "n": 43,
+         "wins": 18,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 0.3265,
+       "median": 0.299,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.558,
+         "median": -0.4961,
+         "ci": null,
+         "n": 43,
+         "wins": 43,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 5
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.3351,
+       "median": 0.2777,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01247,
+         "median": 0.00912,
+         "ci": null,
+         "n": 43,
+         "wins": 20,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 0.7121,
+       "median": 0.541,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01118,
+         "median": 0.009693,
+         "ci": null,
+         "n": 43,
+         "wins": 19,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "offcentre_lat_jerk",
+       "value": 0.4467,
+       "median": 0.4115,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.7088,
+         "median": -0.6836,
+         "ci": null,
+         "n": 43,
+         "wins": 43,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 5
+        }
+       }
+      },
+      {
+       "key": "brake_ahead_4s",
+       "value": -0.6588,
+       "median": -0.6588,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 1.135,
+         "median": 1.135,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "brake_gap_min",
+       "value": 22.56,
+       "median": 22.56,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -6.725,
+         "median": -6.725,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "brake_speed_err",
+       "value": 1.148,
+       "median": 1.148,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.08067,
+         "median": 0.08067,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      }
+     ]
+    },
+    "stock-newcase": {
+     "n": 4,
+     "clusters": 1,
+     "metrics": [
+      {
+       "key": "heading_xtrack_2s",
+       "value": 0.3631,
+       "median": 0.3713,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.07733,
+         "median": -0.1089,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "heading_xtrack_4s",
+       "value": 0.43,
+       "median": 0.3,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03919,
+         "median": 0.04071,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 0.3443,
+       "median": 0.288,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.7214,
+         "median": -0.6115,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.2532,
+       "median": 0.2072,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.04641,
+         "median": -0.06389,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 0.7702,
+       "median": 0.7939,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.1356,
+         "median": 0.0945,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "offcentre_lat_jerk",
+       "value": 0.4858,
+       "median": 0.49,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.7355,
+         "median": -0.6316,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        }
+       }
+      }
+     ]
+    },
+    "v13-8mm": {
+     "n": 18,
+     "clusters": 3,
+     "metrics": [
+      {
+       "key": "heading_xtrack_2s",
+       "value": 0.972,
+       "median": 0.8951,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.1969,
+         "median": 0.2291,
+         "ci": null,
+         "n": 18,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "heading_xtrack_4s",
+       "value": 1.504,
+       "median": 0.7509,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.0002759,
+         "median": 0.1256,
+         "ci": null,
+         "n": 18,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 0.4261,
+       "median": 0.3861,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.4891,
+         "median": -0.4706,
+         "ci": null,
+         "n": 18,
+         "wins": 18,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.4341,
+       "median": 0.2665,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.05273,
+         "median": 0.07072,
+         "ci": null,
+         "n": 18,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 0.8644,
+       "median": 0.2464,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1902,
+         "median": -0.03568,
+         "ci": null,
+         "n": 18,
+         "wins": 11,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "offcentre_lat_jerk",
+       "value": 0.4102,
+       "median": 0.3809,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.4715,
+         "median": -0.4672,
+         "ci": null,
+         "n": 18,
+         "wins": 18,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
+        }
+       }
+      }
+     ]
+    },
+    "v14-8mm": {
+     "n": 19,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "heading_xtrack_2s",
+       "value": 0.4321,
+       "median": 0.4186,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03999,
+         "median": 0.02266,
+         "ci": null,
+         "n": 19,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "heading_xtrack_4s",
+       "value": 0.7072,
+       "median": 0.4326,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.07458,
+         "median": 0.03187,
+         "ci": null,
+         "n": 19,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 0.3405,
+       "median": 0.2974,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.5776,
+         "median": -0.4627,
+         "ci": null,
+         "n": 19,
+         "wins": 19,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.2667,
+       "median": 0.2288,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.02683,
+         "median": 0.05738,
+         "ci": null,
+         "n": 19,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 0.7637,
+       "median": 0.4493,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.05021,
+         "median": -0.01527,
+         "ci": null,
+         "n": 19,
+         "wins": 10,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "offcentre_lat_jerk",
+       "value": 0.4373,
+       "median": 0.423,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.7483,
+         "median": -0.6774,
+         "ci": null,
+         "n": 19,
+         "wins": 19,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      }
+     ]
+    }
+   }
   }
  },
  "stills": [],
@@ -2441,7 +3943,7 @@
   "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its distance from 1); wins count units where the model is better in the metric's direction.",
   "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best correlates with the car's later lateral motion; a larger value means the request comes earlier. A value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
   "Truck open loop comes from few drives, and the camera setup changed between them (lens, housing, aim); the pooled number mixes setups, so read the per-setup numbers too. The 8 mm setups' wide camera recorded about 7-10 fps, so its frame can be up to ~60 ms from the narrow one. On the V14 setup up to 7 of a window's 700 steps are ~100 ms (one camera frame dropped). The camera's aim is the truck's live calibration learned on each drive; drives whose recorded calibration was carried over from another drive are left out.",
-  "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not validated on it in closed loop; the reference is the driver's own line, not the lane centre. On the V14 setup the wide frame can be up to 90 ms from the simulated one (its camera recorded 7-9 fps).",
+  "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not validated on it in closed loop; the reference is the driver's own line, not the lane centre. The pooled number mixes camera setups, so read the per-setup numbers too. On the V14 setup the wide frame can be up to 90 ms from the simulated one (its camera recorded 7-9 fps).",
   "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame jump it does not, so none is used). The braking-lead test has 2 windows from one drive, whose recorded calibration was carried over from an earlier drive."
  ]
 }

@@ -4,59 +4,83 @@
  "unit": "m",
  "models": {
   "1365126a_12864": {
-   "median": 0.1622,
-   "ci": null,
-   "n": 18,
-   "clusters": 4,
+   "median": 0.1267,
+   "ci": [
+    0.1009,
+    0.16
+   ],
+   "n": 98,
+   "clusters": 13,
    "rank": 1
   },
   "1a421175_12864": {
-   "median": 0.1408,
-   "ci": null,
-   "n": 18,
-   "clusters": 4,
+   "median": 0.132,
+   "ci": [
+    0.0964,
+    0.1743
+   ],
+   "n": 98,
+   "clusters": 13,
    "rank": 1
   },
   "6b5b705f_12800": {
-   "median": 0.1381,
-   "ci": null,
-   "n": 18,
-   "clusters": 4,
+   "median": 0.12,
+   "ci": [
+    0.09331,
+    0.1483
+   ],
+   "n": 98,
+   "clusters": 13,
    "rank": 1
   },
   "870a4823_12864": {
-   "median": 0.1351,
-   "ci": null,
-   "n": 18,
-   "clusters": 4,
+   "median": 0.125,
+   "ci": [
+    0.09087,
+    0.169
+   ],
+   "n": 98,
+   "clusters": 13,
    "rank": 1
   },
   "8d736683_12864": {
-   "median": 0.1585,
-   "ci": null,
-   "n": 18,
-   "clusters": 4,
+   "median": 0.1278,
+   "ci": [
+    0.0986,
+    0.1537
+   ],
+   "n": 98,
+   "clusters": 13,
    "rank": 1
   },
   "96244b1f_12800": {
-   "median": 0.196,
-   "ci": null,
-   "n": 18,
-   "clusters": 4,
+   "median": 0.1289,
+   "ci": [
+    0.09118,
+    0.174
+   ],
+   "n": 98,
+   "clusters": 13,
    "rank": 1
   },
   "f78ed37d_12864": {
-   "median": 0.159,
-   "ci": null,
-   "n": 18,
-   "clusters": 4,
-   "rank": 1
+   "median": 0.1435,
+   "ci": [
+    0.1157,
+    0.1813
+   ],
+   "n": 98,
+   "clusters": 13,
+   "rank": 3
   },
   "lebowski_877m": {
-   "median": 0.227,
-   "ci": null,
-   "n": 18,
-   "clusters": 4,
+   "median": 0.1531,
+   "ci": [
+    0.1209,
+    0.2041
+   ],
+   "n": 98,
+   "clusters": 13,
    "rank": 1
   }
  }

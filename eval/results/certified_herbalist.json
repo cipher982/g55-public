@@ -18,9 +18,9 @@
   "notes": "Shipped in openpilot 0.9.6. One supercombo whose desired-curvature head is the steering command. No acceleration command (the longitudinal MPC planned it), so no longitudinal scores. Policy checkpoint 93532291/700. Navigation inputs zero."
  },
  "scored": {
-  "date": "2026-10-28T01:48:14Z",
+  "date": "2026-10-28T04:04:38Z",
   "suite": "geval-1",
-  "code": "e1af6a09df98"
+  "code": "b47aaab777de"
  },
  "baselines": [
   "lebowski_877m",

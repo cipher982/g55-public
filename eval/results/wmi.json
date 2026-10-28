@@ -18,9 +18,9 @@
   "notes": "Named in the openpilot 0.11.0 release notes. The 0.11.0 and 0.11.1 tags carry the CD210 model (PR #37050, master 2026-02-03): a re-export of these weights, every weight tensor byte for byte the same (policy checkpoint a27b3122/100 in both), so it is scored once, here. Same vision model as Dark Souls 2 (6a7d09ad/200). Plan only, commands from modeld's get_action_from_model."
  },
  "scored": {
-  "date": "2026-10-28T01:48:16Z",
+  "date": "2026-10-28T04:04:40Z",
   "suite": "geval-1",
-  "code": "e1af6a09df98"
+  "code": "b47aaab777de"
  },
  "baselines": [
   "lebowski_877m",

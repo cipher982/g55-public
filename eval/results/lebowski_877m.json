@@ -18,9 +18,9 @@
   "notes": "877M ConvNeXt encoder, host-kept history, no RL residual. Checkpoint 6f5c8d09/ecc73f48. The model the G55 runs."
  },
  "scored": {
-  "date": "2026-10-28T01:48:16Z",
+  "date": "2026-10-28T04:04:40Z",
   "suite": "geval-1",
-  "code": "e1af6a09df98"
+  "code": "b47aaab777de"
  },
  "baselines": [
   "wmi"
@@ -1941,9 +1941,9 @@
   "truck_closed_loop": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 18,
-   "clusters": 4,
-   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 18 windows (9 day, 9 night).",
+   "n": 98,
+   "clusters": 13,
+   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 98 windows (59 day, 39 night).",
    "baselines": [],
    "metrics": [
     {
@@ -1951,11 +1951,14 @@
      "label": "Distance from the recorded path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.2683,
-     "median": 0.227,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.2393,
+     "median": 0.1531,
+     "ci": [
+      0.1775,
+      0.3002
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -1963,11 +1966,14 @@
      "label": "Distance from the recorded path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.5619,
-     "median": 0.3668,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.5959,
+     "median": 0.3357,
+     "ci": [
+      0.4208,
+      0.8216
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -1975,11 +1981,14 @@
      "label": "Distance from the recorded path at 7.2 s",
      "unit": "m",
      "better": "lower",
-     "value": 1.605,
-     "median": 0.6783,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 2.044,
+     "median": 0.7835,
+     "ci": [
+      1.405,
+      2.711
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -1987,11 +1996,14 @@
      "label": "Share of episodes ever more than 1 m off the path",
      "unit": "",
      "better": "lower",
-     "value": 0.3611,
-     "median": 0.0,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.4337,
+     "median": 0.25,
+     "ci": [
+      0.3467,
+      0.5167
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -1999,11 +2011,14 @@
      "label": "Requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.5448,
-     "median": 0.4278,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.5683,
+     "median": 0.4587,
+     "ci": [
+      0.4948,
+      0.6376
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -2011,11 +2026,14 @@
      "label": "Requested longitudinal jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.3613,
-     "median": 0.3399,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.393,
+     "median": 0.3776,
+     "ci": [
+      0.3507,
+      0.4325
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -2023,22 +2041,372 @@
      "label": "Speed error against the recorded speed, RMS",
      "unit": "m/s",
      "better": "lower",
-     "value": 1.058,
-     "median": 1.06,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 1.124,
+     "median": 0.9282,
+     "ci": [
+      0.903,
+      1.378
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     }
    ],
-   "per_unit_file": null
+   "per_unit_file": null,
+   "by_group": {
+    "stock-aimedup": {
+     "n": 14,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "xtrack_2s",
+       "value": 0.2007,
+       "median": 0.133,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.5301,
+       "median": 0.4693,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 1.861,
+       "median": 1.388,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.5714,
+       "median": 0.5,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.6565,
+       "median": 0.5145,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.4777,
+       "median": 0.4659,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "speed_err",
+       "value": 1.856,
+       "median": 1.903,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      }
+     ]
+    },
+    "stock-dual": {
+     "n": 43,
+     "clusters": 5,
+     "metrics": [
+      {
+       "key": "xtrack_2s",
+       "value": 0.2463,
+       "median": 0.2199,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.5039,
+       "median": 0.3677,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 1.99,
+       "median": 0.6743,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.3837,
+       "median": 0.0,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.5465,
+       "median": 0.418,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.3848,
+       "median": 0.3764,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "speed_err",
+       "value": 1.103,
+       "median": 0.8169,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      }
+     ]
+    },
+    "stock-newcase": {
+     "n": 4,
+     "clusters": 1,
+     "metrics": [
+      {
+       "key": "xtrack_2s",
+       "value": 0.08687,
+       "median": 0.06166,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.2187,
+       "median": 0.1476,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 1.211,
+       "median": 1.296,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.625,
+       "median": 0.75,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.5673,
+       "median": 0.5641,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.3208,
+       "median": 0.3049,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "speed_err",
+       "value": 0.5984,
+       "median": 0.5706,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      }
+     ]
+    },
+    "v13-8mm": {
+     "n": 18,
+     "clusters": 3,
+     "metrics": [
+      {
+       "key": "xtrack_2s",
+       "value": 0.3502,
+       "median": 0.1446,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.9828,
+       "median": 0.2733,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 2.91,
+       "median": 0.7608,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.3056,
+       "median": 0.0,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.4877,
+       "median": 0.3316,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.316,
+       "median": 0.279,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "speed_err",
+       "value": 1.013,
+       "median": 0.8044,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      }
+     ]
+    },
+    "v14-8mm": {
+     "n": 19,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "xtrack_2s",
+       "value": 0.1788,
+       "median": 0.1603,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.5655,
+       "median": 0.3398,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 1.656,
+       "median": 1.037,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.5263,
+       "median": 0.5,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.6295,
+       "median": 0.5763,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.4374,
+       "median": 0.3893,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "speed_err",
+       "value": 0.849,
+       "median": 0.8643,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      }
+     ]
+    }
+   }
   },
   "truck_recovery": {
    "status": "ok",
    "unit_of_evidence": "window",
-   "n": 20,
-   "clusters": 5,
-   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 18 windows (9 day, 9 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 18 windows (9 day, 9 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
+   "n": 100,
+   "clusters": 14,
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 80 windows (50 day, 30 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 98 windows (59 day, 39 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
    "baselines": [],
    "metrics": [
     {
@@ -2046,11 +2414,14 @@
      "label": "2° off heading: distance from the path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.4269,
-     "median": 0.3971,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.4819,
+     "median": 0.4101,
+     "ci": [
+      0.4028,
+      0.5883
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -2058,11 +2429,14 @@
      "label": "2° off heading: distance from the path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.5437,
-     "median": 0.3658,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.7672,
+     "median": 0.4907,
+     "ci": [
+      0.5479,
+      1.102
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -2070,11 +2444,14 @@
      "label": "2° off heading: requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.8269,
-     "median": 0.8061,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.8877,
+     "median": 0.8104,
+     "ci": [
+      0.8127,
+      0.9743
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -2082,11 +2459,14 @@
      "label": "0.5 m off centre: distance from the path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.3488,
-     "median": 0.2922,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.3136,
+     "median": 0.2307,
+     "ci": [
+      0.2562,
+      0.3701
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -2094,11 +2474,14 @@
      "label": "0.5 m off centre: distance from the path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.659,
-     "median": 0.3832,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 0.7497,
+     "median": 0.4617,
+     "ci": [
+      0.573,
+      0.9632
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -2106,11 +2489,14 @@
      "label": "0.5 m off centre: requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 1.173,
-     "median": 1.086,
-     "ci": null,
-     "n": 18,
-     "clusters": 4,
+     "value": 1.107,
+     "median": 1.063,
+     "ci": [
+      1.033,
+      1.175
+     ],
+     "n": 98,
+     "clusters": 13,
      "paired": {}
     },
     {
@@ -2150,7 +2536,336 @@
      "paired": {}
     }
    ],
-   "per_unit_file": null
+   "per_unit_file": null,
+   "by_group": {
+    "stock-aimedup": {
+     "n": 14,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "heading_xtrack_2s",
+       "value": 0.4217,
+       "median": 0.344,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "heading_xtrack_4s",
+       "value": 0.6156,
+       "median": 0.5211,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 0.7703,
+       "median": 0.6174,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.3029,
+       "median": 0.2445,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 0.5896,
+       "median": 0.4081,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_lat_jerk",
+       "value": 1.107,
+       "median": 1.137,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {}
+      }
+     ]
+    },
+    "stock-dual": {
+     "n": 45,
+     "clusters": 6,
+     "metrics": [
+      {
+       "key": "heading_xtrack_2s",
+       "value": 0.4222,
+       "median": 0.3823,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "heading_xtrack_4s",
+       "value": 0.6026,
+       "median": 0.4987,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 0.8844,
+       "median": 0.797,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.3226,
+       "median": 0.2645,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 0.7009,
+       "median": 0.4756,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_lat_jerk",
+       "value": 1.155,
+       "median": 1.08,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {}
+      },
+      {
+       "key": "brake_ahead_4s",
+       "value": -1.794,
+       "median": -1.794,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "brake_gap_min",
+       "value": 29.29,
+       "median": 29.29,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "brake_speed_err",
+       "value": 1.067,
+       "median": 1.067,
+       "ci": null,
+       "n": 2,
+       "clusters": 1,
+       "paired": {}
+      }
+     ]
+    },
+    "stock-newcase": {
+     "n": 4,
+     "clusters": 1,
+     "metrics": [
+      {
+       "key": "heading_xtrack_2s",
+       "value": 0.4405,
+       "median": 0.4283,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "heading_xtrack_4s",
+       "value": 0.3908,
+       "median": 0.2593,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 1.066,
+       "median": 1.012,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.2996,
+       "median": 0.2852,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 0.6346,
+       "median": 0.6128,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_lat_jerk",
+       "value": 1.221,
+       "median": 1.113,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {}
+      }
+     ]
+    },
+    "v13-8mm": {
+     "n": 18,
+     "clusters": 3,
+     "metrics": [
+      {
+       "key": "heading_xtrack_2s",
+       "value": 0.7751,
+       "median": 0.6422,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "heading_xtrack_4s",
+       "value": 1.504,
+       "median": 0.6862,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 0.9152,
+       "median": 0.9269,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.3814,
+       "median": 0.1742,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 1.055,
+       "median": 0.3703,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_lat_jerk",
+       "value": 0.8816,
+       "median": 0.8418,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {}
+      }
+     ]
+    },
+    "v14-8mm": {
+     "n": 19,
+     "clusters": 2,
+     "metrics": [
+      {
+       "key": "heading_xtrack_2s",
+       "value": 0.3921,
+       "median": 0.3807,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "heading_xtrack_4s",
+       "value": 0.6326,
+       "median": 0.3885,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 0.9181,
+       "median": 0.7789,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.2399,
+       "median": 0.1972,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 0.7135,
+       "median": 0.4826,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      },
+      {
+       "key": "offcentre_lat_jerk",
+       "value": 1.186,
+       "median": 1.141,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {}
+      }
+     ]
+    }
+   }
   }
  },
  "stills": [],
@@ -2161,7 +2876,7 @@
   "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its distance from 1); wins count units where the model is better in the metric's direction.",
   "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best correlates with the car's later lateral motion; a larger value means the request comes earlier. A value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
   "Truck open loop comes from few drives, and the camera setup changed between them (lens, housing, aim); the pooled number mixes setups, so read the per-setup numbers too. The 8 mm setups' wide camera recorded about 7-10 fps, so its frame can be up to ~60 ms from the narrow one. On the V14 setup up to 7 of a window's 700 steps are ~100 ms (one camera frame dropped). The camera's aim is the truck's live calibration learned on each drive; drives whose recorded calibration was carried over from another drive are left out.",
-  "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not validated on it in closed loop; the reference is the driver's own line, not the lane centre. On the V14 setup the wide frame can be up to 90 ms from the simulated one (its camera recorded 7-9 fps).",
+  "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not validated on it in closed loop; the reference is the driver's own line, not the lane centre. The pooled number mixes camera setups, so read the per-setup numbers too. On the V14 setup the wide frame can be up to 90 ms from the simulated one (its camera recorded 7-9 fps).",
   "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame jump it does not, so none is used). The braking-lead test has 2 windows from one drive, whose recorded calibration was carried over from an earlier drive."
  ]
 }

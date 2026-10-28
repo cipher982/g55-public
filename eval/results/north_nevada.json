@@ -18,9 +18,9 @@
   "notes": "Named in the openpilot 0.10.1 release notes; the 0.10.1 tag carries The Cool People's model, merged eleven days later. Plan only, commands from modeld's get_action_from_model. Vision 2cc530ac/500, policy 0e620593/400."
  },
  "scored": {
-  "date": "2026-10-28T01:48:15Z",
+  "date": "2026-10-28T04:04:39Z",
   "suite": "geval-1",
-  "code": "e1af6a09df98"
+  "code": "b47aaab777de"
  },
  "baselines": [
   "lebowski_877m",
