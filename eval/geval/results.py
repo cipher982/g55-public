@@ -179,6 +179,7 @@ def build(work: Path, model_id: str, arch: dict, out_dir: Path, per_unit_root: P
     secs = {name: section(work, name, model_id, reg, per_unit_root, drives) for name in S.SECTIONS}
     limits = list(S.LIMITS_COMMON)
     limits += [S.LIMITS[n] for n, s in secs.items() if s["status"] == "ok" and n in S.LIMITS]
+    limits += me.get("limits", [])          # the model's own (data/models.json), e.g. a historical model's confounds
     limits += limits_extra or []
     if me["id"] == "96244b1f_12800":
         limits.append("This model takes a navigation map and route; every run here feeds zeros (no route), "

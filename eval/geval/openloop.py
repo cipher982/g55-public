@@ -221,6 +221,8 @@ def route_unit(npz_path, model, sign=1.0):
     d = np.load(npz_path, allow_pickle=False)
     meta = json.loads(str(d["meta"].item()))
     S = {k: np.asarray(d[k]) for k in ("t", "v", "a", "yaw", "action_t")}
+    if f"action_t__{model}" in d.files:      # engines/legacy_replay.py: each release's own action_t
+        S["action_t"] = np.asarray(d[f"action_t__{model}"])
     act = np.asarray(d[f"act__{model}"], float)
     f, _ = parse_fields(np.asarray(d[f"raw__{model}"], np.float32), meta["slices"][model], S["action_t"])
     return model_metrics(S, act[:, 0], act[:, 1], f, sign), meta

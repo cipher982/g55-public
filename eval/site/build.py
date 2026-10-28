@@ -756,7 +756,8 @@ def ranking_table(models, cfg, root) -> str:
     g = g55_ranked(root)
     nw, nd = g55_counts(models)
     scored = [m for m in models if (m["sections"].get(G55[0]) or {}).get("status") == "ok"]
-    pending = sorted((m for m in models if m not in scored), key=first_public, reverse=True)
+    oldest = min((first_public(m) for m in scored), default="")
+    pending = sorted((m for m in models if m not in scored and first_public(m) >= oldest), key=first_public, reverse=True)
 
     def wins_of(m):
         x, _ = find_metric(m, *G55)
@@ -908,6 +909,7 @@ TRENDS_G55 = [  # (title, unit, how to read one model)
     ("G55 closed loop: windows closer to the recorded path than lebowski at 2 s", "windows", ("wins", "truck_closed_loop", "xtrack_2s")),
     ("G55, 2° heading error: windows closer than lebowski at 2 s", "windows", ("wins", "truck_recovery", "heading_xtrack_2s")),
     ("G55, 0.5 m offset: windows closer than lebowski at 2 s", "windows", ("wins", "truck_recovery", "offcentre_xtrack_2s")),
+    ("G55 open loop: lateral error against what the truck did (m/s²)", "m/s²", ("truck_open_loop", "lat_mae")),
 ]
 TREND_G55_RANK = ("G55 closed loop: median distance from the recorded path at 2 s (cm)", "cm", "g55rank")
 TRENDS_PUBLIC = [  # the public closed loop is the harness check's chart above these
@@ -942,10 +944,10 @@ def trend_values(kind, models, ref, r):
             elif p:
                 out[mid] = (p["wins"], None, None, f'{p["n"]} windows from {p["clusters"]} drives')
         else:
-            x, _ = find_metric(m, kind[0], kind[1])
+            x, sec = find_metric(m, kind[0], kind[1])
             if x:
                 v = (x["value"], x["ci"][0] if x["ci"] else None, x["ci"][1] if x["ci"] else None,
-                     f'{x["n"]} segments from {x["clusters"]} drives')
+                     f'{x["n"]} {sec.get("unit_of_evidence", "segment")}s from {x["clusters"]} drives')
                 if mid == ref:
                     line = v
                 else:
@@ -957,8 +959,12 @@ def trend_panel(title, unit, kind, models, cfg, r) -> str:
     ref = cfg["reference_model"]
     idx = by_id(models)
     vals, line = trend_values(kind, models, ref, r)
-    others = [m for m in models if m["model"]["id"] != ref]
-    dates = [_date(first_public(m)) for m in others]
+    # From the oldest model with a value here (or the reference): older models never run in this
+    # section (comma's historical models have open-loop scores only) neither stretch the axis nor count as pending.
+    have = [first_public(m) for m in models if m["model"]["id"] in vals or (line and m["model"]["id"] == ref)]
+    since = min(have) if have else ""
+    others = [m for m in models if m["model"]["id"] != ref and first_public(m) >= since]
+    dates = [_date(first_public(m)) for m in others] or [_date(first_public(idx[ref]))]
     d0, d1 = min(dates) - _dt.timedelta(days=6), max(dates) + _dt.timedelta(days=6)
     W, H, L, Rr, T, B = 360, 190, 44, 14, 14, 34
     span = (d1 - d0).days
@@ -983,11 +989,14 @@ def trend_panel(title, unit, kind, models, cfg, r) -> str:
         t += step
     d = _dt.date(d0.year, d0.month, 1)
     while d <= d1:
-        for day in (1, 15):
-            dd = d.replace(day=day)
+        if span > 200:   # years of models: half-yearly ticks
+            ticks = [(d, str(d.year) if d.month == 1 else "Jul")] if d.month in (1, 7) else []
+        else:
+            ticks = [(d.replace(day=day), f'{d.strftime("%b")} {day}') for day in (1, 15)]
+        for dd, lab in ticks:
             if d0 <= dd <= d1:
                 g.append(f'<line class="xt" x1="{X(dd):.1f}" x2="{X(dd):.1f}" y1="{H - B}" y2="{H - B + 4}"/>'
-                         f'<text class="tick" x="{X(dd):.1f}" y="{H - B + 17}" text-anchor="middle">{dd.strftime("%b")} {day}</text>')
+                         f'<text class="tick" x="{X(dd):.1f}" y="{H - B + 17}" text-anchor="middle">{lab}</text>')
         d = (d.replace(day=28) + _dt.timedelta(days=4)).replace(day=1)
     refl = ""
     if line:

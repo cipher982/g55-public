@@ -1,7 +1,191 @@
 {
-  "_doc": "Known comma big driving models. first_public: the first date the weights were public (openpilot master or Hugging Face). on_master: the date they were merged to openpilot master, null if never. The site's timeline is ordered by first_public (ties broken by id); a model's second baseline is the model just before it, or in a section where that model has no scores, the latest earlier model that has them. source is the file scored, and its date can be later than first_public (a release tag or a re-upload of the same weights). Lineage facts are borrowed from comma's GitHub PRs and Hugging Face upload history; 'same weights' claims were checked by tensor bytes (deep dive 2026-10-27).",
+  "_doc": "Known comma big driving models. first_public: the first date the weights were public (openpilot master or Hugging Face). on_master: the date they were merged to openpilot master, null if never. The site's timeline is ordered by first_public (ties broken by id); a model's second baseline is the model just before it, or in a section where that model has no scores, the latest earlier model that has them. source is the file scored, and its date can be later than first_public (a release tag or a re-upload of the same weights). Lineage facts are borrowed from comma's GitHub PRs and Hugging Face upload history; 'same weights' claims were checked by tensor bytes (deep dive 2026-10-27). Models before lebowski (0.9.5 to 0.11.1, engine 'legacy') are comma's default comma 3/3X models of each release, scored with engines/legacy.py under their own release's inputs and command; a split model's sha256 is vision+policy.",
   "hf_repo": "commaai/openpilot_driving_models",
   "models": [
+    {
+      "id": "farmville",
+      "name": "Farmville",
+      "family": "supercombo",
+      "engine": "legacy",
+      "first_public": "2023-11-07",
+      "on_master": "2023-11-07",
+      "source": {"kind": "openpilot-master", "ref": "b91ecda3503288dd7df8e1bca286383d0d700176",
+                 "url": "https://github.com/commaai/openpilot/pull/30392", "date": "2023-11-07"},
+      "file": {"lfs": "commaai/openpilot", "commit": "b91ecda3503288dd7df8e1bca286383d0d700176",
+               "path": "selfdrive/modeld/models/supercombo.onnx"},
+      "sha256": "0b7184d46dc2ba3f84eb748252634205105a3742bac29942ae4380b0332fa850",
+      "notes": "Shipped in openpilot 0.9.5. One supercombo with a lateral planner head: the steering command is the 0.9.5 lateral planner on the model's planner solution (lat_planner_solution), lag-adjusted as controlsd did. No acceleration command (the longitudinal MPC planned it), so no longitudinal scores. Checkpoint bf8b2580/449 (vision) d09c9c88/700 (policy). Navigation inputs zero.",
+      "limits": [
+        "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 600 frames of one route): the plan's lateral position is 0.030 m RMS from comma's output; every other model here is 0.38 m or more from it on the same check.",
+        "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
+        "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",
+        "No acceleration command: before openpilot 0.10 the longitudinal MPC, not the model, chose the acceleration, so the longitudinal action metrics are empty; the plan's speeds are scored.",
+        "The steering command is this release's (the lateral planner on the model's planner solution, lag-adjusted, unsmoothed); from 0.10 modeld smooths its command and the newest models are scored on their own action head, so lateral action rates are not comparable across these eras."
+      ]
+    },
+    {
+      "id": "certified_herbalist",
+      "name": "Certified Herbalist",
+      "family": "supercombo",
+      "engine": "legacy",
+      "first_public": "2024-02-19",
+      "on_master": "2024-02-19",
+      "source": {"kind": "openpilot-master", "ref": "a4d53d378d4331dc7780e5e60845ea1731c48341",
+                 "url": "https://github.com/commaai/openpilot/pull/31425", "date": "2024-02-19"},
+      "file": {"lfs": "commaai/openpilot", "commit": "a4d53d378d4331dc7780e5e60845ea1731c48341",
+               "path": "selfdrive/modeld/models/supercombo.onnx"},
+      "sha256": "c11f99aab832242a604b1bb4c4cf391c9c3d5e90cbc07ab0d4c133473b56a3a4",
+      "notes": "Shipped in openpilot 0.9.6. One supercombo whose desired-curvature head is the steering command. No acceleration command (the longitudinal MPC planned it), so no longitudinal scores. Policy checkpoint 93532291/700. Navigation inputs zero.",
+      "limits": [
+        "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 600 frames of one route): the plan's lateral position is 0.013 m RMS from comma's output; every other model here is 0.32 m or more from it on the same check.",
+        "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
+        "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",
+        "No acceleration command: before openpilot 0.10 the longitudinal MPC, not the model, chose the acceleration, so the longitudinal action metrics are empty; the plan's speeds are scored.",
+        "The steering command is this release's (the model's desired-curvature head, unsmoothed); from 0.10 modeld smooths its command and the newest models are scored on their own action head, so lateral action rates are not comparable across these eras."
+      ]
+    },
+    {
+      "id": "north_dakota",
+      "name": "North Dakota",
+      "family": "supercombo",
+      "engine": "legacy",
+      "first_public": "2024-04-29",
+      "on_master": "2024-04-29",
+      "source": {"kind": "openpilot-master", "ref": "375978d40b976bf9e82ab74f267846a56b7656a6",
+                 "url": "https://github.com/commaai/openpilot/pull/32309", "date": "2024-04-29"},
+      "file": {"lfs": "commaai/openpilot", "commit": "375978d40b976bf9e82ab74f267846a56b7656a6",
+               "path": "selfdrive/modeld/models/supercombo.onnx"},
+      "sha256": "b31b504bc0b440d3bc72967507a00eb4f112285626fbfb3135011500325ee6d6",
+      "notes": "Shipped in openpilot 0.9.7. One supercombo whose desired-curvature head is the steering command; no navigation inputs. No acceleration command (the longitudinal MPC planned it), so no longitudinal scores. Policy checkpoint 86d23b15/700.",
+      "limits": [
+        "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 600 frames of one route): the plan's lateral position is 0.009 m RMS from comma's output; every other model here is 0.32 m or more from it on the same check.",
+        "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
+        "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",
+        "No acceleration command: before openpilot 0.10 the longitudinal MPC, not the model, chose the acceleration, so the longitudinal action metrics are empty; the plan's speeds are scored.",
+        "The steering command is this release's (the model's desired-curvature head, unsmoothed); from 0.10 modeld smooths its command and the newest models are scored on their own action head, so lateral action rates are not comparable across these eras."
+      ]
+    },
+    {
+      "id": "filet_o_fish",
+      "name": "Filet o Fish",
+      "family": "vision-policy",
+      "engine": "legacy",
+      "first_public": "2025-03-07",
+      "on_master": "2025-03-07",
+      "source": {"kind": "openpilot-master", "ref": "d807b5c476658dba7760d30949baa619074c4a4e",
+                 "url": "https://github.com/commaai/openpilot/pull/34798", "date": "2025-03-07"},
+      "file": {"lfs": "commaai/openpilot", "commit": "d807b5c476658dba7760d30949baa619074c4a4e",
+               "paths": ["selfdrive/modeld/models/driving_vision.onnx", "selfdrive/modeld/models/driving_policy.onnx"]},
+      "sha256": "897f80d0388250f99bba69b6a8434560cc0fd83157cbeb0bc134c67fe4e64624+98f0121ccb6f850077b04cc91bd33d370fc6cbdc2bd35f1ab55628a15a813f36",
+      "notes": "Shipped in openpilot 0.9.8 and 0.9.9. The first split model: a vision model and a policy on a 5 Hz feature history. The policy's desired-curvature head is the steering command. No acceleration command (the longitudinal MPC planned it), so no longitudinal scores. Vision 817b824f/500, policy e07ce1de/700.",
+      "limits": [
+        "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 400 frames of one route): the plan's lateral position is 0.070 m RMS from comma's output; every other model here is 1.53 m or more from it on the same check.",
+        "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
+        "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",
+        "No acceleration command: before openpilot 0.10 the longitudinal MPC, not the model, chose the acceleration, so the longitudinal action metrics are empty; the plan's speeds are scored.",
+        "The steering command is this release's (the model's desired-curvature head, unsmoothed); from 0.10 modeld smooths its command and the newest models are scored on their own action head, so lateral action rates are not comparable across these eras."
+      ]
+    },
+    {
+      "id": "steam_powered",
+      "name": "Steam Powered",
+      "family": "vision-policy",
+      "engine": "legacy",
+      "first_public": "2025-08-17",
+      "on_master": "2025-08-17",
+      "source": {"kind": "openpilot-master", "ref": "ceb557058c5a7e7fd4de8c2dc5608e32c8773eac",
+                 "url": "https://github.com/commaai/openpilot/pull/36000", "date": "2025-08-17"},
+      "file": {"lfs": "commaai/openpilot", "commit": "ceb557058c5a7e7fd4de8c2dc5608e32c8773eac",
+               "paths": ["selfdrive/modeld/models/driving_vision.onnx", "selfdrive/modeld/models/driving_policy.onnx"]},
+      "sha256": "e66bb8d53eced3786ed71a59b55ffc6810944cb217f0518621cc76303260a1ef+04b763fb71efe57a8a4c4168a8043ecd58939015026ded0dc755ded6905ac251",
+      "notes": "Shipped in openpilot 0.10.0. Plan only: modeld turns the plan into curvature and acceleration (get_action_from_model), so both lateral and longitudinal are scored. Vision 2454c1c0/500, policy a8f96b93/400.",
+      "limits": [
+        "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 60 frames of one route): the plan's lateral position is 0.040 m RMS from comma's output; every other model here is 0.83 m or more from it on the same check.",
+        "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
+        "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",
+        "The commands are 0.10's modeld (get_action_from_model on the plan, lateral delay = steer actuator delay + 0.2 s, smoothed over 0.1 s lateral and 0.3 s longitudinal); the newest models are scored on their own unsmoothed action head, so lateral action rates are not comparable across these eras."
+      ]
+    },
+    {
+      "id": "north_nevada",
+      "name": "North Nevada",
+      "family": "vision-policy",
+      "engine": "legacy",
+      "first_public": "2025-10-09",
+      "on_master": "2025-10-09",
+      "source": {"kind": "openpilot-master", "ref": "4d085424f80009ee5ea4ae8f4519ed871905b382",
+                 "url": "https://github.com/commaai/openpilot/pull/36276", "date": "2025-10-09"},
+      "file": {"lfs": "commaai/openpilot", "commit": "4d085424f80009ee5ea4ae8f4519ed871905b382",
+               "paths": ["selfdrive/modeld/models/driving_vision.onnx", "selfdrive/modeld/models/driving_policy.onnx"]},
+      "sha256": "cf6376aa9a090f0da26c280ef69eabf9bbdd51d1faac9ed392919c3db69be916+792fca7c24faadc1183327eec7e04d06dd6ec0e53ac7bb43cb2b9823c6cfb32f",
+      "notes": "Named in the openpilot 0.10.1 release notes; the 0.10.1 tag carries The Cool People's model, merged eleven days later. Plan only, commands from modeld's get_action_from_model. Vision 2cc530ac/500, policy 0e620593/400.",
+      "limits": [
+        "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 60 frames of one route): the plan's lateral position is 0.027 m RMS from comma's output; every other model here is 0.67 m or more from it on the same check.",
+        "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
+        "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",
+        "The commands are 0.10's modeld (get_action_from_model on the plan, lateral delay = steer actuator delay + 0.2 s, smoothed over 0.1 s lateral and 0.3 s longitudinal); the newest models are scored on their own unsmoothed action head, so lateral action rates are not comparable across these eras."
+      ]
+    },
+    {
+      "id": "the_cool_peoples",
+      "name": "The Cool People's",
+      "family": "vision-policy",
+      "engine": "legacy",
+      "first_public": "2025-10-20",
+      "on_master": "2025-10-20",
+      "source": {"kind": "openpilot-master", "ref": "3c957c6e9d8f05138b8a80523d50db5b5ca2cb73",
+                 "url": "https://github.com/commaai/openpilot/pull/36249", "date": "2025-10-20"},
+      "file": {"lfs": "commaai/openpilot", "commit": "3c957c6e9d8f05138b8a80523d50db5b5ca2cb73",
+               "paths": ["selfdrive/modeld/models/driving_vision.onnx", "selfdrive/modeld/models/driving_policy.onnx"]},
+      "sha256": "8f16d548ea4eb5d01518a9e90d4527cd97c31a84bcaf6f695dead8f0015fecc4+c5a1f0655ddf266ed42ad1980389d96f47cc5e756da1fa3ca1477a920bb9b157",
+      "notes": "In the openpilot 0.10.1 tag; named in the 0.10.3 release notes. Same vision model as North Nevada (2cc530ac/500), new policy fd9a6816/400. Plan only, commands from modeld's get_action_from_model.",
+      "limits": [
+        "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 60 frames of one route): the plan's lateral position is 0.032 m RMS from comma's output; every other model here is 0.67 m or more from it on the same check.",
+        "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
+        "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",
+        "The commands are 0.10's modeld (get_action_from_model on the plan, lateral delay = steer actuator delay + 0.2 s, smoothed over 0.1 s lateral and 0.3 s longitudinal); the newest models are scored on their own unsmoothed action head, so lateral action rates are not comparable across these eras."
+      ]
+    },
+    {
+      "id": "dark_souls_2",
+      "name": "Dark Souls 2",
+      "family": "vision-policy",
+      "engine": "legacy",
+      "first_public": "2025-12-12",
+      "on_master": "2025-12-12",
+      "source": {"kind": "openpilot-master", "ref": "9421e1cbfebdb2970afd777cf4642bc5af5795cf",
+                 "url": "https://github.com/commaai/openpilot/pull/36849", "date": "2025-12-12"},
+      "file": {"lfs": "commaai/openpilot", "commit": "9421e1cbfebdb2970afd777cf4642bc5af5795cf",
+               "paths": ["selfdrive/modeld/models/driving_vision.onnx", "selfdrive/modeld/models/driving_policy.onnx"]},
+      "sha256": "1dc66bc06f250b577653ccbeaa2c6521b3d46749f601d0a1a366419e929ca438+f8fe9a71b0fd428a045a82ed50790179f77aa664391198f078e11e7b2cb2c2d7",
+      "notes": "In the openpilot 0.10.3 tag. Plan only, commands from modeld's get_action_from_model. Vision 6a7d09ad/200, policy 4b78e2e6/400.",
+      "limits": [
+        "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 60 frames of one route): the plan's lateral position is 0.067 m RMS from comma's output; every other model here is 0.98 m or more from it on the same check.",
+        "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
+        "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",
+        "The commands are 0.10's modeld (get_action_from_model on the plan, lateral delay = steer actuator delay + 0.2 s, smoothed over 0.1 s lateral and 0.3 s longitudinal); the newest models are scored on their own unsmoothed action head, so lateral action rates are not comparable across these eras."
+      ]
+    },
+    {
+      "id": "wmi",
+      "name": "WMI",
+      "family": "vision-policy",
+      "engine": "legacy",
+      "first_public": "2026-01-19",
+      "on_master": "2026-01-19",
+      "source": {"kind": "openpilot-master", "ref": "0b41b42f7b23637e3bbb1f7495d318d954f971e7",
+                 "url": "https://github.com/commaai/openpilot/pull/36798", "date": "2026-01-19"},
+      "file": {"lfs": "commaai/openpilot", "commit": "0b41b42f7b23637e3bbb1f7495d318d954f971e7",
+               "paths": ["selfdrive/modeld/models/driving_vision.onnx", "selfdrive/modeld/models/driving_policy.onnx"]},
+      "sha256": "1dc66bc06f250b577653ccbeaa2c6521b3d46749f601d0a1a366419e929ca438+1edea5bb56f876db4cec97c150799513f6a59373f3ad152d55e4dcaab1b809e3",
+      "notes": "Named in the openpilot 0.11.0 release notes. The 0.11.0 and 0.11.1 tags carry the CD210 model (PR #37050, master 2026-02-03): a re-export of these weights, every weight tensor byte for byte the same (policy checkpoint a27b3122/100 in both), so it is scored once, here. Same vision model as Dark Souls 2 (6a7d09ad/200). Plan only, commands from modeld's get_action_from_model.",
+      "limits": [
+        "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 60 frames of one route): the plan's lateral position is 0.025 m RMS from comma's output; every other model here is 1.23 m or more from it on the same check.",
+        "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
+        "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",
+        "The commands are 0.10's modeld (get_action_from_model on the plan, lateral delay = steer actuator delay + 0.2 s, smoothed over 0.1 s lateral and 0.3 s longitudinal); the newest models are scored on their own unsmoothed action head, so lateral action rates are not comparable across these eras."
+      ]
+    },
     {
       "id": "lebowski_877m",
       "name": "lebowski",
