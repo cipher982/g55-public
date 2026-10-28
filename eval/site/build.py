@@ -789,10 +789,10 @@ def _date(s: str) -> _dt.date:
 
 
 TRENDS_G55 = [  # (title, unit, how to read one model): "g55rank" or (section, metric[, "cm" = median in cm])
-    ("Closed loop, cm off the path at 2 s", "cm", "g55rank"),
-    ("Open-loop lateral error, m/s²", "m/s²", ("truck_open_loop", "lat_mae")),
-    ("After a 2° heading error, cm at 2 s", "cm", ("truck_recovery", "heading_xtrack_2s", "cm")),
-    ("After a 0.5 m offset, cm at 2 s", "cm", ("truck_recovery", "offcentre_xtrack_2s", "cm")),
+    ("Closed loop, cm at 2 s", "cm", "g55rank"),
+    ("Open-loop error, m/s²", "m/s²", ("truck_open_loop", "lat_mae")),
+    ("2° heading error, cm at 2 s", "cm", ("truck_recovery", "heading_xtrack_2s", "cm")),
+    ("0.5 m offset, cm at 2 s", "cm", ("truck_recovery", "offcentre_xtrack_2s", "cm")),
 ]
 TRENDS_PUBLIC = [  # the public closed loop is the harness check's chart above these
     ("Lateral action rate, open loop, comma's segments (m/s³)", "m/s³", ("public_open_loop", "lat_rate_rms")),
@@ -843,7 +843,7 @@ def trend_values(kind, models, ref, r):
     return out, line
 
 
-def trend_panel(title, unit, kind, models, cfg, r) -> str:
+def trend_panel(title, unit, kind, models, cfg, r, W=360, H=190) -> str:
     ref = cfg["reference_model"]
     idx = by_id(models)
     vals, line = trend_values(kind, models, ref, r)
@@ -854,7 +854,7 @@ def trend_panel(title, unit, kind, models, cfg, r) -> str:
     others = [m for m in models if m["model"]["id"] != ref and first_public(m) >= since]
     dates = [_date(first_public(m)) for m in others] or [_date(first_public(idx[ref]))]
     d0, d1 = min(dates) - _dt.timedelta(days=6), max(dates) + _dt.timedelta(days=6)
-    W, H, L, Rr, T, B = 360, 190, 44, 14, 14, 34
+    L, Rr, T, B = 44, 14, 14, 34
     span = (d1 - d0).days
     X = lambda d: L + (d - d0).days / span * (W - L - Rr)  # noqa: E731
     ys = [v[0] for v in vals.values()] + [v[i] for v in vals.values() for i in (1, 2) if v[i] is not None]
@@ -941,22 +941,23 @@ def _fmt_tick(t: float, step: float) -> str:
     return f"{t:.{d}f}"
 
 
-def trend_legend(cfg, bars: bool = True) -> str:
+def trend_legend(cfg, bars: bool = True, pend: bool = True) -> str:
     sw = "".join(f'<span><i class="sw sw-{h[1]}"></i>{esc(h[2])}</span>' for h in cfg.get("hero", {}).get("highlight", [])
                  if h[0] != cfg["reference_model"])
     return ('<p class="trend-key">' + sw + '<span><i class="sw sw-other"></i>other comma models</span>'
-            '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-fill"/></svg>on openpilot master or shipped</span>'
-            '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-hollow"/></svg>Hugging Face upload only</span>'
+            '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-fill"/></svg>shipped or on master</span>'
+            '<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" class="key-hollow"/></svg>Hugging Face only</span>'
             '<span><svg width="20" height="12" aria-hidden="true"><line x1="0" x2="20" y1="6" y2="6" class="refl"/></svg>lebowski, July 2026</span>'
-            '<span><svg width="12" height="12" aria-hidden="true"><path class="pend" d="M3,3 l6,6 m0,-6 l-6,6"/></svg>not scored yet</span>'
+            + ('<span><svg width="12" height="12" aria-hidden="true"><path class="pend" d="M3,3 l6,6 m0,-6 l-6,6"/></svg>not scored yet</span>' if pend else '')
             + ('<span>bars: 95% interval</span>' if bars else '') + '</p>')
 
 
 def over_time(models, cfg, root) -> str:
     """The G55 panels: closed-loop and recovery medians, then the open-loop lateral error."""
     r = (ranking.truck_scores(root) or {"models": {}})["models"]
-    panels = "".join(trend_panel(t, u, k, models, cfg, r) for t, u, k in TRENDS_G55)
-    return f'{trend_legend(cfg, "tw-ci" in panels)}<div class="trends">{panels}</div>'
+    panels = "".join(trend_panel(t, u, k, models, cfg, r, W=290, H=165) for t, u, k in TRENDS_G55)
+    key = trend_legend(cfg, "tw-ci" in panels, 'class="pend"' in panels)
+    return f'{key}<div class="trends">{panels}</div>'
 
 
 def harness_trends(models, cfg, root) -> str:
