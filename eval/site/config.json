@@ -49,6 +49,6 @@
   ],
   "verdicts": {},
   "watch": {
-    "text": "checked every 20 minutes since 2026-10-27 on Hugging Face and openpilot's branches; no new model since. The site rebuilds from the public repository every 15 minutes."
+    "text": "new models checked every 20 minutes on Hugging Face and openpilot's branches"
   }
 }
