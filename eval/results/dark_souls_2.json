@@ -1,0 +1,924 @@
+{
+ "schema": 1,
+ "model": {
+  "id": "dark_souls_2",
+  "name": "Dark Souls 2",
+  "sha256": "1dc66bc06f250b577653ccbeaa2c6521b3d46749f601d0a1a366419e929ca438+f8fe9a71b0fd428a045a82ed50790179f77aa664391198f078e11e7b2cb2c2d7",
+  "source": {
+   "kind": "openpilot-master",
+   "ref": "9421e1cbfebdb2970afd777cf4642bc5af5795cf",
+   "url": "https://github.com/commaai/openpilot/pull/36849",
+   "date": "2025-12-12"
+  },
+  "first_public": "2025-12-12",
+  "on_master": "2025-12-12",
+  "params_m": null,
+  "gmac": null,
+  "family": "vision-policy",
+  "notes": "In the openpilot 0.10.3 tag. Plan only, commands from modeld's get_action_from_model. Vision 6a7d09ad/200, policy 4b78e2e6/400."
+ },
+ "scored": {
+  "date": "2026-10-28T00:27:39Z",
+  "suite": "geval-1",
+  "code": "073457cffe66"
+ },
+ "baselines": [
+  "lebowski_877m",
+  "the_cool_peoples"
+ ],
+ "sections": {
+  "public_open_loop": {
+   "status": "ok",
+   "unit_of_evidence": "segment",
+   "n": 39,
+   "clusters": 23,
+   "condition": "Measured. comma's public two-camera segments (openpilot CI data), native intrinsics and the device's own calibration, both cameras; every model on the same decoded frames. Truth is what the recording car did next: carState speed and acceleration, yaw rate from the device's cameraOdometry. Segments where the car never moves have no data. 39 of the 45 listed segments have a score, from 23 drives and 20 cars.",
+   "baselines": [
+    "lebowski_877m",
+    "the_cool_peoples"
+   ],
+   "metrics": [
+    {
+     "key": "lat_mae",
+     "label": "Lateral error",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.1294,
+     "median": 0.09522,
+     "ci": [
+      0.09924,
+      0.1633
+     ],
+     "n": 39,
+     "clusters": 23,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.02073,
+       "median": 0.01616,
+       "ci": [
+        0.01035,
+        0.03274
+       ],
+       "n": 39,
+       "wins": 7,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 4
+      },
+      "the_cool_peoples": {
+       "delta": 0.00575,
+       "median": 0.00275,
+       "ci": [
+        0.001619,
+        0.01101
+       ],
+       "n": 39,
+       "wins": 15,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 6
+      }
+     }
+    },
+    {
+     "key": "lat_mae_bl",
+     "label": "Lateral error at the model's own best lead",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.1255,
+     "median": 0.09467,
+     "ci": [
+      0.09526,
+      0.1586
+     ],
+     "n": 39,
+     "clusters": 23,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.0241,
+       "median": 0.01854,
+       "ci": [
+        0.01492,
+        0.035
+       ],
+       "n": 39,
+       "wins": 7,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 2
+      },
+      "the_cool_peoples": {
+       "delta": 0.006903,
+       "median": 0.004826,
+       "ci": [
+        0.001574,
+        0.01364
+       ],
+       "n": 39,
+       "wins": 15,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 6
+      }
+     }
+    },
+    {
+     "key": "lat_corr",
+     "label": "Lateral correlation with the car's later motion",
+     "unit": "",
+     "better": "higher",
+     "value": 0.8118,
+     "median": 0.9321,
+     "ci": [
+      0.7217,
+      0.8903
+     ],
+     "n": 39,
+     "clusters": 23,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.0458,
+       "median": -0.01946,
+       "ci": [
+        -0.1195,
+        -0.00557
+       ],
+       "n": 39,
+       "wins": 11,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 7
+      },
+      "the_cool_peoples": {
+       "delta": -0.01768,
+       "median": -0.003134,
+       "ci": [
+        -0.03854,
+        -0.001526
+       ],
+       "n": 39,
+       "wins": 12,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 5
+      }
+     }
+    },
+    {
+     "key": "lat_gain",
+     "label": "Lateral gain (1 = same size as the car's motion)",
+     "unit": "",
+     "better": "near1",
+     "value": 0.8103,
+     "median": 0.8923,
+     "ci": [
+      0.7031,
+      0.9146
+     ],
+     "n": 39,
+     "clusters": 23,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.03279,
+       "median": 0.005498,
+       "ci": [
+        -0.005259,
+        0.07819
+       ],
+       "n": 39,
+       "wins": 17,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 8
+      },
+      "the_cool_peoples": {
+       "delta": 0.03897,
+       "median": -0.00118,
+       "ci": [
+        -0.003555,
+        0.09978
+       ],
+       "n": 39,
+       "wins": 20,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 8
+      }
+     }
+    },
+    {
+     "key": "lat_rate_rms",
+     "label": "Lateral action rate, RMS (smoothness)",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.4546,
+     "median": 0.4159,
+     "ci": [
+      0.3608,
+      0.5598
+     ],
+     "n": 39,
+     "clusters": 23,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.2093,
+       "median": -0.1888,
+       "ci": [
+        -0.2464,
+        -0.1675
+       ],
+       "n": 39,
+       "wins": 38,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 22
+      },
+      "the_cool_peoples": {
+       "delta": 0.01188,
+       "median": 0.005346,
+       "ci": [
+        0.000976,
+        0.02438
+       ],
+       "n": 39,
+       "wins": 15,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 6
+      }
+     }
+    },
+    {
+     "key": "lat_best_lag",
+     "label": "Lead of the lateral request over the car's motion",
+     "unit": "s",
+     "better": "lower",
+     "value": 0.5338,
+     "median": 0.45,
+     "ci": [
+      0.436,
+      0.6431
+     ],
+     "n": 34,
+     "clusters": 21,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.1437,
+       "median": 0.1,
+       "ci": [
+        0.09473,
+        0.2037
+       ],
+       "n": 32,
+       "wins": 2,
+       "ties": 5,
+       "clusters": 20,
+       "cluster_wins": 1
+      },
+      "the_cool_peoples": {
+       "delta": 0.03824,
+       "median": 0.05,
+       "ci": [
+        0.01405,
+        0.06429
+       ],
+       "n": 34,
+       "wins": 6,
+       "ties": 9,
+       "clusters": 21,
+       "cluster_wins": 5
+      }
+     }
+    },
+    {
+     "key": "lon_mae",
+     "label": "Longitudinal error",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.3348,
+     "median": 0.3114,
+     "ci": [
+      0.2904,
+      0.3853
+     ],
+     "n": 39,
+     "clusters": 23,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.0267,
+       "median": 0.02979,
+       "ci": [
+        0.01177,
+        0.04157
+       ],
+       "n": 39,
+       "wins": 9,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 3
+      },
+      "the_cool_peoples": {
+       "delta": 0.001951,
+       "median": 0.001905,
+       "ci": [
+        -0.007839,
+        0.01099
+       ],
+       "n": 39,
+       "wins": 19,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 11
+      }
+     }
+    },
+    {
+     "key": "lon_corr",
+     "label": "Longitudinal correlation",
+     "unit": "",
+     "better": "higher",
+     "value": 0.6836,
+     "median": 0.8016,
+     "ci": [
+      0.5812,
+      0.7732
+     ],
+     "n": 39,
+     "clusters": 23,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.0341,
+       "median": -0.01869,
+       "ci": [
+        -0.06038,
+        -0.01192
+       ],
+       "n": 39,
+       "wins": 9,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 7
+      },
+      "the_cool_peoples": {
+       "delta": -0.01852,
+       "median": -0.00727,
+       "ci": [
+        -0.04018,
+        -0.001521
+       ],
+       "n": 39,
+       "wins": 15,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 8
+      }
+     }
+    },
+    {
+     "key": "lon_brake_mae",
+     "label": "Longitudinal error while braking",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.4339,
+     "median": 0.3924,
+     "ci": [
+      0.3614,
+      0.5119
+     ],
+     "n": 30,
+     "clusters": 21,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.0003794,
+       "median": -0.009371,
+       "ci": [
+        -0.03538,
+        0.03525
+       ],
+       "n": 30,
+       "wins": 17,
+       "ties": 0,
+       "clusters": 21,
+       "cluster_wins": 13
+      },
+      "the_cool_peoples": {
+       "delta": 0.006703,
+       "median": 0.009738,
+       "ci": [
+        -0.01957,
+        0.02983
+       ],
+       "n": 30,
+       "wins": 13,
+       "ties": 0,
+       "clusters": 21,
+       "cluster_wins": 9
+      }
+     }
+    },
+    {
+     "key": "lon_rate_rms",
+     "label": "Longitudinal action rate, RMS (smoothness)",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.4133,
+     "median": 0.379,
+     "ci": [
+      0.3825,
+      0.4492
+     ],
+     "n": 39,
+     "clusters": 23,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.9197,
+       "median": -0.9422,
+       "ci": [
+        -1.078,
+        -0.7771
+       ],
+       "n": 39,
+       "wins": 39,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 23
+      },
+      "the_cool_peoples": {
+       "delta": 0.02178,
+       "median": 0.01923,
+       "ci": [
+        0.0008416,
+        0.04012
+       ],
+       "n": 39,
+       "wins": 9,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 8
+      }
+     }
+    },
+    {
+     "key": "v3_mae",
+     "label": "Plan speed error at 3 s",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 0.9632,
+     "median": 0.9125,
+     "ci": [
+      0.832,
+      1.117
+     ],
+     "n": 39,
+     "clusters": 23,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.2475,
+       "median": 0.211,
+       "ci": [
+        0.178,
+        0.3117
+       ],
+       "n": 39,
+       "wins": 4,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 1
+      },
+      "the_cool_peoples": {
+       "delta": 0.04729,
+       "median": 0.02479,
+       "ci": [
+        0.002126,
+        0.09236
+       ],
+       "n": 39,
+       "wins": 15,
+       "ties": 0,
+       "clusters": 23,
+       "cluster_wins": 8
+      }
+     }
+    }
+   ],
+   "per_unit_file": "per_unit/dark_souls_2/public_open_loop.csv"
+  },
+  "public_closed_loop": {
+   "status": "not_run",
+   "unit_of_evidence": "segment",
+   "n": 0,
+   "condition": "Measured. comma's worldmodel-4B generates each next frame at 5 Hz from 9 history frames, 5 recorded anchor frames and the car's pose; the model drives comma's ideal car (the requested curvature and acceleration happen at once) for 7.2 s from the recorded start. Distance is to the recording car's own path. One window per segment, nearest the middle, where the car holds at least 5 m/s for the window and the 4.8 s before it; segments with no such stretch are left out. Seeds 0 and 1, averaged per segment.",
+   "baselines": [],
+   "metrics": [],
+   "per_unit_file": null
+  },
+  "truck_open_loop": {
+   "status": "ok",
+   "unit_of_evidence": "window",
+   "n": 4,
+   "clusters": 3,
+   "condition": "Measured. The G55's recorded drives replayed as the truck runs the model: narrow camera only, road-plane warp to 1.45 m (plane:1.45). Truth is the truck's CAN speed and yaw rate. Window = unit. 4 windows: 3 on an earlier camera mount, 1 on the current mount; 2 at night.",
+   "baselines": [
+    "lebowski_877m",
+    "the_cool_peoples"
+   ],
+   "metrics": [
+    {
+     "key": "lat_mae",
+     "label": "Lateral error",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.1686,
+     "median": 0.1763,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.04095,
+       "median": 0.03696,
+       "ci": null,
+       "n": 4,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 0
+      },
+      "the_cool_peoples": {
+       "delta": 0.01028,
+       "median": 0.004457,
+       "ci": null,
+       "n": 4,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "lat_mae_bl",
+     "label": "Lateral error at the model's own best lead",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.1662,
+     "median": 0.1731,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.03974,
+       "median": 0.03548,
+       "ci": null,
+       "n": 4,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 0
+      },
+      "the_cool_peoples": {
+       "delta": 0.01031,
+       "median": 0.005306,
+       "ci": null,
+       "n": 4,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "lat_corr",
+     "label": "Lateral correlation with the car's later motion",
+     "unit": "",
+     "better": "higher",
+     "value": 0.9354,
+     "median": 0.9446,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.02477,
+       "median": -0.0181,
+       "ci": null,
+       "n": 4,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 0
+      },
+      "the_cool_peoples": {
+       "delta": -0.005968,
+       "median": -0.005325,
+       "ci": null,
+       "n": 4,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 0
+      }
+     }
+    },
+    {
+     "key": "lat_gain",
+     "label": "Lateral gain (1 = same size as the car's motion)",
+     "unit": "",
+     "better": "near1",
+     "value": 0.9174,
+     "median": 0.9121,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.026,
+       "median": 0.01821,
+       "ci": null,
+       "n": 4,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 1
+      },
+      "the_cool_peoples": {
+       "delta": 0.01244,
+       "median": 0.01197,
+       "ci": null,
+       "n": 4,
+       "wins": 2,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "lat_rate_rms",
+     "label": "Lateral action rate, RMS (smoothness)",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.523,
+     "median": 0.5654,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.4336,
+       "median": -0.4029,
+       "ci": null,
+       "n": 4,
+       "wins": 4,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 3
+      },
+      "the_cool_peoples": {
+       "delta": 0.03872,
+       "median": 0.0347,
+       "ci": null,
+       "n": 4,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 0
+      }
+     }
+    },
+    {
+     "key": "lat_best_lag",
+     "label": "Lead of the lateral request over the car's motion",
+     "unit": "s",
+     "better": "lower",
+     "value": 0.5625,
+     "median": 0.575,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.225,
+       "median": 0.225,
+       "ci": null,
+       "n": 4,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 0
+      },
+      "the_cool_peoples": {
+       "delta": 0.0,
+       "median": 0.0,
+       "ci": null,
+       "n": 4,
+       "wins": 0,
+       "ties": 4,
+       "clusters": 3,
+       "cluster_wins": 0
+      }
+     }
+    },
+    {
+     "key": "lon_mae",
+     "label": "Longitudinal error",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.3252,
+     "median": 0.3193,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.01076,
+       "median": 0.01155,
+       "ci": null,
+       "n": 4,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 1
+      },
+      "the_cool_peoples": {
+       "delta": -0.005479,
+       "median": -0.002715,
+       "ci": null,
+       "n": 4,
+       "wins": 3,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 2
+      }
+     }
+    },
+    {
+     "key": "lon_corr",
+     "label": "Longitudinal correlation",
+     "unit": "",
+     "better": "higher",
+     "value": 0.5395,
+     "median": 0.5875,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -0.04292,
+       "median": -0.04866,
+       "ci": null,
+       "n": 4,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 1
+      },
+      "the_cool_peoples": {
+       "delta": -0.01148,
+       "median": -0.01272,
+       "ci": null,
+       "n": 4,
+       "wins": 2,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "lon_brake_mae",
+     "label": "Longitudinal error while braking",
+     "unit": "m/s²",
+     "better": "lower",
+     "value": 0.6836,
+     "median": 0.7044,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.1681,
+       "median": 0.1608,
+       "ci": null,
+       "n": 4,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 1
+      },
+      "the_cool_peoples": {
+       "delta": 0.04392,
+       "median": 0.0519,
+       "ci": null,
+       "n": 4,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 1
+      }
+     }
+    },
+    {
+     "key": "lon_rate_rms",
+     "label": "Longitudinal action rate, RMS (smoothness)",
+     "unit": "m/s³",
+     "better": "lower",
+     "value": 0.4003,
+     "median": 0.3891,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": -1.349,
+       "median": -1.23,
+       "ci": null,
+       "n": 4,
+       "wins": 4,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 3
+      },
+      "the_cool_peoples": {
+       "delta": 0.02994,
+       "median": 0.03392,
+       "ci": null,
+       "n": 4,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 0
+      }
+     }
+    },
+    {
+     "key": "v3_mae",
+     "label": "Plan speed error at 3 s",
+     "unit": "m/s",
+     "better": "lower",
+     "value": 1.314,
+     "median": 1.335,
+     "ci": null,
+     "n": 4,
+     "clusters": 3,
+     "paired": {
+      "lebowski_877m": {
+       "delta": 0.2858,
+       "median": 0.2158,
+       "ci": null,
+       "n": 4,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 0
+      },
+      "the_cool_peoples": {
+       "delta": 0.107,
+       "median": 0.174,
+       "ci": null,
+       "n": 4,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 3,
+       "cluster_wins": 1
+      }
+     }
+    }
+   ],
+   "per_unit_file": null
+  },
+  "truck_closed_loop": {
+   "status": "not_run",
+   "unit_of_evidence": "window",
+   "n": 0,
+   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window.",
+   "baselines": [],
+   "metrics": [],
+   "per_unit_file": null
+  },
+  "truck_recovery": {
+   "status": "not_run",
+   "unit_of_evidence": "window",
+   "n": 0,
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran.",
+   "baselines": [],
+   "metrics": [],
+   "per_unit_file": null
+  }
+ },
+ "stills": [],
+ "limits": [
+  "Open-loop scores compare a model's action with what the recording driver or car did; a model that drives differently but well is scored as wrong. comma's RL residual makes the lateral action smoother, and earlier than its base's by 0.10 to 0.26 s (measured on the G55 and on 16 of comma's cars); both score as error here. Measured on the 2026-10-27 deep dive: open-loop accuracy did not predict closed-loop driving.",
+  "Closed-loop numbers come from a generative world model, not a car. In a separate test on the G55's windows, worldmodel-4B followed an added yaw command through 2 s but showed 0 to 20% of an added lateral offset 3 to 4 s later; past about 4 s the recorded anchor frames also pull every model back toward the recorded path. The front-page ranking uses 2 s.",
+  "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below 10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
+  "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its distance from 1); wins count units where the model is better in the metric's direction.",
+  "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best correlates with the car's later lateral motion; a larger value means the request comes earlier. A value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
+  "Truck open loop pools few windows (camera mounts changed between drives); read it as a check that a model works on the truck's camera, not a ranking.",
+  "A historical model, run outside comma's software with its own release's inputs, camera warp and command (engines/legacy.py). Checked against comma's CI model replay of this model (made on a comma device, 60 frames of one route): the plan's lateral position is 0.067 m RMS from comma's output; every other model here is 0.98 m or more from it on the same check.",
+  "Trained for the comma devices and cameras of its time, not for the G55's camera or for every camera among comma's public segments: of those 45 segments 26 record the OX03C10 sensor, 6 the AR0231, 4 the OS04C10 and 9 none; 30 were recorded 2021 to 2024 and 15 come from devices whose route names carry no date.",
+  "Not run in closed loop: the G55 closed-loop and recovery tests need this release's controller inside the world-model loop, which is not built yet.",
+  "The commands are 0.10's modeld (get_action_from_model on the plan, lateral delay = steer actuator delay + 0.2 s, smoothed over 0.1 s lateral and 0.3 s longitudinal); the newest models are scored on their own unsmoothed action head, so lateral action rates are not comparable across these eras."
+ ]
+}
