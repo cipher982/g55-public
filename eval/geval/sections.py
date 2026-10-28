@@ -69,9 +69,11 @@ CONDITIONS = {
         "least 5 m/s for the window and the 4.8 s before it; segments with no such stretch are left out. "
         "Seeds 0 and 1, averaged per segment."),
     "truck_open_loop": (
-        "Measured. The G55's recorded drives replayed as the truck runs the model: narrow camera only, "
-        "road-plane warp to 1.45 m (plane:1.45). Truth is the truck's CAN speed and yaw rate. "
-        "Window = unit."),
+        "Measured. The G55's recorded drives replayed through the model with both of the truck's cameras "
+        "(each setup's own wide-camera calibration), road-plane warp to 1.45 m. Where the narrow lens does not "
+        "cover comma's narrow view (the 8 mm lens in the V13 case), those pixels come from the wide camera, "
+        "brightness matched. Truth is the truck's CAN speed and yaw rate. 30 s windows after a 5 s warm-up; "
+        "window = unit, drive = cluster; results are also given per camera setup."),
     "truck_closed_loop": (
         "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the "
         "G55's measured steering and powertrain response instead of the ideal car. Lane-following "
@@ -111,12 +113,13 @@ LIMITS_COMMON = [
 ]
 
 LIMITS = {
-    "truck_open_loop": "Truck open loop pools few windows (camera mounts changed between drives); read it as "
-                       "a check that a model works on the truck's camera, not a ranking.",
+    "truck_open_loop": "Truck open loop comes from few drives, and the camera setup changed between them (lens, "
+                       "housing, aim); the pooled number mixes setups, so read the per-setup numbers too. "
+                       "The 8 mm setups' wide camera recorded about 8-10 fps, so its frame can be up to ~60 ms "
+                       "from the narrow one.",
     "truck_closed_loop": "Truck closed loop: the steering and powertrain simulation is fitted to the G55, not "
                          "validated on it in closed loop; the reference is the driver's own line, not the lane "
                          "centre.",
     "truck_recovery": "Recovery tests are disturbances rendered by the world model (yaw it renders; a one-frame "
-                      "jump it does not, so none is used). The braking-lead test is not built yet: the drives the "
-                      "truck closed loop can use hold no window where a car ahead brakes.",
+                      "jump it does not, so none is used). The braking-lead test has 2 windows from one drive.",
 }

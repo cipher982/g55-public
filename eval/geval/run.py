@@ -200,6 +200,13 @@ def queue_jobs(cfg, mids: list, sections: list, tag: str | None = None, truck_co
         out = work / "out" / "truck_open_loop"
         out.mkdir(parents=True, exist_ok=True)
         for m in mids:
+            if tol.get("batch_command"):   # one process per model and part: the model loads once for many windows
+                n = int(tol.get("batch_parts", 1))
+                for k in range(n):
+                    cmd = tol["batch_command"].format(python=pyx, model=m, onnx=onnx[m], out_dir=out, part=f"{k}/{n}")
+                    names.append(Q.add_job(q, f"{pf('P22')}_tolb_{m}_{k}of{n}", f"cd {tol['cwd']}\n{cmd} 2>&1 | "
+                                           f"grep -v -e W:onnxruntime -e 'Corrupt JPEG' | grep -v '^ ' | tail -3").stem)
+                continue
             for w in tol["windows"]:
                 o = out / f"{w['id']}__{m}.npz"
                 cmd = tol["command"].format(python=pyx, frames_root=tol["frames_root"], model=m, onnx=onnx[m], out=o, **w)
@@ -223,13 +230,17 @@ cd {ENGINES}
                                                  ("truck_recovery", "offcentre")) if s in sections]
     if truck_conds:
         t = cl["truck"]
-        o = work / "out" / "truck_closed_loop" / f"{tag}.json"
-        o.parent.mkdir(parents=True, exist_ok=True)
-        args = json.dumps({k: t[k] for k in ("code", "wide_camera", "drives", "starts", "night")})
-        names.append(Q.add_job(q, f"{pf('P32')}_tcl_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+        (work / "out" / "truck_closed_loop").mkdir(parents=True, exist_ok=True)
+        jobs = [(f"{pf('P32')}_tcl_{tag}", work / "out" / "truck_closed_loop" / f"{tag}.json",
+                 {k: t[k] for k in ("code", "wide_camera", "drives", "starts", "night")})]
+        if t.get("plugin_args_file"):   # more windows: one job per entry of the file, each its own plugin args
+            jobs += [(f"{pf('P32')}_tcl_{tag}_c{i}", work / "out" / "truck_closed_loop" / f"{tag}_c{i}.json",
+                      {"code": t["code"], **extra}) for i, extra in enumerate(json.loads(Path(t["plugin_args_file"]).read_text()))]
+        for name, o, args in jobs:
+            names.append(Q.add_job(q, name, after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 {wait_gpu(cl.get('min_free_mib', 15500))}
 cd {ENGINES}
-{pyx} -I wm_closed_loop.py --plugin {t['plugin']} --plugin-args {shlex.quote(args)} --cars g55 \\
+{pyx} -I wm_closed_loop.py --plugin {t['plugin']} --plugin-args {shlex.quote(json.dumps(args))} --cars g55 \\
   --conds {','.join(dict.fromkeys(truck_conds))} {common} --out {o} 2>&1 | {filt}""").stem)
     if "truck_recovery" in sections and brake_cfg(cfg).get("starts"):
         t, b = cl["truck"], brake_cfg(cfg)
@@ -315,7 +326,11 @@ def score(cfg, mid: str, sections: list):
     if "truck_closed_loop" in sections:
         units = closedloop.window_units(wins, mid, "g55", "nominal", seeds)
         if units:
-            store.save(work, "truck_closed_loop", mid, units, {"condition": describe(wins, units)})
+            meta = {"condition": describe(wins, units)}
+            groups = backfill.truck_groups(cfg)
+            if groups:
+                meta["groups"] = {u: groups[u] for u in units if u in groups}
+            store.save(work, "truck_closed_loop", mid, units, meta)
     if "truck_recovery" in sections:
         for test, cond in (("heading", "disturb"), ("offcentre", "offcentre")):
             units = closedloop.window_units(wins, mid, "g55", cond, seeds)

@@ -138,6 +138,9 @@ def section(work: Path, name: str, model_id: str, reg: dict, per_unit_root: Path
         metrics.append({"key": key, "label": label, "unit": unit, "better": better,
                         "value": stats.rounded(p["value"]), "median": stats.rounded(p["median"]),
                         "ci": stats.rounded(p["ci"]), "n": p["n"], "clusters": p["clusters"], "paired": paired})
+    groups = entry["meta"].get("groups") or {}
+    by_group = {g: group_metrics(spec, entry, base_entries, cl, {u for u, x in groups.items() if x == g})
+                for g in sorted(set(groups.values()))} if groups else None
     cond = S.CONDITIONS[name]
     if spec["public"]:
         cond = f"{cond} {public_counts(units_with_data)}"
@@ -148,8 +151,30 @@ def section(work: Path, name: str, model_id: str, reg: dict, per_unit_root: Path
         per_unit = f"per_unit/{model_id}/{name}.csv"
         write_csv(per_unit_root / model_id / f"{name}.csv", entry, spec)
     n_drives = len({cl(u) for u in units_with_data})
-    return {"status": "ok", "unit_of_evidence": spec["unit"], "n": len(units_with_data), "clusters": n_drives,
-            "condition": cond, "baselines": bases, "metrics": metrics, "per_unit_file": per_unit}
+    out = {"status": "ok", "unit_of_evidence": spec["unit"], "n": len(units_with_data), "clusters": n_drives,
+           "condition": cond, "baselines": bases, "metrics": metrics, "per_unit_file": per_unit}
+    if by_group:
+        out["by_group"] = by_group
+    return out
+
+
+def group_metrics(spec, entry, base_entries, cl, units):
+    """One group's pooled metrics (a truck camera setup): the same pooling and pairing over its units only."""
+    ms = []
+    for key, label, unit, better, src in spec["metrics"]:
+        vals = {u: v for u, v in censor(key, store.values(entry, src)).items() if u in units}
+        p = stats.pool(vals, cl)
+        if p["n"] == 0:
+            continue
+        paired = {}
+        for b, be in base_entries.items():
+            bv = {u: v for u, v in censor(key, store.values(be, src)).items() if u in units} if be else {}
+            r = stats.paired(vals, bv, better, cl) if bv else None
+            if r:
+                paired[b] = stats.rounded(r)
+        ms.append({"key": key, "value": stats.rounded(p["value"]), "median": stats.rounded(p["median"]),
+                   "ci": stats.rounded(p["ci"]), "n": p["n"], "clusters": p["clusters"], "paired": paired})
+    return {"n": len(units), "clusters": len({cl(u) for u in units}), "metrics": ms}
 
 
 def write_csv(path: Path, entry: dict, spec: dict):

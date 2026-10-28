@@ -5,12 +5,17 @@ Keys read here (see README.md for a full example):
   [paths]  work, python, segments_dir, cereal, models_dir, gpu_lock, results, per_unit
   [queue]  slots, share_s, cpu_cores, launcher (command prefix that starts the runner, e.g. systemd-run)
   [watch]  sections, github_calls
-  [truck_open_loop]   condition, cwd, command, [[truck_open_loop.windows]] id, ...
-  [closed_loop]       wm_args, [closed_loop.public] ..., [closed_loop.truck] ..., [closed_loop.truck_brake] file, drives
+  [truck_open_loop]   condition, cwd, command, [[truck_open_loop.windows]] id, ...; windows_file (JSON
+                      {"windows": [...]}, appended), batch_command and batch_parts (one job per model and part
+                      instead of one per window), each window's optional `setup` (results are also kept per setup)
+  [closed_loop]       wm_args, [closed_loop.public] ..., [closed_loop.truck] ... (plugin_args_file: a JSON list,
+                      one more truck job per entry; groups_file: {window id: camera setup}),
+                      [closed_loop.truck_brake] file, drives
   [backfill]          legacy sources
 """
 from __future__ import annotations
 
+import json
 import os
 import tomllib
 from pathlib import Path
@@ -32,4 +37,7 @@ def load(path: str | None = None) -> Config:
     with open(path, "rb") as f:
         cfg = Config(tomllib.load(f))
     cfg["_path"] = str(Path(path).resolve())
+    tol = cfg.get("truck_open_loop", {})
+    if tol.get("windows_file"):
+        tol["windows"] = list(tol.get("windows", [])) + json.loads(Path(tol["windows_file"]).read_text())["windows"]
     return cfg

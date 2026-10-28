@@ -62,7 +62,11 @@ def truck_open_loop_one(cfg, mid, extra_dirs=()) -> bool:
         units[w["id"]] = openloop.truck_unit(hit[-1], tol["condition"])
     if not units:
         return False
-    store.save(cfg.work, "truck_open_loop", mid, units, {"condition": tol.get("condition_note", "")})
+    meta = {"condition": tol.get("condition_note", "")}
+    groups = {w["id"]: w["setup"] for w in tol["windows"] if w["id"] in units and w.get("setup")}
+    if groups:
+        meta["groups"] = groups
+    store.save(cfg.work, "truck_open_loop", mid, units, meta)
     return True
 
 
@@ -102,7 +106,16 @@ def merge_recovery(cfg, mid, test: str, units: dict, note: str):
     tests = [t for t in ("heading", "offcentre", "brake") if t in notes]
     entry["meta"]["tests"] = notes
     entry["meta"]["condition"] = " ".join(notes[t] for t in tests)
+    groups = truck_groups(cfg)
+    if groups:
+        entry["meta"]["groups"] = {u: groups[u] for u in entry["units"] if u in groups}
     store.save(cfg.work, "truck_recovery", mid, entry["units"], entry["meta"])
+
+
+def truck_groups(cfg) -> dict:
+    """{truck closed-loop window id: camera setup} from [closed_loop.truck] groups_file, if set."""
+    f = cfg.get("closed_loop", {}).get("truck", {}).get("groups_file")
+    return json.loads(Path(f).read_text()) if f else {}
 
 
 def truck_closed_loop(cfg) -> list:

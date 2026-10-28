@@ -59,11 +59,20 @@ else is read by the site. JSON, UTF-8, numbers in SI units unless a metric says 
       }
     }
   ],
-  "per_unit_file": "per_unit/<model-id>/<section>.csv"   // public sections only; null for truck
+  "per_unit_file": "per_unit/<model-id>/<section>.csv",  // public sections only; null for truck
+  "by_group": {                                          // optional: truck open loop, per camera setup
+    "v13-8mm": {"n": 40, "clusters": 5,
+                "metrics": [{"key": "lat_mae", "value": 0.2, "median": 0.18, "ci": null, "n": 40,
+                             "clusters": 5, "paired": {}}]}
+  }
 }
 ```
 
 Rules:
+
+- `by_group` repeats a section's pooling and pairing within each group of units (for the truck:
+  the camera setup a window was recorded with, never pooled silently); the section's own
+  `metrics` pool every group.
 
 - Units are grouped by drive: the route a public segment was cut from (`drive` in the CSV), the
   recorded drive a truck window comes from. An interval is a 95% percentile bootstrap that resamples
