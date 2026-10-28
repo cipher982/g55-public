@@ -7,8 +7,7 @@ truck runs, and with the model whose weights were first public just before it (i
 latest earlier model that was).</p>
 <p>The suite has two halves. The public half uses comma's public data and models, and anyone can rerun it from the
 published code. The truck half uses recorded drives from one 2011 Mercedes G55, which openpilot does not support. Those
-drives stay private: their scores are published, plus one short clip from one window, checked frame by frame, with
-roadside houses, mailboxes and a sign blurred and no location data. The front page leads with the truck half; the public half is a
+drives stay private, so only their scores are published. The front page leads with the truck half; the public half is a
 check of the harness (<a href="#harness">below</a>).</p>
 </section>
 
@@ -28,11 +27,11 @@ check of the harness (<a href="#harness">below</a>).</p>
 <td>Speed and lateral error against what the truck did, and lateral gain: the model's lateral action over the truck's actual lateral motion, where 1 is right.</td></tr>
 <tr><th scope="row">Truck, closed loop</th>
 <td>The truck windows, run through <code>worldmodel-4B</code> with the G55's measured steering response in place of the ideal car.</td>
-<td>Distance from the driven path at 2, 4 and 7.2 s, and the RMS lateral and longitudinal jerk of the requests. 18 windows from four drives,
-9 by day and 9 at night.</td></tr>
+<td>Distance from the driven path at 2, 4 and 7.2 s, and the RMS lateral and longitudinal jerk of the requests. 98 windows from 13 drives
+and 5 camera setups.</td></tr>
 <tr><th scope="row">Truck, recovery tests</th>
-<td>Closed loop after a disturbance: pushed 0.5 m sideways, or turned 2° off heading. A test behind a braking lead car is
-planned but not built yet: the drives the truck closed loop uses have no window where a car ahead brakes.</td>
+<td>Closed loop after a disturbance: pushed 0.5 m sideways, or turned 2° off heading. A test behind a braking lead car
+runs on the 2 windows, from 1 drive, where a car ahead brakes.</td>
 <td>How far off the driven path the model is 2 and 4 s after the disturbance, and how hard it steers to recover.</td></tr>
 </tbody></table></div>
 <p>Each section on a model page lists its own metrics, units, sample size and condition. A section that was not run for a
@@ -47,9 +46,9 @@ drives, and the 28 closed-loop ones from 19. The interval beside a value is a 95
 drives with replacement, recompute the mean over all their units, repeat 4000 times, and keep the 2.5th and 97.5th
 percentiles. Three adjacent minutes of one drive therefore count as one draw, not three.</p>
 <p>With fewer than 10 drives there is no interval. In simulation, a nominal 95% interval of this kind covers the true mean
-about 90% of the time at 10 drives and 79% at 4, and less when the data are skewed. The truck sections come from three or
-four drives, so they report the mean, the median and win counts, including the number of drives in which the model did
-better, and no interval.</p>
+about 90% of the time at 10 drives and 79% at 4, and less when the data are skewed. The G55 open loop comes from 12 drives,
+the closed loop from 13 and the recovery tests from 13, so they carry intervals. The braking-lead test comes from 1 drive, so it
+reports the mean, the median and win counts, including the number of drives in which the model did better, and no interval.</p>
 <p>A delta compares a model with a baseline on the units both were scored on. It is model minus baseline, computed per
 unit and then bootstrapped the same way, so differences between cars, roads and light that affect both models cancel. The
 fraction beside it counts the units where the model did better; for lateral action rate and the lead of the lateral
@@ -69,8 +68,8 @@ models built on one frozen base: it is identical for the four October models on 
 interval of the median that resamples drives. Two models are separated when the interval of the difference of their
 medians, on the units both have, excludes zero; a model's rank is 1 plus the number of models separated from it with a
 lower median. The front page ranks by the G55 closed loop once it has 10 or more drives; the window values stay private,
-so the ranking is published as <code>rankings/truck_closed_loop.json</code> (medians, intervals, counts, ranks). Until then
-the front page orders models by the G55 windows closer to the recorded path than lebowski at 2 s, with no rank. The
+so the ranking is published as <code>rankings/truck_closed_loop.json</code> (medians, intervals, counts, ranks). Below 10 drives
+it orders models by median, with no rank. The
 harness check ranks comma's public segments the same way; <code>uv run python -m geval.ranking</code> prints it from the
 published CSVs.</p>
 </section>
@@ -83,7 +82,7 @@ the steering back through a world model, and small errors build up.</p>
 <p>Measured in the 2026-10-27 deep dive, the two disagree. comma's recent models are a frozen base policy with a residual head
 trained by reinforcement learning on top. With the residual switched off, the base had the lowest open-loop lateral error
 of any model on comma's public segments (0.074 m/s², against lebowski's 0.109). In the first closed-loop run on nine truck
-windows (before the current eighteen), after a small yaw disturbance, the same base ended about 1.8 m from the driven path at 4 s. lebowski ended 0.4 m away, and
+windows (an earlier, smaller set), after a small yaw disturbance, the same base ended about 1.8 m from the driven path at 4 s. lebowski ended 0.4 m away, and
 a policy that does not steer at all 2.3 m; the same models with their residual ended 1.2 to 1.3 m closer to the path than
 their base alone, in 9 of 9 windows. On comma's public segments the residual lowers the lateral action rate by 33 to 40%
 and raises the lead of the lateral request by 0.17 to 0.32 s. Aligned directly with its own base, the residual's
@@ -102,7 +101,7 @@ score side by side and does not combine them.</p>
 cover, and whether a ranking on comma's cars holds on a vehicle unlike them.</p>
 <ul>
 <li>They come from one truck. Nothing in them says how a model drives another vehicle.</li>
-<li>There are few windows. Each section shows its count, and the conditions (day, night, speed, camera setup) are not balanced.</li>
+<li>The windows come from 12 to 14 drives of one truck. Each section shows its count, and the conditions (day, night, speed, camera setup) are not balanced.</li>
 <li>Others cannot reproduce them: the drives are private, and only aggregate scores and a few checked stills are published.</li>
 <li>Closed loop is a simulation. The world model is weakest at night, rolls out 7.2 s at most, and pulls late frames toward
 what was actually recorded, so differences that appear only past about 4 s carry little weight. In a separate test it

@@ -1158,7 +1158,7 @@ def overview(models, cfg, root) -> str:
 <section id="research" class="research">
 <h2>For researchers</h2>
 <ul class="plain">
-<li>Every number is a mean over units: a 60 s segment of a public drive, or a window of a G55 drive. Units are grouped by the drive they come from, and the 95% intervals resample whole drives. Below 10 drives there is no interval, so the G55 sections report means and win counts only.</li>
+<li>Every number is a mean over units: a 60 s segment of a public drive, or a window of a G55 drive. Units are grouped by the drive they come from, and the 95% intervals resample whole drives. A section or test from fewer than 10 drives has no interval and reports means and win counts only; on the G55 that is the braking-lead test (2 windows from 1 drive).</li>
 <li>A paired difference compares two models on the units both were scored on; the count beside it is the units where the model did better.</li>
 <li>Per-segment CSVs, one results file per model (<a href="{esc(cfg['repo_url'])}/blob/main/eval/SCHEMA.md">schema</a>) and the code are public; <code>python -m geval.reproduce</code> recomputes every public interval from the CSVs. <a href="method.html#downloads">Downloads</a></li>
 <li>The G55 drives stay private; their scores are published.</li>
