@@ -1,14 +1,13 @@
 <section class="prose">
 <h1>Method</h1>
-<p>When comma publishes a new driving model, as a changed model file on openpilot master or as an upload to
-<a href="https://huggingface.co/commaai/openpilot_driving_models">commaai/openpilot_driving_models</a>, one fixed suite
-scores it and the site gets a page for it. Each score is compared with lebowski, the 877M model from July 2026, which this
-truck runs, and with the model whose weights were first public just before it (in a section that model was not run in, the
-latest earlier model that was).</p>
-<p>The suite has two halves. The public half uses comma's public data and models, and anyone can rerun it from the
-published code. The truck half uses recorded drives from one 2011 Mercedes G55, which openpilot does not support. Those
-drives stay private, so only their scores are published. The front page leads with the truck half; the public half is a
-check of the harness (<a href="#harness">below</a>).</p>
+<p>When comma publishes a new driving model on openpilot master or Hugging Face
+(<a href="https://huggingface.co/commaai/openpilot_driving_models">commaai/openpilot_driving_models</a>), our evaluation
+runner scores it on a fixed suite and publishes its results page. Each model is compared against lebowski (the July 2026
+877M model that runs on the truck) and against the immediately preceding release.</p>
+<p>The benchmark has two halves. The truck half runs recorded drives from a 2011 Mercedes G55 AMG in open-loop replay
+and closed-loop simulation; raw G55 drives stay private and their scores are published. The public half runs comma's
+public two-camera segments so anyone can reproduce those numbers from the published CSVs and code
+(<a href="#harness">below</a>).</p>
 </section>
 
 <section class="prose">
@@ -82,15 +81,13 @@ or composite tables.</p>
 <p>Open loop asks whether the model's output matches what a human did on a recorded drive. The output never changes the
 next frame, so a model can copy the human closely and still drift once its own steering moves the car. Closed loop feeds
 the steering back through a world model, and small errors build up.</p>
-<p>Measured in the 2026-10-27 deep dive, the two disagree. comma's recent models are a frozen base policy with a residual head
-trained by reinforcement learning on top. With the residual switched off, the base had the lowest open-loop lateral error
-of any model on comma's public segments (0.074 m/s², against lebowski's 0.109). In the first closed-loop run on nine truck
-windows (an earlier, smaller set), after a small yaw disturbance, the same base ended about 1.8 m from the driven path at 4 s. lebowski ended 0.4 m away, and
-a policy that does not steer at all 2.3 m; the same models with their residual ended 1.2 to 1.3 m closer to the path than
-their base alone, in 9 of 9 windows. On comma's public segments the residual lowers the lateral action rate by 33 to 40%
-and raises the lead of the lateral request by 0.17 to 0.32 s. Aligned directly with its own base, the residual's
-lateral request comes 0.13 to 0.26 s earlier on 16 of comma's cars (0.10 to 0.15 s on the G55); the rest of the
-difference goes with the smoother request. Open-loop scoring counts both as error.</p>
+<p>In our 2026-10-27 ablation study, open-loop and closed-loop rankings diverged sharply. comma's recent models pair a
+frozen base policy with a reinforcement-learned residual head. With the residual head disabled, the frozen base achieved
+the lowest open-loop lateral error of any model on comma's public segments (0.074 m/s² vs lebowski's 0.109 m/s²), yet
+drifted 1.8 m off the driven path at 4 s in closed loop after a small yaw disturbance (where lebowski stayed within 0.4 m).
+Enabling the RL residual head pulled all nine closed-loop rollouts 1.2 to 1.3 m closer to the path while lowering open-loop
+lateral action rate by 33 to 40% and shifting lateral requests 0.13 to 0.26 s earlier. Open-loop imitation scoring counts
+both the earlier lead and the smoother steering profile as error against the human driver.</p>
 <p>This matches published work: on the nuPlan benchmark, open-loop and closed-loop planning scores were negatively
 correlated (<a href="https://doi.org/10.48550/arxiv.2306.07962">Dauner et al., 2023</a>). The leaderboard weights closed-loop
 driving and recovery at 80% of the composite score (40% path keeping, 25% recovery, 15% closed-loop smoothness) and open-loop

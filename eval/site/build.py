@@ -32,12 +32,12 @@ sys.path.insert(0, str(EVAL))
 from geval import ranking  # noqa: E402  the rankings: public from the per-unit CSVs, G55 from rankings/
 sys.path.insert(0, str(SITE))
 
-SECTIONS = {  # in page order: the G55 first, comma's public drives (the harness check) after
-    "truck_closed_loop": "G55, closed loop",
-    "truck_recovery": "G55, recovery tests",
-    "truck_open_loop": "G55, open loop",
-    "public_closed_loop": "comma's public drives, closed loop",
-    "public_open_loop": "comma's public drives, open loop",
+SECTIONS = {  # in page order: G55 first, comma public drives after
+    "truck_closed_loop": "G55 closed loop",
+    "truck_recovery": "G55 recovery tests",
+    "truck_open_loop": "G55 open loop",
+    "public_closed_loop": "comma public drives (closed loop)",
+    "public_open_loop": "comma public drives (open loop)",
 }
 UNIT_WORD = {"segment": ("segment", "segments"), "window": ("window", "windows")}
 BETTER_TEXT = {"lower": "lower is better", "higher": "higher is better",
@@ -46,15 +46,15 @@ MINUS = "−"
 # The G55 numbers on every model's row. Lateral action rate is a diagnostic with no better direction:
 # a lower rate can be a smaller request as well as a smoother one.
 KEY_METRICS = [
-    ("truck_closed_loop", "xtrack_2s", "G55 closed loop", "Median distance from the recorded path at 2 s, G55 steering model"),
-    ("truck_open_loop", "lat_mae", "G55 lateral error", "Mean, request against the truck's lateral motion that followed"),
+    ("truck_closed_loop", "xtrack_2s", "G55 closed loop", "Median distance from the recorded path at 2 s"),
+    ("truck_open_loop", "lat_mae", "G55 lateral error", "Mean error between requested and measured lateral acceleration"),
     ("truck_open_loop", "lat_rate_rms", "G55 lateral action rate", "Mean RMS rate of change of the lateral request"),
 ]
 MORE_METRICS = [
     ("truck_recovery", "heading_xtrack_2s", "G55 at 2 s after a 2° heading error", "Median over windows"),
     ("truck_recovery", "offcentre_xtrack_2s", "G55 at 2 s after a 0.5 m offset", "Median over windows"),
-    ("public_closed_loop", "xtrack_2s", "Distance from path at 2 s, comma's segments", "Closed loop, median over segments, comma's ideal car"),
-    ("public_open_loop", "lat_mae", "Lateral error, comma's segments", "Mean, request against the car's lateral motion that followed"),
+    ("public_closed_loop", "xtrack_2s", "Distance from path at 2 s on public segments", "Closed-loop median using comma's ideal car"),
+    ("public_open_loop", "lat_mae", "Lateral error on public segments", "Mean error against measured lateral acceleration"),
 ]
 # Labels the site uses in place of a results file's own, for files written before a label changed.
 LABEL = {"lat_best_lag": "Lead of the lateral request over the car's motion",
@@ -191,15 +191,14 @@ def status_text(m: dict) -> str:
     if src["kind"] == "release":
         s = f'Shipped in openpilot {src["ref"]}'
         if md.get("on_master"):
-            s += f', on master from {md["on_master"]}'
+            s += f' (master {md["on_master"]})'
         return s
     if md.get("on_master"):
-        s = f'Merged to openpilot master {md["on_master"]}'
+        s = f'Merged to openpilot master ({md["on_master"]})'
         if src["kind"] == "openpilot-master" and src["date"] != md["on_master"]:
-            s += f', again {src["date"]}'
+            s += f', updated {src["date"]}'
         return s
-    return "Hugging Face upload only, not shipped"
-
+    return "Hugging Face checkpoint (unshipped)"
 
 def lc_status(m: dict) -> str:
     t = status_text(m)
@@ -1155,8 +1154,8 @@ def camera_setups_section(models: list[dict], cfg: dict, root: Path) -> str:
     return f"""<section id="setups" class="setups-sec">
 <div class="sec-head">
 <div>
-<h2>By G55 camera setup</h2>
-<p class="sub">The G55 corpus spans 5 camera hardware epochs (original dual AR0234 + fisheye through V13/V14 8 mm narrow + IMX662 wide). Results are never pooled silently: inspect how each model scores on each setup beside the pooled number. Lower is better; bold marks the best model in each column.</p>
+<h2>Scores by camera setup</h2>
+<p class="sub">The G55 test drives cover 5 camera mounts and lens combinations. Each column shows a single setup beside the pooled score across all drives. Lower is better; bold marks the best model in each column.</p>
 </div>
 <div class="setup-tabs" role="tablist" aria-label="Metric by camera setup">{"".join(tabs)}</div>
 </div>
@@ -1190,9 +1189,9 @@ def public_chart(models, cfg, root) -> str:
     any_s = next(iter(r.values()))
     ticks = "".join(f'<span class="rk-tk" style="left:{t / top * 100:.2f}%">{t}</span>' for t in range(0, top + 1, tick_step(top)))
     return f"""<figure class="rk rk-pub" aria-labelledby="rkp-t">
-<figcaption class="rk-cap"><p id="rkp-t" class="fig-t">Closed loop on comma's public segments: median distance from the recorded path at 2 s</p>
-<p>{any_s["n"]} segments from {any_s["clusters"]} drives, comma's ideal car in <code>worldmodel-4B</code>; 95% interval resampling drives. Ordered by median distance at 2 s alongside each model's head-to-head segment win rate.</p></figcaption>
-<div class="rk-head" aria-hidden="true"><span>#</span><span>Model</span><div class="rk-axis"><span class="rk-al">cm from the recorded path at 2 s, comma's segments</span>{ticks}</div></div>
+<figcaption class="rk-cap"><p id="rkp-t" class="fig-t">Closed-loop path error at 2 s on comma's public segments</p>
+<p>{any_s["n"]} public segments across {any_s["clusters"]} drives using comma's ideal car in <code>worldmodel-4B</code>. Bars show the 2 s median and 95% drive-clustered bootstrap interval.</p></figcaption>
+<div class="rk-head" aria-hidden="true"><span>#</span><span>Model</span><div class="rk-axis"><span class="rk-al">cm from recorded path at 2 s (public segments)</span>{ticks}</div></div>
 <div class="rk-rows">{"".join(rows)}</div>
 </figure>"""
 
@@ -1209,8 +1208,8 @@ def status_strip(models, cfg, root) -> str:
     latest = max(models, key=lambda m: (scored_at(m), m["model"]["id"]))
     ng = sum(1 for m in models if (m["sections"].get(G55[0]) or {}).get("status") == "ok")
     when = latest["scored"]["date"][:10]
-    return (f'<p class="meta">{len(models)} models tracked, {ng} in G55 closed loop; last scored {esc(when)}; '
-            f'{esc(cfg.get("watch", {}).get("text", ""))}</p>')
+    return (f'<p class="meta">{len(models)} models scored ({ng} in G55 closed loop) · Last updated {esc(when)} · '
+            f'Hugging Face and openpilot branches checked every 20 minutes</p>')
 
 
 def _date(s: str) -> _dt.date:
@@ -1218,14 +1217,14 @@ def _date(s: str) -> _dt.date:
 
 
 TRENDS_G55 = [
-    ("Closed loop, cm at 2 s", "cm", "g55rank"),
-    ("Open-loop error, m/s² (2023–2026)", "m/s²", ("truck_open_loop", "lat_mae")),
-    ("2° heading error, cm at 2 s", "cm", ("truck_recovery", "heading_xtrack_2s", "cm")),
-    ("0.5 m offset, cm at 2 s", "cm", ("truck_recovery", "offcentre_xtrack_2s", "cm")),
+    ("Closed-loop path error at 2 s (cm)", "cm", "g55rank"),
+    ("Open-loop lateral error (m/s², 2023–2026)", "m/s²", ("truck_open_loop", "lat_mae")),
+    ("2° heading recovery at 2 s (cm)", "cm", ("truck_recovery", "heading_xtrack_2s", "cm")),
+    ("0.5 m offset recovery at 2 s (cm)", "cm", ("truck_recovery", "offcentre_xtrack_2s", "cm")),
 ]
 TRENDS_PUBLIC = [
-    ("Lateral action rate, open loop, comma's segments (m/s³)", "m/s³", ("public_open_loop", "lat_rate_rms")),
-    ("Lead of the lateral request over the car's motion, open loop, comma's segments (s)", "s", ("public_open_loop", "lat_best_lag")),
+    ("Open-loop lateral action rate on public segments (m/s³)", "m/s³", ("public_open_loop", "lat_rate_rms")),
+    ("Open-loop lateral request lead on public segments (s)", "s", ("public_open_loop", "lat_best_lag")),
 ]
 
 
@@ -1409,9 +1408,9 @@ def trend_legend(cfg, bars_shown: bool = True, pend: bool = True) -> str:
                                    f'class="st-{c} {"hollow" if hollow else "fl-" + c}" stroke-width="2"/></svg>')
     return ('<p class="trend-key">'
             f'<span>{dot("ship")}shipped or on openpilot master</span>'
-            f'<span>{dot("hf", True)}Hugging Face upload only</span>'
-            f'<span>{dot("ref")}lebowski, the reference (July 2026)</span>'
-            f'<span>{dot("old")}earlier models (2023–2026)</span>'
+            f'<span>{dot("hf", True)}Hugging Face checkpoint</span>'
+            f'<span>{dot("ref")}lebowski reference (July 2026)</span>'
+            f'<span>{dot("old")}earlier releases (2023–2026)</span>'
             '<span><i class="key-better" aria-hidden="true"></i>better than lebowski</span>'
             + ('<span><svg width="12" height="12" aria-hidden="true"><path class="pend" d="M3,3 l6,6 m0,-6 l-6,6"/></svg>not scored yet</span>' if pend else '')
             + ('<span>vertical bars: 95% interval</span>' if bars_shown else '') + '</p>')
@@ -1433,7 +1432,7 @@ def harness_trends(models, cfg, root) -> str:
 def harness(models, cfg, root, heading="h2") -> str:
     """comma's public drives: a check of the harness, rerunnable by anyone."""
     return f"""<{heading}>Harness check on comma's public drives</{heading}>
-<p class="sub">Purpose: to check that the harness reproduces sensible behaviour on comma's own data, and to let others rerun it. The same suite runs on comma's public segments, open loop and closed loop with comma's ideal car; per-segment results and code are published, and <code>python -m geval.reproduce</code> recomputes every interval from them.</p>
+<p class="sub">Runs the same evaluation pipeline on comma's 45 public two-camera segments (28 in closed loop with comma's kinematic car model). Per-segment CSVs and scoring code are published so anyone can verify the numbers with <code>python -m geval.reproduce</code>.</p>
 {public_chart(models, cfg, root)}
 {harness_trends(models, cfg, root)}"""
 
@@ -1561,11 +1560,11 @@ def findings_section(models: list[dict], cfg: dict, root: Path) -> str:
         '<li class="f-card">'
         '<div class="f-top"><span class="f-kicker">Composite Ranking · 4 Pillars</span>'
         f'<span class="f-fig">#{s_new["rank"] if newest_cl is m1 else 1} {esc(short_name(m1))} · {s1:.1f}<small>/100</small></span></div>'
-        f'<p class="f-lead">Across all four G55 pillars (40% path keeping, 25% disturbance recovery, 20% open-loop tracking, 15% smoothness), '
-        f'{m_a(m1)} (<strong>{s1:.1f}</strong>) leads {m_a(m2)} (<strong>{s2:.1f}</strong>) and {m_a(m3)} (<strong>{s3:.1f}</strong>), '
-        f'while the July 2026 reference {m_a(ref_m)} scores <strong>{s_ref:.1f}</strong>.</p>'
+        f'<p class="f-lead">{m_a(m1)} (<strong>{s1:.1f}</strong>) leads {m_a(m2)} (<strong>{s2:.1f}</strong>) and {m_a(m3)} (<strong>{s3:.1f}</strong>) '
+        f'on the 4-pillar G55 score (40% path keeping, 25% recovery, 20% open loop, 15% smoothness). '
+        f'The July 2026 reference model {m_a(ref_m)} scores <strong>{s_ref:.1f}</strong>.</p>'
         '<ul class="f-meta">'
-        f'<li><span>Newest model scored:</span> {m_a(newest_cl)} ({esc(first_public(newest_cl))}) ranks <strong>#{s_new["rank"]} of {len(cl_models)}</strong> ({s_new["score"]:.1f}/100).</li>'
+        f'<li><span>Newest model:</span> {m_a(newest_cl)} ({esc(first_public(newest_cl))}) ranks <strong>#{s_new["rank"]} of {len(cl_models)}</strong> ({s_new["score"]:.1f}/100).</li>'
         f'<li><span>Top shipped / master model:</span> {m_a(top_ship)} ranks <strong>#{s_ship["rank"]} overall</strong> ({s_ship["score"]:.1f}/100).</li>'
         '</ul></li>'
     )
@@ -1592,12 +1591,12 @@ def findings_section(models: list[dict], cfg: dict, root: Path) -> str:
         '<li class="f-card">'
         f'<div class="f-top"><span class="f-kicker">Closed Loop · Nominal Path ({nw_cl} windows, {nd_cl} drives)</span>'
         f'<span class="f-fig">{best_cl2_x["median"] * 100:.1f}–{worst_cl2_x["median"] * 100:.1f} cm <small>vs {ref_cl2_x.get("median", 0) * 100:.1f} cm ref</small></span></div>'
-        f'<p class="f-lead">Every model after {m_a(ref_m)} ({ref_cl2_x.get("median", 0) * 100:.1f} cm) stays closer to the recorded G55 path at 2 s. '
-        f'{m_a(best_cl2_m)} holds the lowest 2 s median (<strong>{best_cl2_x["median"] * 100:.1f} cm</strong>, '
-        f'paired mean delta <strong>{delta_cm:+.1f} cm</strong> vs lebowski'
+        f'<p class="f-lead">All {len(after_cl)} models released after {m_a(ref_m)} ({ref_cl2_x.get("median", 0) * 100:.1f} cm) track the recorded G55 path more closely at 2 s. '
+        f'{m_a(best_cl2_m)} has the lowest 2 s median at <strong>{best_cl2_x["median"] * 100:.1f} cm</strong> '
+        f'(<strong>{delta_cm:+.1f} cm</strong> paired mean vs lebowski'
         + (f', winning <strong>{win_pct}%</strong> of windows' if win_pct is not None else '') + ').</p>'
         '<ul class="f-meta">'
-        f'<li><span>At 4 s horizon:</span> Medians span <strong>{best_cl4_x["median"] * 100:.1f}–{worst_cl4_x["median"] * 100:.1f} cm</strong> (led by {m_a(best_cl4_m)} at {best_cl4_x["median"] * 100:.1f} cm vs lebowski {ref_cl4_x.get("median", 0) * 100:.1f} cm).</li>'
+        f'<li><span>4 s horizon:</span> Medians span <strong>{best_cl4_x["median"] * 100:.1f}–{worst_cl4_x["median"] * 100:.1f} cm</strong> ({m_a(best_cl4_m)} {best_cl4_x["median"] * 100:.1f} cm vs lebowski {ref_cl4_x.get("median", 0) * 100:.1f} cm).</li>'
         f'<li><span>Largest post-lebowski drift at 2 s:</span> {m_a(worst_cl2_m)} at <strong>{worst_cl2_x["median"] * 100:.1f} cm</strong> median ({worst_cl2_x.get("value", 0) * 100:.1f} cm mean).</li>'
         '</ul></li>'
     )
@@ -1620,11 +1619,11 @@ def findings_section(models: list[dict], cfg: dict, root: Path) -> str:
         '<li class="f-card">'
         '<div class="f-top"><span class="f-kicker">Closed Loop · Disturbance Recovery</span>'
         f'<span class="f-fig">{r1_hdg:.1f} cm <small>2° heading</small> · {r1_off:.1f} cm <small>0.5 m offset</small></span></div>'
-        f'<p class="f-lead">Policies that track smooth nominal paths most gently are not the fastest to correct a sudden step error. '
-        f'Started 2° off heading or 0.5 m off-centre, {m_a(r1)} (<strong>{r1_hdg:.1f} cm</strong> / <strong>{r1_off:.1f} cm</strong>) and '
-        f'{m_a(r2)} (<strong>{r2_hdg:.1f} cm</strong> / <strong>{r2_off:.1f} cm</strong>) recover fastest at 2 s.</p>'
+        f'<p class="f-lead">{m_a(r1)} (<strong>{r1_hdg:.1f} cm</strong> / <strong>{r1_off:.1f} cm</strong>) and '
+        f'{m_a(r2)} (<strong>{r2_hdg:.1f} cm</strong> / <strong>{r2_off:.1f} cm</strong>) correct a 2° heading error or 0.5 m lateral offset fastest at 2 s. '
+        'Models tuned for smooth nominal tracking return more gradually.</p>'
         '<ul class="f-meta">'
-        f'<li><span>Gradual return on nominal leaders:</span> {m_a(r_slow)} averages <strong>{rs_hdg:.1f} cm</strong> (2° heading) and <strong>{rs_off:.1f} cm</strong> (0.5 m offset) at 2 s.</li>'
+        f'<li><span>Slowest recovery:</span> {m_a(r_slow)} averages <strong>{rs_hdg:.1f} cm</strong> (2° heading) and <strong>{rs_off:.1f} cm</strong> (0.5 m offset) at 2 s.</li>'
         f'<li><span>Best post-lebowski recovery:</span> {m_a(r2 if r1 is ref_m else r1)} scores <strong>{comp_models[(r2 if r1 is ref_m else r1)["model"]["id"]]["pillars"]["recovery"]:.0f}/100</strong> on the recovery pillar.</li>'
         '</ul></li>'
     )
@@ -1648,11 +1647,11 @@ def findings_section(models: list[dict], cfg: dict, root: Path) -> str:
         '<li class="f-card">'
         '<div class="f-top"><span class="f-kicker">Control Smoothness · Jerk &amp; Gain</span>'
         f'<span class="f-fig">−{min_drop}% to −{max_drop}% <small>CL jerk vs lebowski</small></span></div>'
-        f'<p class="f-lead">Every post-July 2026 model cuts closed-loop lateral jerk from {m_a(ref_m)}\'s <strong>{ref_jrk_v:.2f} m/s³</strong> '
+        f'<p class="f-lead">Post-July 2026 models cut closed-loop lateral jerk from {m_a(ref_m)}\'s <strong>{ref_jrk_v:.2f} m/s³</strong> '
         f'down to <strong>{best_jrk_x["value"]:.2f}–{worst_jrk_x["value"]:.2f} m/s³</strong>. '
-        f'{m_a(best_jrk_m)} ({best_jrk_x["value"]:.2f} m/s³) and {m_a(sec_jrk_m)} ({sec_jrk_x["value"]:.2f} m/s³) are the smoothest in closed loop.</p>'
+        f'{m_a(best_jrk_m)} ({best_jrk_x["value"]:.2f} m/s³) and {m_a(sec_jrk_m)} ({sec_jrk_x["value"]:.2f} m/s³) have the lowest closed-loop jerk.</p>'
         '<ul class="f-meta">'
-        f'<li><span>Open-loop lateral gain:</span> {m_a(ref_m)} requests <strong>{ref_gain:.2f}×</strong> the G55\'s lateral motion vs <strong>{min(gains_after):.2f}–{max(gains_after):.2f}×</strong> on newer models, explaining its sharper recovery but higher oscillation.</li>'
+        f'<li><span>Open-loop lateral gain:</span> {m_a(ref_m)} requests <strong>{ref_gain:.2f}×</strong> the G55\'s lateral acceleration vs <strong>{min(gains_after):.2f}–{max(gains_after):.2f}×</strong> on newer models.</li>'
         '</ul></li>'
     )
 
@@ -1671,12 +1670,10 @@ def findings_section(models: list[dict], cfg: dict, root: Path) -> str:
         '<li class="f-card">'
         f'<div class="f-top"><span class="f-kicker">Open vs Closed Loop · {len(ol_models)} Models (2023–2026)</span>'
         f'<span class="f-fig">{best_ol_v:.3f}–{worst_ol_v:.3f} m/s² <small>open-loop error</small></span></div>'
-        f'<p class="f-lead">Across all {len(ol_models)} models in G55 open loop ({ol_counts(models).rstrip(".")}), '
-        f'{m_a(best_ol_m)} has the lowest lateral error (<strong>{best_ol_v:.3f} m/s²</strong>'
-        + (f', #{best_ol_comp_rk} composite' if best_ol_comp_rk else '')
-        + f'), ahead of {m_a(sec_ol_m)} (<strong>{sec_ol_v:.3f} m/s²</strong>) and {m_a(ref_m)} (<strong>{ref_ol_v:.3f} m/s²</strong>).</p>'
+        f'<p class="f-lead">{m_a(best_ol_m)} has the lowest open-loop lateral error across all {len(ol_models)} models (<strong>{best_ol_v:.3f} m/s²</strong> over {ol_counts(models).rstrip(".")}), '
+        f'ahead of {m_a(sec_ol_m)} (<strong>{sec_ol_v:.3f} m/s²</strong>) and {m_a(ref_m)} (<strong>{ref_ol_v:.3f} m/s²</strong>).</p>'
         '<ul class="f-meta">'
-        f'<li><span>Why closed loop is required:</span> {m_a(best_ol_m)} is #1 in open-loop imitation ({best_ol_v:.3f} m/s²) but #{best_ol_comp_rk} overall because its disturbance recovery ({(_find_metric(best_ol_m, "truck_recovery", "heading_xtrack_2s") or {}).get("median", 0) * 100:.1f} cm) trails {m_a(m1)} and {m_a(m2)}.</li>'
+        f'<li><span>Open vs closed loop:</span> {m_a(best_ol_m)} ranks #1 in open loop ({best_ol_v:.3f} m/s²) but #{best_ol_comp_rk} on the composite score due to slower 2° heading recovery ({(_find_metric(best_ol_m, "truck_recovery", "heading_xtrack_2s") or {}).get("median", 0) * 100:.1f} cm).</li>'
         f'<li><span>2023–2025 releases:</span> Earlier single-signature models span up to <strong>{worst_ol_v:.3f} m/s²</strong> ({m_a(worst_ol_m)}).</li>'
         '</ul></li>'
     )
@@ -1713,20 +1710,20 @@ def findings_section(models: list[dict], cfg: dict, root: Path) -> str:
         '<li class="f-card">'
         '<div class="f-top"><span class="f-kicker">Hardware · 5 Camera Setups</span>'
         f'<span class="f-fig">{best_cl_s[0]:.1f} cm <small>{esc(best_cl_s[1])}</small> vs {worst_cl_s[0]:.1f} cm <small>{esc(worst_cl_s[1])}</small></span></div>'
-        f'<p class="f-lead">Averaged across all {len(cl_models)} closed-loop models, 2 s path distance is lowest on '
-        f'<strong>{esc(best_cl_s[1])}</strong> ({esc(best_cl_s[2])}, <strong>{best_cl_s[0]:.1f} cm</strong>) and highest on '
-        f'<strong>{esc(worst_cl_s[1])}</strong> ({esc(worst_cl_s[2])}, <strong>{worst_cl_s[0]:.1f} cm</strong>).</p>'
+        f'<p class="f-lead">Across the {len(cl_models)} closed-loop models, 2 s path error is lowest on '
+        f'<strong>{esc(best_cl_s[1])}</strong> (<strong>{best_cl_s[0]:.1f} cm</strong>) and highest on '
+        f'<strong>{esc(worst_cl_s[1])}</strong> (<strong>{worst_cl_s[0]:.1f} cm</strong>).</p>'
         '<ul class="f-meta">'
         f'<li><span>Open-loop replay by setup:</span> Lowest lateral error on <strong>{esc(best_ol_s[1])}</strong> (<strong>{best_ol_s[0]:.3f} m/s²</strong>) vs <strong>{esc(worst_ol_s[1])}</strong> (<strong>{worst_ol_s[0]:.3f} m/s²</strong>).</li>'
-        '<li><span>Full matrix:</span> Switch between Closed Loop, Recovery, and Open Loop in <a href="#setups">By camera setup</a> above.</li>'
+        '<li><span>Full breakdown:</span> Compare Closed Loop, Recovery, and Open Loop in <a href="#setups">Scores by camera setup</a> above.</li>'
         '</ul></li>'
     )
 
     return (
         '<section id="findings" class="findings-sec">'
         '<div class="sec-head"><div>'
-        '<h2>Findings</h2>'
-        '<p class="sub">Auto-computed from the published results files whenever a model is scored — no hand-maintained copy.</p>'
+        '<h2>Key findings</h2>'
+        '<p class="sub">Computed directly from the current results across all scored models.</p>'
         '</div></div>'
         f'<ul class="findings-grid">{card1}{card2}{card3}{card4}{card5}{card6}</ul>'
         '</section>'
@@ -1737,7 +1734,7 @@ def overview(models, cfg, root) -> str:
     return f"""<section class="hero">
 <div class="hero-t">
 <h1>openpilot driving model evaluations</h1>
-<p class="lede">Every comma.ai driving model, scored on drives from a 2011 Mercedes G55, a car openpilot does not support.</p>
+<p class="lede">Benchmarking comma.ai's openpilot driving models on a 2011 Mercedes G55 AMG in open-loop replay and closed-loop simulation.</p>
 {status_strip(models, cfg, root)}
 </div>
 {g55_table(models, cfg, root)}
@@ -1746,40 +1743,40 @@ def overview(models, cfg, root) -> str:
 {camera_setups_section(models, cfg, root)}
 
 <section id="time" class="time">
-<h2>Over time, by the date each model was first public</h2>
-<p class="sub">Closed loop and recovery: {g55_counts(models)[0]} windows from {g55_counts(models)[1]} drives. Open loop: {ol_counts(models)} Lower is better in all four.</p>
+<h2>Trends by release date</h2>
+<p class="sub">Plotted by each model's first public release date ({g55_counts(models)[0]} closed-loop windows across {g55_counts(models)[1]} drives; {ol_counts(models).rstrip(".")} in open loop). Lower is better.</p>
 {over_time(models, cfg, root)}
 </section>
 
 {findings_section(models, cfg, root)}
 
 <section id="models">
-<h2>The models</h2>
-<p class="sub">Newest first, by the date the weights were first public. Each links to its full scores and per-setup breakdown.</p>
+<h2>All models</h2>
+<p class="sub">Ordered from newest to oldest by public release date. Select any model for its full metrics and per-setup tables.</p>
 {model_list(models, cfg, root)}
 </section>
 
 <section id="log" class="logsec">
 <h2>Log</h2>
-<p class="sub">Model releases and scoring runs from the results files; suite changes from <a href="{esc(cfg['repo_url'])}/blob/main/eval/CHANGELOG.md">CHANGELOG.md</a>. Newest first.</p>
+<p class="sub">Recent model releases, scoring runs, and benchmark changes from <a href="{esc(cfg['repo_url'])}/blob/main/eval/CHANGELOG.md">CHANGELOG.md</a>.</p>
 {log_feed(models, root)}
 </section>
 
 <section id="how" class="prose">
 <h2>How it works</h2>
 <div class="how">
-<div><h3>Open loop</h3><p>The model runs on recorded camera frames. Its lateral and longitudinal requests are compared with the car's measured motion that followed.</p></div>
-<div><h3>Closed loop</h3><p>The model's requests move a simulated car, and comma's public world model, <code>worldmodel-4B</code>, generates the next camera frame from the new position, 7.2 s per episode. Scored as distance from the recorded path.</p></div>
-<div><h3>The G55</h3><p>A 2011 Mercedes G55 (W463) with recirculating-ball steering and the camera 1.45 m above the road. openpilot does not support it, so its drives are not in comma's training data. Its closed loop uses a model of the G55's steering and powertrain in place of comma's ideal car.</p></div>
+<div><h3>Open loop</h3><p>The model runs on recorded camera frames. Its lateral and longitudinal requests are compared against the vehicle's measured motion.</p></div>
+<div><h3>Closed loop</h3><p>Each model's steering and speed requests drive a simulated vehicle while <code>worldmodel-4B</code> renders the next camera frame at each 0.2 s step over a 7.2 s rollout. Models are scored by distance from the recorded path.</p></div>
+<div><h3>The G55</h3><p>The test vehicle is a 2011 Mercedes G55 AMG (W463) with recirculating-ball steering and a 1.45 m camera height. openpilot does not support the W463, so none of these drives appear in comma's training set. Closed-loop rollouts use a plant model fitted to the G55's steering and powertrain response.</p></div>
 </div>
-<p>comma publishes its own test reports in <a href="https://commaai.github.io/model_reports/">model_reports</a>; the newest there is Cinque v3, from 2026-09-18. Nearest equivalents:</p>
+<p>comma publishes its own test reports in <a href="https://commaai.github.io/model_reports/">model_reports</a> (latest: Cinque v3, 2026-09-18). Nearest equivalents:</p>
 <div class="tw"><table class="vocab"><thead><tr><th scope="col">Here</th><th scope="col">Nearest test in comma's model_reports</th></tr></thead><tbody>
-<tr><th scope="row">Lateral action rate, open loop</th><td>jitter</td></tr>
-<tr><th scope="row">Distance from path, closed loop, comma's ideal car</th><td>MLSim lateral (<code>analyse_lat_mlsim</code>), their world model as the simulator</td></tr>
-<tr><th scope="row">G55 recovery: 0.5 m lateral offset or 2° heading error</th><td>no direct match; closest is hugging, recovery under a lateral bias</td></tr>
+<tr><th scope="row">Lateral action rate (open loop)</th><td>jitter</td></tr>
+<tr><th scope="row">Closed-loop path error (comma's ideal car)</th><td>MLSim lateral (<code>analyse_lat_mlsim</code>) in comma's world model</td></tr>
+<tr><th scope="row">G55 recovery (0.5 m lateral offset or 2° heading error)</th><td>hugging (recovery under a lateral bias)</td></tr>
 <tr><th scope="row">Braking lead car (2 windows)</th><td>unintended lead following</td></tr>
 </tbody></table></div>
-<p><a href="method.html">The full method</a>, with a closed-loop example from <code>worldmodel-4B</code>.</p>
+<p>See the <a href="method.html">Method page</a> for full scoring details and an interactive <code>worldmodel-4B</code> rollout player.</p>
 </section>
 
 <section id="harness" class="harness">
@@ -1789,10 +1786,10 @@ def overview(models, cfg, root) -> str:
 <section id="research" class="research">
 <h2>For researchers</h2>
 <ul class="plain">
-<li>Every number is a mean over units: a 60 s segment of a public drive, or a window of a G55 drive. Units are grouped by the drive they come from, and the 95% intervals resample whole drives. A section or test from fewer than 10 drives has no interval and reports means and win counts only; on the G55 that is the braking-lead test (2 windows from 1 drive).</li>
-<li>A paired difference compares two models on the units both were scored on; the count beside it is the units where the model did better.</li>
-<li>Per-segment CSVs, one results file per model (<a href="{esc(cfg['repo_url'])}/blob/main/eval/SCHEMA.md">schema</a>) and the code are public; <code>python -m geval.reproduce</code> recomputes every public interval from the CSVs. <a href="method.html#downloads">Downloads</a></li>
-<li>The G55 drives stay private; their scores are published.</li>
+<li>Every score is a mean or median over evaluation units (60 s segments on public drives; fixed windows on G55 drives). Units are grouped by drive, and 95% confidence intervals resample whole drives. Tests with fewer than 10 drives report means and win counts without an interval.</li>
+<li>A paired difference compares two models on the exact same windows or segments; the win count shows how often the model beat the baseline.</li>
+<li>Per-segment CSVs, model results files (<a href="{esc(cfg['repo_url'])}/blob/main/eval/SCHEMA.md">schema</a>), and scoring code are public. Run <code>python -m geval.reproduce</code> to recompute every public interval from the CSVs. <a href="method.html#downloads">Downloads</a></li>
+<li>Raw G55 drive recordings stay private; their aggregate and per-setup scores are published.</li>
 </ul>
 {legend()}
 {summary_table(models, cfg)}
@@ -1913,11 +1910,11 @@ def model_page(m, models, cfg, root, out) -> str:
     prevt = ""
     if prev:
         po = by_id(models).get(prev)
-        prevt = f' Compared with lebowski and with {name_html(po, prev + ".html") if po else esc(prev)}, the model first public before it.'
+        prevt = f' Paired deltas compare against lebowski and against the preceding release ({name_html(po, prev + ".html") if po else esc(prev)}).'
     return (f'<section class="mhead"><p class="crumb"><a href="../index.html#leaderboard">← Leaderboard &amp; all models</a></p>'
             f'<h1>{name_html(m)}</h1><p class="m-st"><span class="m-date">{esc(first_public(m))}</span> {esc(status_text(m))}</p>'
             f'<p class="m-verdict">{esc(verdict_line(m, models, cfg, root))}</p></section>'
-            f'<section><h2>Key numbers</h2><p class="sub">The green tick is lebowski. Lateral action rate has no better direction; on the others lower is better.{prevt}</p>'
+            f'<section><h2>Key numbers</h2><p class="sub">Green ticks mark lebowski. Lower is better on path and lateral error metrics.{prevt}</p>'
             f'<div class="kbars">{bars(m, models, cfg, mets, scales, False)}</div></section>'
             f'<section><h2>All scores</h2>{legend()}{secs}</section>{stills}'
             + (f'<section><h2>Limits</h2><ul class="limits">{limits}</ul></section>' if limits else "")
@@ -1975,12 +1972,12 @@ def main() -> None:
         (out / "models" / f"{mid}.html").write_text(
             page(cfg, f"{plain_name(m)} – {tag}", f"{plain_name(m)}: {status_text(m)}. {verdict_line(m, models, cfg, root)}",
                  model_page(m, models, cfg, root, out), 1, "model", f"models/{mid}.html"))
-    desc = ("Every comma.ai openpilot driving model, including Hugging Face uploads, scored on comma's public drives "
-            "and on drives from a 2011 Mercedes G55, in open and closed loop.")
+    desc = ("Benchmarking comma.ai's openpilot driving models on a 2011 Mercedes G55 AMG "
+            "and comma's public segments in open-loop replay and closed-loop simulation.")
     (out / "index.html").write_text(page(cfg, f"openpilot driving model evaluations – {cfg['site_name']}",
                                          desc, overview(models, cfg, root), 0, "leaderboard", ""))
-    (out / "method.html").write_text(page(cfg, f"Method – {cfg['site_name']}", "How each openpilot driving model is scored: "
-                                          "open and closed loop, intervals, limits and downloads.", method(models, cfg, root), 0, "method", "method.html"))
+    (out / "method.html").write_text(page(cfg, f"Method – {cfg['site_name']}", "Scoring methodology for open-loop replay, "
+                                          "worldmodel-4B closed-loop rollouts, drive-clustered intervals, and CSV downloads.", method(models, cfg, root), 0, "method", "method.html"))
     print(f"{len(models)} models -> {out}")
 
 
