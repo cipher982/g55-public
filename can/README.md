@@ -29,3 +29,4 @@ measured/derived/borrowed boundary.
 ## Case studies
 
 - [Isolating an intermittent fault-tolerant CAN-B failure](case-studies/can-b-fault-isolation.md)
+- [W463 body PDM & EZS gateway topology (CAN-B / CAN-C & key-off afterrun)](case-studies/w463-body-pdm-and-gateway-topology.md)

@@ -1,4 +1,4 @@
-VERSION "W463 CAN-B confirmed signals 2026-07-20"
+VERSION "W463 CAN-B confirmed signals 2026-10-30"
 
 NS_ :
     NS_DESC_
@@ -9,16 +9,96 @@ NS_ :
 
 BS_:
 
-BU_: EZS DOOR_FL DOOR_FR DOOR_RR ZGW LOGGER
+BU_: EZS KOMBI AGW SAM_V SAM_H OBF DBE MRM KLA DOOR_FL DOOR_FR DOOR_RL DOOR_RR ZGW LOGGER
+
+BO_ 0 EZS_A1_000_G55: 8 EZS
+ SG_ KeyInserted_KL15C : 0|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ IgnitionAccessory_KL15R : 1|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ IgnitionRun_KL15 : 2|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ IgnitionKL15X : 3|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ StarterCrank_KL50 : 4|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ ExternalUnlockCommand : 30|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ ExternalLockCommand : 31|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ FuelFlapUnlockCommand : 35|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ FuelFlapLockCommand : 36|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ TailgateUnlockCommand : 37|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ TailgateLockCommand : 38|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ DoorLockCommandByte : 40|8@1+ (1,0) [0|255] "" LOGGER
 
 BO_ 2 GatewayEngineStatus_002_G55: 7 ZGW
  SG_ EngineCoolantTemperature : 32|8@1+ (1,-40) [-40|215] "degC" LOGGER
+
+BO_ 3 GatewayDrivetrainStatus_003_G55: 2 ZGW
+ SG_ BrakeLightSwitch : 0|2@1+ (1,0) [0|3] "" LOGGER
+ SG_ SelectorLeverPosition : 8|4@1+ (1,0) [0|15] "" LOGGER
+ SG_ ParkEngaged : 14|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ ReverseEngaged : 15|1@1+ (1,0) [0|1] "" LOGGER
+
+BO_ 4 SAM_H_A1_004_G55: 7 SAM_H
+ SG_ DoorOpenFrontLeft : 0|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ DoorOpenFrontRight : 1|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ DoorOpenRearLeft : 2|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ DoorOpenRearRight : 3|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ TailgateOpen : 4|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ BrakeLampsActive : 6|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ PanicAlarmActive : 7|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ RearWindowDefrostActive : 11|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ BonnetOpen : 15|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ AlarmTriggered : 19|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ InteriorProtectionActive : 21|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ AlarmArmed : 22|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ RearBulbFaultMask : 31|16@0+ (1,0) [0|65535] "" LOGGER
+
+BO_ 6 MRM_A1_006_G55: 5 MRM
+ SG_ TurnSignalLeft : 3|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ TurnSignalRight : 4|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ WiperStalkState : 13|3@1+ (1,0) [0|7] "" LOGGER
+
+BO_ 10 SAM_V_A1_00A_G55: 7 SAM_V
+ SG_ FrontFogLampsActive : 1|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ HighBeamActive : 2|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ AlternatorCharging_KL61 : 7|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ ParkingLampsActive : 12|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ LowBeamActive : 13|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ RearFogLampActive : 15|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ BrakePadWearWarning : 16|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ AcCompressorClutchActive : 20|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ ParkingBrakeEngaged : 21|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ CoolantLevelLowWarning : 29|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ WasherFluidLowWarning : 30|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ BrakeFluidLowWarning : 31|1@1+ (1,0) [0|1] "" LOGGER
+ SG_ FrontBulbFaultMask : 39|16@0+ (1,0) [0|65535] "" LOGGER
+
+BO_ 12 KOMBI_A1_00C_G55: 2 KOMBI
+ SG_ InstrumentIlluminationDimmer : 0|8@1+ (1,0) [0|255] "%" LOGGER
+
+BO_ 14 SAM_H_A3_00E_G55: 2 SAM_H
+ SG_ HazardFlashersActive : 5|1@1+ (1,0) [0|1] "" LOGGER
+
+BO_ 20 DBE_A1_014_G55: 5 DBE
+ SG_ CabinTemperature : 8|8@1+ (0.25,0) [0|63.75] "degC" LOGGER
+ SG_ LightSensorFlags : 16|8@1+ (1,0) [0|255] "" LOGGER
+ SG_ SunroofState : 24|3@1+ (1,0) [0|7] "" LOGGER
+
+BO_ 22 EZS_A12_016_G55: 1 EZS
+ SG_ ElectricalSystemVoltage : 0|8@1+ (0.1,0) [0|25.5] "V" LOGGER
+
+BO_ 23 SAM_V_A2_017_G55: 6 SAM_V
+ SG_ FrontBumperTemperature : 0|8@1+ (0.5,-40) [-40|87.5] "degC" LOGGER
+ SG_ RefrigerantPressure : 15|16@0+ (0.1,0) [0|6553.5] "bar" LOGGER
+ SG_ CompressorValveCurrent : 40|8@1+ (10,0) [0|2550] "mA" LOGGER
 
 BO_ 24 FrontLeftWindowStatus_018_G55: 3 DOOR_FL
  SG_ FrontLeftWindowPositionRaw : 11|12@0+ (1,0) [0|4095] "modulo4096" LOGGER
 
 BO_ 25 FrontRightWindowStatus_019_G55: 3 DOOR_FR
  SG_ FrontRightWindowPositionRaw : 11|12@0+ (1,0) [0|4095] "modulo4096" LOGGER
+
+BO_ 44 OBF_A1_02C_G55: 2 OBF
+ SG_ InteriorCentralLockSwitch : 6|2@1+ (1,0) [0|3] "" LOGGER
+
+BO_ 48 KLA_A1_030_G55: 6 KLA
+ SG_ BlowerSpeedPercent : 40|8@1+ (1,0) [0|100] "%" LOGGER
 
 BO_ 68 DriverMasterWindowRequest_044_G55: 4 DOOR_FL
  SG_ RearLeftWindowDownRequest : 17|1@1+ (1,0) [0|1] "" LOGGER
@@ -28,12 +108,32 @@ BO_ 68 DriverMasterWindowRequest_044_G55: 4 DOOR_FL
  SG_ FrontRightWindowDownRequest : 29|1@1+ (1,0) [0|1] "" LOGGER
  SG_ FrontRightWindowUpRequest : 30|1@1+ (1,0) [0|1] "" LOGGER
 
+BO_ 144 SAM_H_A2_090_G55: 3 SAM_H
+ SG_ FuelLevelPercent : 0|8@1+ (0.5,0) [0|100] "%" LOGGER
+
+BO_ 154 RearLeftWindowStatus_09A_G55: 2 DOOR_RL
+ SG_ RearLeftWindowPositionRaw : 3|12@0+ (1,0) [0|4095] "modulo4096" LOGGER
+
 BO_ 156 RearRightWindowStatus_09C_G55: 2 DOOR_RR
  SG_ RearRightWindowPositionRaw : 3|12@0+ (1,0) [0|4095] "modulo4096" LOGGER
 
-CM_ "Only signals confirmed from a single 2011 W463 test vehicle are included. See the public notes for evidence and remaining candidate fields.";
-CM_ BO_ 68 "Physical driver-master stimuli confirmed these six manual request bits at about 51 Hz while held. No 0x044 command is sent for the driver's own front-left window.";
-CM_ SG_ 24 FrontLeftWindowPositionRaw "Down increases and up decreases; wraps modulo 4096. Adjacent-platform physical scaling remains unverified.";
-CM_ SG_ 25 FrontRightWindowPositionRaw "Down increases and up decreases; wraps modulo 4096. Adjacent-platform physical scaling remains unverified.";
-CM_ SG_ 156 RearRightWindowPositionRaw "Down increases and up decreases; wraps modulo 4096. Adjacent-platform physical scaling remains unverified.";
-CM_ SG_ 2 EngineCoolantTemperature "Exact gateway copy of CAN-C 0x608 byte 0. A cold-start capture rose from ambient temperature to normal operating temperature; raw encoding is degrees C plus 40.";
+BO_ 212 KOMBI_A5_0D4_G55: 7 KOMBI
+ SG_ FuelRangeKm : 47|16@0+ (1,0) [0|65535] "km" LOGGER
+
+BO_ 241 KOMBI_A7_0F1_G55: 2 KOMBI
+ SG_ CompensatedOutsideTemperature : 8|8@1+ (0.5,-40) [-40|87.5] "degC" LOGGER
+
+BO_ 826 GPS_A3_33A_G55: 8 AGW
+ SG_ GpsSpeed : 7|16@0+ (0.036,-1179.648) [-1179.648|1179.612] "km/h" LOGGER
+
+CM_ "Only signals confirmed from a single 2011 W463 test vehicle are included. VIN, key ID, and odometer payloads are intentionally omitted.";
+CM_ BO_ 0 "Measured: EZS_A1 ignition terminals (byte 0) and central-locking command pulses (bytes 3-5; byte 5 uses 0xAA for lock and 0x55 for unlock).";
+CM_ BO_ 4 "Measured: Rear SAM (N10/2) broadcasts all four doorajar switches, tailgate switch, anti-theft alarm status, and rear bulb fault bitmask.";
+CM_ BO_ 10 "Measured: Front SAM (N10/1) broadcasts exterior lighting states, alternator D+ (KL61), fluid/pad warnings, and front bulb fault bitmask.";
+CM_ BO_ 68 "Measured: Physical driver-master stimuli confirmed these six manual request bits at about 51 Hz while held. No 0x044 command is sent for the driver's own front-left window.";
+CM_ SG_ 24 FrontLeftWindowPositionRaw "Measured: 12-bit signed two's-complement Hall counter (down increases, up decreases; wraps modulo 4096).";
+CM_ SG_ 25 FrontRightWindowPositionRaw "Measured: 12-bit signed two's-complement Hall counter (down increases, up decreases; wraps modulo 4096).";
+CM_ SG_ 154 RearLeftWindowPositionRaw "Measured: 12-bit signed two's-complement Hall counter (down increases, up decreases; wraps modulo 4096).";
+CM_ SG_ 156 RearRightWindowPositionRaw "Measured: 12-bit signed two's-complement Hall counter (down increases, up decreases; wraps modulo 4096).";
+CM_ SG_ 2 EngineCoolantTemperature "Measured: Exact gateway copy of CAN-C 0x608 byte 0; raw encoding is degrees C plus 40.";
+CM_ SG_ 826 GpsSpeed "Measured: AGW GPS_A3 ground speed, (raw - 0x8000) cm/s, signed.";

@@ -13,11 +13,11 @@ result from one vehicle as a universal Mercedes specification.
 
 ## Layout
 
-- `can/` — curated CAN-C/CAN-B DBCs and reverse-engineering notes.
+- `can/` — curated CAN-C/CAN-B DBCs, body PDM/gateway topology notes, and reverse-engineering case studies.
+- `power/` — reusable BLE telemetry and register codecs for Victron Orion-Tr Smart DC-DC chargers and JBD/Eco-Worthy LiFePO4 BMS units.
+- `eval/` — open-loop and closed-loop driving model evaluation results and static leaderboard site.
 - `cad/` — reusable CAD tooling and selected vehicle parts.
 - `l2/` — public high-level autonomy architecture and safety reasoning.
-- `txgate/` — reusable bench-only CAN safety machinery when it is ready for this workspace.
-
 ## Working rules
 
 - This repository is the source of truth for its public artifacts.
