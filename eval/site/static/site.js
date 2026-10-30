@@ -1,40 +1,37 @@
-// Hover and focus readout for chart marks and bars (every value is also in a table), and the theme switch.
+// Hover and focus readout for chart marks and bars, theme switch, interactive multi-metric leaderboard, and setup tabs.
 (() => {
   const root = document.documentElement;
   const btn = document.querySelector(".theme");
   if (btn) btn.addEventListener("click", () => {
-    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    root.dataset.theme = dark ? "light" : "dark";
-    try { localStorage.setItem("theme", root.dataset.theme); } catch (e) { /* private window: the choice lasts this page only */ }
+    const cur = root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const next = cur === "dark" ? "light" : "dark";
+    root.dataset.theme = next;
+    try { localStorage.setItem("theme", next); } catch (e) {}
   });
   const tip = document.getElementById("tip");
   if (!tip) return;
   const show = (el) => {
     tip.textContent = el.dataset.tip;
     tip.hidden = false;
-    const r = el.getBoundingClientRect();
-    const w = tip.offsetWidth, h = tip.offsetHeight;
-    const x = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), window.innerWidth - w - 8);
-    const y = r.top - h - 8 > 8 ? r.top - h - 8 : r.bottom + 8;
+    const r = el.getBoundingClientRect(), tr = tip.getBoundingClientRect();
+    const x = Math.min(Math.max(8, r.left + r.width / 2 - tr.width / 2), innerWidth - tr.width - 8);
+    const y = r.top - tr.height - 8 > 8 ? r.top - tr.height - 8 : r.bottom + 8;
     tip.style.left = `${x}px`;
     tip.style.top = `${y}px`;
   };
   const hide = () => { tip.hidden = true; };
   for (const el of document.querySelectorAll("[data-tip]")) {
-    el.addEventListener("pointerenter", () => show(el));
-    el.addEventListener("pointerleave", hide);
+    el.addEventListener("mouseenter", () => show(el));
+    el.addEventListener("mouseleave", hide);
     el.addEventListener("focus", () => show(el));
     el.addEventListener("blur", hide);
   }
   window.addEventListener("scroll", () => {
-    const el = document.activeElement;
-    if (el && el.dataset && el.dataset.tip) show(el); else hide();
+    if (!tip.hidden) hide();
   }, { passive: true });
 })();
 
-// The closed-loop hero: the world model's frames at their own resolution drawn to a canvas, and the paths drawn
-// over them as vectors with the camera geometry the data carries. Frames change every 0.2 s as generated; the
-// pose the paths are projected from, the rings and the distances move between steps. The bird's-eye map follows.
+// The closed-loop hero player on the method page.
 (() => {
   const fig = document.querySelector(".cl");
   const raw = document.getElementById("cl-data");
@@ -63,100 +60,94 @@
   const pose = (m, p) => { const tr = track[m], [i, j, u] = at(tr.xy, p); return [lerp(tr.xy[i][0], tr.xy[j][0], u), lerp(tr.xy[i][1], tr.xy[j][1], u), lerp(tr.yaw[i], tr.yaw[j], u)]; };
   const dist = (m, p) => { const a = d.paths[m].dist, [i, j, u] = at(a, p); return lerp(a[i], a[j], u); };
   const colour = (m) => getComputedStyle(fig).getPropertyValue(`--c-${d.cls[m]}`).trim();
-  // car frame (x forward, y left) -> canvas pixels
   const project = (pts, ps, k) => {
-    const c = Math.cos(-ps[2]), s = Math.sin(-ps[2]);
-    return pts.map(([x, y]) => { const dx = x - ps[0], dy = y - ps[1]; return [c * dx - s * dy, s * dx + c * dy]; });
+    const [x0, y0, psi] = ps, c = Math.cos(psi), s = Math.sin(psi), out = [];
+    for (const [x, y] of pts) { const dx = x - x0, dy = y - y0, xf = c * dx + s * dy, yl = -s * dx + c * dy; if (xf >= 2.2) out.push(px([xf, yl], k)); }
+    return out;
   };
   const px = ([x, y], k) => [(C.cx - C.f * y / x) * k, (C.cy + C.f * C.h / x) * k];
   const roadLine = (xy, ps, k, colourStr, dash, w) => {
-    let car = project(xy, ps).filter((q) => q[0] > 3);
-    if (car.length < 2) return;
-    // resample every 0.25 m of road so dashes are measured on the ground
-    const arc = [0];
-    for (let i = 1; i < car.length; i++) arc.push(arc[i - 1] + Math.hypot(car[i][0] - car[i - 1][0], car[i][1] - car[i - 1][1]));
-    const pts = [];
-    for (let a = 0, i = 0; a <= arc[arc.length - 1]; a += 0.25) {
-      while (arc[i + 1] < a) i++;
-      const u = (a - arc[i]) / (arc[i + 1] - arc[i] || 1);
-      pts.push(px([lerp(car[i][0], car[i + 1][0], u), lerp(car[i][1], car[i + 1][1], u)], k));
-    }
-    const runs = [];
-    if (!dash) runs.push(pts);
-    else for (let i = 0; i < pts.length; i += 2 * dash / 0.25) runs.push(pts.slice(i, i + dash / 0.25 + 1));
-    for (const [stroke, lw] of [["rgb(20 20 20 / 0.85)", w + 3 * devicePixelRatio], [colourStr, w]]) {
-      ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.lineCap = "round"; ctx.lineJoin = "round";
-      for (const r of runs) { if (r.length < 2) continue; ctx.beginPath(); ctx.moveTo(...r[0]); for (const q of r.slice(1)) ctx.lineTo(...q); ctx.stroke(); }
-    }
+    const pts = project(xy, ps, k);
+    if (pts.length < 2) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    if (!dash.length) { ctx.strokeStyle = "rgba(0,0,0,0.55)"; ctx.lineWidth = (w + 2) * k; ctx.stroke(); }
+    ctx.setLineDash(dash.map((x) => x * k));
+    ctx.strokeStyle = colourStr; ctx.lineWidth = w * k; ctx.stroke();
+    ctx.restore();
   };
   const ring = (pt, ps, k, colourStr) => {
-    const [q] = project([pt], ps);
-    if (q[0] <= 3) return;
-    const [u, v] = px(q, k), r = 7 * devicePixelRatio;
-    ctx.lineWidth = 2.5 * devicePixelRatio;
-    ctx.strokeStyle = "rgb(20 20 20 / 0.85)"; ctx.beginPath(); ctx.arc(u, v, r + 1.5 * devicePixelRatio, 0, 7); ctx.stroke();
-    ctx.strokeStyle = colourStr; ctx.beginPath(); ctx.arc(u, v, r, 0, 7); ctx.stroke();
+    const p = project([pt], ps, k)[0];
+    if (!p) return;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(p[0], p[1], 3.8 * k, 0, Math.PI * 2);
+    ctx.fillStyle = "#111"; ctx.fill();
+    ctx.lineWidth = 2 * k; ctx.strokeStyle = colourStr; ctx.stroke();
+    ctx.restore();
   };
 
   function draw() {
-    const f = Math.min(t * d.fps, LAST + 0.999), i = Math.floor(f);
-    const s = Math.max(0, Math.min(f - d.history, d.steps - 1));  // generated step, continuous
-    const p = i < d.history ? 0 : s + 1;                            // path index of the car's pose
-    const key = `${view}|${p.toFixed(4)}|${i}|${cv.width}`;
+    const W = cv.width, k = W / FW;
+    const f = Math.min(t * d.fps, LAST), fi = Math.min(Math.floor(f), LAST);
+    const im = imgs[view];
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, cv.height);
+    if (im && im.complete && im.naturalWidth) {
+      const sx = (fi % d.cols) * FW, sy = Math.floor(fi / d.cols) * FH;
+      ctx.drawImage(im, sx, sy, FW, FH, 0, 0, W, cv.height);
+    }
+    const p = Math.max(0, f - d.history), ps = pose(view, p);
+    roadLine(d.ref_ahead, ps, k, colour("rec"), [5, 4], 1.8);
+    if (view === "rec") {
+      for (const m of models) roadLine(d.paths[m].xy, ps, k, colour(m), [], 1.5);
+    } else {
+      roadLine(d.paths[view].xy, ps, k, colour(view), [], 2.4);
+      ring(d.ref_ahead[K2], ps, k, colour("rec"));
+      ring(d.paths[view].xy[K2], ps, k, colour(view));
+    }
+    const key = `${view}:${fi >> 1}`;
     if (key !== last) {
       last = key;
-      const k = cv.width / FW;
-      const m = i < d.history ? "rec" : view, n = i < d.history ? i : m === "rec" ? i : i - d.history;
-      const im = imgs[m];
-      ctx.fillStyle = "#000"; ctx.fillRect(0, 0, cv.width, cv.height);
-      if (im.complete && im.naturalWidth) {
-        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
-        ctx.drawImage(im, (n % d.cols) * FW, Math.floor(n / d.cols) * FH, FW, FH, 0, 0, cv.width, cv.height);
-      }
-      if (i >= d.history) {
-        const w = 3.5 * devicePixelRatio, ps = pose(view, p);
-        roadLine(d.ref_ahead, ps, k, colour("rec"), 2, w);
-        ring(d.ref_ahead[K2], ps, k, colour("rec"));
-        if (view !== "rec") { roadLine(d.paths[view].xy, ps, k, colour(view), 0, w); ring(d.paths[view].xy[K2], ps, k, colour(view)); }
-      }
+      const sw = `<i class="sw sw-${d.cls[view]}"></i>`;
+      lab.innerHTML = view === "rec" ? `${sw}${d.names.rec}` : `${sw}${d.names[view]} · ${ f < d.history ? "0.00 m" : `${dist(view, p).toFixed(2)} m`}`;
+      time.textContent = f < d.history ? `history ${(f / d.fps).toFixed(1)} s` : `${(p / d.fps).toFixed(1)} / ${((d.steps - 1) / d.fps).toFixed(1)} s`;
     }
-    const sec = (f - d.history + 1) / d.fps;
-    time.textContent = sec < -0.05 ? `recorded, ${sec.toFixed(1)} s` : `${Math.max(0, Math.min(sec, d.steps / d.fps)).toFixed(1)} s`;
-    for (const [m, b] of Object.entries(reads)) b.textContent = `${dist(m, p).toFixed(2)} m`;
-    lab.textContent = i < d.history ? "Recorded, the start every model shares" : view === "rec" ? "Recorded drive" : `${d.names[view]}: ${dist(view, p).toFixed(2)} m from the driver's path`;
-    for (const m of Object.keys(dots)) {
-      const pts = screen[m], [a, b, u] = at(pts, p);
-      dots[m].setAttribute("cx", lerp(pts[a][0], pts[b][0], u).toFixed(1));
-      dots[m].setAttribute("cy", lerp(pts[a][1], pts[b][1], u).toFixed(1));
+    for (const m of models) reads[m].textContent = `${(f < d.history ? 0 : dist(m, p)).toFixed(2)} m`;
+    for (const [m, pts] of Object.entries(screen)) {
+      const [i, j, u] = at(pts, p), c = dots[m];
+      if (c) { c.setAttribute("cx", lerp(pts[i][0], pts[j][0], u).toFixed(1)); c.setAttribute("cy", lerp(pts[i][1], pts[j][1], u).toFixed(1)); }
     }
-    if (document.activeElement !== scrub) scrub.value = t.toFixed(2);
   }
 
   const select = (m) => {
-    view = m;
+    view = m; last = null;
     for (const b of btns) b.setAttribute("aria-pressed", String(b.dataset.v === m));
-    for (const pl of svg.querySelectorAll("polyline")) {
-      pl.classList.toggle("on", pl.dataset.m === m && m !== "rec");
-      pl.classList.toggle("dim", pl.dataset.m !== m && pl.dataset.m !== "rec");
+    for (const pl of svg.querySelectorAll(".bp")) {
+      const on = m === "rec" || pl.dataset.m === m || pl.dataset.m === "rec";
+      pl.classList.toggle("dim", !on);
+      pl.classList.toggle("on", pl.dataset.m === m);
     }
     draw();
   };
   const setPlaying = (on) => {
-    playing = on;
+    playing = on; prev = null;
     playBtn.classList.toggle("paused", !on);
     playBtn.setAttribute("aria-label", on ? "Pause" : "Play");
-    if (on) { prev = null; requestAnimationFrame(frame); }
+    if (on) requestAnimationFrame(frame);
   };
   let prev = null;
   function frame(now) {
     if (!playing) return;
-    if (visible && prev !== null) { t += (now - prev) / 1000; if (t >= T) t %= T; draw(); }
+    if (prev !== null && visible) { t += (now - prev) / 1000; if (t >= T) t = 0; scrub.value = Math.min(t, T).toFixed(2); draw(); }
     prev = now;
     requestAnimationFrame(frame);
   }
   const fit = () => {
-    const w = Math.round(box.clientWidth * devicePixelRatio);
-    if (w && w !== cv.width) { cv.width = w; cv.height = Math.round(w * FH / FW); last = null; draw(); }
+    const r = box.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+    const w = Math.max(FW, Math.round(r.width * dpr)), h = Math.round(w * FH / FW);
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; draw(); }
   };
   new ResizeObserver(fit).observe(box);
   new IntersectionObserver((es) => { visible = es[0].isIntersecting; }).observe(box);
@@ -171,17 +162,125 @@
   else setPlaying(true);
 })();
 
-// The leaderboard's sort toggle: best first (data-place) or newest first (data-date).
-(function () {
-  for (const fig of document.querySelectorAll(".gt")) {
-    const body = fig.querySelector(".gt-body");
-    const btns = fig.querySelectorAll(".gt-sort button");
-    for (const b of btns) b.addEventListener("click", () => {
-      const k = b.dataset.sort;
-      const rows = [...body.children];
-      rows.sort((x, y) => k === "date" ? y.dataset.date.localeCompare(x.dataset.date) : x.dataset.place - y.dataset.place);
-      body.append(...rows);
-      for (const o of btns) o.setAttribute("aria-pressed", String(o === b));
+// Interactive multi-metric Leaderboard sorting & historical open-loop toggle.
+(() => {
+  const fig = document.querySelector(".gt");
+  if (!fig) return;
+  const body = fig.querySelector(".gt-body");
+  const sortBtns = [...fig.querySelectorAll(".gt-sort button")];
+  const colHeaders = [...fig.querySelectorAll(".gt-th[data-sort]")];
+  const moreBtn = fig.querySelector(".gt-more-btn");
+  const rows = [...body.querySelectorAll(".gt-row")];
+  const MEDALS = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
+  let currentSort = "composite";
+  let showOlOnly = false;
+
+  function updateVisibilityAndRanks() {
+    const forceShowAll = currentSort === "openloop" || currentSort === "date";
+    const visibleOl = showOlOnly || forceShowAll;
+    for (const r of rows) {
+      if (r.dataset.olOnly === "true") {
+        r.hidden = !visibleOl;
+      } else {
+        r.hidden = false;
+      }
+    }
+    if (moreBtn) {
+      const n = moreBtn.dataset.count || "9";
+      if (forceShowAll) {
+        moreBtn.hidden = true;
+      } else {
+        moreBtn.hidden = false;
+        moreBtn.setAttribute("aria-expanded", String(showOlOnly));
+        moreBtn.textContent = showOlOnly
+          ? `Hide ${n} earlier open-loop-only releases (2023–2026)`
+          : `Show ${n} earlier openpilot releases (2023–2026, scored in G55 open loop on 119 windows)`;
+      }
+    }
+
+    // Re-number visible rows and assign medals for top 3 when sorted by a performance metric
+    const currentRows = [...body.querySelectorAll(".gt-row")].filter((r) => !r.hidden);
+    let rankIdx = 0;
+    for (const r of currentRows) {
+      r.classList.remove("gt-m1", "gt-m2", "gt-m3");
+      const rkEl = r.querySelector(".gt-rk");
+      if (!rkEl) continue;
+      const hasMetric = currentSort === "date" || currentSort === "openloop" || r.dataset.hasCl === "1";
+      if (!hasMetric) {
+        rkEl.textContent = "–";
+        rkEl.setAttribute("aria-label", "unranked in closed loop");
+        continue;
+      }
+      rankIdx += 1;
+      if (currentSort !== "date" && MEDALS[rankIdx]) {
+        rkEl.textContent = MEDALS[rankIdx];
+        r.classList.add(`gt-m${rankIdx}`);
+      } else {
+        rkEl.textContent = String(rankIdx);
+      }
+      rkEl.setAttribute("aria-label", `place ${rankIdx}`);
+    }
+
+    // Highlight active sorted column cells
+    for (const cell of body.querySelectorAll("[data-col]")) {
+      cell.classList.toggle("is-sorted-col", cell.dataset.col === currentSort);
+    }
+  }
+
+  function applySort(mode) {
+    currentSort = mode;
+    for (const b of sortBtns) b.setAttribute("aria-pressed", String(b.dataset.sort === mode));
+    for (const th of colHeaders) th.classList.toggle("is-active", th.dataset.sort === mode);
+
+    rows.sort((a, b) => {
+      if (mode === "date") {
+        return b.dataset.date.localeCompare(a.dataset.date);
+      }
+      if (mode === "openloop") {
+        return Number(a.dataset.openloop) - Number(b.dataset.openloop);
+      }
+      // For closed-loop metrics, keep closed-loop models above open-loop-only models
+      const aCl = Number(a.dataset.hasCl), bCl = Number(b.dataset.hasCl);
+      if (aCl !== bCl) return bCl - aCl;
+      if (mode === "composite") {
+        const diff = Number(b.dataset.composite) - Number(a.dataset.composite);
+        if (Math.abs(diff) > 1e-6) return diff;
+        return Number(a.dataset.cl2s) - Number(b.dataset.cl2s);
+      }
+      return Number(a.dataset[mode]) - Number(b.dataset[mode]);
+    });
+
+    for (const r of rows) body.appendChild(r);
+    updateVisibilityAndRanks();
+  }
+
+  for (const b of sortBtns) {
+    b.addEventListener("click", () => applySort(b.dataset.sort));
+  }
+  for (const th of colHeaders) {
+    th.addEventListener("click", () => applySort(th.dataset.sort));
+  }
+  if (moreBtn) {
+    moreBtn.addEventListener("click", () => {
+      showOlOnly = !showOlOnly;
+      updateVisibilityAndRanks();
+    });
+  }
+  updateVisibilityAndRanks();
+})();
+
+// Camera setups tabbed matrix (#setups).
+(() => {
+  const sec = document.querySelector(".setups-sec");
+  if (!sec) return;
+  const tabs = [...sec.querySelectorAll("[data-setup-tab]")];
+  const panels = [...sec.querySelectorAll("[data-setup-panel]")];
+  for (const tab of tabs) {
+    tab.addEventListener("click", () => {
+      const k = tab.dataset.setupTab;
+      for (const t of tabs) t.setAttribute("aria-selected", String(t.dataset.setupTab === k));
+      for (const p of panels) p.hidden = p.dataset.setupPanel !== k;
     });
   }
 })();
