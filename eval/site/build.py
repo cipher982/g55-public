@@ -330,8 +330,16 @@ cfg_ref = ["lebowski_877m"]  # set from config.json in main(); fill() reads it f
 
 # ---------------------------------------------------------------- page shell
 
+def _asset_hash(name: str) -> str:
+    import hashlib
+    p = SITE / "static" / name
+    return hashlib.sha256(p.read_bytes()).hexdigest()[:8] if p.exists() else "1"
+
+
 def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, path: str) -> str:
     up = "../" * depth
+    css_v = _asset_hash("style.css")
+    js_v = _asset_hash("site.js")
     umami = ""
     if cfg.get("umami_website_id"):
         dom = f' data-domains="{esc(cfg["umami_domains"])}"' if cfg.get("umami_domains") else ""
@@ -375,7 +383,7 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@400;600;700&family=Overpass:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
-<link rel="stylesheet" href="{up}style.css">
+<link rel="stylesheet" href="{up}style.css?v={css_v}">
 <link rel="icon" href="{up}favicon.svg" type="image/svg+xml">
 {umami}
 </head>
@@ -392,7 +400,7 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 <a href="{esc(cfg['repo_url'])}/tree/main/eval">Code and schema</a>.</p>
 </footer>
 <div id="tip" class="tip" role="status" hidden></div>
-<script src="{up}site.js" defer></script>
+<script src="{up}site.js?v={js_v}" defer></script>
 </body>
 </html>
 """
@@ -847,49 +855,21 @@ def g55_table(models, cfg, root) -> str:
 
     rx = t.get(ref)
     refline = (f'<i class="gt-refl" style="left:{min(rx["median"] * 100 / top * 100, 100):.2f}%" title="lebowski: {cm(rx["median"])} cm" aria-hidden="true"></i>' if rx else "")
-
-    def render_metric_cell(m, sec, key, stat, scale, dec, unit_str, span_pair, col_key, label_attr, sub_fn=None):
-        x, _ = find_metric(m, sec, key)
+    def render_metric_cell(m, sec, key, stat, scale, dec, unit_str, span_pair, col_key, label_attr, tip_extra=""):
+        x, s = find_metric(m, sec, key)
         if not x or x.get(stat, x.get("value")) is None:
-            return f'<div class="gt-mcell gt-na" data-col="{col_key}" data-l="{label_attr}"><span>—</span></div>', None
+            return f'<span class="gt-mcell gt-na" data-col="{col_key}" data-l="{label_attr}">–</span>', None
         raw_v = float(x.get(stat, x["value"]))
         lo, hi = span_pair
         h = (hi - raw_v) / (hi - lo) if hi > lo else 0.5
-        bar_w = max(8.0, min(100.0, (raw_v - lo * 0.85) / ((hi * 1.05) - (lo * 0.85)) * 100.0)) if hi > lo else 50.0
         best = " gt-best" if abs(raw_v - lo) < 1e-9 and len(cl_models) > 1 else ""
-        sub_html = sub_fn(m, x) if sub_fn else ""
+        tip = f'{plain_name(m)}, {label_attr}: {num(raw_v * scale, dec)} {unit_str}{tip_extra}'
         return (
-            f'<div class="gt-mcell{best}" data-col="{col_key}" data-l="{label_attr}" style="--h:{h:.2f}">'
-            f'<div class="gt-mv"><strong>{num(raw_v * scale, dec)}</strong><span class="gt-mu"> {esc(unit_str)}</span></div>'
-            f'{sub_html}'
-            f'<span class="gt-mbar"><i style="width:{bar_w:.1f}%"></i></span>'
-            f'</div>'
+            f'<span class="gt-mcell{best}" data-col="{col_key}" data-l="{label_attr}" '
+            f'style="--h:{h:.2f}" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}">'
+            f'<strong>{num(raw_v * scale, dec)}</strong><small class="gt-mu"> {esc(unit_str)}</small>'
+            f'</span>'
         ), raw_v
-
-    def sub_hdg(m, x):
-        return f'<span class="gt-ms">mean {num(x["value"] * 100, 1)} cm</span>'
-
-    def sub_off(m, x):
-        x4, _ = find_metric(m, "truck_recovery", "offcentre_xtrack_4s")
-        if x4 and x4.get("median") is not None:
-            return f'<span class="gt-ms">4s: {num(x4["median"] * 100, 1)} cm</span>'
-        return f'<span class="gt-ms">mean {num(x["value"] * 100, 1)} cm</span>'
-
-    def sub_jrk(m, x):
-        if x.get("median") is not None:
-            return f'<span class="gt-ms">med {num(x["median"], 2)}</span>'
-        return ""
-
-    def sub_ol(m, x):
-        if m["model"]["id"] == ref:
-            return '<span class="gt-ms">reference</span>'
-        p = x.get("paired", {}).get(ref)
-        if p:
-            v = verdict_of(x, p)
-            if v in ("better", "worse"):
-                return f'<span class="gt-ms">{mark(v)}{num(p["delta"], 3, True)} vs leb</span>'
-            return f'<span class="gt-ms">{p["wins"]}/{p["n"]} vs leb</span>'
-        return ""
 
     rows = []
     for m in all_shown:
@@ -906,7 +886,7 @@ def g55_table(models, cfg, root) -> str:
         if first_public(m) == newest:
             tags.append('<span class="gt-tag gt-new">newest</span>')
         if mid == ref:
-            tags.append('<span class="gt-tag gt-ref-tag">reference</span>')
+            tags.append('<span class="gt-tag gt-ref-tag">ref</span>')
         elif md["source"]["kind"] == "release":
             tags.append(f'<span class="gt-tag gt-ship-tag">{esc(md["source"]["ref"])}</span>')
         elif md.get("on_master"):
@@ -918,46 +898,40 @@ def g55_table(models, cfg, root) -> str:
         if md.get("family"):
             meta_parts.append(esc(md["family"]))
 
-        # Column 3: Composite Score cell
+        # Column 3: Compact inline G55 Score + 4-segment bar
         if has_cl and cs.get("score") is not None:
             p = cs["pillars"]
-            # Stacked bar segments: path (40%), recovery (25%), open_loop (20%), smoothness (15%)
             w_path = (p["path"] or 0) * 0.40
             w_rec = (p["recovery"] or 0) * 0.25
             w_ol = (p["open_loop"] or 0) * 0.20
             w_sm = (p["smoothness"] or 0) * 0.15
-            sc_tip = (f'{plain_name(m)} — G55 Composite Score {num(cs["score"], 1)}/100: '
+            sc_tip = (f'{plain_name(m)} — G55 Score {num(cs["score"], 1)}/100: '
                       f'Path keeping {num(p["path"], 0)}/100 (40%), '
                       f'Recovery {num(p["recovery"], 0)}/100 (25%), '
                       f'Open-loop {num(p["open_loop"], 0)}/100 (20%), '
                       f'Smoothness {num(p["smoothness"], 0)}/100 (15%)')
             score_cell = (
                 f'<div class="gt-score" data-col="composite" data-l="G55 Score" tabindex="0" data-tip="{esc(sc_tip)}" aria-label="{esc(sc_tip)}">'
-                f'<div class="gt-sc-top"><strong class="gt-sc-v">{num(cs["score"], 1)}</strong><span class="gt-sc-max">/100</span></div>'
+                f'<strong class="gt-sc-v">{num(cs["score"], 1)}</strong>'
                 f'<div class="gt-sbar" aria-hidden="true">'
                 f'<i class="sb-path" style="width:{w_path:.1f}%"></i>'
                 f'<i class="sb-rec" style="width:{w_rec:.1f}%"></i>'
                 f'<i class="sb-ol" style="width:{w_ol:.1f}%"></i>'
                 f'<i class="sb-sm" style="width:{w_sm:.1f}%"></i>'
                 f'</div>'
-                f'<span class="gt-sc-sub">P:{num(p["path"], 0)} R:{num(p["recovery"], 0)} O:{num(p["open_loop"], 0)} S:{num(p["smoothness"], 0)}</span>'
                 f'</div>'
             )
         else:
-            p_ol = cs.get("pillars", {}).get("open_loop")
             ol_rk = cs.get("ol_rank")
             score_cell = (
                 f'<div class="gt-score gt-na" data-col="composite" data-l="G55 Score">'
-                f'<span class="gt-ol-badge">Open loop #{ol_rk if ol_rk else "–"}</span>'
-                f'<span class="gt-sc-sub">OL score {num(p_ol, 0) if p_ol is not None else "–"}/100</span>'
+                f'<span class="gt-ol-badge">OL #{ol_rk if ol_rk else "–"}</span>'
                 f'</div>'
             )
 
-        # Column 4: Closed Loop 2s cell (clean two-deck layout: numbers on top, bar + CI + ref line below)
+        # Column 4: Single-line Closed-Loop 2s track (bar on left, clean value + CI on right)
         if has_cl:
             s_ = t[mid]
-            x2_metric, _ = find_metric(m, "truck_closed_loop", "xtrack_2s")
-            p_leb = x2_metric.get("paired", {}).get(ref) if x2_metric else None
             bar_pct = min(s_["median"] * 100 / top * 100, 100)
             ci_html = ""
             ci_str = ""
@@ -966,41 +940,32 @@ def g55_table(models, cfg, root) -> str:
                 c1 = min(s_["ci"][1] * 100 / top * 100, 100)
                 ci_html = f'<span class="gt-ci" style="left:{c0:.2f}%;width:{max(0.0, c1 - c0):.2f}%"></span>'
                 ci_str = f'[{cm(s_["ci"][0])}, {cm(s_["ci"][1])}]'
-            delta_badge = ""
-            if mid == ref:
-                delta_badge = '<span class="gt-dl">baseline</span>'
-            elif p_leb:
-                v_leb = verdict_of(x2_metric, p_leb)
-                if v_leb in ("better", "worse"):
-                    delta_badge = f'<span class="gt-dl">{mark(v_leb)}{num(p_leb["delta"] * 100, 1, True)} cm</span>'
-                else:
-                    delta_badge = f'<span class="gt-dl">{p_leb["wins"]}/{p_leb["n"]} wins</span>'
             wr_tip = f', {s_["win_rate"]*100:.1f}% head-to-head window win rate' if s_.get("win_rate") is not None else ""
             cl_tip = (f'{plain_name(m)}: median {cm(s_["median"])} cm (mean {cm(s_.get("mean", s_["median"]))} cm) '
                       f'from the recorded path at 2 s, 95% interval {ci_str or "none"}, '
                       f'{s_["n"]} windows from {s_["clusters"]} drives{wr_tip}')
             cl_cell = (
-                f'<div class="gt-cl" data-col="cl2s" data-l="Closed loop 2s" tabindex="0" data-tip="{esc(cl_tip)}" aria-label="{esc(cl_tip)}">'
-                f'<div class="gt-cl-top">'
-                f'<span class="gt-cl-v"><strong>{cm(s_["median"])}</strong> <span class="gt-mu">cm</span> <span class="gt-ci-txt">{esc(ci_str)}</span></span>'
-                f'{delta_badge}'
-                f'</div>'
+                f'<div class="gt-cl" data-col="cl2s" data-l="CL 2s" tabindex="0" data-tip="{esc(cl_tip)}" aria-label="{esc(cl_tip)}">'
                 f'<div class="gt-bar">{refline}'
                 f'<span class="gt-fill gt-f-{c_cls}" style="width:{bar_pct:.2f}%"></span>'
                 f'{ci_html}'
                 f'<span class="gt-dot dot-{c_cls}" style="left:{bar_pct:.2f}%"></span>'
                 f'</div>'
+                f'<div class="gt-cl-read">'
+                f'<strong>{cm(s_["median"])}</strong><small class="gt-mu"> cm</small>'
+                f'<span class="gt-ci-txt">{esc(ci_str)}</span>'
+                f'</div>'
                 f'</div>'
             )
             cl_val = s_["median"]
         else:
-            cl_cell = '<div class="gt-cl gt-na" data-col="cl2s" data-l="Closed loop 2s"><span class="gt-na-txt">not run in closed loop</span></div>'
+            cl_cell = '<div class="gt-cl gt-na" data-col="cl2s" data-l="CL 2s"><span class="gt-na-txt">open loop only</span></div>'
             cl_val = None
 
-        c_hdg, v_hdg = render_metric_cell(m, "truck_recovery", "heading_xtrack_2s", "median", 100, 1, "cm", sp_hdg, "heading", "2° heading, cm", sub_hdg)
-        c_off, v_off = render_metric_cell(m, "truck_recovery", "offcentre_xtrack_2s", "median", 100, 1, "cm", sp_off, "offset", "0.5 m offset, cm", sub_off)
-        c_jrk, v_jrk = render_metric_cell(m, "truck_closed_loop", "lat_jerk", "value", 1, 2, "m/s³", sp_jrk, "jerk", "Smoothness, m/s³", sub_jrk)
-        c_ol, v_ol = render_metric_cell(m, "truck_open_loop", "lat_mae", "value", 1, 3, "m/s²", sp_ol, "openloop", "Open loop, m/s²", sub_ol)
+        c_hdg, v_hdg = render_metric_cell(m, "truck_recovery", "heading_xtrack_2s", "median", 100, 1, "cm", sp_hdg, "heading", "2° heading")
+        c_off, v_off = render_metric_cell(m, "truck_recovery", "offcentre_xtrack_2s", "median", 100, 1, "cm", sp_off, "offset", "0.5 m offset")
+        c_jrk, v_jrk = render_metric_cell(m, "truck_closed_loop", "lat_jerk", "value", 1, 2, "m/s³", sp_jrk, "jerk", "Smoothness")
+        c_ol, v_ol = render_metric_cell(m, "truck_open_loop", "lat_mae", "value", 1, 3, "m/s²", sp_ol, "openloop", "Open loop")
 
         ol_only_attr = "" if has_cl else ' data-ol-only="true" hidden'
         rows.append(
@@ -1028,12 +993,12 @@ def g55_table(models, cfg, root) -> str:
         '<div class="gt-row gt-head" role="row">'
         '<span>#</span>'
         '<span>Model</span>'
-        '<button type="button" class="gt-th is-active" data-sort="composite" title="Sort by G55 Composite Score (higher is better)">G55 Score <i aria-hidden="true">↓</i><span class="th-sub">4-pillar index (0–100)</span></button>'
-        f'<div class="gt-th-cl"><button type="button" class="gt-th" data-sort="cl2s" title="Sort by closed-loop 2 s median distance (lower is better)">Closed loop at 2 s <i aria-hidden="true">↑</i><span class="th-sub">cm from path (dashed = lebowski)</span></button><div class="rk-axis" aria-hidden="true">{ticks}</div></div>'
-        '<button type="button" class="gt-th gt-th-r" data-sort="heading" title="Sort by 2° heading recovery at 2 s (lower is better)">2° Heading <i aria-hidden="true">↑</i><span class="th-sub">recovery at 2 s</span></button>'
-        '<button type="button" class="gt-th gt-th-r" data-sort="offset" title="Sort by 0.5 m offset recovery at 2 s (lower is better)">0.5 m Offset <i aria-hidden="true">↑</i><span class="th-sub">recovery at 2 s</span></button>'
-        '<button type="button" class="gt-th gt-th-r" data-sort="jerk" title="Sort by closed-loop lateral jerk RMS (lower is smoother)">Smoothness <i aria-hidden="true">↑</i><span class="th-sub">CL jerk, m/s³</span></button>'
-        '<button type="button" class="gt-th gt-th-r" data-sort="openloop" title="Sort all 18 models by open-loop lateral error (lower is better)">Open Loop <i aria-hidden="true">↑</i><span class="th-sub">lat error, m/s²</span></button>'
+        '<button type="button" class="gt-th is-active" data-sort="composite" title="Sort by G55 Composite Score (higher is better)"><span class="th-top">G55 Score <i aria-hidden="true">↓</i></span><span class="th-sub">0–100 index</span></button>'
+        f'<div class="gt-th-cl"><button type="button" class="gt-th" data-sort="cl2s" title="Sort by closed-loop 2 s median distance (lower is better)"><span class="th-top">Closed loop at 2 s <i aria-hidden="true">↑</i></span><span class="th-sub">cm from path · dashed = lebowski</span></button><div class="rk-axis" aria-hidden="true">{ticks}</div></div>'
+        '<button type="button" class="gt-th gt-th-r" data-sort="heading" title="Sort by 2° heading recovery at 2 s (lower is better)"><span class="th-top">2° Heading <i aria-hidden="true">↑</i></span><span class="th-sub">2 s median</span></button>'
+        '<button type="button" class="gt-th gt-th-r" data-sort="offset" title="Sort by 0.5 m offset recovery at 2 s (lower is better)"><span class="th-top">0.5 m Offset <i aria-hidden="true">↑</i></span><span class="th-sub">2 s median</span></button>'
+        '<button type="button" class="gt-th gt-th-r" data-sort="jerk" title="Sort by closed-loop lateral jerk RMS (lower is smoother)"><span class="th-top">Smoothness <i aria-hidden="true">↑</i></span><span class="th-sub">CL jerk</span></button>'
+        '<button type="button" class="gt-th gt-th-r" data-sort="openloop" title="Sort all 18 models by open-loop lateral error (lower is better)"><span class="th-top">Open Loop <i aria-hidden="true">↑</i></span><span class="th-sub">lat error</span></button>'
         '</div>'
     )
 
@@ -1049,11 +1014,18 @@ def g55_table(models, cfg, root) -> str:
 
     return f"""<figure id="leaderboard" class="gt" aria-labelledby="gt-t">
 <figcaption class="gt-cap">
-<div class="gt-cap-main">
-<h2 id="gt-t" class="fig-t">Leaderboard: G55 driving benchmark</h2>
-<p class="gt-sub">Ranked by the 4-pillar <strong>G55 Composite Score</strong> (40% closed-loop path keeping, 25% disturbance recovery, 20% open-loop tracking, 15% closed-loop smoothness), or click any test to re-rank.</p>
+<div class="gt-cap-bar">
+<div>
+<h2 id="gt-t" class="fig-t">Leaderboard: the G55 benchmark</h2>
+<p class="gt-legend" aria-hidden="true">
+<span><i class="sw sw-ship"></i>Shipped / master</span>
+<span><i class="sw sw-hf"></i>Hugging Face only</span>
+<span><i class="sw sw-ref"></i>lebowski (ref)</span>
+<span><i class="sw sw-old"></i>Earlier (2023–2026)</span>
+<span class="gt-leg-sep">·</span>
+<span>Score bar: <i class="sb-dot sb-path"></i>Path 40% <i class="sb-dot sb-rec"></i>Recovery 25% <i class="sb-dot sb-ol"></i>Open-Loop 20% <i class="sb-dot sb-sm"></i>Smoothness 15%</span>
+</p>
 </div>
-<div class="gt-controls">
 <div class="gt-sort" role="group" aria-label="Rank models by">
 <button type="button" aria-pressed="true" data-sort="composite">G55 Score</button>
 <button type="button" aria-pressed="false" data-sort="cl2s">Closed Loop 2s</button>
@@ -1064,16 +1036,8 @@ def g55_table(models, cfg, root) -> str:
 <button type="button" aria-pressed="false" data-sort="date">Newest</button>
 </div>
 </div>
-<div class="gt-legend" aria-hidden="true">
-<span><i class="sw sw-ship"></i>Shipped / master</span>
-<span><i class="sw sw-hf"></i>Hugging Face only</span>
-<span><i class="sw sw-ref"></i>lebowski (reference)</span>
-<span><i class="sw sw-old"></i>Earlier release (2023–2026)</span>
-<span class="gt-leg-sep">|</span>
-<span>Pillar bar: <i class="sb-dot sb-path"></i>Path 40% <i class="sb-dot sb-rec"></i>Recovery 25% <i class="sb-dot sb-ol"></i>Open-Loop 20% <i class="sb-dot sb-sm"></i>Smoothness 15%</span>
-</div>
 </figcaption>
-{head}<div class="gt-body">{"".join(rows)}</div>
+<div class="gt-scroll">{head}<div class="gt-body">{"".join(rows)}</div></div>
 {more_btn}
 <p class="gt-note"><strong>How the ranking works:</strong> Each closed-loop model runs {nw} G55 windows from {nd} drives across 3 closed-loop tests in <code>worldmodel-4B</code> with the G55's measured steering and powertrain response (nominal start, 2° heading error, 0.5 m lateral offset) plus {ol_counts(models)[:-1]} in open loop. The <strong>G55 Score</strong> (0–100, higher is better) weights closed-loop path keeping at 2 s (40%: 25% median + 15% mean), disturbance recovery at 2 s (25%: 12.5% heading + 12.5% offset), open-loop lateral error across all {len(all_shown)} models (20%), and closed-loop lateral jerk RMS (15%). In the metric columns, lower is better; <code>[lo, hi]</code> is the 95% drive-clustered bootstrap interval, and {mark("better")} marks a paired difference from lebowski whose 95% interval excludes zero. <a href="method.html">Full method</a>.</p>
 </figure>"""
@@ -1315,7 +1279,7 @@ def trend_panel(title, unit, kind, models, cfg, r, W=460, H=215) -> str:
     others = [m for m in models if m["model"]["id"] != ref and first_public(m) >= since]
     dates = [_date(first_public(m)) for m in others] or [_date(first_public(idx[ref]))]
     d0, d1 = min(dates) - _dt.timedelta(days=6), max(dates) + _dt.timedelta(days=10)
-    L, Rr, T, B = 46, 20, 16, 34
+    L, Rr, T, B = 46, 20, 24, 34
     span = max(1, (d1 - d0).days)
     X = lambda d: L + (d - d0).days / span * (W - L - Rr)  # noqa: E731
     ys = [v[0] for v in vals.values()] + [v[i] for v in vals.values() for i in (1, 2) if v[i] is not None]
@@ -1369,33 +1333,41 @@ def trend_panel(title, unit, kind, models, cfg, r, W=460, H=215) -> str:
         marks.append(f'<circle class="tp st-{c} {fill_cls}" cx="{cx:.1f}" cy="{cy:.1f}" r="5" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}"/>')
 
     # Label notable points (best, newest) without overlapping
+    # Label notable points (best, newest) without overlapping or clipping
     if ordered:
         best_m = min(ordered, key=lambda m: vals[m["model"]["id"]][0])
         newest_m = ordered[-1]
+        ref_y = Y(line[0]) if line and not is_wins(kind) else -999.0
+
+        def clamp_y(y_val):
+            return max(14.0, min(float(H - B - 6), y_val))
+
         if best_m is newest_m:
             mid = best_m["model"]["id"]
             cx, cy = X(_date(first_public(best_m))), Y(vals[mid][0])
-            anchor = "end" if cx > W - 90 else "start"
+            anchor = "end" if cx > W - 95 else "start"
             dx = -7 if anchor == "end" else 7
-            dy = -8 if cy > T + 22 else 14
-            marks.append(f'<text class="tp-lbl" x="{cx + dx:.1f}" y="{cy + dy:.1f}" text-anchor="{anchor}">{esc(short_name(best_m))}</text>')
+            dy = -9 if cy > T + 18 else 14
+            if abs((cy + dy) - ref_y) < 10:
+                dy = 14 if dy < 0 else -9
+            marks.append(f'<text class="tp-lbl" x="{cx + dx:.1f}" y="{clamp_y(cy + dy):.1f}" text-anchor="{anchor}">{esc(short_name(best_m))}</text>')
         else:
             b_id, n_id = best_m["model"]["id"], newest_m["model"]["id"]
             bx, by = X(_date(first_public(best_m))), Y(vals[b_id][0])
             nx, ny = X(_date(first_public(newest_m))), Y(vals[n_id][0])
             close_x = abs(nx - bx) < 120
             if close_x:
-                # Place higher point label above (-9), lower point label below (+15)
-                b_dy = -9 if by <= ny else 15
-                n_dy = 15 if by <= ny else -9
+                b_dy = -9 if by <= ny else 14
+                n_dy = 14 if by <= ny else -9
             else:
-                b_dy = -8 if by > T + 22 else 14
-                n_dy = -8 if ny > T + 22 else 14
+                b_dy = -9 if by > T + 18 else 14
+                n_dy = -9 if ny > T + 18 else 14
             for lm, cx, cy, dy in ((best_m, bx, by, b_dy), (newest_m, nx, ny, n_dy)):
-                anchor = "end" if cx > W - 90 else "start"
+                if abs((cy + dy) - ref_y) < 9:
+                    dy = -9 if cy < ref_y else 14
+                anchor = "end" if cx > W - 95 else "start"
                 dx = -7 if anchor == "end" else 7
-                marks.append(f'<text class="tp-lbl" x="{cx + dx:.1f}" y="{cy + dy:.1f}" text-anchor="{anchor}">{esc(short_name(lm))}</text>')
-
+                marks.append(f'<text class="tp-lbl" x="{cx + dx:.1f}" y="{clamp_y(cy + dy):.1f}" text-anchor="{anchor}">{esc(short_name(lm))}</text>')
     pend = [m for m in others if m["model"]["id"] not in vals]
     for m in pend:
         cx = X(_date(first_public(m)))
@@ -1548,7 +1520,6 @@ def overview(models, cfg, root) -> str:
 <p class="lede">Every comma.ai driving model, scored on drives from a 2011 Mercedes G55, a car openpilot does not support.</p>
 {status_strip(models, cfg, root)}
 </div>
-{kpi_strip(models, cfg, root)}
 {g55_table(models, cfg, root)}
 </section>
 
