@@ -341,7 +341,10 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   if (location.hash) {
     const h = location.hash.replace(/^#/, "");
-    if (items.some((it) => it.id === h)) setActive(h);
+    if (items.some((it) => it.id === h)) {
+      setActive(h);
+      lockUntil = performance.now() + 900;
+    }
   } else {
     onScroll();
   }

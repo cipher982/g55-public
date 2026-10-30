@@ -345,16 +345,17 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
         dom = f' data-domains="{esc(cfg["umami_domains"])}"' if cfg.get("umami_domains") else ""
         umami = (f'<script defer src="{esc(cfg["umami_src"])}" '
                  f'data-website-id="{esc(cfg["umami_website_id"])}"{dom}></script>')
+    idx_prefix = "" if path == "" else f"{up}index.html"
     nav = []
-    for href, label, key in (("index.html#leaderboard", "Leaderboard", "leaderboard"),
-                             ("index.html#setups", "Camera setups", "setups"),
-                             ("index.html#time", "Over time", "time"),
-                             ("index.html#findings", "Findings", "findings"),
-                             ("index.html#models", "Models", "models"),
-                             ("index.html#log", "Log", "log"),
-                             ("method.html", "Method", "method")):
+    for href, label, key in ((f"{idx_prefix}#leaderboard", "Leaderboard", "leaderboard"),
+                             (f"{idx_prefix}#setups", "Camera setups", "setups"),
+                             (f"{idx_prefix}#time", "Over time", "time"),
+                             (f"{idx_prefix}#findings", "Findings", "findings"),
+                             (f"{idx_prefix}#models", "Models", "models"),
+                             (f"{idx_prefix}#log", "Log", "log"),
+                             (f"{up}method.html", "Method", "method")):
         cur = ' aria-current="page"' if key == current else ""
-        nav.append(f'<a href="{up}{href}"{cur}>{label}</a>')
+        nav.append(f'<a href="{href}"{cur}>{label}</a>')
     site = cfg["site_url"].rstrip("/")
     og = f"{site}/og.png"
     return f"""<!doctype html>
