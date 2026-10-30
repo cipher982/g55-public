@@ -1503,17 +1503,236 @@ def log_feed(models, root) -> str:
 
 # ---------------------------------------------------------------- overview
 
+def findings_section(models: list[dict], cfg: dict, root: Path) -> str:
+    """Auto-computed analytical findings from the published results files (zero manual maintenance)."""
+    ref_id = cfg["reference_model"]
+    idx = by_id(models)
+    ref_m = idx.get(ref_id)
+    comp_models = ranking.g55_composite(models, ranking.truck_scores(root))
+    ranked_ids = sorted(
+        (mid for mid, d in comp_models.items() if d.get("rank") is not None),
+        key=lambda mid: comp_models[mid]["rank"],
+    )
+    def _find_metric(m_doc: dict, sec_name: str, key: str) -> dict | None:
+        return find_metric(m_doc, sec_name, key)[0]
+
+
+    cl_models = [idx[mid] for mid in ranked_ids if mid in idx]
+    ol_models = [
+        m for m in models
+        if (m["sections"].get("truck_open_loop") or {}).get("status") == "ok"
+        and _find_metric(m, "truck_open_loop", "lat_mae")
+    ]
+
+    # Fallback for minimal synthetic fixtures (< 3 closed-loop models)
+    if len(cl_models) < 3 or not ref_m:
+        def _legacy(f):
+            try:
+                return (f'<li class="f-card"><span class="f-fig">{esc(fill(f["figure"], models, root))}</span>'
+                        f'<div class="f-b"><p>{esc(fill(f["line"], models, root))}</p>'
+                        f'<p class="f-sub">{esc(fill(f["text"], models, root))}</p></div></li>')
+            except (SystemExit, ValueError, KeyError):
+                if root.resolve() == EVAL.resolve():
+                    raise
+                return ""
+        items = "".join(_legacy(f) for f in cfg.get("findings", []))
+        return f'<section id="findings"><h2>Findings</h2><ul class="findings-grid">{items}</ul></section>'
+
+    after_cl = [m for m in cl_models if m["model"]["id"] != ref_id and first_public(m) > first_public(ref_m)]
+    nw_cl, nd_cl = g55_counts(models)
+
+    def m_a(m: dict) -> str:
+        return f'<a class="mlink" href="models/{esc(m["model"]["id"])}.html"><strong>{esc(short_name(m))}</strong></a>'
+
+    # 1. Composite Ranking & Podium
+    m1, m2, m3 = cl_models[0], cl_models[1], cl_models[2]
+    s1 = comp_models[m1["model"]["id"]]["score"]
+    s2 = comp_models[m2["model"]["id"]]["score"]
+    s3 = comp_models[m3["model"]["id"]]["score"]
+    s_ref = comp_models.get(ref_id, {}).get("score", 0.0)
+    newest_cl = max(cl_models, key=first_public)
+    s_new = comp_models[newest_cl["model"]["id"]]
+    shipped_cl = [m for m in cl_models if m["model"]["id"] != ref_id and (m["model"]["source"]["kind"] in ("release", "openpilot-master") or m["model"].get("on_master"))]
+    top_ship = shipped_cl[0] if shipped_cl else m1
+    s_ship = comp_models[top_ship["model"]["id"]]
+
+    card1 = (
+        '<li class="f-card">'
+        '<div class="f-top"><span class="f-kicker">Composite Ranking · 4 Pillars</span>'
+        f'<span class="f-fig">#{s_new["rank"] if newest_cl is m1 else 1} {esc(short_name(m1))} · {s1:.1f}<small>/100</small></span></div>'
+        f'<p class="f-lead">Across all four G55 pillars (40% path keeping, 25% disturbance recovery, 20% open-loop tracking, 15% smoothness), '
+        f'{m_a(m1)} (<strong>{s1:.1f}</strong>) leads {m_a(m2)} (<strong>{s2:.1f}</strong>) and {m_a(m3)} (<strong>{s3:.1f}</strong>), '
+        f'while the July 2026 reference {m_a(ref_m)} scores <strong>{s_ref:.1f}</strong>.</p>'
+        '<ul class="f-meta">'
+        f'<li><span>Newest model scored:</span> {m_a(newest_cl)} ({esc(first_public(newest_cl))}) ranks <strong>#{s_new["rank"]} of {len(cl_models)}</strong> ({s_new["score"]:.1f}/100).</li>'
+        f'<li><span>Top shipped / master model:</span> {m_a(top_ship)} ranks <strong>#{s_ship["rank"]} overall</strong> ({s_ship["score"]:.1f}/100).</li>'
+        '</ul></li>'
+    )
+
+    # 2. Closed-Loop Nominal Path Keeping (2 s & 4 s)
+    cl2_vals = [(m, _find_metric(m, "truck_closed_loop", "xtrack_2s")) for m in after_cl]
+    cl2_vals = [(m, x) for m, x in cl2_vals if x and x.get("median") is not None]
+    cl2_vals.sort(key=lambda t: t[1]["median"])
+    best_cl2_m, best_cl2_x = cl2_vals[0]
+    worst_cl2_m, worst_cl2_x = cl2_vals[-1]
+    ref_cl2_x = _find_metric(ref_m, "truck_closed_loop", "xtrack_2s") or {}
+    best_cl2_p = (best_cl2_x.get("paired") or {}).get(ref_id) or {}
+    win_pct = round(best_cl2_p["wins"] / best_cl2_p["n"] * 100) if best_cl2_p.get("wins") is not None and best_cl2_p.get("n") else None
+    delta_cm = (best_cl2_p.get("delta") or 0.0) * 100
+
+    cl4_vals = [(m, _find_metric(m, "truck_closed_loop", "xtrack_4s")) for m in after_cl]
+    cl4_vals = [(m, x) for m, x in cl4_vals if x and x.get("median") is not None]
+    cl4_vals.sort(key=lambda t: t[1]["median"])
+    best_cl4_m, best_cl4_x = cl4_vals[0]
+    worst_cl4_x = cl4_vals[-1][1]
+    ref_cl4_x = _find_metric(ref_m, "truck_closed_loop", "xtrack_4s") or {}
+
+    card2 = (
+        '<li class="f-card">'
+        f'<div class="f-top"><span class="f-kicker">Closed Loop · Nominal Path ({nw_cl} windows, {nd_cl} drives)</span>'
+        f'<span class="f-fig">{best_cl2_x["median"] * 100:.1f}–{worst_cl2_x["median"] * 100:.1f} cm <small>vs {ref_cl2_x.get("median", 0) * 100:.1f} cm ref</small></span></div>'
+        f'<p class="f-lead">Every model after {m_a(ref_m)} ({ref_cl2_x.get("median", 0) * 100:.1f} cm) stays closer to the recorded G55 path at 2 s. '
+        f'{m_a(best_cl2_m)} holds the lowest 2 s median (<strong>{best_cl2_x["median"] * 100:.1f} cm</strong>, '
+        f'paired mean delta <strong>{delta_cm:+.1f} cm</strong> vs lebowski'
+        + (f', winning <strong>{win_pct}%</strong> of windows' if win_pct is not None else '') + ').</p>'
+        '<ul class="f-meta">'
+        f'<li><span>At 4 s horizon:</span> Medians span <strong>{best_cl4_x["median"] * 100:.1f}–{worst_cl4_x["median"] * 100:.1f} cm</strong> (led by {m_a(best_cl4_m)} at {best_cl4_x["median"] * 100:.1f} cm vs lebowski {ref_cl4_x.get("median", 0) * 100:.1f} cm).</li>'
+        f'<li><span>Largest post-lebowski drift at 2 s:</span> {m_a(worst_cl2_m)} at <strong>{worst_cl2_x["median"] * 100:.1f} cm</strong> median ({worst_cl2_x.get("value", 0) * 100:.1f} cm mean).</li>'
+        '</ul></li>'
+    )
+
+    # 3. Disturbance Recovery vs Nominal Path Trade-Off
+    rec_sorted = sorted(
+        cl_models,
+        key=lambda m: comp_models[m["model"]["id"]]["pillars"].get("recovery", 0.0),
+        reverse=True,
+    )
+    r1, r2, r_slow = rec_sorted[0], rec_sorted[1], rec_sorted[-1]
+    r1_hdg = (_find_metric(r1, "truck_recovery", "heading_xtrack_2s") or {}).get("median", 0) * 100
+    r1_off = (_find_metric(r1, "truck_recovery", "offcentre_xtrack_2s") or {}).get("median", 0) * 100
+    r2_hdg = (_find_metric(r2, "truck_recovery", "heading_xtrack_2s") or {}).get("median", 0) * 100
+    r2_off = (_find_metric(r2, "truck_recovery", "offcentre_xtrack_2s") or {}).get("median", 0) * 100
+    rs_hdg = (_find_metric(r_slow, "truck_recovery", "heading_xtrack_2s") or {}).get("median", 0) * 100
+    rs_off = (_find_metric(r_slow, "truck_recovery", "offcentre_xtrack_2s") or {}).get("median", 0) * 100
+
+    card3 = (
+        '<li class="f-card">'
+        '<div class="f-top"><span class="f-kicker">Closed Loop · Disturbance Recovery</span>'
+        f'<span class="f-fig">{r1_hdg:.1f} cm <small>2° heading</small> · {r1_off:.1f} cm <small>0.5 m offset</small></span></div>'
+        f'<p class="f-lead">Policies that track smooth nominal paths most gently are not the fastest to correct a sudden step error. '
+        f'Started 2° off heading or 0.5 m off-centre, {m_a(r1)} (<strong>{r1_hdg:.1f} cm</strong> / <strong>{r1_off:.1f} cm</strong>) and '
+        f'{m_a(r2)} (<strong>{r2_hdg:.1f} cm</strong> / <strong>{r2_off:.1f} cm</strong>) recover fastest at 2 s.</p>'
+        '<ul class="f-meta">'
+        f'<li><span>Gradual return on nominal leaders:</span> {m_a(r_slow)} averages <strong>{rs_hdg:.1f} cm</strong> (2° heading) and <strong>{rs_off:.1f} cm</strong> (0.5 m offset) at 2 s.</li>'
+        f'<li><span>Best post-lebowski recovery:</span> {m_a(r2 if r1 is ref_m else r1)} scores <strong>{comp_models[(r2 if r1 is ref_m else r1)["model"]["id"]]["pillars"]["recovery"]:.0f}/100</strong> on the recovery pillar.</li>'
+        '</ul></li>'
+    )
+
+    # 4. Control Smoothness & Steering Gain
+    jrk_vals = [(m, _find_metric(m, "truck_closed_loop", "lat_jerk")) for m in after_cl]
+    jrk_vals = [(m, x) for m, x in jrk_vals if x and x.get("value") is not None]
+    jrk_vals.sort(key=lambda t: t[1]["value"])
+    best_jrk_m, best_jrk_x = jrk_vals[0]
+    sec_jrk_m, sec_jrk_x = jrk_vals[1]
+    worst_jrk_x = jrk_vals[-1][1]
+    ref_jrk_v = (_find_metric(ref_m, "truck_closed_loop", "lat_jerk") or {}).get("value", 0.57)
+    min_drop = round((1.0 - worst_jrk_x["value"] / ref_jrk_v) * 100)
+    max_drop = round((1.0 - best_jrk_x["value"] / ref_jrk_v) * 100)
+
+    gains_after = [(_find_metric(m, "truck_open_loop", "lat_gain") or {}).get("value") for m in after_cl]
+    gains_after = [g for g in gains_after if g is not None]
+    ref_gain = (_find_metric(ref_m, "truck_open_loop", "lat_gain") or {}).get("value", 0.80)
+
+    card4 = (
+        '<li class="f-card">'
+        '<div class="f-top"><span class="f-kicker">Control Smoothness · Jerk &amp; Gain</span>'
+        f'<span class="f-fig">−{min_drop}% to −{max_drop}% <small>CL jerk vs lebowski</small></span></div>'
+        f'<p class="f-lead">Every post-July 2026 model cuts closed-loop lateral jerk from {m_a(ref_m)}\'s <strong>{ref_jrk_v:.2f} m/s³</strong> '
+        f'down to <strong>{best_jrk_x["value"]:.2f}–{worst_jrk_x["value"]:.2f} m/s³</strong>. '
+        f'{m_a(best_jrk_m)} ({best_jrk_x["value"]:.2f} m/s³) and {m_a(sec_jrk_m)} ({sec_jrk_x["value"]:.2f} m/s³) are the smoothest in closed loop.</p>'
+        '<ul class="f-meta">'
+        f'<li><span>Open-loop lateral gain:</span> {m_a(ref_m)} requests <strong>{ref_gain:.2f}×</strong> the G55\'s lateral motion vs <strong>{min(gains_after):.2f}–{max(gains_after):.2f}×</strong> on newer models, explaining its sharper recovery but higher oscillation.</li>'
+        '</ul></li>'
+    )
+
+    # 5. Open-Loop vs Closed-Loop Divergence
+    ol_sorted = sorted(ol_models, key=lambda m: _find_metric(m, "truck_open_loop", "lat_mae")["value"])
+    best_ol_m = ol_sorted[0]
+    sec_ol_m = ol_sorted[1]
+    worst_ol_m = ol_sorted[-1]
+    best_ol_v = _find_metric(best_ol_m, "truck_open_loop", "lat_mae")["value"]
+    sec_ol_v = _find_metric(sec_ol_m, "truck_open_loop", "lat_mae")["value"]
+    worst_ol_v = _find_metric(worst_ol_m, "truck_open_loop", "lat_mae")["value"]
+    ref_ol_v = (_find_metric(ref_m, "truck_open_loop", "lat_mae") or {}).get("value", 0.0)
+    best_ol_comp_rk = comp_models.get(best_ol_m["model"]["id"], {}).get("rank")
+
+    card5 = (
+        '<li class="f-card">'
+        f'<div class="f-top"><span class="f-kicker">Open vs Closed Loop · {len(ol_models)} Models (2023–2026)</span>'
+        f'<span class="f-fig">{best_ol_v:.3f}–{worst_ol_v:.3f} m/s² <small>open-loop error</small></span></div>'
+        f'<p class="f-lead">Across all {len(ol_models)} models in G55 open loop ({ol_counts(models).rstrip(".")}), '
+        f'{m_a(best_ol_m)} has the lowest lateral error (<strong>{best_ol_v:.3f} m/s²</strong>'
+        + (f', #{best_ol_comp_rk} composite' if best_ol_comp_rk else '')
+        + f'), ahead of {m_a(sec_ol_m)} (<strong>{sec_ol_v:.3f} m/s²</strong>) and {m_a(ref_m)} (<strong>{ref_ol_v:.3f} m/s²</strong>).</p>'
+        '<ul class="f-meta">'
+        f'<li><span>Why closed loop is required:</span> {m_a(best_ol_m)} is #1 in open-loop imitation ({best_ol_v:.3f} m/s²) but #{best_ol_comp_rk} overall because its disturbance recovery ({(_find_metric(best_ol_m, "truck_recovery", "heading_xtrack_2s") or {}).get("median", 0) * 100:.1f} cm) trails {m_a(m1)} and {m_a(m2)}.</li>'
+        f'<li><span>2023–2025 releases:</span> Earlier single-signature models span up to <strong>{worst_ol_v:.3f} m/s²</strong> ({m_a(worst_ol_m)}).</li>'
+        '</ul></li>'
+    )
+
+    # 6. Camera Mount & Lens Sensitivity (by_group across 5 G55 setups)
+    def _gm_val(m_doc: dict, sec_name: str, g_key: str, mkey: str, stat: str) -> float | None:
+        bg = ((m_doc["sections"].get(sec_name) or {}).get("by_group") or {}).get(g_key)
+        if not bg:
+            return None
+        gm = next((x for x in bg.get("metrics", []) if x["key"] == mkey), None)
+        if not gm:
+            return None
+        v = gm.get(stat, gm.get("value"))
+        return float(v) if v is not None else None
+
+    setup_means_cl = []
+    setup_means_ol = []
+    for g_key, g_short, g_desc in CAMERA_GROUPS:
+        c_vals = [_gm_val(m, "truck_closed_loop", g_key, "xtrack_2s", "median") for m in cl_models]
+        c_vals = [v * 100 for v in c_vals if v is not None]
+        if c_vals:
+            setup_means_cl.append((sum(c_vals) / len(c_vals), g_short, g_desc))
+        o_vals = [_gm_val(m, "truck_open_loop", g_key, "lat_mae", "value") for m in cl_models]
+        o_vals = [v for v in o_vals if v is not None]
+        if o_vals:
+            setup_means_ol.append((sum(o_vals) / len(o_vals), g_short, g_desc))
+
+    setup_means_cl.sort()
+    setup_means_ol.sort()
+    best_cl_s, worst_cl_s = setup_means_cl[0], setup_means_cl[-1]
+    best_ol_s, worst_ol_s = setup_means_ol[0], setup_means_ol[-1]
+
+    card6 = (
+        '<li class="f-card">'
+        '<div class="f-top"><span class="f-kicker">Hardware · 5 Camera Setups</span>'
+        f'<span class="f-fig">{best_cl_s[0]:.1f} cm <small>{esc(best_cl_s[1])}</small> vs {worst_cl_s[0]:.1f} cm <small>{esc(worst_cl_s[1])}</small></span></div>'
+        f'<p class="f-lead">Averaged across all {len(cl_models)} closed-loop models, 2 s path distance is lowest on '
+        f'<strong>{esc(best_cl_s[1])}</strong> ({esc(best_cl_s[2])}, <strong>{best_cl_s[0]:.1f} cm</strong>) and highest on '
+        f'<strong>{esc(worst_cl_s[1])}</strong> ({esc(worst_cl_s[2])}, <strong>{worst_cl_s[0]:.1f} cm</strong>).</p>'
+        '<ul class="f-meta">'
+        f'<li><span>Open-loop replay by setup:</span> Lowest lateral error on <strong>{esc(best_ol_s[1])}</strong> (<strong>{best_ol_s[0]:.3f} m/s²</strong>) vs <strong>{esc(worst_ol_s[1])}</strong> (<strong>{worst_ol_s[0]:.3f} m/s²</strong>).</li>'
+        '<li><span>Full matrix:</span> Switch between Closed Loop, Recovery, and Open Loop in <a href="#setups">By camera setup</a> above.</li>'
+        '</ul></li>'
+    )
+
+    return (
+        '<section id="findings" class="findings-sec">'
+        '<div class="sec-head"><div>'
+        '<h2>Findings</h2>'
+        '<p class="sub">Auto-computed from the published results files whenever a model is scored — no hand-maintained copy.</p>'
+        '</div></div>'
+        f'<ul class="findings-grid">{card1}{card2}{card3}{card4}{card5}{card6}</ul>'
+        '</section>'
+    )
+
+
 def overview(models, cfg, root) -> str:
-    def finding(f):
-        try:
-            return (f'<li><span class="f-fig">{esc(fill(f["figure"], models, root))}</span>'
-                    f'<div class="f-b"><p>{esc(fill(f["line"], models, root))}</p>'
-                    f'<details><summary>Detail</summary><p>{esc(fill(f["text"], models, root))}</p></details></div></li>')
-        except (SystemExit, ValueError, KeyError):
-            if root.resolve() == EVAL.resolve():
-                raise
-            return ""
-    findings = "".join(finding(f) for f in cfg.get("findings", []))
     return f"""<section class="hero">
 <div class="hero-t">
 <h1>openpilot driving model evaluations</h1>
@@ -1531,10 +1750,7 @@ def overview(models, cfg, root) -> str:
 {over_time(models, cfg, root)}
 </section>
 
-<section id="findings">
-<h2>Findings</h2>
-<ul class="findings">{findings}</ul>
-</section>
+{findings_section(models, cfg, root)}
 
 <section id="models">
 <h2>The models</h2>

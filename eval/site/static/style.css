@@ -476,16 +476,49 @@ code.hx-only { font: 700 0.92em var(--mono); color: var(--ink); }
 details summary { cursor: pointer; color: var(--link); width: fit-content; }
 details[open] summary { margin-bottom: 8px; }
 
-.findings { list-style: none; padding: 0; margin: 0; max-width: none; display: grid; gap: 0; border-top: 1px solid var(--rule); }
-.findings li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 16px 0; border-bottom: 1px solid var(--rule); }
-.f-fig { font-weight: 800; font-size: 22px; line-height: 1.2; letter-spacing: -0.01em; white-space: nowrap; }
-.findings p { font-size: 16px; max-width: 66ch; }
-.f-b { display: grid; gap: 6px; min-width: 0; }
-.findings details { font-size: 14px; color: var(--ink2); }
-.findings details summary { font-size: 13.5px; }
-@media (min-width: 760px) {
-  .findings li { grid-template-columns: 14rem minmax(0, 1fr); gap: 24px; align-items: baseline; }
+#leaderboard, section[id] { scroll-margin-top: 64px; }
+
+.findings-sec { display: grid; gap: 12px; }
+.findings-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-width: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
 }
+@media (min-width: 820px) {
+  .findings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.f-card {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+}
+.f-top { display: grid; gap: 3px; border-bottom: 1px solid var(--rule); padding-bottom: 8px; }
+.f-kicker { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.f-fig { font-weight: 800; font-size: 20px; line-height: 1.2; letter-spacing: -0.01em; color: var(--ink); }
+.f-fig small { font-size: 13px; font-weight: 600; color: var(--muted); }
+.f-lead { font-size: 14.5px; line-height: 1.48; color: var(--ink); margin: 0; max-width: none; }
+.f-meta {
+  list-style: none;
+  padding: 6px 0 0;
+  margin: 0;
+  border-top: 1px dashed var(--rule);
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 1.42;
+  color: var(--ink2);
+}
+.f-meta li span { font-weight: 700; color: var(--muted); }
+.f-sub { font-size: 13.5px; color: var(--ink2); margin: 0; }
 
 /* The model list */
 .mlist { list-style: none; padding: 0; margin: 0; max-width: none; border-top: 1px solid var(--rule); }

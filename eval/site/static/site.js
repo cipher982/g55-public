@@ -284,3 +284,65 @@
     });
   }
 })();
+
+// Sticky top nav active section highlight (click + hashchange + scroll-spy).
+(() => {
+  const nav = document.querySelector(".top nav");
+  if (!nav) return;
+  const links = [...nav.querySelectorAll("a[href*='#']")];
+  const items = [];
+  for (const a of links) {
+    const idx = a.getAttribute("href").indexOf("#");
+    if (idx < 0) continue;
+    const id = a.getAttribute("href").slice(idx + 1);
+    const sec = document.getElementById(id);
+    if (sec) items.push({ id, a, sec });
+  }
+  if (!items.length) return;
+
+  let lockUntil = 0;
+  const setActive = (id) => {
+    for (const it of items) {
+      if (it.id === id) it.a.setAttribute("aria-current", "page");
+      else it.a.removeAttribute("aria-current");
+    }
+  };
+
+  for (const it of items) {
+    it.a.addEventListener("click", () => {
+      setActive(it.id);
+      lockUntil = performance.now() + 700;
+    });
+  }
+
+  window.addEventListener("hashchange", () => {
+    const h = location.hash.replace(/^#/, "");
+    if (items.some((it) => it.id === h)) {
+      setActive(h);
+      lockUntil = performance.now() + 700;
+    }
+  });
+
+  const onScroll = () => {
+    if (performance.now() < lockUntil) return;
+    const y = window.scrollY + 130;
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 24) {
+      setActive(items[items.length - 1].id);
+      return;
+    }
+    let cur = items[0].id;
+    for (const it of items) {
+      const top = it.sec.getBoundingClientRect().top + window.scrollY;
+      if (top <= y) cur = it.id;
+    }
+    setActive(cur);
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  if (location.hash) {
+    const h = location.hash.replace(/^#/, "");
+    if (items.some((it) => it.id === h)) setActive(h);
+  } else {
+    onScroll();
+  }
+})();
