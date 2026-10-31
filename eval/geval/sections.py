@@ -76,8 +76,9 @@ CONDITIONS = {
         "window = unit, drive = cluster; results are also given per camera setup."),
     "truck_closed_loop": (
         "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the "
-        "G55's measured steering and powertrain response instead of the ideal car, starting from the speed and "
-        "lateral acceleration in the truck's CAN recording of the 2 s before the window. Lane-following "
+        "G55's measured steering and powertrain response instead of the ideal car. The simulation starts from "
+        "the truck's state (speed, yaw rate, steering, gear) in its CAN recording of the 2 s before the window; "
+        "one window, whose 2 s before are not all valid CAN, starts steady at its recorded speed. Lane-following "
         "windows from the G55's drives, day and night; distance is to the driver's recorded path; "
         "seeds 0 and 1, averaged per window."),
     "truck_recovery": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran.",
