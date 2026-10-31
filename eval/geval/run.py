@@ -231,11 +231,13 @@ cd {ENGINES}
     if truck_conds:
         t = cl["truck"]
         (work / "out" / "truck_closed_loop").mkdir(parents=True, exist_ok=True)
+        # `history`, when set, travels with every truck job: the plugin's start-history settings (its paths are inputs)
+        hist = {"history": t["history"]} if t.get("history") else {}
         jobs = [(f"{pf('P32')}_tcl_{tag}", work / "out" / "truck_closed_loop" / f"{tag}.json",
-                 {k: t[k] for k in ("code", "wide_camera", "drives", "starts", "night")})]
+                 {**{k: t[k] for k in ("code", "wide_camera", "drives", "starts", "night")}, **hist})]
         if t.get("plugin_args_file"):   # more windows: one job per entry of the file, each its own plugin args
             jobs += [(f"{pf('P32')}_tcl_{tag}_c{i}", work / "out" / "truck_closed_loop" / f"{tag}_c{i}.json",
-                      {"code": t["code"], **extra}) for i, extra in enumerate(json.loads(Path(t["plugin_args_file"]).read_text()))]
+                      {"code": t["code"], **extra, **hist}) for i, extra in enumerate(json.loads(Path(t["plugin_args_file"]).read_text()))]
         for name, o, args in jobs:
             names.append(Q.add_job(q, name, after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 {wait_gpu(cl.get('min_free_mib', 15500))}
@@ -247,7 +249,8 @@ cd {ENGINES}
         o = work / "out" / "truck_brake" / f"{tag}.json"
         o.parent.mkdir(parents=True, exist_ok=True)
         args = json.dumps({"code": t["code"], "wide_camera": t["wide_camera"], "drives": b.get("drives") or t["drives"],
-                           "night": b.get("night", t["night"]), "starts": b["starts"]})
+                           "night": b.get("night", t["night"]), "starts": b["starts"],
+                           **({"history": t["history"]} if t.get("history") else {})})
         names.append(Q.add_job(q, f"{pf('P34')}_tbr_{tag}", after_line(q, after) + f"""export HF_HUB_OFFLINE=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 {wait_gpu(cl.get('min_free_mib', 15500))}
 cd {ENGINES}
