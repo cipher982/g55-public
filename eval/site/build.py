@@ -1031,7 +1031,7 @@ def g55_table(models, cfg, root) -> str:
 <div class="gt-scroll">{head}<div class="gt-body">{"".join(rows)}</div></div>
 {more_btn}
 <p class="gt-note"><strong>Tiers.</strong> {esc(tier_rule())}</p>
-<p class="gt-note">Each closed-loop model runs {nw} G55 windows from {nd} drives in <code>worldmodel-4B</code> with the G55's measured steering and powertrain response (nominal start, 2° heading error, 0.5 m lateral offset), plus {ol_counts(models)[:-1]} in open loop. The <strong>G55 score</strong> (0 to 100, higher is better) weights closed-loop path keeping at 2 s (40%: 25% median, 15% mean), recovery at 2 s (25%: 12.5% heading, 12.5% offset), open-loop lateral error across all {len(all_shown)} models (20%) and closed-loop lateral jerk RMS (15%). In the metric columns lower is better; <code>[lo, hi]</code> is the 95% interval from resampling drives. <a href="method.html">Full method</a>.</p>
+<p class="gt-note">Each closed-loop model runs {nw} G55 windows from {nd} drives in <code>worldmodel-4B</code> with the G55's measured steering and powertrain response, starting from the truck's recorded state (undisturbed, 2° heading error, 0.5 m lateral offset), plus {ol_counts(models)[:-1]} in open loop. The <strong>G55 score</strong> (0 to 100, higher is better) weights closed-loop path keeping at 2 s (40%: 25% median, 15% mean), recovery at 2 s (25%: 12.5% heading, 12.5% offset), open-loop lateral error across all {len(all_shown)} models (20%) and closed-loop lateral jerk RMS (15%). In the metric columns lower is better; <code>[lo, hi]</code> is the 95% interval from resampling drives. <a href="method.html">Full method</a>.</p>
 </figure>"""
 
 

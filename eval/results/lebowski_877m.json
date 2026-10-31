@@ -18,9 +18,9 @@
   "notes": "877M ConvNeXt encoder, host-kept history, no RL residual. Checkpoint 6f5c8d09/ecc73f48. The model the G55 runs."
  },
  "scored": {
-  "date": "2026-10-28T04:04:40Z",
+  "date": "2026-10-31T21:54:12Z",
   "suite": "geval-1",
-  "code": "b47aaab777de"
+  "code": "9f72247d2e73"
  },
  "baselines": [
   "wmi"
@@ -1943,7 +1943,7 @@
    "unit_of_evidence": "window",
    "n": 98,
    "clusters": 13,
-   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 98 windows (59 day, 39 night).",
+   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. The simulation starts from the truck's state (speed, yaw rate, steering, gear) in its CAN recording of the 2 s before the window; one window, whose 2 s before are not all valid CAN, starts steady at its recorded speed. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 98 windows (59 day, 39 night).",
    "baselines": [],
    "metrics": [
     {
@@ -1951,11 +1951,11 @@
      "label": "Distance from the recorded path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.2393,
-     "median": 0.1531,
+     "value": 0.1695,
+     "median": 0.1204,
      "ci": [
-      0.1775,
-      0.3002
+      0.1372,
+      0.2032
      ],
      "n": 98,
      "clusters": 13,
@@ -1966,11 +1966,11 @@
      "label": "Distance from the recorded path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.5959,
-     "median": 0.3357,
+     "value": 0.52,
+     "median": 0.3434,
      "ci": [
-      0.4208,
-      0.8216
+      0.3731,
+      0.6914
      ],
      "n": 98,
      "clusters": 13,
@@ -1981,11 +1981,11 @@
      "label": "Distance from the recorded path at 7.2 s",
      "unit": "m",
      "better": "lower",
-     "value": 2.044,
-     "median": 0.7835,
+     "value": 1.979,
+     "median": 0.8673,
      "ci": [
-      1.405,
-      2.711
+      1.435,
+      2.545
      ],
      "n": 98,
      "clusters": 13,
@@ -1996,11 +1996,11 @@
      "label": "Share of episodes ever more than 1 m off the path",
      "unit": "",
      "better": "lower",
-     "value": 0.4337,
-     "median": 0.25,
+     "value": 0.4286,
+     "median": 0.5,
      "ci": [
-      0.3467,
-      0.5167
+      0.343,
+      0.5172
      ],
      "n": 98,
      "clusters": 13,
@@ -2011,11 +2011,11 @@
      "label": "Requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.5683,
-     "median": 0.4587,
+     "value": 0.5419,
+     "median": 0.4013,
      "ci": [
-      0.4948,
-      0.6376
+      0.4677,
+      0.6189
      ],
      "n": 98,
      "clusters": 13,
@@ -2026,11 +2026,11 @@
      "label": "Requested longitudinal jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.393,
-     "median": 0.3776,
+     "value": 0.3863,
+     "median": 0.3755,
      "ci": [
-      0.3507,
-      0.4325
+      0.3407,
+      0.4334
      ],
      "n": 98,
      "clusters": 13,
@@ -2041,11 +2041,11 @@
      "label": "Speed error against the recorded speed, RMS",
      "unit": "m/s",
      "better": "lower",
-     "value": 1.124,
-     "median": 0.9282,
+     "value": 1.083,
+     "median": 0.8621,
      "ci": [
-      0.903,
-      1.378
+      0.883,
+      1.314
      ],
      "n": 98,
      "clusters": 13,
@@ -2060,8 +2060,8 @@
      "metrics": [
       {
        "key": "xtrack_2s",
-       "value": 0.2007,
-       "median": 0.133,
+       "value": 0.1503,
+       "median": 0.1142,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2069,8 +2069,8 @@
       },
       {
        "key": "xtrack_4s",
-       "value": 0.5301,
-       "median": 0.4693,
+       "value": 0.4511,
+       "median": 0.5101,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2078,8 +2078,8 @@
       },
       {
        "key": "xtrack_7s",
-       "value": 1.861,
-       "median": 1.388,
+       "value": 1.905,
+       "median": 1.353,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2087,8 +2087,8 @@
       },
       {
        "key": "fail_1m",
-       "value": 0.5714,
-       "median": 0.5,
+       "value": 0.6786,
+       "median": 1.0,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2096,8 +2096,8 @@
       },
       {
        "key": "lat_jerk",
-       "value": 0.6565,
-       "median": 0.5145,
+       "value": 0.5708,
+       "median": 0.4823,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2105,8 +2105,8 @@
       },
       {
        "key": "long_jerk",
-       "value": 0.4777,
-       "median": 0.4659,
+       "value": 0.4947,
+       "median": 0.4983,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2114,8 +2114,8 @@
       },
       {
        "key": "speed_err",
-       "value": 1.856,
-       "median": 1.903,
+       "value": 1.764,
+       "median": 1.72,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2129,8 +2129,8 @@
      "metrics": [
       {
        "key": "xtrack_2s",
-       "value": 0.2463,
-       "median": 0.2199,
+       "value": 0.1681,
+       "median": 0.1295,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2138,8 +2138,8 @@
       },
       {
        "key": "xtrack_4s",
-       "value": 0.5039,
-       "median": 0.3677,
+       "value": 0.4522,
+       "median": 0.3762,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2147,8 +2147,8 @@
       },
       {
        "key": "xtrack_7s",
-       "value": 1.99,
-       "median": 0.6743,
+       "value": 2.019,
+       "median": 0.6208,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2156,7 +2156,7 @@
       },
       {
        "key": "fail_1m",
-       "value": 0.3837,
+       "value": 0.3372,
        "median": 0.0,
        "ci": null,
        "n": 43,
@@ -2165,8 +2165,8 @@
       },
       {
        "key": "lat_jerk",
-       "value": 0.5465,
-       "median": 0.418,
+       "value": 0.5527,
+       "median": 0.409,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2174,8 +2174,8 @@
       },
       {
        "key": "long_jerk",
-       "value": 0.3848,
-       "median": 0.3764,
+       "value": 0.3742,
+       "median": 0.3534,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2183,8 +2183,8 @@
       },
       {
        "key": "speed_err",
-       "value": 1.103,
-       "median": 0.8169,
+       "value": 1.083,
+       "median": 0.8187,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2198,8 +2198,8 @@
      "metrics": [
       {
        "key": "xtrack_2s",
-       "value": 0.08687,
-       "median": 0.06166,
+       "value": 0.1249,
+       "median": 0.1223,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2207,8 +2207,8 @@
       },
       {
        "key": "xtrack_4s",
-       "value": 0.2187,
-       "median": 0.1476,
+       "value": 0.2406,
+       "median": 0.1903,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2216,8 +2216,8 @@
       },
       {
        "key": "xtrack_7s",
-       "value": 1.211,
-       "median": 1.296,
+       "value": 1.636,
+       "median": 1.916,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2234,8 +2234,8 @@
       },
       {
        "key": "lat_jerk",
-       "value": 0.5673,
-       "median": 0.5641,
+       "value": 0.7397,
+       "median": 0.6887,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2243,8 +2243,8 @@
       },
       {
        "key": "long_jerk",
-       "value": 0.3208,
-       "median": 0.3049,
+       "value": 0.3892,
+       "median": 0.3271,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2252,8 +2252,8 @@
       },
       {
        "key": "speed_err",
-       "value": 0.5984,
-       "median": 0.5706,
+       "value": 0.6788,
+       "median": 0.6751,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2267,8 +2267,8 @@
      "metrics": [
       {
        "key": "xtrack_2s",
-       "value": 0.3502,
-       "median": 0.1446,
+       "value": 0.2173,
+       "median": 0.1445,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2276,8 +2276,8 @@
       },
       {
        "key": "xtrack_4s",
-       "value": 0.9828,
-       "median": 0.2733,
+       "value": 0.8021,
+       "median": 0.2894,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2285,8 +2285,8 @@
       },
       {
        "key": "xtrack_7s",
-       "value": 2.91,
-       "median": 0.7608,
+       "value": 2.625,
+       "median": 0.8179,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2294,8 +2294,8 @@
       },
       {
        "key": "fail_1m",
-       "value": 0.3056,
-       "median": 0.0,
+       "value": 0.3889,
+       "median": 0.25,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2303,8 +2303,8 @@
       },
       {
        "key": "lat_jerk",
-       "value": 0.4877,
-       "median": 0.3316,
+       "value": 0.3794,
+       "median": 0.3107,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2312,8 +2312,8 @@
       },
       {
        "key": "long_jerk",
-       "value": 0.316,
-       "median": 0.279,
+       "value": 0.3046,
+       "median": 0.263,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2321,8 +2321,8 @@
       },
       {
        "key": "speed_err",
-       "value": 1.013,
-       "median": 0.8044,
+       "value": 0.9446,
+       "median": 0.7879,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2336,8 +2336,8 @@
      "metrics": [
       {
        "key": "xtrack_2s",
-       "value": 0.1788,
-       "median": 0.1603,
+       "value": 0.1509,
+       "median": 0.1066,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2345,8 +2345,8 @@
       },
       {
        "key": "xtrack_4s",
-       "value": 0.5655,
-       "median": 0.3398,
+       "value": 0.5158,
+       "median": 0.3111,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2354,8 +2354,8 @@
       },
       {
        "key": "xtrack_7s",
-       "value": 1.656,
-       "median": 1.037,
+       "value": 1.405,
+       "median": 0.9471,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2363,7 +2363,7 @@
       },
       {
        "key": "fail_1m",
-       "value": 0.5263,
+       "value": 0.4474,
        "median": 0.5,
        "ci": null,
        "n": 19,
@@ -2372,8 +2372,8 @@
       },
       {
        "key": "lat_jerk",
-       "value": 0.6295,
-       "median": 0.5763,
+       "value": 0.6085,
+       "median": 0.4451,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2381,8 +2381,8 @@
       },
       {
        "key": "long_jerk",
-       "value": 0.4374,
-       "median": 0.3893,
+       "value": 0.4104,
+       "median": 0.3919,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2390,8 +2390,8 @@
       },
       {
        "key": "speed_err",
-       "value": 0.849,
-       "median": 0.8643,
+       "value": 0.7947,
+       "median": 0.6586,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2406,7 +2406,7 @@
    "unit_of_evidence": "window",
    "n": 100,
    "clusters": 14,
-   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 80 windows (50 day, 30 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 98 windows (59 day, 39 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
+   "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 98 windows (59 day, 39 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 98 windows (59 day, 39 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
    "baselines": [],
    "metrics": [
     {
@@ -2414,11 +2414,11 @@
      "label": "2° off heading: distance from the path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.4819,
-     "median": 0.4101,
+     "value": 0.4529,
+     "median": 0.3917,
      "ci": [
-      0.4028,
-      0.5883
+      0.3881,
+      0.5368
      ],
      "n": 98,
      "clusters": 13,
@@ -2429,11 +2429,11 @@
      "label": "2° off heading: distance from the path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.7672,
-     "median": 0.4907,
+     "value": 0.7025,
+     "median": 0.3828,
      "ci": [
-      0.5479,
-      1.102
+      0.4964,
+      0.9749
      ],
      "n": 98,
      "clusters": 13,
@@ -2444,11 +2444,11 @@
      "label": "2° off heading: requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.8877,
-     "median": 0.8104,
+     "value": 0.8869,
+     "median": 0.7998,
      "ci": [
-      0.8127,
-      0.9743
+      0.8163,
+      0.9529
      ],
      "n": 98,
      "clusters": 13,
@@ -2459,11 +2459,11 @@
      "label": "0.5 m off centre: distance from the path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.3136,
-     "median": 0.2307,
+     "value": 0.267,
+     "median": 0.2066,
      "ci": [
-      0.2562,
-      0.3701
+      0.2254,
+      0.3025
      ],
      "n": 98,
      "clusters": 13,
@@ -2474,11 +2474,11 @@
      "label": "0.5 m off centre: distance from the path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.7497,
-     "median": 0.4617,
+     "value": 0.6629,
+     "median": 0.4224,
      "ci": [
-      0.573,
-      0.9632
+      0.5313,
+      0.795
      ],
      "n": 98,
      "clusters": 13,
@@ -2489,10 +2489,10 @@
      "label": "0.5 m off centre: requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 1.107,
-     "median": 1.063,
+     "value": 1.11,
+     "median": 1.036,
      "ci": [
-      1.033,
+      1.035,
       1.175
      ],
      "n": 98,
@@ -2504,8 +2504,8 @@
      "label": "Braking lead: distance ahead of the recorded car at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": -1.794,
-     "median": -1.794,
+     "value": -1.338,
+     "median": -1.338,
      "ci": null,
      "n": 2,
      "clusters": 1,
@@ -2516,8 +2516,8 @@
      "label": "Braking lead: smallest gap to the lead (derived)",
      "unit": "m",
      "better": "higher",
-     "value": 29.29,
-     "median": 29.29,
+     "value": 27.46,
+     "median": 27.46,
      "ci": null,
      "n": 2,
      "clusters": 1,
@@ -2528,8 +2528,8 @@
      "label": "Braking lead: speed error against the recorded speed, RMS",
      "unit": "m/s",
      "better": "lower",
-     "value": 1.067,
-     "median": 1.067,
+     "value": 1.203,
+     "median": 1.203,
      "ci": null,
      "n": 2,
      "clusters": 1,
@@ -2544,8 +2544,8 @@
      "metrics": [
       {
        "key": "heading_xtrack_2s",
-       "value": 0.4217,
-       "median": 0.344,
+       "value": 0.3918,
+       "median": 0.3581,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2553,8 +2553,8 @@
       },
       {
        "key": "heading_xtrack_4s",
-       "value": 0.6156,
-       "median": 0.5211,
+       "value": 0.553,
+       "median": 0.4573,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2562,8 +2562,8 @@
       },
       {
        "key": "heading_lat_jerk",
-       "value": 0.7703,
-       "median": 0.6174,
+       "value": 0.768,
+       "median": 0.6731,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2571,8 +2571,8 @@
       },
       {
        "key": "offcentre_xtrack_2s",
-       "value": 0.3029,
-       "median": 0.2445,
+       "value": 0.2629,
+       "median": 0.245,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2580,8 +2580,8 @@
       },
       {
        "key": "offcentre_xtrack_4s",
-       "value": 0.5896,
-       "median": 0.4081,
+       "value": 0.5898,
+       "median": 0.4375,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2589,8 +2589,8 @@
       },
       {
        "key": "offcentre_lat_jerk",
-       "value": 1.107,
-       "median": 1.137,
+       "value": 1.062,
+       "median": 1.074,
        "ci": null,
        "n": 14,
        "clusters": 2,
@@ -2604,8 +2604,8 @@
      "metrics": [
       {
        "key": "heading_xtrack_2s",
-       "value": 0.4222,
-       "median": 0.3823,
+       "value": 0.4156,
+       "median": 0.3809,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2613,8 +2613,8 @@
       },
       {
        "key": "heading_xtrack_4s",
-       "value": 0.6026,
-       "median": 0.4987,
+       "value": 0.6362,
+       "median": 0.405,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2622,8 +2622,8 @@
       },
       {
        "key": "heading_lat_jerk",
-       "value": 0.8844,
-       "median": 0.797,
+       "value": 0.8964,
+       "median": 0.7892,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2631,8 +2631,8 @@
       },
       {
        "key": "offcentre_xtrack_2s",
-       "value": 0.3226,
-       "median": 0.2645,
+       "value": 0.2993,
+       "median": 0.2622,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2640,8 +2640,8 @@
       },
       {
        "key": "offcentre_xtrack_4s",
-       "value": 0.7009,
-       "median": 0.4756,
+       "value": 0.6704,
+       "median": 0.4468,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2649,8 +2649,8 @@
       },
       {
        "key": "offcentre_lat_jerk",
-       "value": 1.155,
-       "median": 1.08,
+       "value": 1.177,
+       "median": 1.094,
        "ci": null,
        "n": 43,
        "clusters": 5,
@@ -2658,8 +2658,8 @@
       },
       {
        "key": "brake_ahead_4s",
-       "value": -1.794,
-       "median": -1.794,
+       "value": -1.338,
+       "median": -1.338,
        "ci": null,
        "n": 2,
        "clusters": 1,
@@ -2667,8 +2667,8 @@
       },
       {
        "key": "brake_gap_min",
-       "value": 29.29,
-       "median": 29.29,
+       "value": 27.46,
+       "median": 27.46,
        "ci": null,
        "n": 2,
        "clusters": 1,
@@ -2676,8 +2676,8 @@
       },
       {
        "key": "brake_speed_err",
-       "value": 1.067,
-       "median": 1.067,
+       "value": 1.203,
+       "median": 1.203,
        "ci": null,
        "n": 2,
        "clusters": 1,
@@ -2691,8 +2691,8 @@
      "metrics": [
       {
        "key": "heading_xtrack_2s",
-       "value": 0.4405,
-       "median": 0.4283,
+       "value": 0.4506,
+       "median": 0.432,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2700,8 +2700,8 @@
       },
       {
        "key": "heading_xtrack_4s",
-       "value": 0.3908,
-       "median": 0.2593,
+       "value": 0.2197,
+       "median": 0.2214,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2709,8 +2709,8 @@
       },
       {
        "key": "heading_lat_jerk",
-       "value": 1.066,
-       "median": 1.012,
+       "value": 0.9722,
+       "median": 1.031,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2718,8 +2718,8 @@
       },
       {
        "key": "offcentre_xtrack_2s",
-       "value": 0.2996,
-       "median": 0.2852,
+       "value": 0.2998,
+       "median": 0.2845,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2727,8 +2727,8 @@
       },
       {
        "key": "offcentre_xtrack_4s",
-       "value": 0.6346,
-       "median": 0.6128,
+       "value": 0.7277,
+       "median": 0.5555,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2736,8 +2736,8 @@
       },
       {
        "key": "offcentre_lat_jerk",
-       "value": 1.221,
-       "median": 1.113,
+       "value": 1.397,
+       "median": 1.081,
        "ci": null,
        "n": 4,
        "clusters": 1,
@@ -2751,8 +2751,8 @@
      "metrics": [
       {
        "key": "heading_xtrack_2s",
-       "value": 0.7751,
-       "median": 0.6422,
+       "value": 0.6931,
+       "median": 0.6084,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2760,8 +2760,8 @@
       },
       {
        "key": "heading_xtrack_4s",
-       "value": 1.504,
-       "median": 0.6862,
+       "value": 1.231,
+       "median": 0.7479,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2769,8 +2769,8 @@
       },
       {
        "key": "heading_lat_jerk",
-       "value": 0.9152,
-       "median": 0.9269,
+       "value": 0.873,
+       "median": 0.8724,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2778,8 +2778,8 @@
       },
       {
        "key": "offcentre_xtrack_2s",
-       "value": 0.3814,
-       "median": 0.1742,
+       "value": 0.258,
+       "median": 0.1699,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2787,8 +2787,8 @@
       },
       {
        "key": "offcentre_xtrack_4s",
-       "value": 1.055,
-       "median": 0.3703,
+       "value": 0.693,
+       "median": 0.2712,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2796,8 +2796,8 @@
       },
       {
        "key": "offcentre_lat_jerk",
-       "value": 0.8816,
-       "median": 0.8418,
+       "value": 0.8818,
+       "median": 0.8582,
        "ci": null,
        "n": 18,
        "clusters": 3,
@@ -2811,8 +2811,8 @@
      "metrics": [
       {
        "key": "heading_xtrack_2s",
-       "value": 0.3921,
-       "median": 0.3807,
+       "value": 0.3555,
+       "median": 0.3552,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2820,8 +2820,8 @@
       },
       {
        "key": "heading_xtrack_4s",
-       "value": 0.6326,
-       "median": 0.3885,
+       "value": 0.5635,
+       "median": 0.3109,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2829,8 +2829,8 @@
       },
       {
        "key": "heading_lat_jerk",
-       "value": 0.9181,
-       "median": 0.7789,
+       "value": 0.9484,
+       "median": 0.8019,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2838,8 +2838,8 @@
       },
       {
        "key": "offcentre_xtrack_2s",
-       "value": 0.2399,
-       "median": 0.1972,
+       "value": 0.1985,
+       "median": 0.1666,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2847,8 +2847,8 @@
       },
       {
        "key": "offcentre_xtrack_4s",
-       "value": 0.7135,
-       "median": 0.4826,
+       "value": 0.6574,
+       "median": 0.4311,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -2856,8 +2856,8 @@
       },
       {
        "key": "offcentre_lat_jerk",
-       "value": 1.186,
-       "median": 1.141,
+       "value": 1.153,
+       "median": 1.077,
        "ci": null,
        "n": 19,
        "clusters": 2,

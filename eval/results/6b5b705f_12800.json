@@ -18,9 +18,9 @@
   "notes": "Never shipped. Same frozen base as MD v3 (f22e06e5/56320, bit-identical), different RL residual head."
  },
  "scored": {
-  "date": "2026-10-28T04:04:44Z",
+  "date": "2026-10-31T21:54:37Z",
   "suite": "geval-1",
-  "code": "b47aaab777de"
+  "code": "9f72247d2e73"
  },
  "baselines": [
   "lebowski_877m",
@@ -2974,10 +2974,10 @@
    "unit_of_evidence": "window",
    "n": 98,
    "clusters": 13,
-   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 98 windows (59 day, 39 night).",
+   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. The simulation starts from the truck's state (speed, yaw rate, steering, gear) in its CAN recording of the 2 s before the window; one window, whose 2 s before are not all valid CAN, starts steady at its recorded speed. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 98 windows (59 day, 39 night).",
    "baselines": [
     "lebowski_877m",
-    "96244b1f_12800"
+    "1365126a_12864"
    ],
    "metrics": [
     {
@@ -2985,40 +2985,40 @@
      "label": "Distance from the recorded path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.2062,
-     "median": 0.12,
+     "value": 0.1389,
+     "median": 0.09476,
      "ci": [
-      0.1573,
-      0.2683
+      0.1076,
+      0.1719
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.03308,
-       "median": -0.0118,
+       "delta": -0.03065,
+       "median": -0.02147,
        "ci": [
-        -0.06111,
-        -0.007141
+        -0.04317,
+        -0.01952
        ],
        "n": 98,
-       "wins": 57,
+       "wins": 65,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 10
+       "cluster_wins": 12
       },
-      "96244b1f_12800": {
-       "delta": -0.01407,
-       "median": -0.005881,
+      "1365126a_12864": {
+       "delta": 0.002212,
+       "median": 0.003975,
        "ci": [
-        -0.03525,
-        0.009029
+        -0.004064,
+        0.008336
        ],
        "n": 98,
-       "wins": 51,
+       "wins": 44,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 8
+       "cluster_wins": 6
       }
      }
     },
@@ -3027,40 +3027,40 @@
      "label": "Distance from the recorded path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.6546,
-     "median": 0.2979,
+     "value": 0.5767,
+     "median": 0.3,
      "ci": [
-      0.444,
-      0.885
+      0.3843,
+      0.7766
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.0587,
-       "median": 0.001652,
+       "delta": 0.05668,
+       "median": -0.01625,
        "ci": [
-        -0.0121,
-        0.1556
+        -0.02198,
+        0.1675
        ],
        "n": 98,
-       "wins": 49,
+       "wins": 54,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 5
+       "cluster_wins": 6
       },
-      "96244b1f_12800": {
-       "delta": 0.03916,
-       "median": 0.005104,
+      "1365126a_12864": {
+       "delta": 0.03724,
+       "median": -0.006728,
        "ci": [
-        -0.03802,
-        0.1058
+        -0.05845,
+        0.1519
        ],
        "n": 98,
-       "wins": 48,
+       "wins": 52,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 5
+       "cluster_wins": 8
       }
      }
     },
@@ -3069,40 +3069,40 @@
      "label": "Distance from the recorded path at 7.2 s",
      "unit": "m",
      "better": "lower",
-     "value": 2.961,
-     "median": 0.8634,
+     "value": 3.008,
+     "median": 0.7577,
      "ci": [
-      2.046,
-      3.946
+      2.034,
+      4.077
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.9165,
-       "median": 0.06432,
+       "delta": 1.029,
+       "median": 0.07547,
        "ci": [
-        0.1959,
-        1.834
+        0.1983,
+        2.101
        ],
        "n": 98,
-       "wins": 39,
+       "wins": 36,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 2
+       "cluster_wins": 1
       },
-      "96244b1f_12800": {
-       "delta": 0.5451,
-       "median": 0.05623,
+      "1365126a_12864": {
+       "delta": 0.4769,
+       "median": 0.001744,
        "ci": [
-        0.104,
-        0.9618
+        0.1482,
+        0.9527
        ],
        "n": 98,
-       "wins": 37,
+       "wins": 48,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 2
+       "cluster_wins": 3
       }
      }
     },
@@ -3111,40 +3111,40 @@
      "label": "Share of episodes ever more than 1 m off the path",
      "unit": "",
      "better": "lower",
-     "value": 0.4643,
-     "median": 0.5,
+     "value": 0.4184,
+     "median": 0.0,
      "ci": [
-      0.3561,
-      0.5795
+      0.3211,
+      0.526
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.03061,
+       "delta": -0.0102,
        "median": 0.0,
        "ci": [
-        -0.02942,
-        0.1098
+        -0.06396,
+        0.05635
        ],
        "n": 98,
-       "wins": 13,
-       "ties": 69,
+       "wins": 11,
+       "ties": 78,
        "clusters": 13,
-       "cluster_wins": 4
+       "cluster_wins": 5
       },
-      "96244b1f_12800": {
-       "delta": 0.04082,
+      "1365126a_12864": {
+       "delta": -0.03571,
        "median": 0.0,
        "ci": [
-        0.004902,
-        0.08081
+        -0.09184,
+        0.02779
        ],
        "n": 98,
-       "wins": 6,
-       "ties": 79,
+       "wins": 11,
+       "ties": 82,
        "clusters": 13,
-       "cluster_wins": 2
+       "cluster_wins": 6
       }
      }
     },
@@ -3153,37 +3153,37 @@
      "label": "Requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.3485,
-     "median": 0.202,
+     "value": 0.2861,
+     "median": 0.1875,
      "ci": [
-      0.2417,
-      0.4797
+      0.2385,
+      0.3324
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.2198,
-       "median": -0.2104,
+       "delta": -0.2558,
+       "median": -0.1824,
        "ci": [
-        -0.348,
-        -0.09597
+        -0.3533,
+        -0.1591
        ],
        "n": 98,
-       "wins": 90,
+       "wins": 88,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 12
+       "cluster_wins": 13
       },
-      "96244b1f_12800": {
-       "delta": 0.0739,
-       "median": -0.001987,
+      "1365126a_12864": {
+       "delta": 0.0002112,
+       "median": 0.008249,
        "ci": [
-        -0.005122,
-        0.1735
+        -0.0345,
+        0.04119
        ],
        "n": 98,
-       "wins": 51,
+       "wins": 37,
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 5
@@ -3195,40 +3195,40 @@
      "label": "Requested longitudinal jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.3933,
-     "median": 0.3202,
+     "value": 0.3732,
+     "median": 0.3093,
      "ci": [
-      0.3453,
-      0.4477
+      0.3294,
+      0.4168
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.0002891,
-       "median": -0.03857,
+       "delta": -0.01303,
+       "median": -0.0328,
        "ci": [
-        -0.05695,
-        0.06595
+        -0.06889,
+        0.04651
        ],
        "n": 98,
-       "wins": 57,
+       "wins": 62,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 7
+       "cluster_wins": 8
       },
-      "96244b1f_12800": {
-       "delta": 0.02089,
-       "median": 0.01734,
+      "1365126a_12864": {
+       "delta": 0.008229,
+       "median": 0.02234,
        "ci": [
-        -0.00883,
-        0.05145
+        -0.03565,
+        0.04035
        ],
        "n": 98,
-       "wins": 39,
+       "wins": 35,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 5
+       "cluster_wins": 4
       }
      }
     },
@@ -3237,40 +3237,40 @@
      "label": "Speed error against the recorded speed, RMS",
      "unit": "m/s",
      "better": "lower",
-     "value": 1.343,
-     "median": 1.112,
+     "value": 1.311,
+     "median": 1.061,
      "ci": [
-      1.093,
-      1.585
+      1.066,
+      1.555
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.2188,
-       "median": 0.1263,
+       "delta": 0.2281,
+       "median": 0.1845,
        "ci": [
-        0.0436,
-        0.3813
+        0.05564,
+        0.4004
+       ],
+       "n": 98,
+       "wins": 37,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 4
+      },
+      "1365126a_12864": {
+       "delta": 0.09175,
+       "median": 0.06735,
+       "ci": [
+        0.009072,
+        0.1674
        ],
        "n": 98,
        "wins": 37,
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 5
-      },
-      "96244b1f_12800": {
-       "delta": 0.1034,
-       "median": 0.04002,
-       "ci": [
-        0.02361,
-        0.1811
-       ],
-       "n": 98,
-       "wins": 44,
-       "ties": 0,
-       "clusters": 13,
-       "cluster_wins": 6
       }
      }
     }
@@ -3283,25 +3283,175 @@
      "metrics": [
       {
        "key": "xtrack_2s",
-       "value": 0.2073,
-       "median": 0.1039,
+       "value": 0.1216,
+       "median": 0.09476,
        "ci": null,
        "n": 14,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.00665,
-         "median": 0.02568,
+         "delta": -0.02869,
+         "median": -0.03028,
          "ci": null,
          "n": 14,
-         "wins": 5,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "1365126a_12864": {
+         "delta": -0.002506,
+         "median": -0.01747,
+         "ci": null,
+         "n": 14,
+         "wins": 8,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.5722,
+       "median": 0.4552,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.1211,
+         "median": 0.05566,
+         "ci": null,
+         "n": 14,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": 0.03958,
-         "median": 0.03659,
+        "1365126a_12864": {
+         "delta": -0.1278,
+         "median": -0.07026,
+         "ci": null,
+         "n": 14,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 4.848,
+       "median": 5.292,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 2.943,
+         "median": 1.226,
+         "ci": null,
+         "n": 14,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "1365126a_12864": {
+         "delta": 0.4149,
+         "median": 0.0549,
+         "ci": null,
+         "n": 14,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "fail_1m",
+       "value": 0.7143,
+       "median": 1.0,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03571,
+         "median": 0.0,
+         "ci": null,
+         "n": 14,
+         "wins": 2,
+         "ties": 9,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "1365126a_12864": {
+         "delta": -0.03571,
+         "median": 0.0,
+         "ci": null,
+         "n": 14,
+         "wins": 2,
+         "ties": 10,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "lat_jerk",
+       "value": 0.3631,
+       "median": 0.2358,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.2077,
+         "median": -0.2619,
+         "ci": null,
+         "n": 14,
+         "wins": 11,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "1365126a_12864": {
+         "delta": -0.09819,
+         "median": -0.03314,
+         "ci": null,
+         "n": 14,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.3489,
+       "median": 0.3154,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.1457,
+         "median": -0.101,
+         "ci": null,
+         "n": 14,
+         "wins": 12,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "1365126a_12864": {
+         "delta": 0.04284,
+         "median": 0.04838,
          "ci": null,
          "n": 14,
          "wins": 3,
@@ -3312,179 +3462,29 @@
        }
       },
       {
-       "key": "xtrack_4s",
-       "value": 0.5468,
-       "median": 0.4184,
-       "ci": null,
-       "n": 14,
-       "clusters": 2,
-       "paired": {
-        "lebowski_877m": {
-         "delta": 0.01668,
-         "median": 0.02086,
-         "ci": null,
-         "n": 14,
-         "wins": 7,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 1
-        },
-        "96244b1f_12800": {
-         "delta": 0.05528,
-         "median": 0.0928,
-         "ci": null,
-         "n": 14,
-         "wins": 5,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 0
-        }
-       }
-      },
-      {
-       "key": "xtrack_7s",
-       "value": 4.158,
-       "median": 2.696,
-       "ci": null,
-       "n": 14,
-       "clusters": 2,
-       "paired": {
-        "lebowski_877m": {
-         "delta": 2.297,
-         "median": 0.1881,
-         "ci": null,
-         "n": 14,
-         "wins": 5,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 0
-        },
-        "96244b1f_12800": {
-         "delta": 0.8288,
-         "median": 0.2193,
-         "ci": null,
-         "n": 14,
-         "wins": 5,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 0
-        }
-       }
-      },
-      {
-       "key": "fail_1m",
-       "value": 0.6429,
-       "median": 1.0,
-       "ci": null,
-       "n": 14,
-       "clusters": 2,
-       "paired": {
-        "lebowski_877m": {
-         "delta": 0.07143,
-         "median": 0.0,
-         "ci": null,
-         "n": 14,
-         "wins": 2,
-         "ties": 8,
-         "clusters": 2,
-         "cluster_wins": 0
-        },
-        "96244b1f_12800": {
-         "delta": 0.0,
-         "median": 0.0,
-         "ci": null,
-         "n": 14,
-         "wins": 2,
-         "ties": 10,
-         "clusters": 2,
-         "cluster_wins": 0
-        }
-       }
-      },
-      {
-       "key": "lat_jerk",
-       "value": 0.4115,
-       "median": 0.293,
-       "ci": null,
-       "n": 14,
-       "clusters": 2,
-       "paired": {
-        "lebowski_877m": {
-         "delta": -0.245,
-         "median": -0.2726,
-         "ci": null,
-         "n": 14,
-         "wins": 12,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 2
-        },
-        "96244b1f_12800": {
-         "delta": 0.09146,
-         "median": -0.009889,
-         "ci": null,
-         "n": 14,
-         "wins": 8,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 0
-        }
-       }
-      },
-      {
-       "key": "long_jerk",
-       "value": 0.3685,
-       "median": 0.3257,
-       "ci": null,
-       "n": 14,
-       "clusters": 2,
-       "paired": {
-        "lebowski_877m": {
-         "delta": -0.1091,
-         "median": -0.1117,
-         "ci": null,
-         "n": 14,
-         "wins": 10,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 2
-        },
-        "96244b1f_12800": {
-         "delta": 0.05344,
-         "median": 0.02603,
-         "ci": null,
-         "n": 14,
-         "wins": 4,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 0
-        }
-       }
-      },
-      {
        "key": "speed_err",
-       "value": 1.656,
-       "median": 1.429,
+       "value": 1.702,
+       "median": 1.43,
        "ci": null,
        "n": 14,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.2002,
-         "median": -0.7506,
+         "delta": -0.06178,
+         "median": -0.6326,
          "ci": null,
          "n": 14,
          "wins": 9,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 2
+         "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": 0.1916,
-         "median": 0.02208,
+        "1365126a_12864": {
+         "delta": 0.1441,
+         "median": 0.05012,
          "ci": null,
          "n": 14,
-         "wins": 7,
+         "wins": 6,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
@@ -3499,148 +3499,148 @@
      "metrics": [
       {
        "key": "xtrack_2s",
-       "value": 0.1836,
-       "median": 0.1374,
+       "value": 0.1343,
+       "median": 0.1015,
        "ci": null,
        "n": 43,
        "clusters": 5,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.06272,
-         "median": -0.0449,
+         "delta": -0.03378,
+         "median": -0.04203,
          "ci": null,
          "n": 43,
-         "wins": 32,
+         "wins": 33,
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 4
         },
-        "96244b1f_12800": {
-         "delta": -0.03279,
-         "median": -0.02437,
-         "ci": null,
-         "n": 43,
-         "wins": 27,
-         "ties": 0,
-         "clusters": 5,
-         "cluster_wins": 4
-        }
-       }
-      },
-      {
-       "key": "xtrack_4s",
-       "value": 0.5253,
-       "median": 0.2874,
-       "ci": null,
-       "n": 43,
-       "clusters": 5,
-       "paired": {
-        "lebowski_877m": {
-         "delta": 0.02137,
-         "median": -0.01828,
-         "ci": null,
-         "n": 43,
-         "wins": 25,
-         "ties": 0,
-         "clusters": 5,
-         "cluster_wins": 2
-        },
-        "96244b1f_12800": {
-         "delta": 0.07246,
-         "median": -0.004842,
-         "ci": null,
-         "n": 43,
-         "wins": 25,
-         "ties": 0,
-         "clusters": 5,
-         "cluster_wins": 2
-        }
-       }
-      },
-      {
-       "key": "xtrack_7s",
-       "value": 2.36,
-       "median": 0.7065,
-       "ci": null,
-       "n": 43,
-       "clusters": 5,
-       "paired": {
-        "lebowski_877m": {
-         "delta": 0.3699,
-         "median": 0.06312,
+        "1365126a_12864": {
+         "delta": -0.0005794,
+         "median": 0.005829,
          "ci": null,
          "n": 43,
          "wins": 17,
          "ties": 0,
          "clusters": 5,
-         "cluster_wins": 1
+         "cluster_wins": 2
+        }
+       }
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.4154,
+       "median": 0.2789,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.03685,
+         "median": -0.04101,
+         "ci": null,
+         "n": 43,
+         "wins": 26,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 4
         },
-        "96244b1f_12800": {
-         "delta": 0.9888,
-         "median": 0.06009,
+        "1365126a_12864": {
+         "delta": 0.004019,
+         "median": 0.003868,
+         "ci": null,
+         "n": 43,
+         "wins": 20,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 3
+        }
+       }
+      },
+      {
+       "key": "xtrack_7s",
+       "value": 2.249,
+       "median": 0.532,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.2295,
+         "median": 0.09003,
          "ci": null,
          "n": 43,
          "wins": 15,
          "ties": 0,
          "clusters": 5,
-         "cluster_wins": 0
+         "cluster_wins": 1
+        },
+        "1365126a_12864": {
+         "delta": 0.2902,
+         "median": 0.02804,
+         "ci": null,
+         "n": 43,
+         "wins": 19,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 1
         }
        }
       },
       {
        "key": "fail_1m",
-       "value": 0.407,
+       "value": 0.3488,
        "median": 0.0,
        "ci": null,
        "n": 43,
        "clusters": 5,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.02326,
+         "delta": 0.01163,
          "median": 0.0,
          "ci": null,
          "n": 43,
-         "wins": 6,
-         "ties": 30,
+         "wins": 5,
+         "ties": 33,
          "clusters": 5,
          "cluster_wins": 2
         },
-        "96244b1f_12800": {
-         "delta": 0.0814,
+        "1365126a_12864": {
+         "delta": -0.03488,
          "median": 0.0,
          "ci": null,
          "n": 43,
-         "wins": 1,
-         "ties": 35,
+         "wins": 5,
+         "ties": 36,
          "clusters": 5,
-         "cluster_wins": 0
+         "cluster_wins": 3
         }
        }
       },
       {
        "key": "lat_jerk",
-       "value": 0.4265,
-       "median": 0.1905,
+       "value": 0.3019,
+       "median": 0.1825,
        "ci": null,
        "n": 43,
        "clusters": 5,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.12,
-         "median": -0.1789,
+         "delta": -0.2508,
+         "median": -0.1743,
          "ci": null,
          "n": 43,
-         "wins": 38,
+         "wins": 39,
          "ties": 0,
          "clusters": 5,
-         "cluster_wins": 4
+         "cluster_wins": 5
         },
-        "96244b1f_12800": {
-         "delta": 0.1314,
-         "median": -0.002105,
+        "1365126a_12864": {
+         "delta": 0.008118,
+         "median": 0.009184,
          "ci": null,
          "n": 43,
-         "wins": 22,
+         "wins": 15,
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 2
@@ -3649,28 +3649,28 @@
       },
       {
        "key": "long_jerk",
-       "value": 0.4348,
-       "median": 0.2927,
+       "value": 0.4182,
+       "median": 0.3367,
        "ci": null,
        "n": 43,
        "clusters": 5,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.05002,
-         "median": -0.02112,
+         "delta": 0.04392,
+         "median": -0.01867,
          "ci": null,
          "n": 43,
-         "wins": 24,
+         "wins": 26,
          "ties": 0,
          "clusters": 5,
-         "cluster_wins": 2
+         "cluster_wins": 3
         },
-        "96244b1f_12800": {
-         "delta": 0.03477,
-         "median": 0.02788,
+        "1365126a_12864": {
+         "delta": -0.006611,
+         "median": 0.02465,
          "ci": null,
          "n": 43,
-         "wins": 14,
+         "wins": 17,
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 1
@@ -3679,31 +3679,31 @@
       },
       {
        "key": "speed_err",
-       "value": 1.309,
-       "median": 1.06,
+       "value": 1.294,
+       "median": 1.008,
        "ci": null,
        "n": 43,
        "clusters": 5,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.2059,
-         "median": 0.0787,
-         "ci": null,
-         "n": 43,
-         "wins": 18,
-         "ties": 0,
-         "clusters": 5,
-         "cluster_wins": 2
-        },
-        "96244b1f_12800": {
-         "delta": 0.1246,
-         "median": 0.07084,
+         "delta": 0.2106,
+         "median": 0.1974,
          "ci": null,
          "n": 43,
          "wins": 17,
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 2
+        },
+        "1365126a_12864": {
+         "delta": 0.05577,
+         "median": 0.05404,
+         "ci": null,
+         "n": 43,
+         "wins": 16,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 3
         }
        }
       }
@@ -3715,15 +3715,15 @@
      "metrics": [
       {
        "key": "xtrack_2s",
-       "value": 0.04537,
-       "median": 0.03746,
+       "value": 0.04539,
+       "median": 0.04095,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.0415,
-         "median": -0.02883,
+         "delta": -0.07948,
+         "median": -0.08061,
          "ci": null,
          "n": 4,
          "wins": 3,
@@ -3731,9 +3731,9 @@
          "clusters": 1,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.003508,
-         "median": -0.005668,
+        "1365126a_12864": {
+         "delta": -0.004158,
+         "median": -0.001422,
          "ci": null,
          "n": 4,
          "wins": 2,
@@ -3745,15 +3745,15 @@
       },
       {
        "key": "xtrack_4s",
-       "value": 0.1703,
-       "median": 0.1829,
+       "value": 0.2193,
+       "median": 0.1676,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.04839,
-         "median": 0.01006,
+         "delta": -0.0213,
+         "median": 0.04875,
          "ci": null,
          "n": 4,
          "wins": 2,
@@ -3761,12 +3761,12 @@
          "clusters": 1,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.06273,
-         "median": -0.0806,
+        "1365126a_12864": {
+         "delta": -0.03812,
+         "median": -0.05689,
          "ci": null,
          "n": 4,
-         "wins": 3,
+         "wins": 2,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
@@ -3775,15 +3775,15 @@
       },
       {
        "key": "xtrack_7s",
-       "value": 1.859,
-       "median": 1.794,
+       "value": 1.752,
+       "median": 2.135,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.6485,
-         "median": 0.4691,
+         "delta": 0.1163,
+         "median": 0.106,
          "ci": null,
          "n": 4,
          "wins": 1,
@@ -3791,12 +3791,12 @@
          "clusters": 1,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": 0.09541,
-         "median": 0.09749,
+        "1365126a_12864": {
+         "delta": 0.199,
+         "median": -0.1468,
          "ci": null,
          "n": 4,
-         "wins": 2,
+         "wins": 3,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 0
@@ -3805,23 +3805,23 @@
       },
       {
        "key": "fail_1m",
-       "value": 0.75,
-       "median": 1.0,
+       "value": 0.625,
+       "median": 0.75,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.125,
+         "delta": 0.0,
          "median": 0.0,
          "ci": null,
          "n": 4,
          "wins": 0,
-         "ties": 3,
+         "ties": 4,
          "clusters": 1,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
+        "1365126a_12864": {
          "delta": 0.125,
          "median": 0.0,
          "ci": null,
@@ -3835,15 +3835,15 @@
       },
       {
        "key": "lat_jerk",
-       "value": 0.3329,
-       "median": 0.2968,
+       "value": 0.3214,
+       "median": 0.2917,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.2344,
-         "median": -0.2015,
+         "delta": -0.4184,
+         "median": -0.3133,
          "ci": null,
          "n": 4,
          "wins": 4,
@@ -3851,12 +3851,42 @@
          "clusters": 1,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.01759,
-         "median": -0.0399,
+        "1365126a_12864": {
+         "delta": 0.05483,
+         "median": 0.04441,
          "ci": null,
          "n": 4,
-         "wins": 3,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        }
+       }
+      },
+      {
+       "key": "long_jerk",
+       "value": 0.4008,
+       "median": 0.4076,
+       "ci": null,
+       "n": 4,
+       "clusters": 1,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01161,
+         "median": -0.007072,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "1365126a_12864": {
+         "delta": -0.04015,
+         "median": -0.01283,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
@@ -3864,46 +3894,16 @@
        }
       },
       {
-       "key": "long_jerk",
-       "value": 0.3707,
-       "median": 0.3244,
-       "ci": null,
-       "n": 4,
-       "clusters": 1,
-       "paired": {
-        "lebowski_877m": {
-         "delta": 0.04992,
-         "median": 0.08032,
-         "ci": null,
-         "n": 4,
-         "wins": 1,
-         "ties": 0,
-         "clusters": 1,
-         "cluster_wins": 0
-        },
-        "96244b1f_12800": {
-         "delta": 0.1066,
-         "median": 0.05754,
-         "ci": null,
-         "n": 4,
-         "wins": 0,
-         "ties": 0,
-         "clusters": 1,
-         "cluster_wins": 0
-        }
-       }
-      },
-      {
        "key": "speed_err",
-       "value": 0.7855,
-       "median": 0.5453,
+       "value": 0.7057,
+       "median": 0.6036,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.1871,
-         "median": 0.2532,
+         "delta": 0.02694,
+         "median": 0.2527,
          "ci": null,
          "n": 4,
          "wins": 1,
@@ -3911,12 +3911,12 @@
          "clusters": 1,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": -0.04728,
-         "median": -0.3188,
+        "1365126a_12864": {
+         "delta": -0.3412,
+         "median": -0.3189,
          "ci": null,
          "n": 4,
-         "wins": 3,
+         "wins": 4,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
@@ -3931,58 +3931,58 @@
      "metrics": [
       {
        "key": "xtrack_2s",
-       "value": 0.3386,
-       "median": 0.1,
+       "value": 0.1957,
+       "median": 0.09915,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.01156,
-         "median": 0.003131,
+         "delta": -0.02164,
+         "median": -0.02137,
          "ci": null,
          "n": 18,
-         "wins": 9,
-         "ties": 0,
-         "clusters": 3,
-         "cluster_wins": 2
-        },
-        "96244b1f_12800": {
-         "delta": -0.03843,
-         "median": -0.0123,
-         "ci": null,
-         "n": 18,
-         "wins": 12,
+         "wins": 11,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 3
-        }
-       }
-      },
-      {
-       "key": "xtrack_4s",
-       "value": 0.9875,
-       "median": 0.2524,
-       "ci": null,
-       "n": 18,
-       "clusters": 3,
-       "paired": {
-        "lebowski_877m": {
-         "delta": 0.004737,
-         "median": 0.009194,
+        },
+        "1365126a_12864": {
+         "delta": 0.00991,
+         "median": -0.002222,
          "ci": null,
          "n": 18,
          "wins": 9,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 1
-        },
-        "96244b1f_12800": {
-         "delta": -0.09061,
-         "median": -0.005487,
+        }
+       }
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.8179,
+       "median": 0.2925,
+       "ci": null,
+       "n": 18,
+       "clusters": 3,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.01583,
+         "median": -0.03334,
          "ci": null,
          "n": 18,
-         "wins": 10,
+         "wins": 12,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        },
+        "1365126a_12864": {
+         "delta": 0.2665,
+         "median": -0.02682,
+         "ci": null,
+         "n": 18,
+         "wins": 14,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 2
@@ -3991,28 +3991,28 @@
       },
       {
        "key": "xtrack_7s",
-       "value": 2.76,
-       "median": 0.8553,
+       "value": 2.736,
+       "median": 0.8269,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.1492,
-         "median": 0.01985,
+         "delta": 0.1111,
+         "median": 0.03563,
          "ci": null,
          "n": 18,
-         "wins": 7,
+         "wins": 8,
          "ties": 0,
          "clusters": 3,
-         "cluster_wins": 1
+         "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": -0.3602,
-         "median": -0.0309,
+        "1365126a_12864": {
+         "delta": 1.335,
+         "median": -0.04284,
          "ci": null,
          "n": 18,
-         "wins": 10,
+         "wins": 14,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 2
@@ -4021,29 +4021,29 @@
       },
       {
        "key": "fail_1m",
-       "value": 0.3611,
+       "value": 0.3056,
        "median": 0.0,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.05556,
+         "delta": -0.08333,
          "median": 0.0,
          "ci": null,
          "n": 18,
          "wins": 2,
-         "ties": 13,
+         "ties": 16,
          "clusters": 3,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.02778,
+        "1365126a_12864": {
+         "delta": -0.1111,
          "median": 0.0,
          "ci": null,
          "n": 18,
-         "wins": 3,
-         "ties": 13,
+         "wins": 4,
+         "ties": 14,
          "clusters": 3,
          "cluster_wins": 2
         }
@@ -4051,28 +4051,28 @@
       },
       {
        "key": "lat_jerk",
-       "value": 0.2809,
-       "median": 0.2065,
+       "value": 0.2926,
+       "median": 0.1599,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.2068,
-         "median": -0.1231,
+         "delta": -0.08685,
+         "median": -0.1076,
          "ci": null,
          "n": 18,
-         "wins": 17,
+         "wins": 15,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 3
         },
-        "96244b1f_12800": {
-         "delta": 0.05188,
-         "median": 0.03198,
+        "1365126a_12864": {
+         "delta": 0.05963,
+         "median": 0.01631,
          "ci": null,
          "n": 18,
-         "wins": 3,
+         "wins": 2,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 0
@@ -4081,28 +4081,28 @@
       },
       {
        "key": "long_jerk",
-       "value": 0.3364,
-       "median": 0.2442,
+       "value": 0.3326,
+       "median": 0.206,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.02043,
-         "median": -0.03787,
+         "delta": 0.02804,
+         "median": 0.0001073,
          "ci": null,
          "n": 18,
-         "wins": 11,
+         "wins": 9,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.01875,
-         "median": -0.01527,
+        "1365126a_12864": {
+         "delta": 0.01493,
+         "median": 0.002119,
          "ci": null,
          "n": 18,
-         "wins": 11,
+         "wins": 8,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 2
@@ -4111,31 +4111,31 @@
       },
       {
        "key": "speed_err",
-       "value": 1.197,
-       "median": 0.9909,
+       "value": 1.054,
+       "median": 0.7361,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.1844,
-         "median": 0.2258,
+         "delta": 0.1097,
+         "median": 0.1686,
          "ci": null,
          "n": 18,
-         "wins": 4,
+         "wins": 6,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.03946,
-         "median": -0.08595,
+        "1365126a_12864": {
+         "delta": 0.1959,
+         "median": 0.2013,
          "ci": null,
          "n": 18,
-         "wins": 10,
+         "wins": 5,
          "ties": 0,
          "clusters": 3,
-         "cluster_wins": 3
+         "cluster_wins": 1
         }
        }
       }
@@ -4147,85 +4147,85 @@
      "metrics": [
       {
        "key": "xtrack_2s",
-       "value": 0.1649,
-       "median": 0.1657,
+       "value": 0.1277,
+       "median": 0.1015,
        "ci": null,
        "n": 19,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.01391,
-         "median": 0.01309,
+         "delta": -0.02325,
+         "median": -0.00716,
+         "ci": null,
+         "n": 19,
+         "wins": 10,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "1365126a_12864": {
+         "delta": 0.006053,
+         "median": 0.002222,
          "ci": null,
          "n": 19,
          "wins": 8,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 2
-        },
-        "96244b1f_12800": {
-         "delta": 0.009628,
-         "median": 0.008831,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "xtrack_4s",
+       "value": 0.7918,
+       "median": 0.3801,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.276,
+         "median": 0.05522,
          "ci": null,
          "n": 19,
          "wins": 7,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
-        }
-       }
-      },
-      {
-       "key": "xtrack_4s",
-       "value": 0.8133,
-       "median": 0.3329,
-       "ci": null,
-       "n": 19,
-       "clusters": 2,
-       "paired": {
-        "lebowski_877m": {
-         "delta": 0.2478,
-         "median": 0.06882,
-         "ci": null,
-         "n": 19,
-         "wins": 6,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": 0.0963,
-         "median": 0.05666,
+        "1365126a_12864": {
+         "delta": 0.0327,
+         "median": 0.01818,
          "ci": null,
          "n": 19,
-         "wins": 5,
+         "wins": 8,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 0
+         "cluster_wins": 1
         }
        }
       },
       {
        "key": "xtrack_7s",
-       "value": 3.859,
-       "median": 1.028,
+       "value": 3.892,
+       "median": 0.7779,
        "ci": null,
        "n": 19,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": 2.202,
-         "median": 0.0614,
+         "delta": 2.488,
+         "median": 0.002568,
          "ci": null,
          "n": 19,
-         "wins": 9,
+         "wins": 8,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": 0.2843,
-         "median": 0.06278,
+        "1365126a_12864": {
+         "delta": 0.1909,
+         "median": 0.08325,
          "ci": null,
          "n": 19,
          "wins": 5,
@@ -4237,8 +4237,8 @@
       },
       {
        "key": "fail_1m",
-       "value": 0.5,
-       "median": 0.5,
+       "value": 0.4211,
+       "median": 0.0,
        "ci": null,
        "n": 19,
        "clusters": 2,
@@ -4248,18 +4248,18 @@
          "median": 0.0,
          "ci": null,
          "n": 19,
-         "wins": 3,
-         "ties": 15,
+         "wins": 2,
+         "ties": 16,
          "clusters": 2,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": 0.02632,
+        "1365126a_12864": {
+         "delta": 0.0,
          "median": 0.0,
          "ci": null,
          "n": 19,
          "wins": 0,
-         "ties": 18,
+         "ties": 19,
          "clusters": 2,
          "cluster_wins": 0
         }
@@ -4267,15 +4267,15 @@
       },
       {
        "key": "lat_jerk",
-       "value": 0.193,
-       "median": 0.1657,
+       "value": 0.1801,
+       "median": 0.1656,
        "ci": null,
        "n": 19,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.4365,
-         "median": -0.3404,
+         "delta": -0.4284,
+         "median": -0.2626,
          "ci": null,
          "n": 19,
          "wins": 19,
@@ -4283,72 +4283,72 @@
          "clusters": 2,
          "cluster_wins": 2
         },
-        "96244b1f_12800": {
-         "delta": -0.02907,
-         "median": -0.02282,
-         "ci": null,
-         "n": 19,
-         "wins": 15,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 2
-        }
-       }
-      },
-      {
-       "key": "long_jerk",
-       "value": 0.3762,
-       "median": 0.4095,
-       "ci": null,
-       "n": 19,
-       "clusters": 2,
-       "paired": {
-        "lebowski_877m": {
-         "delta": -0.06116,
-         "median": -0.03958,
+        "1365126a_12864": {
+         "delta": -0.01297,
+         "median": -0.01258,
          "ci": null,
          "n": 19,
          "wins": 11,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 2
-        },
-        "96244b1f_12800": {
-         "delta": -0.015,
-         "median": -0.001817,
-         "ci": null,
-         "n": 19,
-         "wins": 10,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 2
+         "cluster_wins": 1
         }
        }
       },
       {
-       "key": "speed_err",
-       "value": 1.445,
-       "median": 1.068,
+       "key": "long_jerk",
+       "value": 0.3222,
+       "median": 0.3,
        "ci": null,
        "n": 19,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.596,
-         "median": 0.5469,
+         "delta": -0.08824,
+         "median": -0.0989,
+         "ci": null,
+         "n": 19,
+         "wins": 13,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "1365126a_12864": {
+         "delta": 0.02015,
+         "median": 0.01874,
          "ci": null,
          "n": 19,
          "wins": 5,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
-        },
-        "96244b1f_12800": {
-         "delta": 0.1575,
-         "median": 0.1232,
+        }
+       }
+      },
+      {
+       "key": "speed_err",
+       "value": 1.431,
+       "median": 1.055,
+       "ci": null,
+       "n": 19,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.6359,
+         "median": 0.4273,
          "ci": null,
          "n": 19,
-         "wins": 7,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "1365126a_12864": {
+         "delta": 0.127,
+         "median": 0.1547,
+         "ci": null,
+         "n": 19,
+         "wins": 6,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
@@ -4367,7 +4367,7 @@
    "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 98 windows (59 day, 39 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 98 windows (59 day, 39 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
    "baselines": [
     "lebowski_877m",
-    "96244b1f_12800"
+    "1365126a_12864"
    ],
    "metrics": [
     {
@@ -4375,40 +4375,40 @@
      "label": "2° off heading: distance from the path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.5307,
-     "median": 0.45,
+     "value": 0.5002,
+     "median": 0.4209,
      "ci": [
-      0.4229,
-      0.6652
+      0.4066,
+      0.6147
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.04884,
-       "median": 0.04531,
+       "delta": 0.0473,
+       "median": 0.05833,
        "ci": [
-        0.01376,
-        0.08717
+        0.008299,
+        0.08823
        ],
        "n": 98,
-       "wins": 39,
+       "wins": 40,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 3
+       "cluster_wins": 5
       },
-      "96244b1f_12800": {
-       "delta": 0.006292,
-       "median": 0.01567,
+      "1365126a_12864": {
+       "delta": -0.01723,
+       "median": -0.0214,
        "ci": [
-        -0.01214,
-        0.02273
+        -0.02554,
+        -0.008405
        ],
        "n": 98,
-       "wins": 36,
+       "wins": 79,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 6
+       "cluster_wins": 11
       }
      }
     },
@@ -4417,40 +4417,40 @@
      "label": "2° off heading: distance from the path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.8796,
-     "median": 0.5167,
+     "value": 0.7781,
+     "median": 0.4767,
      "ci": [
-      0.6287,
-      1.19
+      0.5513,
+      1.038
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.1125,
-       "median": 0.03178,
+       "delta": 0.07559,
+       "median": 0.03009,
        "ci": [
-        0.03465,
-        0.1936
+        -0.06813,
+        0.1907
        ],
        "n": 98,
-       "wins": 39,
+       "wins": 41,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 4
+       "cluster_wins": 3
       },
-      "96244b1f_12800": {
-       "delta": 0.03401,
-       "median": 0.003656,
+      "1365126a_12864": {
+       "delta": -0.01038,
+       "median": -0.03533,
        "ci": [
-        -0.04311,
-        0.09648
+        -0.04325,
+        0.02029
        ],
        "n": 98,
-       "wins": 48,
+       "wins": 62,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 5
+       "cluster_wins": 6
       }
      }
     },
@@ -4459,40 +4459,40 @@
      "label": "2° off heading: requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.4033,
-     "median": 0.3094,
+     "value": 0.3775,
+     "median": 0.3077,
      "ci": [
-      0.341,
-      0.4643
+      0.3358,
+      0.4194
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.4844,
-       "median": -0.4304,
+       "delta": -0.5094,
+       "median": -0.4585,
        "ci": [
-        -0.5811,
-        -0.4034
+        -0.581,
+        -0.4322
        ],
        "n": 98,
-       "wins": 95,
+       "wins": 94,
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 13
       },
-      "96244b1f_12800": {
-       "delta": -0.009525,
-       "median": -0.01633,
+      "1365126a_12864": {
+       "delta": 0.006328,
+       "median": 0.01139,
        "ci": [
-        -0.04222,
-        0.02363
+        -0.007787,
+        0.02355
        ],
        "n": 98,
-       "wins": 60,
+       "wins": 39,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 8
+       "cluster_wins": 6
       }
      }
     },
@@ -4501,40 +4501,40 @@
      "label": "0.5 m off centre: distance from the path at 2 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.3278,
-     "median": 0.2442,
+     "value": 0.267,
+     "median": 0.2203,
      "ci": [
-      0.2819,
-      0.3836
+      0.2395,
+      0.2929
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.0142,
-       "median": 0.01569,
+       "delta": -1.618e-05,
+       "median": 0.005776,
        "ci": [
-        -0.0057,
-        0.03513
+        -0.02072,
+        0.02233
        ],
        "n": 98,
-       "wins": 42,
+       "wins": 44,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 4
+       "cluster_wins": 5
       },
-      "96244b1f_12800": {
-       "delta": 0.003137,
-       "median": 0.01617,
+      "1365126a_12864": {
+       "delta": -0.01797,
+       "median": -0.01917,
        "ci": [
-        -0.01922,
-        0.02706
+        -0.02473,
+        -0.01172
        ],
        "n": 98,
-       "wins": 38,
+       "wins": 80,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 6
+       "cluster_wins": 12
       }
      }
     },
@@ -4543,40 +4543,40 @@
      "label": "0.5 m off centre: distance from the path at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": 0.7879,
-     "median": 0.4338,
+     "value": 0.7103,
+     "median": 0.3962,
      "ci": [
-      0.5851,
-      1.013
+      0.5606,
+      0.8563
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.03823,
-       "median": -0.03276,
+       "delta": 0.04746,
+       "median": -0.03851,
        "ci": [
-        -0.05205,
-        0.1362
+        -0.008247,
+        0.1077
        ],
        "n": 98,
-       "wins": 57,
+       "wins": 55,
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 6
       },
-      "96244b1f_12800": {
-       "delta": -0.01067,
-       "median": -0.006369,
+      "1365126a_12864": {
+       "delta": 0.02984,
+       "median": 0.009766,
        "ci": [
-        -0.09455,
-        0.07676
+        -0.05188,
+        0.09921
        ],
        "n": 98,
-       "wins": 50,
+       "wins": 46,
        "ties": 0,
        "clusters": 13,
-       "cluster_wins": 6
+       "cluster_wins": 5
       }
      }
     },
@@ -4585,37 +4585,37 @@
      "label": "0.5 m off centre: requested lateral jerk, RMS",
      "unit": "m/s³",
      "better": "lower",
-     "value": 0.6049,
-     "median": 0.4378,
+     "value": 0.5666,
+     "median": 0.4139,
      "ci": [
-      0.5124,
-      0.6971
+      0.4934,
+      0.6408
      ],
      "n": 98,
      "clusters": 13,
      "paired": {
       "lebowski_877m": {
-       "delta": -0.5019,
-       "median": -0.5011,
+       "delta": -0.5438,
+       "median": -0.516,
        "ci": [
-        -0.6327,
-        -0.3823
+        -0.6436,
+        -0.4399
        ],
        "n": 98,
-       "wins": 91,
+       "wins": 92,
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 13
       },
-      "96244b1f_12800": {
-       "delta": 0.04987,
-       "median": -0.02174,
+      "1365126a_12864": {
+       "delta": 0.05282,
+       "median": 0.01286,
        "ci": [
-        -0.01983,
-        0.1136
+        0.009867,
+        0.09925
        ],
        "n": 98,
-       "wins": 60,
+       "wins": 33,
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 2
@@ -4627,15 +4627,15 @@
      "label": "Braking lead: distance ahead of the recorded car at 4 s",
      "unit": "m",
      "better": "lower",
-     "value": -0.7022,
-     "median": -0.7022,
+     "value": -0.3692,
+     "median": -0.3692,
      "ci": null,
      "n": 2,
      "clusters": 1,
      "paired": {
       "lebowski_877m": {
-       "delta": 1.091,
-       "median": 1.091,
+       "delta": 0.9683,
+       "median": 0.9683,
        "ci": null,
        "n": 2,
        "wins": 1,
@@ -4643,15 +4643,15 @@
        "clusters": 1,
        "cluster_wins": 0
       },
-      "96244b1f_12800": {
-       "delta": -0.3588,
-       "median": -0.3588,
+      "1365126a_12864": {
+       "delta": 0.1953,
+       "median": 0.1953,
        "ci": null,
        "n": 2,
        "wins": 1,
        "ties": 0,
        "clusters": 1,
-       "cluster_wins": 1
+       "cluster_wins": 0
       }
      }
     },
@@ -4660,15 +4660,15 @@
      "label": "Braking lead: smallest gap to the lead (derived)",
      "unit": "m",
      "better": "higher",
-     "value": 25.78,
-     "median": 25.78,
+     "value": 25.73,
+     "median": 25.73,
      "ci": null,
      "n": 2,
      "clusters": 1,
      "paired": {
       "lebowski_877m": {
-       "delta": -3.501,
-       "median": -3.501,
+       "delta": -1.733,
+       "median": -1.733,
        "ci": null,
        "n": 2,
        "wins": 1,
@@ -4676,9 +4676,9 @@
        "clusters": 1,
        "cluster_wins": 0
       },
-      "96244b1f_12800": {
-       "delta": 0.8502,
-       "median": 0.8502,
+      "1365126a_12864": {
+       "delta": 0.02309,
+       "median": 0.02309,
        "ci": null,
        "n": 2,
        "wins": 1,
@@ -4693,31 +4693,31 @@
      "label": "Braking lead: speed error against the recorded speed, RMS",
      "unit": "m/s",
      "better": "lower",
-     "value": 1.794,
-     "median": 1.794,
+     "value": 1.116,
+     "median": 1.116,
      "ci": null,
      "n": 2,
      "clusters": 1,
      "paired": {
       "lebowski_877m": {
-       "delta": 0.7273,
-       "median": 0.7273,
+       "delta": -0.08713,
+       "median": -0.08713,
        "ci": null,
        "n": 2,
        "wins": 1,
        "ties": 0,
        "clusters": 1,
-       "cluster_wins": 0
+       "cluster_wins": 1
       },
-      "96244b1f_12800": {
-       "delta": 0.3054,
-       "median": 0.3054,
+      "1365126a_12864": {
+       "delta": -0.1437,
+       "median": -0.1437,
        "ci": null,
        "n": 2,
-       "wins": 0,
+       "wins": 2,
        "ties": 0,
        "clusters": 1,
-       "cluster_wins": 0
+       "cluster_wins": 1
       }
      }
     }
@@ -4730,28 +4730,28 @@
      "metrics": [
       {
        "key": "heading_xtrack_2s",
-       "value": 0.4492,
-       "median": 0.391,
+       "value": 0.43,
+       "median": 0.3994,
        "ci": null,
        "n": 14,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.02748,
-         "median": 0.01641,
+         "delta": 0.03819,
+         "median": 0.03875,
          "ci": null,
          "n": 14,
-         "wins": 6,
+         "wins": 5,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 0
+         "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": 0.04833,
-         "median": 0.04531,
+        "1365126a_12864": {
+         "delta": 0.01401,
+         "median": 0.01616,
          "ci": null,
          "n": 14,
-         "wins": 1,
+         "wins": 4,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
@@ -4760,15 +4760,75 @@
       },
       {
        "key": "heading_xtrack_4s",
-       "value": 0.8482,
-       "median": 0.5594,
+       "value": 0.753,
+       "median": 0.6034,
        "ci": null,
        "n": 14,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.2325,
-         "median": 0.1091,
+         "delta": 0.2,
+         "median": 0.06036,
+         "ci": null,
+         "n": 14,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "1365126a_12864": {
+         "delta": 0.01775,
+         "median": -0.03854,
+         "ci": null,
+         "n": 14,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "heading_lat_jerk",
+       "value": 0.3928,
+       "median": 0.2841,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": -0.3752,
+         "median": -0.3332,
+         "ci": null,
+         "n": 14,
+         "wins": 13,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "1365126a_12864": {
+         "delta": -0.00458,
+         "median": -0.006825,
+         "ci": null,
+         "n": 14,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_2s",
+       "value": 0.2937,
+       "median": 0.2769,
+       "ci": null,
+       "n": 14,
+       "clusters": 2,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.03075,
+         "median": 0.01551,
          "ci": null,
          "n": 14,
          "wins": 4,
@@ -4776,89 +4836,29 @@
          "clusters": 2,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": 0.1828,
-         "median": 0.1988,
+        "1365126a_12864": {
+         "delta": 0.0008291,
+         "median": 0.00571,
          "ci": null,
          "n": 14,
-         "wins": 3,
+         "wins": 5,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 0
-        }
-       }
-      },
-      {
-       "key": "heading_lat_jerk",
-       "value": 0.4454,
-       "median": 0.3041,
-       "ci": null,
-       "n": 14,
-       "clusters": 2,
-       "paired": {
-        "lebowski_877m": {
-         "delta": -0.3249,
-         "median": -0.3016,
-         "ci": null,
-         "n": 14,
-         "wins": 12,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 2
-        },
-        "96244b1f_12800": {
-         "delta": -0.08138,
-         "median": -0.07348,
-         "ci": null,
-         "n": 14,
-         "wins": 11,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 2
-        }
-       }
-      },
-      {
-       "key": "offcentre_xtrack_2s",
-       "value": 0.3363,
-       "median": 0.2782,
-       "ci": null,
-       "n": 14,
-       "clusters": 2,
-       "paired": {
-        "lebowski_877m": {
-         "delta": 0.0334,
-         "median": 0.01213,
-         "ci": null,
-         "n": 14,
-         "wins": 6,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 0
-        },
-        "96244b1f_12800": {
-         "delta": 0.05749,
-         "median": 0.05301,
-         "ci": null,
-         "n": 14,
-         "wins": 1,
-         "ties": 0,
-         "clusters": 2,
-         "cluster_wins": 0
+         "cluster_wins": 1
         }
        }
       },
       {
        "key": "offcentre_xtrack_4s",
-       "value": 0.607,
-       "median": 0.465,
+       "value": 0.6442,
+       "median": 0.5652,
        "ci": null,
        "n": 14,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.01742,
-         "median": -0.1249,
+         "delta": 0.05436,
+         "median": -0.02759,
          "ci": null,
          "n": 14,
          "wins": 8,
@@ -4866,42 +4866,42 @@
          "clusters": 2,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.01982,
-         "median": 0.01855,
+        "1365126a_12864": {
+         "delta": -0.2038,
+         "median": -0.04568,
          "ci": null,
          "n": 14,
-         "wins": 7,
+         "wins": 9,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 1
+         "cluster_wins": 2
         }
        }
       },
       {
        "key": "offcentre_lat_jerk",
-       "value": 0.7047,
-       "median": 0.5569,
+       "value": 0.7658,
+       "median": 0.6453,
        "ci": null,
        "n": 14,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.402,
-         "median": -0.3875,
+         "delta": -0.2959,
+         "median": -0.2996,
          "ci": null,
          "n": 14,
-         "wins": 12,
+         "wins": 11,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
         },
-        "96244b1f_12800": {
-         "delta": 0.09741,
-         "median": -0.02706,
+        "1365126a_12864": {
+         "delta": 0.1238,
+         "median": 0.04928,
          "ci": null,
          "n": 14,
-         "wins": 7,
+         "wins": 4,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
@@ -4916,58 +4916,58 @@
      "metrics": [
       {
        "key": "heading_xtrack_2s",
-       "value": 0.4398,
-       "median": 0.4336,
+       "value": 0.4216,
+       "median": 0.3683,
        "ci": null,
        "n": 43,
        "clusters": 5,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.01752,
-         "median": 0.002491,
+         "delta": 0.006064,
+         "median": -0.01926,
          "ci": null,
          "n": 43,
-         "wins": 20,
+         "wins": 25,
          "ties": 0,
          "clusters": 5,
-         "cluster_wins": 2
+         "cluster_wins": 3
         },
-        "96244b1f_12800": {
-         "delta": 0.0063,
-         "median": 0.01306,
+        "1365126a_12864": {
+         "delta": -0.02483,
+         "median": -0.02559,
          "ci": null,
          "n": 43,
-         "wins": 17,
+         "wins": 38,
          "ties": 0,
          "clusters": 5,
-         "cluster_wins": 2
+         "cluster_wins": 5
         }
        }
       },
       {
        "key": "heading_xtrack_4s",
-       "value": 0.6712,
-       "median": 0.4855,
+       "value": 0.6013,
+       "median": 0.3705,
        "ci": null,
        "n": 43,
        "clusters": 5,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.06865,
-         "median": 0.0007616,
+         "delta": -0.03491,
+         "median": -0.01784,
          "ci": null,
          "n": 43,
-         "wins": 21,
+         "wins": 24,
          "ties": 0,
          "clusters": 5,
-         "cluster_wins": 2
+         "cluster_wins": 3
         },
-        "96244b1f_12800": {
-         "delta": 0.05833,
-         "median": 0.002228,
+        "1365126a_12864": {
+         "delta": -0.0168,
+         "median": -0.02469,
          "ci": null,
          "n": 43,
-         "wins": 21,
+         "wins": 26,
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 2
@@ -4976,58 +4976,28 @@
       },
       {
        "key": "heading_lat_jerk",
-       "value": 0.4105,
-       "median": 0.3003,
+       "value": 0.3817,
+       "median": 0.3065,
        "ci": null,
        "n": 43,
        "clusters": 5,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.4739,
-         "median": -0.4443,
+         "delta": -0.5147,
+         "median": -0.4704,
          "ci": null,
          "n": 43,
-         "wins": 42,
+         "wins": 40,
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 5
         },
-        "96244b1f_12800": {
-         "delta": 0.004721,
-         "median": -0.02149,
+        "1365126a_12864": {
+         "delta": 0.02174,
+         "median": 0.01475,
          "ci": null,
          "n": 43,
-         "wins": 30,
-         "ties": 0,
-         "clusters": 5,
-         "cluster_wins": 3
-        }
-       }
-      },
-      {
-       "key": "offcentre_xtrack_2s",
-       "value": 0.3123,
-       "median": 0.2706,
-       "ci": null,
-       "n": 43,
-       "clusters": 5,
-       "paired": {
-        "lebowski_877m": {
-         "delta": -0.01034,
-         "median": -0.008726,
-         "ci": null,
-         "n": 43,
-         "wins": 24,
-         "ties": 0,
-         "clusters": 5,
-         "cluster_wins": 3
-        },
-        "96244b1f_12800": {
-         "delta": 0.004336,
-         "median": 0.00591,
-         "ci": null,
-         "n": 43,
-         "wins": 17,
+         "wins": 16,
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 2
@@ -5035,16 +5005,46 @@
        }
       },
       {
-       "key": "offcentre_xtrack_4s",
-       "value": 0.7055,
-       "median": 0.4923,
+       "key": "offcentre_xtrack_2s",
+       "value": 0.2661,
+       "median": 0.2178,
        "ci": null,
        "n": 43,
        "clusters": 5,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.004561,
-         "median": -0.03707,
+         "delta": -0.03323,
+         "median": -0.0371,
+         "ci": null,
+         "n": 43,
+         "wins": 28,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 4
+        },
+        "1365126a_12864": {
+         "delta": -0.02238,
+         "median": -0.02003,
+         "ci": null,
+         "n": 43,
+         "wins": 38,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 5
+        }
+       }
+      },
+      {
+       "key": "offcentre_xtrack_4s",
+       "value": 0.7014,
+       "median": 0.3956,
+       "ci": null,
+       "n": 43,
+       "clusters": 5,
+       "paired": {
+        "lebowski_877m": {
+         "delta": 0.031,
+         "median": -0.0577,
          "ci": null,
          "n": 43,
          "wins": 27,
@@ -5052,42 +5052,42 @@
          "clusters": 5,
          "cluster_wins": 3
         },
-        "96244b1f_12800": {
-         "delta": 0.02679,
-         "median": 0.004018,
+        "1365126a_12864": {
+         "delta": 0.08256,
+         "median": 0.02263,
          "ci": null,
          "n": 43,
-         "wins": 20,
+         "wins": 18,
          "ties": 0,
          "clusters": 5,
-         "cluster_wins": 2
+         "cluster_wins": 1
         }
        }
       },
       {
        "key": "offcentre_lat_jerk",
-       "value": 0.6878,
-       "median": 0.4634,
+       "value": 0.5984,
+       "median": 0.4385,
        "ci": null,
        "n": 43,
        "clusters": 5,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.4677,
-         "median": -0.5718,
+         "delta": -0.5783,
+         "median": -0.5147,
          "ci": null,
          "n": 43,
-         "wins": 39,
+         "wins": 41,
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 5
         },
-        "96244b1f_12800": {
-         "delta": 0.07944,
-         "median": -0.03129,
+        "1365126a_12864": {
+         "delta": 0.06528,
+         "median": 0.0219,
          "ci": null,
          "n": 43,
-         "wins": 26,
+         "wins": 15,
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 1
@@ -5096,15 +5096,15 @@
       },
       {
        "key": "brake_ahead_4s",
-       "value": -0.7022,
-       "median": -0.7022,
+       "value": -0.3692,
+       "median": -0.3692,
        "ci": null,
        "n": 2,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": 1.091,
-         "median": 1.091,
+         "delta": 0.9683,
+         "median": 0.9683,
          "ci": null,
          "n": 2,
          "wins": 1,
@@ -5112,29 +5112,29 @@
          "clusters": 1,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": -0.3588,
-         "median": -0.3588,
+        "1365126a_12864": {
+         "delta": 0.1953,
+         "median": 0.1953,
          "ci": null,
          "n": 2,
          "wins": 1,
          "ties": 0,
          "clusters": 1,
-         "cluster_wins": 1
+         "cluster_wins": 0
         }
        }
       },
       {
        "key": "brake_gap_min",
-       "value": 25.78,
-       "median": 25.78,
+       "value": 25.73,
+       "median": 25.73,
        "ci": null,
        "n": 2,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": -3.501,
-         "median": -3.501,
+         "delta": -1.733,
+         "median": -1.733,
          "ci": null,
          "n": 2,
          "wins": 1,
@@ -5142,9 +5142,9 @@
          "clusters": 1,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": 0.8502,
-         "median": 0.8502,
+        "1365126a_12864": {
+         "delta": 0.02309,
+         "median": 0.02309,
          "ci": null,
          "n": 2,
          "wins": 1,
@@ -5156,31 +5156,31 @@
       },
       {
        "key": "brake_speed_err",
-       "value": 1.794,
-       "median": 1.794,
+       "value": 1.116,
+       "median": 1.116,
        "ci": null,
        "n": 2,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.7273,
-         "median": 0.7273,
+         "delta": -0.08713,
+         "median": -0.08713,
          "ci": null,
          "n": 2,
          "wins": 1,
          "ties": 0,
          "clusters": 1,
-         "cluster_wins": 0
+         "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": 0.3054,
-         "median": 0.3054,
+        "1365126a_12864": {
+         "delta": -0.1437,
+         "median": -0.1437,
          "ci": null,
          "n": 2,
-         "wins": 0,
+         "wins": 2,
          "ties": 0,
          "clusters": 1,
-         "cluster_wins": 0
+         "cluster_wins": 1
         }
        }
       }
@@ -5192,15 +5192,15 @@
      "metrics": [
       {
        "key": "heading_xtrack_2s",
-       "value": 0.3364,
-       "median": 0.3568,
+       "value": 0.3491,
+       "median": 0.3601,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.1041,
-         "median": -0.1237,
+         "delta": -0.1015,
+         "median": -0.1199,
          "ci": null,
          "n": 4,
          "wins": 3,
@@ -5208,12 +5208,12 @@
          "clusters": 1,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.008062,
-         "median": -0.01622,
+        "1365126a_12864": {
+         "delta": -0.03024,
+         "median": -0.03309,
          "ci": null,
          "n": 4,
-         "wins": 2,
+         "wins": 4,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
@@ -5222,28 +5222,28 @@
       },
       {
        "key": "heading_xtrack_4s",
-       "value": 0.3499,
-       "median": 0.1887,
+       "value": 0.3,
+       "median": 0.1811,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.04096,
-         "median": -0.01711,
+         "delta": 0.0803,
+         "median": 0.03406,
          "ci": null,
          "n": 4,
          "wins": 2,
          "ties": 0,
          "clusters": 1,
-         "cluster_wins": 1
+         "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": -0.01916,
-         "median": -0.08439,
+        "1365126a_12864": {
+         "delta": -0.09728,
+         "median": -0.0908,
          "ci": null,
          "n": 4,
-         "wins": 3,
+         "wins": 4,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
@@ -5252,15 +5252,15 @@
       },
       {
        "key": "heading_lat_jerk",
-       "value": 0.3457,
-       "median": 0.2528,
+       "value": 0.3503,
+       "median": 0.2596,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.7199,
-         "median": -0.5759,
+         "delta": -0.6218,
+         "median": -0.5721,
          "ci": null,
          "n": 4,
          "wins": 4,
@@ -5268,42 +5268,42 @@
          "clusters": 1,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.01394,
-         "median": -0.03978,
+        "1365126a_12864": {
+         "delta": 0.02164,
+         "median": 0.0346,
          "ci": null,
          "n": 4,
-         "wins": 3,
+         "wins": 1,
          "ties": 0,
          "clusters": 1,
-         "cluster_wins": 1
+         "cluster_wins": 0
         }
        }
       },
       {
        "key": "offcentre_xtrack_2s",
-       "value": 0.2793,
-       "median": 0.21,
+       "value": 0.2909,
+       "median": 0.2173,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.02037,
-         "median": 0.003124,
+         "delta": -0.008899,
+         "median": 0.01753,
          "ci": null,
          "n": 4,
-         "wins": 2,
+         "wins": 1,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.01179,
-         "median": -0.002323,
+        "1365126a_12864": {
+         "delta": -0.02826,
+         "median": -0.03017,
          "ci": null,
          "n": 4,
-         "wins": 2,
+         "wins": 4,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
@@ -5312,45 +5312,45 @@
       },
       {
        "key": "offcentre_xtrack_4s",
-       "value": 0.7123,
-       "median": 0.7691,
+       "value": 0.6596,
+       "median": 0.5351,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.07772,
-         "median": 0.04659,
+         "delta": -0.06811,
+         "median": -0.0623,
          "ci": null,
          "n": 4,
-         "wins": 1,
+         "wins": 3,
          "ties": 0,
          "clusters": 1,
-         "cluster_wins": 0
+         "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": 0.01888,
-         "median": 0.01971,
+        "1365126a_12864": {
+         "delta": -0.09901,
+         "median": -0.04791,
          "ci": null,
          "n": 4,
-         "wins": 2,
+         "wins": 4,
          "ties": 0,
          "clusters": 1,
-         "cluster_wins": 0
+         "cluster_wins": 1
         }
        }
       },
       {
        "key": "offcentre_lat_jerk",
-       "value": 0.6287,
-       "median": 0.4415,
+       "value": 0.6557,
+       "median": 0.4519,
        "ci": null,
        "n": 4,
        "clusters": 1,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.5926,
-         "median": -0.5979,
+         "delta": -0.7416,
+         "median": -0.6289,
          "ci": null,
          "n": 4,
          "wins": 4,
@@ -5358,12 +5358,12 @@
          "clusters": 1,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": 0.003691,
-         "median": 0.0004341,
+        "1365126a_12864": {
+         "delta": 0.01819,
+         "median": 0.02534,
          "ci": null,
          "n": 4,
-         "wins": 2,
+         "wins": 1,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 0
@@ -5378,28 +5378,28 @@
      "metrics": [
       {
        "key": "heading_xtrack_2s",
-       "value": 0.9508,
-       "median": 0.8279,
+       "value": 0.8691,
+       "median": 0.8218,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.1757,
-         "median": 0.1741,
+         "delta": 0.1761,
+         "median": 0.1887,
          "ci": null,
          "n": 18,
-         "wins": 3,
+         "wins": 2,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": -0.03527,
-         "median": -0.01934,
+        "1365126a_12864": {
+         "delta": -0.01567,
+         "median": -0.03095,
          "ci": null,
          "n": 18,
-         "wins": 13,
+         "wins": 15,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 3
@@ -5408,28 +5408,28 @@
       },
       {
        "key": "heading_xtrack_4s",
-       "value": 1.532,
-       "median": 0.7508,
+       "value": 1.296,
+       "median": 0.7879,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.02837,
-         "median": 0.07295,
+         "delta": 0.06463,
+         "median": 0.07944,
          "ci": null,
          "n": 18,
-         "wins": 6,
+         "wins": 5,
          "ties": 0,
          "clusters": 3,
-         "cluster_wins": 1
+         "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": -0.1267,
-         "median": -0.0559,
+        "1365126a_12864": {
+         "delta": -0.01478,
+         "median": -0.04536,
          "ci": null,
          "n": 18,
-         "wins": 13,
+         "wins": 14,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 2
@@ -5438,15 +5438,15 @@
       },
       {
        "key": "heading_lat_jerk",
-       "value": 0.4731,
-       "median": 0.4295,
+       "value": 0.4424,
+       "median": 0.4059,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.4421,
-         "median": -0.4405,
+         "delta": -0.4306,
+         "median": -0.418,
          "ci": null,
          "n": 18,
          "wins": 18,
@@ -5454,42 +5454,42 @@
          "clusters": 3,
          "cluster_wins": 3
         },
-        "96244b1f_12800": {
-         "delta": 0.04024,
-         "median": 0.04015,
+        "1365126a_12864": {
+         "delta": -0.00403,
+         "median": 0.0153,
          "ci": null,
          "n": 18,
-         "wins": 2,
+         "wins": 5,
          "ties": 0,
          "clusters": 3,
-         "cluster_wins": 0
+         "cluster_wins": 1
         }
        }
       },
       {
        "key": "offcentre_xtrack_2s",
-       "value": 0.4278,
-       "median": 0.2294,
+       "value": 0.2758,
+       "median": 0.195,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.04642,
-         "median": 0.04034,
+         "delta": 0.01779,
+         "median": 0.02932,
          "ci": null,
          "n": 18,
-         "wins": 4,
+         "wins": 8,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": -0.04546,
-         "median": -0.006669,
+        "1365126a_12864": {
+         "delta": -0.01746,
+         "median": -0.01908,
          "ci": null,
          "n": 18,
-         "wins": 12,
+         "wins": 16,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 3
@@ -5498,45 +5498,45 @@
       },
       {
        "key": "offcentre_xtrack_4s",
-       "value": 1.047,
-       "median": 0.2242,
+       "value": 0.6907,
+       "median": 0.2427,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.007744,
-         "median": -0.02569,
+         "delta": -0.002326,
+         "median": -0.03324,
          "ci": null,
          "n": 18,
-         "wins": 11,
+         "wins": 10,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 1
         },
-        "96244b1f_12800": {
-         "delta": -0.1449,
-         "median": -0.01299,
+        "1365126a_12864": {
+         "delta": 0.1004,
+         "median": 0.009766,
          "ci": null,
          "n": 18,
-         "wins": 11,
+         "wins": 8,
          "ties": 0,
          "clusters": 3,
-         "cluster_wins": 2
+         "cluster_wins": 1
         }
        }
       },
       {
        "key": "offcentre_lat_jerk",
-       "value": 0.4953,
-       "median": 0.4054,
+       "value": 0.4803,
+       "median": 0.3863,
        "ci": null,
        "n": 18,
        "clusters": 3,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.3864,
-         "median": -0.4178,
+         "delta": -0.4015,
+         "median": -0.4277,
          "ci": null,
          "n": 18,
          "wins": 17,
@@ -5544,12 +5544,12 @@
          "clusters": 3,
          "cluster_wins": 3
         },
-        "96244b1f_12800": {
-         "delta": 0.01889,
-         "median": -0.00235,
+        "1365126a_12864": {
+         "delta": 0.04503,
+         "median": 0.01058,
          "ci": null,
          "n": 18,
-         "wins": 9,
+         "wins": 3,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 0
@@ -5564,58 +5564,58 @@
      "metrics": [
       {
        "key": "heading_xtrack_2s",
-       "value": 0.4396,
-       "median": 0.4348,
+       "value": 0.4121,
+       "median": 0.3934,
        "ci": null,
        "n": 19,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.04749,
-         "median": 0.03736,
+         "delta": 0.05664,
+         "median": 0.06119,
          "ci": null,
          "n": 19,
-         "wins": 7,
+         "wins": 5,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": 0.01769,
-         "median": 0.01606,
+        "1365126a_12864": {
+         "delta": -0.0218,
+         "median": -0.0212,
          "ci": null,
          "n": 19,
-         "wins": 3,
+         "wins": 18,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 0
+         "cluster_wins": 2
         }
        }
       },
       {
        "key": "heading_xtrack_4s",
-       "value": 0.8678,
-       "median": 0.4592,
+       "value": 0.8069,
+       "median": 0.4059,
        "ci": null,
        "n": 19,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.2352,
-         "median": 0.09504,
+         "delta": 0.2434,
+         "median": 0.1122,
          "ci": null,
          "n": 19,
-         "wins": 6,
+         "wins": 5,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": 0.0328,
-         "median": 0.0126,
+        "1365126a_12864": {
+         "delta": 0.005896,
+         "median": -0.003254,
          "ci": null,
          "n": 19,
-         "wins": 8,
+         "wins": 10,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
@@ -5624,15 +5624,15 @@
       },
       {
        "key": "heading_lat_jerk",
-       "value": 0.3019,
-       "median": 0.2703,
+       "value": 0.3012,
+       "median": 0.2596,
        "ci": null,
        "n": 19,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.6162,
-         "median": -0.4842,
+         "delta": -0.6472,
+         "median": -0.5365,
          "ci": null,
          "n": 19,
          "wins": 19,
@@ -5640,12 +5640,12 @@
          "clusters": 2,
          "cluster_wins": 2
         },
-        "96244b1f_12800": {
-         "delta": -0.03504,
-         "median": -0.01746,
+        "1365126a_12864": {
+         "delta": -0.01392,
+         "median": 0.0008882,
          "ci": null,
          "n": 19,
-         "wins": 14,
+         "wins": 9,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
@@ -5654,75 +5654,75 @@
       },
       {
        "key": "offcentre_xtrack_2s",
-       "value": 0.2723,
-       "median": 0.2189,
+       "value": 0.2359,
+       "median": 0.2025,
        "ci": null,
        "n": 19,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.03236,
-         "median": 0.04859,
+         "delta": 0.03748,
+         "median": 0.06771,
          "ci": null,
          "n": 19,
-         "wins": 6,
+         "wins": 3,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": 0.009561,
-         "median": 0.0203,
+        "1365126a_12864": {
+         "delta": -0.02018,
+         "median": -0.02354,
          "ci": null,
          "n": 19,
-         "wins": 6,
+         "wins": 17,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 0
+         "cluster_wins": 2
         }
        }
       },
       {
        "key": "offcentre_xtrack_4s",
-       "value": 0.8785,
-       "median": 0.4586,
+       "value": 0.8086,
+       "median": 0.4141,
        "ci": null,
        "n": 19,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": 0.165,
-         "median": -0.01093,
+         "delta": 0.1511,
+         "median": 0.01212,
          "ci": null,
          "n": 19,
-         "wins": 10,
+         "wins": 7,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 1
+         "cluster_wins": 0
         },
-        "96244b1f_12800": {
-         "delta": 0.03224,
-         "median": -0.006236,
+        "1365126a_12864": {
+         "delta": 0.04295,
+         "median": 0.03821,
          "ci": null,
          "n": 19,
-         "wins": 10,
+         "wins": 7,
          "ties": 0,
          "clusters": 2,
-         "cluster_wins": 1
+         "cluster_wins": 0
         }
        }
       },
       {
        "key": "offcentre_lat_jerk",
-       "value": 0.4425,
-       "median": 0.3886,
+       "value": 0.411,
+       "median": 0.378,
        "ci": null,
        "n": 19,
        "clusters": 2,
        "paired": {
         "lebowski_877m": {
-         "delta": -0.7431,
-         "median": -0.7036,
+         "delta": -0.7415,
+         "median": -0.7054,
          "ci": null,
          "n": 19,
          "wins": 19,
@@ -5730,12 +5730,12 @@
          "clusters": 2,
          "cluster_wins": 2
         },
-        "96244b1f_12800": {
+        "1365126a_12864": {
          "delta": -0.01301,
-         "median": -0.04079,
+         "median": -0.001459,
          "ci": null,
          "n": 19,
-         "wins": 16,
+         "wins": 10,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 1
