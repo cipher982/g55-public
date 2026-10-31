@@ -236,10 +236,8 @@ p, ul, ol { margin: 0; max-width: 74ch; }
 .gt-th-cl .rk-axis { position: relative; height: 12px; width: calc(100% - 4.9rem - 8px); font-weight: 400; font-size: 10.5px; color: var(--muted); }
 .rk-tk { position: absolute; bottom: 0; transform: translateX(-50%); }
 
-/* Podium row accents (strictly #1, #2, #3 only) */
-.gt-m1 { background: linear-gradient(90deg, rgba(234, 179, 8, 0.11), transparent 28%); }
-.gt-m2 { background: linear-gradient(90deg, rgba(148, 163, 184, 0.11), transparent 28%); }
-.gt-m3 { background: linear-gradient(90deg, rgba(194, 120, 62, 0.10), transparent 28%); }
+/* A rule above the first row of each new tier */
+.gt-body .gt-row.gt-tier-start { border-top: 2px solid var(--ink2); }
 
 .gt-rk {
   font-size: 16px;
@@ -249,7 +247,6 @@ p, ul, ol { margin: 0; max-width: 74ch; }
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
-.gt-m1 .gt-rk, .gt-m2 .gt-rk, .gt-m3 .gt-rk { font-size: 21px; }
 
 /* Model identity cell */
 .gt-name { display: grid; gap: 1px; min-width: 0; }
@@ -314,7 +311,6 @@ code.hx-only { font: 700 0.92em var(--mono); color: var(--ink); }
   background: rgba(var(--c-heat), calc(var(--h, 0) * 0.20));
 }
 .gt-mcell strong { font-weight: 600; color: var(--ink); }
-.gt-mcell.gt-best strong { font-weight: 800; text-decoration: underline; text-decoration-color: var(--c-ref); text-decoration-thickness: 2px; text-underline-offset: 2px; }
 .gt-mu { font-size: 11px; color: var(--muted); font-weight: 400; }
 .gt-mcell.gt-na, .gt-cl.gt-na, .gt-score.gt-na {
   background: transparent;
@@ -352,7 +348,8 @@ code.hx-only { font: 700 0.92em var(--mono); color: var(--ink); }
     gap: 6px 6px;
     padding: 10px 2px;
   }
-  .gt-rk { grid-column: 1 / 2; grid-row: 1; justify-self: start; padding-left: 4px; }
+  .gt-rk { grid-column: 1 / 2; grid-row: 1; justify-self: start; width: 1.8rem; }
+  .gt-rk[aria-label^="tier"]::before { content: "tier"; display: block; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
   .gt-name { grid-column: 1 / 3; grid-row: 1; padding-left: 2rem; }
   .gt-score { grid-column: 3 / 5; grid-row: 1; justify-self: end; width: 100%; max-width: 9.5rem; }
   .gt-cl { grid-column: 1 / -1; grid-row: 2; padding: 2px 4px; }

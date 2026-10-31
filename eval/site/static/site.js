@@ -171,7 +171,8 @@
   const colHeaders = [...fig.querySelectorAll(".gt-th[data-sort]")];
   const moreBtn = fig.querySelector(".gt-more-btn");
   const rows = [...body.querySelectorAll(".gt-row")];
-  const MEDALS = { 1: "🥇", 2: "🥈", 3: "🥉" };
+  // The first column is the tier of the active test (data-tier-<test>, from drive resamples), never a place.
+  const tierOf = (r, mode) => r.dataset["tier" + mode.charAt(0).toUpperCase() + mode.slice(1)] || "";
 
   let currentSort = "composite";
   let showOlOnly = false;
@@ -199,27 +200,17 @@
       }
     }
 
-    // Re-number visible rows and assign medals for top 3 when sorted by a performance metric
-    const currentRows = [...body.querySelectorAll(".gt-row")].filter((r) => !r.hidden);
-    let rankIdx = 0;
-    for (const r of currentRows) {
-      r.classList.remove("gt-m1", "gt-m2", "gt-m3");
+    // Tier of the active test in the first column; a rule above the first row of each new tier.
+    let prev = null;
+    for (const r of [...body.querySelectorAll(".gt-row")].filter((x) => !x.hidden)) {
+      const t = currentSort === "date" ? "" : tierOf(r, currentSort);
       const rkEl = r.querySelector(".gt-rk");
-      if (!rkEl) continue;
-      const hasMetric = currentSort === "date" || currentSort === "openloop" || r.dataset.hasCl === "1";
-      if (!hasMetric) {
-        rkEl.textContent = "–";
-        rkEl.setAttribute("aria-label", "unranked in closed loop");
-        continue;
+      if (rkEl) {
+        rkEl.textContent = t || "–";
+        rkEl.setAttribute("aria-label", t ? `tier ${t}` : "no tier");
       }
-      rankIdx += 1;
-      if (currentSort !== "date" && MEDALS[rankIdx]) {
-        rkEl.textContent = MEDALS[rankIdx];
-        r.classList.add(`gt-m${rankIdx}`);
-      } else {
-        rkEl.textContent = String(rankIdx);
-      }
-      rkEl.setAttribute("aria-label", `place ${rankIdx}`);
+      r.classList.toggle("gt-tier-start", prev !== null && t !== "" && t !== prev);
+      prev = t;
     }
 
     // Highlight active sorted column cells
@@ -233,22 +224,14 @@
     for (const b of sortBtns) b.setAttribute("aria-pressed", String(b.dataset.sort === mode));
     for (const th of colHeaders) th.classList.toggle("is-active", th.dataset.sort === mode);
 
+    // Tier of the active test first (no tier last), newest first inside a tier: the resamples support
+    // no order inside a tier, so none is shown.
     rows.sort((a, b) => {
-      if (mode === "date") {
-        return b.dataset.date.localeCompare(a.dataset.date);
+      if (mode !== "date") {
+        const ta = Number(tierOf(a, mode) || 99), tb = Number(tierOf(b, mode) || 99);
+        if (ta !== tb) return ta - tb;
       }
-      if (mode === "openloop") {
-        return Number(a.dataset.openloop) - Number(b.dataset.openloop);
-      }
-      // For closed-loop metrics, keep closed-loop models above open-loop-only models
-      const aCl = Number(a.dataset.hasCl), bCl = Number(b.dataset.hasCl);
-      if (aCl !== bCl) return bCl - aCl;
-      if (mode === "composite") {
-        const diff = Number(b.dataset.composite) - Number(a.dataset.composite);
-        if (Math.abs(diff) > 1e-6) return diff;
-        return Number(a.dataset.cl2s) - Number(b.dataset.cl2s);
-      }
-      return Number(a.dataset[mode]) - Number(b.dataset[mode]);
+      return b.dataset.date.localeCompare(a.dataset.date);
     });
 
     for (const r of rows) body.appendChild(r);

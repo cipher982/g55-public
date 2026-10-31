@@ -325,6 +325,52 @@ def fill(text: str, models: list[dict], root: Path) -> str:
 CFG: dict = {}
 MODELS: list = []  # every model, set in main(); model_class() needs the reference's date
 cfg_ref = ["lebowski_877m"]  # set from config.json in main(); fill() reads it for "others"
+TIERS: dict = {}  # {test: ranking.order(...)}, set in main() from rankings/tiers.json and the public CSVs
+
+
+# ---------------------------------------------------------------- tiers: the only order the site prints
+
+def tier_of(test: str, mid: str) -> int | None:
+    return ((TIERS.get(test) or {}).get("models") or {}).get(mid, {}).get("tier")
+
+
+def n_tiers(test: str) -> int:
+    return len((TIERS.get(test) or {}).get("tiers") or [])
+
+
+def tier_attrs(test: str, mids) -> str:
+    """The attributes that make an element a tier claim the check (ranking.check_site) verifies."""
+    mids = [mids] if isinstance(mids, str) else list(mids)
+    ts = {tier_of(test, m) for m in mids}
+    if len(ts) != 1 or None in ts:
+        return ""
+    who = f' data-model="{esc(mids[0])}"' if len(mids) == 1 else f' data-models="{esc(" ".join(mids))}"'
+    return f'{who} data-tier-{test}="{ts.pop()}"'
+
+
+def tier_span(test: str, mid: str, text: str | None = None) -> str:
+    """'tier 1 of 2' (or `text`) as a verified claim; empty when the test has no tiers for the model."""
+    t = tier_of(test, mid)
+    if t is None:
+        return ""
+    return f'<span class="tier"{tier_attrs(test, mid)}>{esc(text or f"tier {t} of {n_tiers(test)}")}</span>'
+
+
+def tier_sort(test: str):
+    """Sort key: tier first, then newest first. Inside a tier the resamples support no order."""
+    return lambda m: (tier_of(test, m["model"]["id"]) or 99, _neg_date(first_public(m)), m["model"]["id"])
+
+
+def _neg_date(d: str) -> tuple:
+    return tuple(-ord(c) for c in d)
+
+
+def tier_rule() -> str:
+    """The one line that says how tiers are formed."""
+    reps = next((t.get("resamples") for t in TIERS.values()), ranking.TIER_REPS)
+    p = next((t.get("p_separate") for t in TIERS.values()), ranking.TIER_P)
+    return (f"Tiers come from {reps} resamples of whole drives: a model sits in a higher tier only when it beat every "
+            f"model in the lower tiers in at least {round(p * 100)}% of them. Within a tier, newest first.")
 
 
 # ---------------------------------------------------------------- page shell
@@ -408,26 +454,28 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 
 # ---------------------------------------------------------------- per-model verdict and bars
 
-def verdict_line(m: dict, models: list[dict], cfg: dict, root: Path | None = None) -> str:
-    """Factual summary for every model: G55 composite rank & score, closed-loop 2 s median, recovery,
-    and open-loop lateral error."""
+def verdict_line(m: dict, models: list[dict], cfg: dict, root: Path | None = None, as_html: bool = True) -> str:
+    """Factual summary for every model: G55 score and its tier, closed-loop 2 s median, open-loop lateral
+    error. HTML (the tier is a verified claim), or plain text without the tier for page descriptions."""
     over = cfg.get("verdicts", {}).get(m["model"]["id"])
     if over:
-        return fill(over, models, root or EVAL)
+        t = fill(over, models, root or EVAL)
+        return esc(t) if as_html else t
     mid = m["model"]["id"]
     ref = cfg["reference_model"]
     comp = ranking.g55_composite(models, ranking.truck_scores(root or EVAL))
     cs = comp.get(mid, {})
-    n_cl = sum(1 for v in comp.values() if v.get("rank") is not None)
-    n_ol = sum(1 for v in comp.values() if v.get("ol_rank") is not None)
 
-    out = []
+    out, tier = [], ""
     if mid == ref:
         out.append("Reference 877M model (July 2026); the G55 drives with it.")
-    if cs.get("rank") is not None and cs.get("score") is not None:
-        out.append(f'Ranked #{cs["rank"]} of {n_cl} in G55 closed loop (G55 score {num(cs["score"], 1)}/100).')
-    elif cs.get("ol_rank") is not None:
-        out.append(f'Ranked #{cs["ol_rank"]} of {n_ol} in G55 open loop.')
+    if cs.get("score") is not None:
+        if as_html and tier_of("composite", mid):
+            tier = f'G55 score {num(cs["score"], 1)}/100, {tier_span("composite", mid)}.'
+        else:
+            out.append(f'G55 score {num(cs["score"], 1)}/100.')
+    elif as_html and tier_of("openloop", mid):
+        tier = f'G55 open loop {tier_span("openloop", mid)}.'
 
     x2, _ = find_metric(m, "truck_closed_loop", "xtrack_2s")
     if x2 and x2.get("median") is not None:
@@ -445,7 +493,10 @@ def verdict_line(m: dict, models: list[dict], cfg: dict, root: Path | None = Non
 
     if mid == "96244b1f_12800":
         out.append("Navigation inputs fed zeros.")
-    return " ".join(out)
+    if not as_html:
+        return " ".join(out)
+    head = [esc(out.pop(0))] if mid == ref else []
+    return " ".join(head + ([tier] if tier else []) + [esc(x) for x in out])
 
 
 def bar_scale(models, section, key) -> float:
@@ -495,10 +546,11 @@ def model_list(models: list[dict], cfg: dict, root: Path) -> str:
         md = m["model"]
         cs = comp.get(mid, {})
         rk_badge = ""
-        if cs.get("rank") is not None:
-            rk_badge = f'<span class="m-rk-pill">#{cs["rank"]} G55 ({num(cs["score"], 1)})</span>'
-        elif cs.get("ol_rank") is not None:
-            rk_badge = f'<span class="m-rk-pill m-rk-ol">OL #{cs["ol_rank"]}</span>'
+        if cs.get("score") is not None and tier_of("composite", mid):
+            rk_badge = (f'<span class="m-rk-pill"{tier_attrs("composite", mid)}>G55 tier {tier_of("composite", mid)} '
+                        f'({num(cs["score"], 1)})</span>')
+        elif tier_of("openloop", mid):
+            rk_badge = f'<span class="m-rk-pill m-rk-ol"{tier_attrs("openloop", mid)}>Open-loop tier {tier_of("openloop", mid)}</span>'
         arch_bits = []
         if md.get("params_m") is not None:
             arch_bits.append(f'{num(md["params_m"], 0)}M params')
@@ -510,7 +562,7 @@ def model_list(models: list[dict], cfg: dict, root: Path) -> str:
         rows.append(
             f'<li class="mrow"><div class="m-id"><h3>{name_html(m, f"models/{mid}.html")} {rk_badge}</h3>'
             f'<p class="m-st"><span class="m-date">{esc(first_public(m))}</span> {esc(status_text(m))}</p>{arch_html}</div>'
-            f'<p class="m-v">{esc(verdict_line(m, models, cfg, root))}</p>'
+            f'<p class="m-v">{verdict_line(m, models, cfg, root)}</p>'
             f'<div class="m-bars">{bars(m, models, cfg, KEY_METRICS, scales, True)}</div></li>')
     head = ('<div class="mlist-head" aria-hidden="true"><span>Model &amp; architecture</span><span>Summary</span>'
             '<span>G55 key metrics; green tick = lebowski</span></div>')
@@ -749,66 +801,11 @@ def dot_track(s, c, top, unit_word, label) -> str:
             + f'{cm(s["median"])} cm</span></div>')
 
 
-MEDAL = {1: "🥇", 2: "🥈", 3: "🥉"}
-
-
-def kpi_strip(models: list[dict], cfg: dict, root: Path) -> str:
-    """Four high-signal summary cards above the leaderboard: #1 G55 model, shipped release, latest scored, and corpus scope."""
-    idx = by_id(models)
-    trk = ranking.truck_scores(root)
-    comp = ranking.g55_composite(models, trk)
-    ranked_ids = sorted((mid for mid, d in comp.items() if d.get("rank") is not None), key=lambda mid: comp[mid]["rank"])
-    latest = max(models, key=lambda m: (scored_at(m), first_public(m), m["model"]["id"]))
-    shipped_models = [m for m in models if m["model"]["id"] in comp and comp[m["model"]["id"]].get("rank") is not None and shipped(m) and m["model"]["id"] != cfg["reference_model"]]
-    best_shipped = min(shipped_models, key=lambda m: comp[m["model"]["id"]]["rank"]) if shipped_models else None
-
-    cards = []
-    if ranked_ids:
-        top_id = ranked_ids[0]
-        top_m = idx[top_id]
-        ts = comp[top_id]
-        wr = f' · {ts["win_rate"]*100:.0f}% window wins' if ts.get("win_rate") is not None else ""
-        cards.append(
-            f'<div class="kpi-card kpi-gold"><span class="kpi-k">🥇 #1 on G55 (composite)</span>'
-            f'<strong class="kpi-v">{name_html(top_m, f"models/{top_id}.html")}</strong>'
-            f'<span class="kpi-s">G55 score <b>{num(ts["score"], 1)}</b>/100 · {cm(ts["cl_median"])} cm at 2 s{esc(wr)}</span></div>'
-        )
-    if best_shipped:
-        sid = best_shipped["model"]["id"]
-        ss = comp[sid]
-        cards.append(
-            f'<div class="kpi-card"><span class="kpi-k">Best shipped / master model</span>'
-            f'<strong class="kpi-v">{name_html(best_shipped, f"models/{sid}.html")}</strong>'
-            f'<span class="kpi-s">Ranked <b>#{ss["rank"]}</b> of {len(ranked_ids)} · G55 score <b>{num(ss["score"], 1)}</b> · {cm(ss["cl_median"])} cm at 2 s</span></div>'
-        )
-    lid = latest["model"]["id"]
-    ls = comp.get(lid, {})
-    l_rk = f'Ranked #{ls["rank"]} ({num(ls["score"], 1)}/100) · {cm(ls["cl_median"])} cm at 2 s' if ls.get("rank") else f'First public {first_public(latest)}'
-    cards.append(
-        f'<div class="kpi-card"><span class="kpi-k">Newest scored ({esc(scored_at(latest)[:10])})</span>'
-        f'<strong class="kpi-v">{name_html(latest, f"models/{lid}.html")}</strong>'
-        f'<span class="kpi-s">{esc(l_rk)}</span></div>'
-    )
-    nw_cl, nd_cl = g55_counts(models)
-    secs_ol = [s for s in ((m["sections"].get("truck_open_loop") or {}) for m in models) if s.get("status") == "ok"]
-    nw_ol = max((s.get("n", 0) for s in secs_ol), default=0)
-    nd_ol = max((s.get("clusters", 0) for s in secs_ol), default=0)
-    cards.append(
-        f'<div class="kpi-card"><span class="kpi-k">G55 benchmark corpus</span>'
-        f'<strong class="kpi-v">{len(models)} models ({len(ranked_ids)} closed loop)</strong>'
-        f'<span class="kpi-s">{nw_cl} closed-loop windows ({nd_cl} drives) · {nw_ol} open-loop ({nd_ol} drives) · 5 camera setups</span></div>'
-    )
-    return f'<div class="kpi-strip">{"".join(cards)}</div>'
-
-
 def g55_table(models, cfg, root) -> str:
-    """The front page's interactive multi-metric leaderboard:
-    - Ranks every G55 closed-loop model 1..N (strict ordinal rank, never 8 models tied at #1) by the
-      4-pillar G55 Composite Score (0–100) by default.
-    - Interactive tabs and clickable column headers re-rank by: Composite Score, Closed Loop (2 s),
-      2° Heading Recovery, 0.5 m Offset Recovery, Closed-Loop Smoothness (Jerk), Open Loop (all 18 models),
-      or Newest First.
-    - Includes a toggle to expand the 9 historical open-loop-only releases (2023–2026)."""
+    """The front page's leaderboard. Rows are grouped by tier (`TIERS`, from drive resamples), newest first
+    inside a tier; the first column is the tier, never a place. Tabs and column headers switch which test's
+    tiers group the rows (G55 score, closed loop at 2 s, 2° heading, 0.5 m offset, smoothness, open loop
+    over every model) or list the models newest first. A toggle shows the open-loop-only releases."""
     ref = cfg["reference_model"]
     trk_doc = ranking.truck_scores(root) or {"models": {}}
     t = trk_doc["models"]
@@ -837,7 +834,7 @@ def g55_table(models, cfg, root) -> str:
     cl_models = [m for m in models if m["model"]["id"] in t]
     ol_only_models = [m for m in models if m["model"]["id"] not in t and (m["sections"].get("truck_open_loop") or {}).get("status") == "ok"]
 
-    cl_models.sort(key=lambda m: (comp[m["model"]["id"]].get("rank") or 999, t[m["model"]["id"]]["median"]))
+    cl_models.sort(key=tier_sort("composite"))
     ol_only_models.sort(key=lambda m: (first_public(m), m["model"]["id"]), reverse=True)
 
     all_shown = cl_models + ol_only_models
@@ -862,10 +859,9 @@ def g55_table(models, cfg, root) -> str:
         raw_v = float(x.get(stat, x["value"]))
         lo, hi = span_pair
         h = (hi - raw_v) / (hi - lo) if hi > lo else 0.5
-        best = " gt-best" if abs(raw_v - lo) < 1e-9 and len(cl_models) > 1 else ""
         tip = f'{plain_name(m)}, {label_attr}: {num(raw_v * scale, dec)} {unit_str}{tip_extra}'
         return (
-            f'<span class="gt-mcell{best}" data-col="{col_key}" data-l="{label_attr}" '
+            f'<span class="gt-mcell" data-col="{col_key}" data-l="{label_attr}" '
             f'style="--h:{h:.2f}" tabindex="0" data-tip="{esc(tip)}" aria-label="{esc(tip)}">'
             f'<strong>{num(raw_v * scale, dec)}</strong><small class="gt-mu"> {esc(unit_str)}</small>'
             f'</span>'
@@ -877,10 +873,9 @@ def g55_table(models, cfg, root) -> str:
         md = m["model"]
         cs = comp.get(mid, {})
         has_cl = mid in t
-        pl = cs.get("rank") if has_cl else cs.get("ol_rank", 99)
-        med = MEDAL.get(pl, "") if has_cl else ""
-        tier = f" gt-m{pl}" if (has_cl and med) else ""
         c_cls = model_class(m, cfg)
+        tiers = "".join(f' data-tier-{k}="{tier_of(k, mid)}"' for k in ranking.TESTS if tier_of(k, mid))
+        t0 = tier_of("composite", mid) if has_cl else None
 
         tags = []
         if first_public(m) == newest:
@@ -922,12 +917,8 @@ def g55_table(models, cfg, root) -> str:
                 f'</div>'
             )
         else:
-            ol_rk = cs.get("ol_rank")
-            score_cell = (
-                f'<div class="gt-score gt-na" data-col="composite" data-l="G55 Score">'
-                f'<span class="gt-ol-badge">OL #{ol_rk if ol_rk else "–"}</span>'
-                f'</div>'
-            )
+            score_cell = ('<div class="gt-score gt-na" data-col="composite" data-l="G55 Score">'
+                          '<span class="gt-ol-badge">open loop only</span></div>')
 
         # Column 4: Single-line Closed-Loop 2s track (bar on left, clean value + CI on right)
         if has_cl:
@@ -969,8 +960,8 @@ def g55_table(models, cfg, root) -> str:
 
         ol_only_attr = "" if has_cl else ' data-ol-only="true" hidden'
         rows.append(
-            f'<div class="gt-row{tier}{" gt-ref" if mid == ref else ""}{" gt-ol-row" if not has_cl else ""}"'
-            f' data-place="{pl}"'
+            f'<div class="gt-row{" gt-ref" if mid == ref else ""}{" gt-ol-row" if not has_cl else ""}"'
+            f' data-model="{esc(mid)}"{tiers}'
             f' data-has-cl="{"1" if has_cl else "0"}"'
             f' data-composite="{cs["score_raw"] if cs.get("score_raw") is not None else -1:.4f}"'
             f' data-cl2s="{cl_val if cl_val is not None else 999:.6f}"'
@@ -979,7 +970,7 @@ def g55_table(models, cfg, root) -> str:
             f' data-jerk="{v_jrk if v_jrk is not None else 999:.6f}"'
             f' data-openloop="{v_ol if v_ol is not None else 999:.6f}"'
             f' data-date="{esc(first_public(m))}"{ol_only_attr}>'
-            f'<span class="gt-rk" aria-label="place {pl}">{med or pl}</span>'
+            f'<span class="gt-rk" aria-label="{f"tier {t0}" if t0 else "no tier"}">{t0 or "–"}</span>'
             f'<div class="gt-name">'
             f'<div class="gt-nm"><span class="sw sw-{c_cls}" aria-hidden="true"></span>{name_html(m, "models/" + mid + ".html")}{"".join(tags)}</div>'
             f'<span class="gt-d">{" · ".join(meta_parts)}</span>'
@@ -991,14 +982,14 @@ def g55_table(models, cfg, root) -> str:
     ticks = "".join(f'<span class="rk-tk gt-tk" style="left:{x / top * 100:.2f}%">{x}</span>' for x in range(0, top + 1, tick_step(top)))
     head = (
         '<div class="gt-row gt-head" role="row">'
-        '<span>#</span>'
+        '<span>Tier</span>'
         '<span>Model</span>'
-        '<button type="button" class="gt-th is-active" data-sort="composite" title="Sort by G55 Composite Score (higher is better)"><span class="th-top">G55 Score <i aria-hidden="true">↓</i></span><span class="th-sub">0–100 index</span></button>'
-        f'<div class="gt-th-cl"><button type="button" class="gt-th" data-sort="cl2s" title="Sort by closed-loop 2 s median distance (lower is better)"><span class="th-top">Closed loop at 2 s <i aria-hidden="true">↑</i></span><span class="th-sub">cm from path · dashed = lebowski</span></button><div class="rk-axis" aria-hidden="true">{ticks}</div></div>'
-        '<button type="button" class="gt-th gt-th-r" data-sort="heading" title="Sort by 2° heading recovery at 2 s (lower is better)"><span class="th-top">2° Heading <i aria-hidden="true">↑</i></span><span class="th-sub">2 s median</span></button>'
-        '<button type="button" class="gt-th gt-th-r" data-sort="offset" title="Sort by 0.5 m offset recovery at 2 s (lower is better)"><span class="th-top">0.5 m Offset <i aria-hidden="true">↑</i></span><span class="th-sub">2 s median</span></button>'
-        '<button type="button" class="gt-th gt-th-r" data-sort="jerk" title="Sort by closed-loop lateral jerk RMS (lower is smoother)"><span class="th-top">Smoothness <i aria-hidden="true">↑</i></span><span class="th-sub">CL jerk</span></button>'
-        '<button type="button" class="gt-th gt-th-r" data-sort="openloop" title="Sort all 18 models by open-loop lateral error (lower is better)"><span class="th-top">Open Loop <i aria-hidden="true">↑</i></span><span class="th-sub">lat error</span></button>'
+        '<button type="button" class="gt-th is-active" data-sort="composite" title="Group by G55 score tiers (higher is better)"><span class="th-top">G55 Score <i aria-hidden="true">↓</i></span><span class="th-sub">0–100 index</span></button>'
+        f'<div class="gt-th-cl"><button type="button" class="gt-th" data-sort="cl2s" title="Group by closed-loop 2 s tiers (lower is better)"><span class="th-top">Closed loop at 2 s <i aria-hidden="true">↑</i></span><span class="th-sub">cm from path · dashed = lebowski</span></button><div class="rk-axis" aria-hidden="true">{ticks}</div></div>'
+        '<button type="button" class="gt-th gt-th-r" data-sort="heading" title="Group by 2° heading tiers at 2 s (lower is better)"><span class="th-top">2° Heading <i aria-hidden="true">↑</i></span><span class="th-sub">2 s median</span></button>'
+        '<button type="button" class="gt-th gt-th-r" data-sort="offset" title="Group by 0.5 m offset tiers at 2 s (lower is better)"><span class="th-top">0.5 m Offset <i aria-hidden="true">↑</i></span><span class="th-sub">2 s median</span></button>'
+        '<button type="button" class="gt-th gt-th-r" data-sort="jerk" title="Group by closed-loop lateral jerk tiers (lower is smoother)"><span class="th-top">Smoothness <i aria-hidden="true">↑</i></span><span class="th-sub">CL jerk</span></button>'
+        '<button type="button" class="gt-th gt-th-r" data-sort="openloop" title="Group every model by open-loop lateral error tiers (lower is better)"><span class="th-top">Open Loop <i aria-hidden="true">↑</i></span><span class="th-sub">lat error</span></button>'
         '</div>'
     )
 
@@ -1026,7 +1017,7 @@ def g55_table(models, cfg, root) -> str:
 <span>Score bar: <i class="sb-dot sb-path"></i>Path 40% <i class="sb-dot sb-rec"></i>Recovery 25% <i class="sb-dot sb-ol"></i>Open-Loop 20% <i class="sb-dot sb-sm"></i>Smoothness 15%</span>
 </p>
 </div>
-<div class="gt-sort" role="group" aria-label="Rank models by">
+<div class="gt-sort" role="group" aria-label="Group models by the tiers of">
 <button type="button" aria-pressed="true" data-sort="composite">G55 Score</button>
 <button type="button" aria-pressed="false" data-sort="cl2s">Closed Loop 2s</button>
 <button type="button" aria-pressed="false" data-sort="heading">2° Heading</button>
@@ -1039,7 +1030,8 @@ def g55_table(models, cfg, root) -> str:
 </figcaption>
 <div class="gt-scroll">{head}<div class="gt-body">{"".join(rows)}</div></div>
 {more_btn}
-<p class="gt-note"><strong>How the ranking works:</strong> Each closed-loop model runs {nw} G55 windows from {nd} drives across 3 closed-loop tests in <code>worldmodel-4B</code> with the G55's measured steering and powertrain response (nominal start, 2° heading error, 0.5 m lateral offset) plus {ol_counts(models)[:-1]} in open loop. The <strong>G55 Score</strong> (0–100, higher is better) weights closed-loop path keeping at 2 s (40%: 25% median + 15% mean), disturbance recovery at 2 s (25%: 12.5% heading + 12.5% offset), open-loop lateral error across all {len(all_shown)} models (20%), and closed-loop lateral jerk RMS (15%). In the metric columns, lower is better; <code>[lo, hi]</code> is the 95% drive-clustered bootstrap interval, and {mark("better")} marks a paired difference from lebowski whose 95% interval excludes zero. <a href="method.html">Full method</a>.</p>
+<p class="gt-note"><strong>Tiers.</strong> {esc(tier_rule())}</p>
+<p class="gt-note">Each closed-loop model runs {nw} G55 windows from {nd} drives in <code>worldmodel-4B</code> with the G55's measured steering and powertrain response (nominal start, 2° heading error, 0.5 m lateral offset), plus {ol_counts(models)[:-1]} in open loop. The <strong>G55 score</strong> (0 to 100, higher is better) weights closed-loop path keeping at 2 s (40%: 25% median, 15% mean), recovery at 2 s (25%: 12.5% heading, 12.5% offset), open-loop lateral error across all {len(all_shown)} models (20%) and closed-loop lateral jerk RMS (15%). In the metric columns lower is better; <code>[lo, hi]</code> is the 95% interval from resampling drives. <a href="method.html">Full method</a>.</p>
 </figure>"""
 
 
@@ -1056,7 +1048,6 @@ def camera_setups_section(models: list[dict], cfg: dict, root: Path) -> str:
     if not has_bg:
         return ""
 
-    comp = ranking.g55_composite(models, ranking.truck_scores(root))
     views = [
         ("cl2s", "Closed Loop (2 s, cm)", "truck_closed_loop", "xtrack_2s", "median", 100.0, 1, "cm", True),
         ("heading", "2° Heading Recovery (cm)", "truck_recovery", "heading_xtrack_2s", "median", 100.0, 1, "cm", True),
@@ -1075,10 +1066,7 @@ def camera_setups_section(models: list[dict], cfg: dict, root: Path) -> str:
 
         # Find which models have this section
         pool = [m for m in models if (m["sections"].get(sec_name) or {}).get("status") == "ok"]
-        if cl_only:
-            pool.sort(key=lambda m: (comp.get(m["model"]["id"], {}).get("rank") or 999, first_public(m)))
-        else:
-            pool.sort(key=lambda m: (comp.get(m["model"]["id"], {}).get("ol_rank") or 999, first_public(m)))
+        pool.sort(key=tier_sort(vkey))
 
         # Compute column spans for heat shading
         col_spans = {}
@@ -1121,8 +1109,7 @@ def camera_setups_section(models: list[dict], cfg: dict, root: Path) -> str:
                 pv = float(xm.get(stat, xm["value"]))
                 lo, hi = col_spans["pooled"]
                 h = (hi - pv) / (hi - lo) if hi > lo else 0.5
-                best = " gt-best" if abs(pv - lo) < 1e-9 else ""
-                p_cell = f'<td class="n setup-c{best}" style="--h:{h:.2f}">{num(pv * scale, dec)} <span class="gt-mu">{esc(unit_str)}</span></td>'
+                p_cell = f'<td class="n setup-c" style="--h:{h:.2f}">{num(pv * scale, dec)} <span class="gt-mu">{esc(unit_str)}</span></td>'
             else:
                 p_cell = '<td class="na">—</td>'
 
@@ -1134,8 +1121,7 @@ def camera_setups_section(models: list[dict], cfg: dict, root: Path) -> str:
                     gv = float(gm.get(stat, gm["value"]))
                     lo, hi = col_spans[gkey]
                     h = (hi - gv) / (hi - lo) if hi > lo else 0.5
-                    best = " gt-best" if abs(gv - lo) < 1e-9 else ""
-                    g_cells.append(f'<td class="n setup-c{best}" style="--h:{h:.2f}">{num(gv * scale, dec)}</td>')
+                    g_cells.append(f'<td class="n setup-c" style="--h:{h:.2f}">{num(gv * scale, dec)}</td>')
                 else:
                     g_cells.append('<td class="na">—</td>')
 
@@ -1155,7 +1141,7 @@ def camera_setups_section(models: list[dict], cfg: dict, root: Path) -> str:
 <div class="sec-head">
 <div>
 <h2>Scores by camera setup</h2>
-<p class="sub">The G55 test drives cover 5 camera mounts and lens combinations. Each column shows a single setup beside the pooled score across all drives. Lower is better; bold marks the best model in each column.</p>
+<p class="sub">The G55 test drives cover 5 camera mounts and lens combinations. Each column shows a single setup beside the pooled score across all drives. Lower is better. Rows follow the pooled tiers of the tab's test, newest first within a tier.</p>
 </div>
 <div class="setup-tabs" role="tablist" aria-label="Metric by camera setup">{"".join(tabs)}</div>
 </div>
@@ -1166,22 +1152,21 @@ def camera_setups_section(models: list[dict], cfg: dict, root: Path) -> str:
 # ---------------------------------------------------------------- harness check & living parts
 
 def public_chart(models, cfg, root) -> str:
-    """comma's public segments in closed loop: median distance at 2 s, interval, ordinal rank."""
+    """comma's public segments in closed loop: median distance at 2 s, interval and tier (from the CSVs)."""
     r = ranking.scores(root)["models"]
     if not r:
         return ""
     top = top_cm(r)
-    ranked = sorted((m for m in models if m["model"]["id"] in r), key=lambda m: (r[m["model"]["id"]]["rank"], r[m["model"]["id"]]["median"]))
+    ranked = sorted((m for m in models if m["model"]["id"] in r), key=tier_sort("public_cl2s"))
     rows = []
     for m in ranked:
         mid = m["model"]["id"]
         s = r[mid]
-        rk = s["rank"]
-        med = MEDAL.get(rk, str(rk))
+        t = tier_of("public_cl2s", mid)
         wr = f'<span class="rk-wr">{s["win_rate"]*100:.0f}% win rate</span>' if s.get("win_rate") is not None else ""
         rows.append(
-            f'<div class="rk-row">'
-            f'<span class="rk-ord">{med}</span>'
+            f'<div class="rk-row"{tier_attrs("public_cl2s", mid)}>'
+            f'<span class="rk-ord" aria-label="{f"tier {t}" if t else "no tier"}">{t or "–"}</span>'
             f'<div class="rk-name"><span class="rk-sw sw-{model_class(m, cfg)}" aria-hidden="true"></span>'
             f'<div>{name_html(m, "models/" + mid + ".html")}{wr}</div></div>'
             f'{dot_track(s, model_class(m, cfg), top, "segments", plain_name(m))}</div>'
@@ -1190,8 +1175,8 @@ def public_chart(models, cfg, root) -> str:
     ticks = "".join(f'<span class="rk-tk" style="left:{t / top * 100:.2f}%">{t}</span>' for t in range(0, top + 1, tick_step(top)))
     return f"""<figure class="rk rk-pub" aria-labelledby="rkp-t">
 <figcaption class="rk-cap"><p id="rkp-t" class="fig-t">Closed-loop path error at 2 s on comma's public segments</p>
-<p>{any_s["n"]} public segments across {any_s["clusters"]} drives using comma's ideal car in <code>worldmodel-4B</code>. Bars show the 2 s median and 95% drive-clustered bootstrap interval.</p></figcaption>
-<div class="rk-head" aria-hidden="true"><span>#</span><span>Model</span><div class="rk-axis"><span class="rk-al">cm from recorded path at 2 s (public segments)</span>{ticks}</div></div>
+<p>{any_s["n"]} public segments across {any_s["clusters"]} drives using comma's ideal car in <code>worldmodel-4B</code>. Bars show the 2 s median and 95% drive-clustered bootstrap interval. {esc(tier_rule())}</p></figcaption>
+<div class="rk-head" aria-hidden="true"><span>Tier</span><span>Model</span><div class="rk-axis"><span class="rk-al">cm from recorded path at 2 s (public segments)</span>{ticks}</div></div>
 <div class="rk-rows">{"".join(rows)}</div>
 </figure>"""
 
@@ -1376,10 +1361,10 @@ def trend_panel(title, unit, kind, models, cfg, r, W=460, H=215) -> str:
     latest = ordered[-1] if ordered else None
     if latest:
         v, lo, hi, nw = vals[latest["model"]["id"]]
-        best_m = min(ordered, key=lambda m: vals[m["model"]["id"]][0])
-        bv = vals[best_m["model"]["id"]][0]
+        vs = sorted(vals[m["model"]["id"]][0] for m in ordered)
         d_fmt = 1 if unit == "cm" else (3 if unit == "m/s²" else 2)
-        cap = f'Best: <strong>{esc(short_name(best_m))}</strong> ({num(bv, d_fmt)} {esc(unit)}) · Newest: <strong>{esc(short_name(latest))}</strong> ({num(v, d_fmt)} {esc(unit)})'
+        cap = (f'Newest: <strong>{esc(short_name(latest))}</strong> ({num(v, d_fmt)} {esc(unit)}) · '
+               f'{len(vs)} models: {num(vs[0], d_fmt)} to {num(vs[-1], d_fmt)} {esc(unit)}')
         if line and not is_wins(kind):
             cap += f' · lebowski {num(line[0], d_fmt)} {esc(unit)}'
     else:
@@ -1497,8 +1482,8 @@ def log_feed(models, root) -> str:
             body += f' <a class="lg-c" href="{esc(link)}">{esc(lab or "link")}</a>'
         rows.append(f'<li class="lg-{kind}"><time datetime="{date}"{rep}>{date}</time><span class="lg-k">{ {"change": "suite", "scored": "scored", "model": "model"}[kind]}</span><span>{body}</span></li>')
     head, rest = rows[:12], rows[12:]
-    more = f'<details class="lg-more"><summary>{len(rest)} earlier entries</summary><ol class="log">{"".join(rest)}</ol></details>' if rest else ""
-    return f'<ol class="log">{"".join(head)}</ol>{more}'
+    more = f'<details class="lg-more"><summary>{len(rest)} earlier entries</summary><ol class="log" data-history>{"".join(rest)}</ol></details>' if rest else ""
+    return f'<ol class="log" data-history>{"".join(head)}</ol>{more}'
 
 
 # ---------------------------------------------------------------- overview
@@ -1509,15 +1494,12 @@ def findings_section(models: list[dict], cfg: dict, root: Path) -> str:
     idx = by_id(models)
     ref_m = idx.get(ref_id)
     comp_models = ranking.g55_composite(models, ranking.truck_scores(root))
-    ranked_ids = sorted(
-        (mid for mid, d in comp_models.items() if d.get("rank") is not None),
-        key=lambda mid: comp_models[mid]["rank"],
-    )
+
     def _find_metric(m_doc: dict, sec_name: str, key: str) -> dict | None:
         return find_metric(m_doc, sec_name, key)[0]
 
-
-    cl_models = [idx[mid] for mid in ranked_ids if mid in idx]
+    cl_models = sorted((idx[mid] for mid, d in comp_models.items() if d.get("score") is not None and mid in idx),
+                       key=tier_sort("composite"))
     ol_models = [
         m for m in models
         if (m["sections"].get("truck_open_loop") or {}).get("status") == "ok"
@@ -1544,138 +1526,130 @@ def findings_section(models: list[dict], cfg: dict, root: Path) -> str:
     def m_a(m: dict) -> str:
         return f'<a class="mlink" href="models/{esc(m["model"]["id"])}.html"><strong>{esc(short_name(m))}</strong></a>'
 
-    # 1. Composite Ranking & Podium
-    m1, m2, m3 = cl_models[0], cl_models[1], cl_models[2]
-    s1 = comp_models[m1["model"]["id"]]["score"]
-    s2 = comp_models[m2["model"]["id"]]["score"]
-    s3 = comp_models[m3["model"]["id"]]["score"]
-    s_ref = comp_models.get(ref_id, {}).get("score", 0.0)
-    newest_cl = max(cl_models, key=first_public)
-    s_new = comp_models[newest_cl["model"]["id"]]
-    shipped_cl = [m for m in cl_models if m["model"]["id"] != ref_id and (m["model"]["source"]["kind"] in ("release", "openpilot-master") or m["model"].get("on_master"))]
-    top_ship = shipped_cl[0] if shipped_cl else m1
-    s_ship = comp_models[top_ship["model"]["id"]]
+    def val(sec_name, key, stat):
+        return lambda mid: (_find_metric(idx[mid], sec_name, key) or {}).get(stat)
 
+    def tier_lines(test, value, fmt, unit="") -> str:
+        """One verified claim per tier: the names when a tier has three models or fewer, else the count,
+        and the range of the site's own values."""
+        out = []
+        for k, ms in enumerate((TIERS.get(test) or {}).get("tiers") or [], 1):
+            ms = [x for x in ms if x in idx]
+            vs = sorted(v for v in (value(x) for x in ms) if v is not None)
+            if not ms or not vs:
+                continue
+            rng = (fmt(vs[0]) if fmt(vs[0]) == fmt(vs[-1]) else f"{fmt(vs[0])} to {fmt(vs[-1])}") + unit
+            who = join_words([m_a(idx[x]) for x in sorted(ms, key=lambda x: first_public(idx[x]), reverse=True)]) \
+                if len(ms) <= 3 else f"{len(ms)} models"
+            out.append(f'<span class="tier"{tier_attrs(test, ms)}>Tier {k}: {who}, {rng}.</span>')
+        return " ".join(out)
+
+    def tiers_word(test) -> str:
+        n = n_tiers(test)
+        return "the resamples separate none of them" if n == 1 else f"{n} tiers"
+
+    reps = (TIERS.get("composite") or {}).get("resamples", ranking.TIER_REPS)
+
+    # 1. G55 score tiers
+    tc = TIERS.get("composite") or {}
+    newest_cl = max(cl_models, key=first_public)
+    top = tc.get("tiers", [[]])[0]
+    p12 = None
+    if len(top) >= 2:
+        hi1, hi2 = sorted(top, key=lambda x: -(comp_models[x]["score_raw"] or 0))[:2]
+        p12 = (idx[hi1], idx[hi2], tc["beats"][hi1][hi2])
     card1 = (
         '<li class="f-card">'
-        '<div class="f-top"><span class="f-kicker">Composite Ranking · 4 Pillars</span>'
-        f'<span class="f-fig">#{s_new["rank"] if newest_cl is m1 else 1} {esc(short_name(m1))} · {s1:.1f}<small>/100</small></span></div>'
-        f'<p class="f-lead">{m_a(m1)} (<strong>{s1:.1f}</strong>) leads {m_a(m2)} (<strong>{s2:.1f}</strong>) and {m_a(m3)} (<strong>{s3:.1f}</strong>) '
-        f'on the 4-pillar G55 score (40% path keeping, 25% recovery, 20% open loop, 15% smoothness). '
-        f'The July 2026 reference model {m_a(ref_m)} scores <strong>{s_ref:.1f}</strong>.</p>'
+        f'<div class="f-top"><span class="f-kicker">G55 score · {reps} drive resamples</span>'
+        f'<span class="f-fig">{n_tiers("composite")} tier{"s" if n_tiers("composite") != 1 else ""} <small>{len(cl_models)} models</small></span></div>'
+        f'<p class="f-lead">{tier_lines("composite", lambda x: comp_models[x]["score"], lambda v: f"{v:.1f}")}</p>'
         '<ul class="f-meta">'
-        f'<li><span>Newest model:</span> {m_a(newest_cl)} ({esc(first_public(newest_cl))}) ranks <strong>#{s_new["rank"]} of {len(cl_models)}</strong> ({s_new["score"]:.1f}/100).</li>'
-        f'<li><span>Top shipped / master model:</span> {m_a(top_ship)} ranks <strong>#{s_ship["rank"]} overall</strong> ({s_ship["score"]:.1f}/100).</li>'
+        + (f'<li><span{tier_attrs("composite", top)}>Inside tier 1:</span> {m_a(p12[0])} has the highest score and beat {m_a(p12[1])} in '
+           f'{p12[2] * 100:.0f}% of the resamples.</li>' if p12 else '')
+        + f'<li><span>Newest model:</span> {m_a(newest_cl)} ({esc(first_public(newest_cl))}), G55 score '
+          f'{comp_models[newest_cl["model"]["id"]]["score"]:.1f}, {tier_span("composite", newest_cl["model"]["id"])}.</li>'
         '</ul></li>'
     )
 
-    # 2. Closed-Loop Nominal Path Keeping (2 s & 4 s)
-    cl2_vals = [(m, _find_metric(m, "truck_closed_loop", "xtrack_2s")) for m in after_cl]
-    cl2_vals = [(m, x) for m, x in cl2_vals if x and x.get("median") is not None]
-    cl2_vals.sort(key=lambda t: t[1]["median"])
-    best_cl2_m, best_cl2_x = cl2_vals[0]
-    worst_cl2_m, worst_cl2_x = cl2_vals[-1]
-    ref_cl2_x = _find_metric(ref_m, "truck_closed_loop", "xtrack_2s") or {}
-    best_cl2_p = (best_cl2_x.get("paired") or {}).get(ref_id) or {}
-    win_pct = round(best_cl2_p["wins"] / best_cl2_p["n"] * 100) if best_cl2_p.get("wins") is not None and best_cl2_p.get("n") else None
-    delta_cm = (best_cl2_p.get("delta") or 0.0) * 100
-
-    cl4_vals = [(m, _find_metric(m, "truck_closed_loop", "xtrack_4s")) for m in after_cl]
-    cl4_vals = [(m, x) for m, x in cl4_vals if x and x.get("median") is not None]
-    cl4_vals.sort(key=lambda t: t[1]["median"])
-    best_cl4_m, best_cl4_x = cl4_vals[0]
-    worst_cl4_x = cl4_vals[-1][1]
-    ref_cl4_x = _find_metric(ref_m, "truck_closed_loop", "xtrack_4s") or {}
-
+    # 2. Closed loop, nominal path at 2 s and 4 s
+    cl2 = val("truck_closed_loop", "xtrack_2s", "median")
+    cl4 = val("truck_closed_loop", "xtrack_4s", "median")
+    cl2_v = sorted(cl2(m["model"]["id"]) for m in cl_models)
+    cl4_v = sorted(cl4(m["model"]["id"]) for m in cl_models if cl4(m["model"]["id"]) is not None)
+    closer = [m for m in cl_models if m["model"]["id"] != ref_id
+              and ((((_find_metric(m, "truck_closed_loop", "xtrack_2s") or {}).get("paired") or {}).get(ref_id) or {}).get("ci") or [0, 0])[1] < 0]
     card2 = (
         '<li class="f-card">'
-        f'<div class="f-top"><span class="f-kicker">Closed Loop · Nominal Path ({nw_cl} windows, {nd_cl} drives)</span>'
-        f'<span class="f-fig">{best_cl2_x["median"] * 100:.1f}–{worst_cl2_x["median"] * 100:.1f} cm <small>vs {ref_cl2_x.get("median", 0) * 100:.1f} cm ref</small></span></div>'
-        f'<p class="f-lead">All {len(after_cl)} models released after {m_a(ref_m)} ({ref_cl2_x.get("median", 0) * 100:.1f} cm) track the recorded G55 path more closely at 2 s. '
-        f'{m_a(best_cl2_m)} has the lowest 2 s median at <strong>{best_cl2_x["median"] * 100:.1f} cm</strong> '
-        f'(<strong>{delta_cm:+.1f} cm</strong> paired mean vs lebowski'
-        + (f', winning <strong>{win_pct}%</strong> of windows' if win_pct is not None else '') + ').</p>'
+        f'<div class="f-top"><span class="f-kicker">Closed loop · Nominal path ({nw_cl} windows, {nd_cl} drives)</span>'
+        f'<span class="f-fig">{cl2_v[0] * 100:.1f}–{cl2_v[-1] * 100:.1f} cm <small>medians at 2 s</small></span></div>'
+        f'<p class="f-lead">Median distance from the recorded path at 2 s for {len(cl_models)} models: {tiers_word("cl2s")}. '
+        f'{tier_lines("cl2s", cl2, lambda v: f"{v * 100:.1f}", " cm") if n_tiers("cl2s") > 1 else ""}</p>'
         '<ul class="f-meta">'
-        f'<li><span>4 s horizon:</span> Medians span <strong>{best_cl4_x["median"] * 100:.1f}–{worst_cl4_x["median"] * 100:.1f} cm</strong> ({m_a(best_cl4_m)} {best_cl4_x["median"] * 100:.1f} cm vs lebowski {ref_cl4_x.get("median", 0) * 100:.1f} cm).</li>'
-        f'<li><span>Largest post-lebowski drift at 2 s:</span> {m_a(worst_cl2_m)} at <strong>{worst_cl2_x["median"] * 100:.1f} cm</strong> median ({worst_cl2_x.get("value", 0) * 100:.1f} cm mean).</li>'
-        '</ul></li>'
+        f'<li><span>Mean difference from lebowski, paired on the same windows:</span> {len(closer)} of {len(cl_models) - 1} models '
+        f'are closer to the path, with the 95% interval below zero.</li>'
+        + (f'<li><span>4 s horizon:</span> medians {cl4_v[0] * 100:.1f}–{cl4_v[-1] * 100:.1f} cm; lebowski '
+           f'{(cl4(ref_id) or 0) * 100:.1f} cm.</li>' if cl4_v else '')
+        + '</ul></li>'
     )
 
-    # 3. Disturbance Recovery vs Nominal Path Trade-Off
-    rec_sorted = sorted(
-        cl_models,
-        key=lambda m: comp_models[m["model"]["id"]]["pillars"].get("recovery", 0.0),
-        reverse=True,
-    )
-    r1, r2, r_slow = rec_sorted[0], rec_sorted[1], rec_sorted[-1]
-    r1_hdg = (_find_metric(r1, "truck_recovery", "heading_xtrack_2s") or {}).get("median", 0) * 100
-    r1_off = (_find_metric(r1, "truck_recovery", "offcentre_xtrack_2s") or {}).get("median", 0) * 100
-    r2_hdg = (_find_metric(r2, "truck_recovery", "heading_xtrack_2s") or {}).get("median", 0) * 100
-    r2_off = (_find_metric(r2, "truck_recovery", "offcentre_xtrack_2s") or {}).get("median", 0) * 100
-    rs_hdg = (_find_metric(r_slow, "truck_recovery", "heading_xtrack_2s") or {}).get("median", 0) * 100
-    rs_off = (_find_metric(r_slow, "truck_recovery", "offcentre_xtrack_2s") or {}).get("median", 0) * 100
-
+    # 3. Disturbance recovery at 2 s
+    hdg = val("truck_recovery", "heading_xtrack_2s", "median")
+    off = val("truck_recovery", "offcentre_xtrack_2s", "median")
+    hv = sorted(hdg(m["model"]["id"]) for m in cl_models if hdg(m["model"]["id"]) is not None)
+    ov = sorted(off(m["model"]["id"]) for m in cl_models if off(m["model"]["id"]) is not None)
+    both_one = n_tiers("heading") == 1 and n_tiers("offset") == 1
     card3 = (
         '<li class="f-card">'
-        '<div class="f-top"><span class="f-kicker">Closed Loop · Disturbance Recovery</span>'
-        f'<span class="f-fig">{r1_hdg:.1f} cm <small>2° heading</small> · {r1_off:.1f} cm <small>0.5 m offset</small></span></div>'
-        f'<p class="f-lead">{m_a(r1)} (<strong>{r1_hdg:.1f} cm</strong> / <strong>{r1_off:.1f} cm</strong>) and '
-        f'{m_a(r2)} (<strong>{r2_hdg:.1f} cm</strong> / <strong>{r2_off:.1f} cm</strong>) correct a 2° heading error or 0.5 m lateral offset fastest at 2 s. '
-        'Models tuned for smooth nominal tracking return more gradually.</p>'
-        '<ul class="f-meta">'
-        f'<li><span>Slowest recovery:</span> {m_a(r_slow)} averages <strong>{rs_hdg:.1f} cm</strong> (2° heading) and <strong>{rs_off:.1f} cm</strong> (0.5 m offset) at 2 s.</li>'
-        f'<li><span>Best post-lebowski recovery:</span> {m_a(r2 if r1 is ref_m else r1)} scores <strong>{comp_models[(r2 if r1 is ref_m else r1)["model"]["id"]]["pillars"]["recovery"]:.0f}/100</strong> on the recovery pillar.</li>'
+        '<div class="f-top"><span class="f-kicker">Closed loop · Disturbance recovery</span>'
+        f'<span class="f-fig">{hv[0] * 100:.1f}–{hv[-1] * 100:.1f} cm <small>2° heading</small> · '
+        f'{ov[0] * 100:.1f}–{ov[-1] * 100:.1f} cm <small>0.5 m offset</small></span></div>'
+        f'<p class="f-lead">Median distance from the path at 2 s after a 2° heading error or a 0.5 m offset. '
+        + ("The resamples separate no model on either test." if both_one else
+           f'2° heading: {tiers_word("heading")}. {tier_lines("heading", hdg, lambda v: f"{v * 100:.1f}", " cm")} '
+           f'0.5 m offset: {tiers_word("offset")}. {tier_lines("offset", off, lambda v: f"{v * 100:.1f}", " cm")}')
+        + '</p><ul class="f-meta">'
+        f'<li><span>lebowski:</span> {(hdg(ref_id) or 0) * 100:.1f} cm after the heading error, {(off(ref_id) or 0) * 100:.1f} cm after the offset.</li>'
         '</ul></li>'
     )
 
-    # 4. Control Smoothness & Steering Gain
-    jrk_vals = [(m, _find_metric(m, "truck_closed_loop", "lat_jerk")) for m in after_cl]
-    jrk_vals = [(m, x) for m, x in jrk_vals if x and x.get("value") is not None]
-    jrk_vals.sort(key=lambda t: t[1]["value"])
-    best_jrk_m, best_jrk_x = jrk_vals[0]
-    sec_jrk_m, sec_jrk_x = jrk_vals[1]
-    worst_jrk_x = jrk_vals[-1][1]
-    ref_jrk_v = (_find_metric(ref_m, "truck_closed_loop", "lat_jerk") or {}).get("value", 0.57)
-    min_drop = round((1.0 - worst_jrk_x["value"] / ref_jrk_v) * 100)
-    max_drop = round((1.0 - best_jrk_x["value"] / ref_jrk_v) * 100)
-
-    gains_after = [(_find_metric(m, "truck_open_loop", "lat_gain") or {}).get("value") for m in after_cl]
-    gains_after = [g for g in gains_after if g is not None]
-    ref_gain = (_find_metric(ref_m, "truck_open_loop", "lat_gain") or {}).get("value", 0.80)
-
+    # 4. Control smoothness and steering gain
+    jrk = val("truck_closed_loop", "lat_jerk", "value")
+    jv = sorted(jrk(m["model"]["id"]) for m in after_cl if jrk(m["model"]["id"]) is not None)
+    ref_jrk_v = jrk(ref_id) or 0.0
+    gains_after = [g for g in ((_find_metric(m, "truck_open_loop", "lat_gain") or {}).get("value") for m in after_cl) if g is not None]
+    ref_gain = (_find_metric(ref_m, "truck_open_loop", "lat_gain") or {}).get("value")
     card4 = (
         '<li class="f-card">'
-        '<div class="f-top"><span class="f-kicker">Control Smoothness · Jerk &amp; Gain</span>'
-        f'<span class="f-fig">−{min_drop}% to −{max_drop}% <small>CL jerk vs lebowski</small></span></div>'
-        f'<p class="f-lead">Post-July 2026 models cut closed-loop lateral jerk from {m_a(ref_m)}\'s <strong>{ref_jrk_v:.2f} m/s³</strong> '
-        f'down to <strong>{best_jrk_x["value"]:.2f}–{worst_jrk_x["value"]:.2f} m/s³</strong>. '
-        f'{m_a(best_jrk_m)} ({best_jrk_x["value"]:.2f} m/s³) and {m_a(sec_jrk_m)} ({sec_jrk_x["value"]:.2f} m/s³) have the lowest closed-loop jerk.</p>'
+        '<div class="f-top"><span class="f-kicker">Control smoothness · Jerk and gain</span>'
+        f'<span class="f-fig">{jv[0]:.2f}–{jv[-1]:.2f} m/s³ <small>vs {ref_jrk_v:.2f} lebowski</small></span></div>'
+        f'<p class="f-lead">Closed-loop lateral jerk, RMS: {tiers_word("jerk")}. '
+        f'{tier_lines("jerk", jrk, lambda v: f"{v:.2f}", " m/s³")}</p>'
         '<ul class="f-meta">'
-        f'<li><span>Open-loop lateral gain:</span> {m_a(ref_m)} requests <strong>{ref_gain:.2f}×</strong> the G55\'s lateral acceleration vs <strong>{min(gains_after):.2f}–{max(gains_after):.2f}×</strong> on newer models.</li>'
-        '</ul></li>'
+        + (f'<li><span>Open-loop lateral gain:</span> lebowski requests {ref_gain:.2f}× the G55\'s lateral acceleration; '
+           f'the {len(gains_after)} later models {min(gains_after):.2f}× to {max(gains_after):.2f}×.</li>'
+           if gains_after and ref_gain is not None else '')
+        + '</ul></li>'
     )
 
-    # 5. Open-Loop vs Closed-Loop Divergence
-    ol_sorted = sorted(ol_models, key=lambda m: _find_metric(m, "truck_open_loop", "lat_mae")["value"])
-    best_ol_m = ol_sorted[0]
-    sec_ol_m = ol_sorted[1]
-    worst_ol_m = ol_sorted[-1]
-    best_ol_v = _find_metric(best_ol_m, "truck_open_loop", "lat_mae")["value"]
-    sec_ol_v = _find_metric(sec_ol_m, "truck_open_loop", "lat_mae")["value"]
-    worst_ol_v = _find_metric(worst_ol_m, "truck_open_loop", "lat_mae")["value"]
-    ref_ol_v = (_find_metric(ref_m, "truck_open_loop", "lat_mae") or {}).get("value", 0.0)
-    best_ol_comp_rk = comp_models.get(best_ol_m["model"]["id"], {}).get("rank")
-
+    # 5. Open loop across every model, 2023 to 2026
+    olv = val("truck_open_loop", "lat_mae", "value")
+    ol_all = sorted(olv(m["model"]["id"]) for m in ol_models)
+    to = TIERS.get("openloop") or {}
+    t1 = [idx[x] for x in (to.get("tiers") or [[]])[0] if x in idx]
+    since = ""
+    if t1:
+        d0 = min(first_public(m) for m in t1)
+        if all(tier_of("openloop", m["model"]["id"]) == 1 for m in ol_models if first_public(m) >= d0):
+            first = min(t1, key=first_public)
+            since = (f'<li><span class="tier"{tier_attrs("openloop", [m["model"]["id"] for m in t1])}>Tier 1</span> '
+                     f'holds every model first public since {esc(d0)} ({m_a(first)}).</li>')
     card5 = (
         '<li class="f-card">'
-        f'<div class="f-top"><span class="f-kicker">Open vs Closed Loop · {len(ol_models)} Models (2023–2026)</span>'
-        f'<span class="f-fig">{best_ol_v:.3f}–{worst_ol_v:.3f} m/s² <small>open-loop error</small></span></div>'
-        f'<p class="f-lead">{m_a(best_ol_m)} has the lowest open-loop lateral error across all {len(ol_models)} models (<strong>{best_ol_v:.3f} m/s²</strong> over {ol_counts(models).rstrip(".")}), '
-        f'ahead of {m_a(sec_ol_m)} (<strong>{sec_ol_v:.3f} m/s²</strong>) and {m_a(ref_m)} (<strong>{ref_ol_v:.3f} m/s²</strong>).</p>'
-        '<ul class="f-meta">'
-        f'<li><span>Open vs closed loop:</span> {m_a(best_ol_m)} ranks #1 in open loop ({best_ol_v:.3f} m/s²) but #{best_ol_comp_rk} on the composite score due to slower 2° heading recovery ({(_find_metric(best_ol_m, "truck_recovery", "heading_xtrack_2s") or {}).get("median", 0) * 100:.1f} cm).</li>'
-        f'<li><span>2023–2025 releases:</span> Earlier single-signature models span up to <strong>{worst_ol_v:.3f} m/s²</strong> ({m_a(worst_ol_m)}).</li>'
-        '</ul></li>'
+        f'<div class="f-top"><span class="f-kicker">Open loop · {len(ol_models)} models (2023–2026)</span>'
+        f'<span class="f-fig">{ol_all[0]:.3f}–{ol_all[-1]:.3f} m/s² <small>lateral error</small></span></div>'
+        f'<p class="f-lead">Lateral error against what the G55 did, over {ol_counts(models).rstrip(".")}: {tiers_word("openloop")}. '
+        f'{tier_lines("openloop", olv, lambda v: f"{v:.3f}", " m/s²")}</p>'
+        + (f'<ul class="f-meta">{since}</ul>' if since else '') + '</li>'
     )
 
     # 6. Camera Mount & Lens Sensitivity (by_group across 5 G55 setups)
@@ -1710,11 +1684,10 @@ def findings_section(models: list[dict], cfg: dict, root: Path) -> str:
         '<li class="f-card">'
         '<div class="f-top"><span class="f-kicker">Hardware · 5 Camera Setups</span>'
         f'<span class="f-fig">{best_cl_s[0]:.1f} cm <small>{esc(best_cl_s[1])}</small> vs {worst_cl_s[0]:.1f} cm <small>{esc(worst_cl_s[1])}</small></span></div>'
-        f'<p class="f-lead">Across the {len(cl_models)} closed-loop models, 2 s path error is lowest on '
-        f'<strong>{esc(best_cl_s[1])}</strong> (<strong>{best_cl_s[0]:.1f} cm</strong>) and highest on '
-        f'<strong>{esc(worst_cl_s[1])}</strong> (<strong>{worst_cl_s[0]:.1f} cm</strong>).</p>'
+        f'<p class="f-lead">Mean of the {len(cl_models)} closed-loop models\' 2 s medians, per camera setup: from '
+        f'<strong>{best_cl_s[0]:.1f} cm</strong> ({esc(best_cl_s[1])}) to <strong>{worst_cl_s[0]:.1f} cm</strong> ({esc(worst_cl_s[1])}).</p>'
         '<ul class="f-meta">'
-        f'<li><span>Open-loop replay by setup:</span> Lowest lateral error on <strong>{esc(best_ol_s[1])}</strong> (<strong>{best_ol_s[0]:.3f} m/s²</strong>) vs <strong>{esc(worst_ol_s[1])}</strong> (<strong>{worst_ol_s[0]:.3f} m/s²</strong>).</li>'
+        f'<li><span>Open loop by setup:</span> mean lateral error from <strong>{best_ol_s[0]:.3f} m/s²</strong> ({esc(best_ol_s[1])}) to <strong>{worst_ol_s[0]:.3f} m/s²</strong> ({esc(worst_ol_s[1])}).</li>'
         '<li><span>Full breakdown:</span> Compare Closed Loop, Recovery, and Open Loop in <a href="#setups">Scores by camera setup</a> above.</li>'
         '</ul></li>'
     )
@@ -1913,7 +1886,7 @@ def model_page(m, models, cfg, root, out) -> str:
         prevt = f' Paired deltas compare against lebowski and against the preceding release ({name_html(po, prev + ".html") if po else esc(prev)}).'
     return (f'<section class="mhead"><p class="crumb"><a href="../index.html#leaderboard">← Leaderboard &amp; all models</a></p>'
             f'<h1>{name_html(m)}</h1><p class="m-st"><span class="m-date">{esc(first_public(m))}</span> {esc(status_text(m))}</p>'
-            f'<p class="m-verdict">{esc(verdict_line(m, models, cfg, root))}</p></section>'
+            f'<p class="m-verdict">{verdict_line(m, models, cfg, root)}</p></section>'
             f'<section><h2>Key numbers</h2><p class="sub">Green ticks mark lebowski. Lower is better on path and lateral error metrics.{prevt}</p>'
             f'<div class="kbars">{bars(m, models, cfg, mets, scales, False)}</div></section>'
             f'<section><h2>All scores</h2>{legend()}{secs}</section>{stills}'
@@ -1958,6 +1931,8 @@ def main() -> None:
     root, out = a.root.resolve(), a.out.resolve()
     models = load(root)
     MODELS[:] = models
+    TIERS.clear()
+    TIERS.update(ranking.site_tests(root))
     if out.exists():
         shutil.rmtree(out)
     (out / "models").mkdir(parents=True)
@@ -1970,7 +1945,7 @@ def main() -> None:
         shutil.copy2(m["_file"], out / "results" / m["_file"].name)
         mid = m["model"]["id"]
         (out / "models" / f"{mid}.html").write_text(
-            page(cfg, f"{plain_name(m)} – {tag}", f"{plain_name(m)}: {status_text(m)}. {verdict_line(m, models, cfg, root)}",
+            page(cfg, f"{plain_name(m)} – {tag}", f"{plain_name(m)}: {status_text(m)}. {verdict_line(m, models, cfg, root, as_html=False)}",
                  model_page(m, models, cfg, root, out), 1, "model", f"models/{mid}.html"))
     desc = ("Benchmarking comma.ai's openpilot driving models on a 2011 Mercedes G55 AMG "
             "and comma's public segments in open-loop replay and closed-loop simulation.")
@@ -1978,7 +1953,12 @@ def main() -> None:
                                          desc, overview(models, cfg, root), 0, "leaderboard", ""))
     (out / "method.html").write_text(page(cfg, f"Method – {cfg['site_name']}", "Scoring methodology for open-loop replay, "
                                           "worldmodel-4B closed-loop rollouts, drive-clustered intervals, and CSV downloads.", method(models, cfg, root), 0, "method", "method.html"))
-    print(f"{len(models)} models -> {out}")
+    problems = ranking.check_site(out, TIERS)
+    if problems:
+        print("\n".join(f"FAIL {x}" for x in problems), file=sys.stderr)
+        raise SystemExit(f"{len(problems)} problems: the site prints an order the resamples do not support "
+                         f"(geval.ranking.check_site); {out} is not publishable")
+    print(f"{len(models)} models -> {out}; order check: 0 problems, tiers for {', '.join(sorted(TIERS))}")
 
 
 if __name__ == "__main__":

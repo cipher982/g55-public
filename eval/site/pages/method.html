@@ -63,17 +63,17 @@ better direction. A value at either end of the search is only a bound and is lef
 count can be below the section's. The plan speed error at 3 s reads the model's plan output, which does not separate
 models built on one frozen base: it is identical for the four October models on base <code>f22e06e5</code>.</p>
 <p>Every public interval can be recomputed from the per-segment CSVs: <code>uv run python -m geval.reproduce</code> in
-<code>eval/</code>. On the front-page leaderboard, models scored on the G55 in closed loop are ranked by their
-<strong>G55 composite score</strong> (0 to 100, higher is better), which combines four G55 evaluation pillars:
-closed-loop path keeping at 2 s (40%: 25% median and 15% mean distance from the recorded path), closed-loop disturbance
-recovery at 2 s (25%: 12.5% after a 2° heading error and 12.5% after a 0.5 m lateral offset), open-loop lateral error across
-all scored models (20%), and closed-loop lateral jerk RMS (15%). Each pillar scales linearly from 0 (highest error among
-scored models) to 100 (lowest error). The leaderboard also lets you re-rank by any single test (closed-loop 2 s median,
-2° heading recovery, 0.5 m offset recovery, closed-loop smoothness, open-loop lateral error across all 18 models, or
-release date). Single-section closed-loop rankings order models by median distance at 2 s (ties broken by mean and
-head-to-head window win rate) with a 95% drive-clustered interval of the median; <code>rankings/truck_closed_loop.json</code>
-publishes the G55 closed-loop aggregates, and <code>uv run python -m geval.ranking</code> prints the public, G55 closed-loop
-or composite tables.</p>
+<code>eval/</code>. The <strong>G55 score</strong> (0 to 100, higher is better) combines four G55 tests: closed-loop path
+keeping at 2 s (40%: 25% median and 15% mean distance from the recorded path), recovery at 2 s (25%: 12.5% after a 2° heading
+error, 12.5% after a 0.5 m lateral offset), open-loop lateral error across all scored models (20%) and closed-loop lateral
+jerk RMS (15%). Each part scales linearly from 0 (highest error among the scored models) to 100 (lowest error).</p>
+<p>The site prints tiers, not places. Whole drives are resampled with replacement 2000 times, the same drives for every
+model, and every statistic, the scaling and the score are recomputed each time. A model sits in a higher tier only when it
+beat every model in the lower tiers in at least 95% of the resamples. Inside a tier the order changes from one resample to
+the next, so the leaderboard lists a tier newest first. Each single test gets its tiers by the same rule.
+<code>rankings/tiers.json</code> holds the tiers, each model's 95% rank interval and how often each model beat each other
+one. The site build runs <code>uv run python -m geval.ranking --check site/_site</code>, which fails if a page prints any
+other order: a place number, a medal, or a tier the resamples do not support.</p>
 </section>
 
 <section class="prose">
@@ -91,7 +91,7 @@ both the earlier lead and the smoother steering profile as error against the hum
 <p>This matches published work: on the nuPlan benchmark, open-loop and closed-loop planning scores were negatively
 correlated (<a href="https://doi.org/10.48550/arxiv.2306.07962">Dauner et al., 2023</a>). The leaderboard weights closed-loop
 driving and recovery at 80% of the composite score (40% path keeping, 25% recovery, 15% closed-loop smoothness) and open-loop
-tracking at 20%, while showing every column side by side so each test can be inspected or sorted on its own.</p>
+tracking at 20%, and shows every test side by side, each with its own tiers.</p>
 </section>
 
 <!-- closed-loop example -->
