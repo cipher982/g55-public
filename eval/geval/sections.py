@@ -84,6 +84,17 @@ CONDITIONS = {
     "truck_recovery": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran.",
 }
 
+# The G55 simulators the truck closed loop and recovery tests have run on. `[closed_loop.truck] simulator` in
+# the private config names the one in use; every truck closed-loop and recovery section records it, and the
+# site refuses a table that mixes two. A new simulator is a new benchmark revision: rescore every model.
+SIMULATORS = {
+    "g55-2026-10-26": "G55 steering and powertrain simulation as fitted on 2026-10-26; each window starts "
+                      "steady at its recorded speed.",
+    "g55-2026-10-31": "G55 steering and powertrain simulation with the steering centre and understeer as "
+                      "refitted by 2026-10-31; each window starts from the truck's state in its CAN recording "
+                      "of the 2 s before it.",
+}
+
 RECOVERY_TESTS = {
     "heading": "2° off heading: an extra 2°/s yaw for the first second.",
     "offcentre": ("0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move "
@@ -101,10 +112,10 @@ LIMITS_COMMON = [
     "Closed-loop numbers come from a generative world model, not a car. In a separate test on the G55's "
     "windows, worldmodel-4B followed an added yaw command through 2 s but showed 0 to 20% of an added "
     "lateral offset 3 to 4 s later; past about 4 s the recorded anchor frames also pull every model "
-    "back toward the recorded path. The front-page ranking uses 2 s.",
+    "back toward the recorded path. The front page reports 2 s.",
     "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was "
     "cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below "
-    "10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
+    "10 drives there is no interval: the braking-lead test comes from one drive and reports means and win counts only.",
     "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its "
     "distance from 1); wins count units where the model is better in the metric's direction.",
     "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best "

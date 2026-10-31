@@ -2,12 +2,11 @@
 <h1>Method</h1>
 <p>When comma publishes a new driving model on openpilot master or Hugging Face
 (<a href="https://huggingface.co/commaai/openpilot_driving_models">commaai/openpilot_driving_models</a>), our evaluation
-runner scores it on a fixed suite and publishes its results page. Each model is compared against lebowski (the July 2026
-877M model that runs on the truck) and against the immediately preceding release.</p>
+runner scores it on a fixed suite and publishes its results page. Model pages also give paired differences from lebowski
+(the July 2026 877M model that runs on the truck) and from the preceding release.</p>
 <p>The benchmark has two halves. The truck half runs recorded drives from a 2011 Mercedes G55 AMG in open-loop replay
 and closed-loop simulation; raw G55 drives stay private and their scores are published. The public half runs comma's
-public two-camera segments so anyone can reproduce those numbers from the published CSVs and code
-(<a href="#harness">below</a>).</p>
+public two-camera segments, whose per-segment results are published as CSVs (<a href="#downloads">below</a>).</p>
 </section>
 
 <section class="prose">
@@ -25,7 +24,7 @@ public two-camera segments so anyone can reproduce those numbers from the publis
 <td>Windows from the truck's recorded drives, fed to the model the way the truck runs it: the narrow camera, mounted 1.45 m up. A replay of lebowski on these windows matches the truck's live records (correlation 0.99 to 1.000 on the lateral action).</td>
 <td>Speed and lateral error against what the truck did, and lateral gain: the model's lateral action over the truck's actual lateral motion, where 1 is right.</td></tr>
 <tr><th scope="row">Truck, closed loop</th>
-<td>The truck windows, run through <code>worldmodel-4B</code> with the G55's measured steering response in place of the ideal car.</td>
+<td>The truck windows, run through <code>worldmodel-4B</code> with a simulation of the G55's steering and powertrain in place of the ideal car, starting from the truck's state in its CAN recording of the 2 s before the window.</td>
 <td>Distance from the driven path at 2, 4 and 7.2 s, and the RMS lateral and longitudinal jerk of the requests. 98 windows from 13 drives
 and 5 camera setups.</td></tr>
 <tr><th scope="row">Truck, recovery tests</th>
@@ -62,18 +61,11 @@ so it comes earlier. Smoothing a request also moves that peak, so the lead is no
 better direction. A value at either end of the search is only a bound and is left out, so its
 count can be below the section's. The plan speed error at 3 s reads the model's plan output, which does not separate
 models built on one frozen base: it is identical for the four October models on base <code>f22e06e5</code>.</p>
-<p>Every public interval can be recomputed from the per-segment CSVs: <code>uv run python -m geval.reproduce</code> in
-<code>eval/</code>. The <strong>G55 score</strong> (0 to 100, higher is better) combines four G55 tests: closed-loop path
-keeping at 2 s (40%: 25% median and 15% mean distance from the recorded path), recovery at 2 s (25%: 12.5% after a 2° heading
-error, 12.5% after a 0.5 m lateral offset), open-loop lateral error across all scored models (20%) and closed-loop lateral
-jerk RMS (15%). Each part scales linearly from 0 (highest error among the scored models) to 100 (lowest error).</p>
-<p>The site prints tiers, not places. Whole drives are resampled with replacement 2000 times, the same drives for every
-model, and every statistic, the scaling and the score are recomputed each time. A model sits in a higher tier only when it
-beat every model in the lower tiers in at least 95% of the resamples. Inside a tier the order changes from one resample to
-the next, so the leaderboard lists a tier newest first. Each single test gets its tiers by the same rule.
-<code>rankings/tiers.json</code> holds the tiers, each model's 95% rank interval and how often each model beat each other
-one. The site build runs <code>uv run python -m geval.ranking --check site/_site</code>, which fails if a page prints any
-other order: a place number, a medal, or a tier the resamples do not support.</p>
+<p>Every public interval can be recomputed from the per-segment CSVs.</p>
+<p>The site reports values; it does not rank models or combine tests into one score. Each test has its own table, every
+model's mean with its 95% interval and its median, and every table lists models newest release first. The site build
+checks every page and refuses to publish one that lists models in any other order, prints a place or a medal, or
+prints a combined score.</p>
 </section>
 
 <section class="prose">
@@ -81,7 +73,7 @@ other order: a place number, a medal, or a tier the resamples do not support.</p
 <p>Open loop asks whether the model's output matches what a human did on a recorded drive. The output never changes the
 next frame, so a model can copy the human closely and still drift once its own steering moves the car. Closed loop feeds
 the steering back through a world model, and small errors build up.</p>
-<p>In our 2026-10-27 ablation study, open-loop and closed-loop rankings diverged sharply. comma's recent models pair a
+<p>In our 2026-10-27 ablation study, open-loop and closed-loop results disagreed sharply. comma's recent models pair a
 frozen base policy with a reinforcement-learned residual head. With the residual head disabled, the frozen base achieved
 the lowest open-loop lateral error of any model on comma's public segments (0.074 m/s² vs lebowski's 0.109 m/s²), yet
 drifted 1.8 m off the driven path at 4 s in closed loop after a small yaw disturbance (where lebowski stayed within 0.4 m).
@@ -89,28 +81,35 @@ Enabling the RL residual head pulled all nine closed-loop rollouts 1.2 to 1.3 m 
 lateral action rate by 33 to 40% and shifting lateral requests 0.13 to 0.26 s earlier. Open-loop imitation scoring counts
 both the earlier lead and the smoother steering profile as error against the human driver.</p>
 <p>This matches published work: on the nuPlan benchmark, open-loop and closed-loop planning scores were negatively
-correlated (<a href="https://doi.org/10.48550/arxiv.2306.07962">Dauner et al., 2023</a>). The leaderboard weights closed-loop
-driving and recovery at 80% of the composite score (40% path keeping, 25% recovery, 15% closed-loop smoothness) and open-loop
-tracking at 20%, and shows every test side by side, each with its own tiers.</p>
+correlated (<a href="https://doi.org/10.48550/arxiv.2306.07962">Dauner et al., 2023</a>). The site shows every test side
+by side and does not weigh one against another.</p>
 </section>
 
 <!-- closed-loop example -->
 
 <section class="prose">
 <h2>What the truck sections can and cannot show</h2>
-<p>They show how each model behaves with a camera height, a vehicle and a steering response that comma's fleet does not
-cover, and whether a ranking on comma's cars holds on a vehicle unlike them.</p>
+<p>They show how each model behaves on one truck: its 1.45 m camera height, its cameras and its steering response, on
+its recorded drives and in one simulator version.</p>
 <ul>
 <li>They come from one truck. Nothing in them says how a model drives another vehicle.</li>
 <li>The windows come from 12 to 14 drives of one truck. Each section shows its count, and the conditions (day, night, speed, camera setup) are not balanced.</li>
 <li>Others cannot reproduce them: the drives are private, and only aggregate scores and a few checked stills are published.</li>
 <li>Closed loop is a simulation. The world model is weakest at night, rolls out 7.2 s at most, and pulls late frames toward
 what was actually recorded, so differences that appear only past about 4 s carry little weight. In a separate test it
-showed 0 to 20% of an added lateral offset 3 to 4 s after it, so the front-page ranking uses 2 s.</li>
+showed 0 to 20% of an added lateral offset 3 to 4 s after it, so the front page shows 2 s first.</li>
 <li>No newer model has steered the truck. It drives on lebowski, and every other model is scored by replay.</li>
 </ul>
 <p>Stills are a few camera frames per condition with the model's path drawn on them, each checked so that nothing in it
 identifies the truck, its owner or the place.</p>
 </section>
 
-<!-- harness check -->
+<section class="prose">
+<h2>Benchmark revisions</h2>
+<p>A result belongs to a benchmark revision: the protocol (the windows, tests and metrics; <code>geval-1</code> since
+2026-10-27) and, for the G55 closed loop and recovery tests, the G55 simulator. Every results file records both, and the
+site refuses a table that mixes two simulators. A new simulator means every model is rescored, so a change between revisions
+is a change of the benchmark, not of a model. The G55 simulators so far:</p>
+<!-- simulators -->
+<p>The <a href="index.html#log">log</a> lists each change with its date.</p>
+</section>

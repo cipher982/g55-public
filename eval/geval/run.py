@@ -326,15 +326,19 @@ def score(cfg, mid: str, sections: list):
             store.save(work, "public_closed_loop", mid, units, {"condition": f"{len(units)} segments from "
                        f"{len({segs[u]['car'] for u in units if u in segs})} cars, one 7.2 s window each."})
     wins = episodes_from(work / "out" / "truck_closed_loop", mid)
+    sim = truck_simulator(cfg)
     if "truck_closed_loop" in sections:
-        # the old suite windows of the backfilled models live only in the backfill files; keep them beside new runs
-        old, old_night = backfill.model_units(cfg, mid, "nominal")
+        # the backfilled models' old suite windows live only in the backfill files; they ran on the deep dive's
+        # simulator, so they join only results that name no simulator
+        old, old_night = backfill.model_units(cfg, mid, "nominal") if sim is None else ({}, set())
         new = closedloop.window_units(wins, mid, "g55", "nominal", seeds)
         units = {**old, **new}
         if units:
             night = len((old_night - new.keys()) | {f"{w['drive']}:{w['start']}" for w in wins
                                                    if f"{w['drive']}:{w['start']}" in new and w.get("night")})
             meta = {"condition": f"{len(units)} windows ({len(units) - night} day, {night} night)."}
+            if sim:
+                meta["simulator"] = sim
             groups = backfill.truck_groups(cfg)
             if groups:
                 meta["groups"] = {u: groups[u] for u in units if u in groups}
@@ -343,12 +347,21 @@ def score(cfg, mid: str, sections: list):
         for test, cond in (("heading", "disturb"), ("offcentre", "offcentre")):
             units = closedloop.window_units(wins, mid, "g55", cond, seeds)
             if units:
-                backfill.merge_recovery(cfg, mid, test, units, f"{S.RECOVERY_TESTS[test]} {describe(wins, units)}")
+                backfill.merge_recovery(cfg, mid, test, units, f"{S.RECOVERY_TESTS[test]} {describe(wins, units)}", sim)
         bw = episodes_from(work / "out" / "truck_brake", mid)
         if bw:
             units = brake_units(cfg, bw, mid, seeds)
             if units:
-                backfill.merge_recovery(cfg, mid, "brake", units, f"{S.RECOVERY_TESTS['brake']} {describe(bw, units)}")
+                backfill.merge_recovery(cfg, mid, "brake", units, f"{S.RECOVERY_TESTS['brake']} {describe(bw, units)}", sim)
+
+
+def truck_simulator(cfg) -> str | None:
+    """`[closed_loop.truck] simulator`: the id (sections.SIMULATORS) every truck closed-loop and recovery result
+    records, or None for a config from before 2026-10-31."""
+    sim = cfg.get("closed_loop", {}).get("truck", {}).get("simulator")
+    if sim is not None and sim not in S.SIMULATORS:
+        raise SystemExit(f"[closed_loop.truck] simulator {sim!r} is not in geval.sections.SIMULATORS")
+    return sim
 
 
 def describe(wins, units):

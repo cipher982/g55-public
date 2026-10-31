@@ -1,4 +1,5 @@
-// Hover and focus readout for chart marks and bars, theme switch, interactive multi-metric leaderboard, and setup tabs.
+// Hover and focus readout for table cells and bars, theme switch, the closed-loop player and setup tabs.
+// Nothing here reorders a table: every list of models is newest release first, as built.
 (() => {
   const root = document.documentElement;
   const btn = document.querySelector(".theme");
@@ -160,97 +161,6 @@
   select(view);
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) { t = LAST / d.fps; setPlaying(false); draw(); }
   else setPlaying(true);
-})();
-
-// Interactive multi-metric Leaderboard sorting & historical open-loop toggle.
-(() => {
-  const fig = document.querySelector(".gt");
-  if (!fig) return;
-  const body = fig.querySelector(".gt-body");
-  const sortBtns = [...fig.querySelectorAll(".gt-sort button")];
-  const colHeaders = [...fig.querySelectorAll(".gt-th[data-sort]")];
-  const moreBtn = fig.querySelector(".gt-more-btn");
-  const rows = [...body.querySelectorAll(".gt-row")];
-  // The first column is the tier of the active test (data-tier-<test>, from drive resamples), never a place.
-  const tierOf = (r, mode) => r.dataset["tier" + mode.charAt(0).toUpperCase() + mode.slice(1)] || "";
-
-  let currentSort = "composite";
-  let showOlOnly = false;
-
-  function updateVisibilityAndRanks() {
-    const forceShowAll = currentSort === "openloop" || currentSort === "date";
-    const visibleOl = showOlOnly || forceShowAll;
-    for (const r of rows) {
-      if (r.dataset.olOnly === "true") {
-        r.hidden = !visibleOl;
-      } else {
-        r.hidden = false;
-      }
-    }
-    if (moreBtn) {
-      const n = moreBtn.dataset.count || "9";
-      if (forceShowAll) {
-        moreBtn.hidden = true;
-      } else {
-        moreBtn.hidden = false;
-        moreBtn.setAttribute("aria-expanded", String(showOlOnly));
-        moreBtn.textContent = showOlOnly
-          ? `Hide ${n} earlier open-loop-only releases (2023–2026)`
-          : `Show ${n} earlier openpilot releases (2023–2026, scored in G55 open loop on 119 windows)`;
-      }
-    }
-
-    // Tier of the active test in the first column; a rule above the first row of each new tier.
-    let prev = null;
-    for (const r of [...body.querySelectorAll(".gt-row")].filter((x) => !x.hidden)) {
-      const t = currentSort === "date" ? "" : tierOf(r, currentSort);
-      const rkEl = r.querySelector(".gt-rk");
-      if (rkEl) {
-        rkEl.textContent = t || "–";
-        rkEl.setAttribute("aria-label", t ? `tier ${t}` : "no tier");
-      }
-      r.classList.toggle("gt-tier-start", prev !== null && t !== "" && t !== prev);
-      prev = t;
-    }
-
-    // Highlight active sorted column cells
-    for (const cell of body.querySelectorAll("[data-col]")) {
-      cell.classList.toggle("is-sorted-col", cell.dataset.col === currentSort);
-    }
-  }
-
-  function applySort(mode) {
-    currentSort = mode;
-    for (const b of sortBtns) b.setAttribute("aria-pressed", String(b.dataset.sort === mode));
-    for (const th of colHeaders) th.classList.toggle("is-active", th.dataset.sort === mode);
-
-    // Tier of the active test first (no tier last), newest first inside a tier: the resamples support
-    // no order inside a tier, so none is shown.
-    rows.sort((a, b) => {
-      if (mode !== "date") {
-        const ta = Number(tierOf(a, mode) || 99), tb = Number(tierOf(b, mode) || 99);
-        if (ta !== tb) return ta - tb;
-      }
-      return b.dataset.date.localeCompare(a.dataset.date);
-    });
-
-    for (const r of rows) body.appendChild(r);
-    updateVisibilityAndRanks();
-  }
-
-  for (const b of sortBtns) {
-    b.addEventListener("click", () => applySort(b.dataset.sort));
-  }
-  for (const th of colHeaders) {
-    th.addEventListener("click", () => applySort(th.dataset.sort));
-  }
-  if (moreBtn) {
-    moreBtn.addEventListener("click", () => {
-      showOlOnly = !showOlOnly;
-      updateVisibilityAndRanks();
-    });
-  }
-  updateVisibilityAndRanks();
 })();
 
 // Camera setups tabbed matrix (#setups).

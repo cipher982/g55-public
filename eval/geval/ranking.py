@@ -1,28 +1,26 @@
-"""Rankings for the G-Wagon eval:
+"""Tiers, closed-loop tables and the order check for the G-Wagon eval site.
 
-1. G55 composite score (`g55_composite`, `composite_from`): combines the four G55 evaluation pillars on a
-   0–100 scale (higher is better; 100 = best model on that pillar, 0 = worst):
-     - Closed-loop path keeping (40%): nominal distance at 2 s in worldmodel-4B (25% median + 15% mean)
-     - Closed-loop recovery (25%): 2 s distance after a 2° heading error (12.5%) and 0.5 m offset (12.5%)
-     - Open-loop tracking (20%): mean lateral error on recorded G55 drives (across all scored models)
-     - Closed-loop smoothness (15%): RMS requested lateral jerk in nominal closed loop
+The site is a results report: one table per test, each model's value with its 95% interval, rows newest
+release first. It prints no combined score and no places (the G55 composite score was retired on
+2026-10-31, David: "just present our results and lay them out").
 
-2. Tiers (`write_tiers`, `order`): the only order the site prints. Whole drives are resampled with
-   replacement (TIER_REPS times, the same drives for every model and test that share them), every
-   statistic, the min-max scaling and the composite are recomputed, and a model sits in a higher tier
-   only when it beat every model in the lower tiers in at least TIER_P of the resamples.
-   `rankings/tiers.json` holds aggregates only (values, rank intervals, tiers, pairwise shares).
+1. The check (`check_site`): `site/build.py` runs it and refuses to write a failing site. It fails on
+   - place numbers, medals, leader wording or a combined score anywhere a reader can see them;
+   - a list of models (`data-order="release"`) that is not newest release first, a model listed twice in
+     one list, and two or more models listed outside such a list;
+   - a tier claim (`data-tier-<test>`) the resamples do not support.
 
-3. The check (`check_site`): every order the built site prints must be one the resamples support. It
-   fails on a tier claim the pairwise shares do not support, and on place numbers, medals or leader
-   wording anywhere a reader can see them. `site/build.py` runs it and refuses to write a failing site.
+2. Tiers (`write_tiers`, `order`): whole drives resampled with replacement (TIER_REPS times, the same drives
+   for every model and test that share them); a model sits in a higher tier only when it beat every model
+   in the lower tiers in at least TIER_P of the resamples. `rankings/tiers.json` holds aggregates only
+   (values, rank intervals, tiers, pairwise shares). The site prints no tiers now; the check verifies any
+   it would.
 
-4. Single-section closed-loop tables (`rank`, `scores`, `write_truck`): median and mean distance from
+3. Single-section closed-loop tables (`rank`, `scores`, `write_truck`): median and mean distance from
    the recorded path at 2 s with a drive-clustered 95% interval of the median and paired differences.
 
     uv run python -m geval.ranking                                  # from eval/; the public table
-    uv run python -m geval.ranking --section truck_closed_loop      # the published G55 closed-loop table
-    uv run python -m geval.ranking --section composite              # the G55 composite score and tiers
+    uv run python -m geval.ranking --section truck_closed_loop      # the G55 closed-loop table
     uv run python -m geval.ranking --check site/_site               # the check, on a built site
 """
 from __future__ import annotations
@@ -43,15 +41,6 @@ ROOT = Path(__file__).resolve().parents[1]
 SECTION = "public_closed_loop"
 TRUCK = "truck_closed_loop"
 KEY = "xtrack_2s"
-
-# Pillar weights for the G55 composite score (sum = 1.00).
-COMPOSITE_WEIGHTS = {
-    "path": 0.40,        # 25% nominal CL 2 s median + 15% nominal CL 2 s mean
-    "recovery": 0.25,    # 12.5% 2° heading 2 s median + 12.5% 0.5 m offset 2 s median
-    "open_loop": 0.20,   # 20% G55 open-loop lateral error (lat_mae mean across all scored models)
-    "smoothness": 0.15,  # 15% G55 closed-loop lateral jerk RMS (lat_jerk mean)
-}
-
 
 def _win_rates(vals: dict) -> dict[str, float]:
     """Per model, fraction of head-to-head comparisons won across shared units (lower is better; tie = 0.5)."""
@@ -156,98 +145,6 @@ def truck_scores(root: Path) -> dict | None:
     return json.loads(p.read_text()) if p.exists() else None
 
 
-def _metric_val(m: dict, section: str, key: str, stat: str = "value") -> float | None:
-    s = m.get("sections", {}).get(section)
-    if not s or s.get("status") != "ok":
-        return None
-    for x in s.get("metrics", []):
-        if x.get("key") == key:
-            v = x.get(stat)
-            return float(v) if v is not None else (float(x["value"]) if x.get("value") is not None else None)
-    return None
-
-
-def _norm_0_100(val: float | None, vals: list[float]) -> float | None:
-    if val is None or not vals:
-        return None
-    lo, hi = min(vals), max(vals)
-    if hi <= lo:
-        return 100.0
-    return 100.0 * (hi - val) / (hi - lo)
-
-
-def composite_from(v: dict) -> dict[str, tuple[float, dict]]:
-    """v: {statistic: {model: value}} with the statistics cl_med, cl_mean, hdg, off, ol, jerk (lower is
-    better for each). For every model with a closed-loop median: (score 0-100, pillars). Each statistic is
-    min-max scaled across the models that have it; a model's pillars are weighted by COMPOSITE_WEIGHTS over
-    the pillars it has. The site and the resamples both score with this function."""
-    def norm(name, mid):
-        col = v.get(name) or {}
-        return _norm_0_100(col.get(mid), [x for x in col.values() if x is not None])
-
-    out = {}
-    for mid, med in (v.get("cl_med") or {}).items():
-        if med is None:
-            continue
-        s_med, s_mean = norm("cl_med", mid), norm("cl_mean", mid)
-        s_path = 0.625 * s_med + 0.375 * s_mean if s_mean is not None else s_med
-        s_hdg, s_off = norm("hdg", mid), norm("off", mid)
-        if s_hdg is not None and s_off is not None:
-            s_rec = 0.5 * (s_hdg + s_off)
-        else:
-            s_rec = s_hdg if s_hdg is not None else s_off
-        pillars = {"path": s_path, "recovery": s_rec, "open_loop": norm("ol", mid), "smoothness": norm("jerk", mid)}
-        avail = [(p, COMPOSITE_WEIGHTS[k]) for k, p in pillars.items() if p is not None]
-        w_sum = sum(w for _, w in avail)
-        out[mid] = (sum(p * w for p, w in avail) / w_sum, pillars)
-    return out
-
-
-def g55_composite(models: list[dict], truck_rk: dict | None = None) -> dict[str, dict]:
-    """The G55 composite score (0–100) and pillar sub-scores for every model in `models` that has a G55
-    closed-loop median, plus the raw values behind them. No ranks: the order the site prints is the tiers
-    (`write_tiers`)."""
-    trk = (truck_rk or {}).get("models", truck_rk or {})
-
-    def cl_med(m):
-        mid = m["model"]["id"]
-        if mid in trk and trk[mid].get("median") is not None:
-            return float(trk[mid]["median"])
-        return _metric_val(m, "truck_closed_loop", "xtrack_2s", "median")
-
-    def cl_mean(m):
-        mid = m["model"]["id"]
-        if mid in trk and trk[mid].get("mean") is not None:
-            return float(trk[mid]["mean"])
-        return _metric_val(m, "truck_closed_loop", "xtrack_2s", "value")
-
-    raw = {m["model"]["id"]: {
-        "cl_med": cl_med(m), "cl_mean": cl_mean(m),
-        "hdg": _metric_val(m, "truck_recovery", "heading_xtrack_2s", "median"),
-        "off": _metric_val(m, "truck_recovery", "offcentre_xtrack_2s", "median"),
-        "ol": _metric_val(m, "truck_open_loop", "lat_mae", "value"),
-        "jerk": _metric_val(m, "truck_closed_loop", "lat_jerk", "value"),
-    } for m in models}
-    scored = composite_from({k: {mid: r[k] for mid, r in raw.items() if r[k] is not None} for k in STATS})
-
-    out: dict[str, dict] = {}
-    for mid, r in raw.items():
-        comp, pillars = scored.get(mid, (None, {k: None for k in COMPOSITE_WEIGHTS}))
-        out[mid] = {
-            "score": round(comp, 1) if comp is not None else None,
-            "score_raw": comp,
-            "pillars": {k: (round(v, 1) if v is not None else None) for k, v in pillars.items()},
-            "cl_median": r["cl_med"],
-            "cl_mean": r["cl_mean"],
-            "hdg_median": r["hdg"],
-            "off_median": r["off"],
-            "ol_mae": r["ol"],
-            "cl_jerk": r["jerk"],
-            "win_rate": trk.get(mid, {}).get("win_rate"),
-        }
-    return out
-
-
 # ---------------------------------------------------------------- tiers: the order the resamples support
 
 TIER_REPS = 2000
@@ -255,18 +152,16 @@ TIER_SEED = 0
 TIER_P = 0.95         # a higher tier beat every model below it in at least this share of resamples
 TIERS_FILE = "tiers.json"
 
-# The composite's statistics: (section, store key, statistic). Lower is better for each.
+# The statistics tiers are computed for: (section, store key, statistic). Lower is better for each.
 STATS = {
     "cl_med": ("truck_closed_loop", "absx_2s", "median"),
-    "cl_mean": ("truck_closed_loop", "absx_2s", "mean"),
     "hdg": ("truck_recovery", "heading:absx_2s", "median"),
     "off": ("truck_recovery", "offcentre:absx_2s", "median"),
     "ol": ("truck_open_loop", "lat_mae", "mean"),
     "jerk": ("truck_closed_loop", "rms_lat_jerk", "mean"),
 }
-# The tests the site orders models by: test -> (label, statistic or None for the composite, better).
+# The tests with tiers: test -> (label, statistic, better).
 TESTS = {
-    "composite": ("G55 score", None, "higher"),
     "cl2s": ("Closed loop at 2 s", "cl_med", "lower"),
     "heading": ("2° heading at 2 s", "hdg", "lower"),
     "offset": ("0.5 m offset at 2 s", "off", "lower"),
@@ -350,18 +245,7 @@ def tiers_from(data: dict, cluster_of: dict, reps: int = TIER_REPS, seed: int = 
     point, boot, counts = resample(data, spec, cluster_of, reps, seed)
     tests = {}
     for test, (label, stat, better) in TESTS.items():
-        if stat is None:
-            pc = {m: sc for m, (sc, _) in composite_from(point).items()}
-            bc = {m: np.full(reps, np.nan) for m in pc}
-            for r in range(reps):
-                draw = {k: {m: float(b[r]) for m, b in boot[k].items() if np.isfinite(b[r])} for k in STATS}
-                for m, (sc, _) in composite_from(draw).items():
-                    if m in bc:
-                        bc[m][r] = sc
-            o = order(pc, bc, better)
-        else:
-            o = order(point[stat], boot[stat], better)
-        tests[test] = {"label": label, **o}
+        tests[test] = {"label": label, **order(point[stat], boot[stat], better)}
     return {"reps": reps, "seed": seed, "p_separate": TIER_P,
             "drives": {ns: {"windows": u, "drives": d} for ns, (u, d) in sorted(counts.items())},
             "tests": tests}
@@ -424,6 +308,7 @@ RANK_TEXT = [
     (re.compile(r"\b(?:podium|leads|leader|fastest|slowest)\b", re.IGNORECASE), "leader wording"),
     (re.compile(r"\btop\s+(?:\d|three|five|model|shipped)", re.IGNORECASE), "top-N wording"),
     (re.compile(r"\b(?:best|worst)\s*:", re.IGNORECASE), "best or worst label"),
+    (re.compile(r"\b(?:G55|composite)\s+score\b|\b\d{1,3}(?:\.\d+)?\s*/\s*100\b", re.IGNORECASE), "combined score"),
 ]
 TEXT_ATTRS = ("aria-label", "title", "data-tip", "alt", "content")
 TIER_TEXT = re.compile(r"\btiers?\s+\d", re.IGNORECASE)
@@ -431,14 +316,21 @@ VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "met
 
 
 class _Page(HTMLParser):
-    """Visible text, reader-facing attributes and tier claims: an element with `data-tier-<test>` and
-    `data-model` (one model) or `data-models` (space-separated). Text that names a tier ("tier 2") must sit
-    inside such an element, so every tier a reader sees is a claim the check verifies."""
+    """Visible text, reader-facing attributes, tier claims and lists of models.
+
+    A tier claim is an element with `data-tier-<test>` and `data-model` (one model) or `data-models`
+    (space-separated). Text that names a tier ("tier 2") must sit inside such an element, so every tier a
+    reader sees is a claim the check verifies.
+
+    A list of models is an element with `data-order` (the only order is "release": newest first by first
+    public date). Each element with `data-model` inside it adds that model to the list, once per run of
+    elements for the same model. Elements with `data-model` outside every list are collected in `free`."""
 
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.stack, self.skip, self.claimed = [], 0, 0
         self.text, self.claims, self.loose = [], [], []
+        self.open_lists, self.lists, self.free = [], [], []
 
     def _see(self, text: str, claimed: bool):
         self.text.append(text)
@@ -451,12 +343,23 @@ class _Page(HTMLParser):
         mids = (a.get("data-models") or a.get("data-model") or "").split()
         mine = [(k[len("data-tier-"):], v) for k, v in a.items() if k.startswith("data-tier-") and v not in (None, "", "-")]
         claim = bool(mids and mine)
+        listing = "data-order" in a and not self.skip and not hide
         if tag not in VOID:
-            self.stack.append((hide, claim))
+            self.stack.append((hide, claim, listing))
             self.skip += hide
             self.claimed += claim
         if self.skip:
             return
+        if listing:
+            self.open_lists.append((a["data-order"], []))
+        if a.get("data-model"):
+            mid = a["data-model"]
+            if self.open_lists:
+                lst = self.open_lists[-1][1]
+                if not lst or lst[-1] != mid:
+                    lst.append(mid)
+            else:
+                self.free.append(mid)
         for k in TEXT_ATTRS:
             if a.get(k):
                 self._see(a[k], claim or self.claimed > 0)
@@ -468,9 +371,11 @@ class _Page(HTMLParser):
     def handle_endtag(self, tag):
         if tag in VOID or not self.stack:
             return
-        hide, claim = self.stack.pop()
+        hide, claim, listing = self.stack.pop()
         self.skip -= hide
         self.claimed -= claim
+        if listing and self.open_lists:
+            self.lists.append(self.open_lists.pop())
 
     def handle_data(self, data):
         if not self.skip:
@@ -509,10 +414,48 @@ def check_claims(claims: list, tests: dict) -> list[str]:
     return problems
 
 
-def check_site(site: Path, tests: dict) -> list[str]:
-    """Every problem with the order a built site prints: place wording or medals in any page, script or
-    stylesheet a reader gets, and tier claims the resamples do not support. `tests`: {test: order(...)}."""
+def check_lists(lists: list, free: list, released: dict, where: str) -> list[str]:
+    """lists: [(order, [model ids in page order])]; free: model ids listed outside any list; released:
+    {model id: first public date}. Every list is newest release first, holds a model once, and names only
+    models with a release date; a page lists at most one model outside a list."""
+    problems = []
+    for kind, mids in lists:
+        if kind != "release":
+            problems.append(f"{where}: a list ordered by {kind!r}; the only order is \"release\"")
+            continue
+        twice = sorted({m for m in mids if mids.count(m) > 1})
+        if twice:
+            problems.append(f"{where}: {', '.join(twice)} listed twice in one list")
+        unknown = [m for m in mids if m not in released]
+        if unknown:
+            problems.append(f"{where}: no release date for {', '.join(unknown)}")
+            continue
+        for a, b in zip(mids, mids[1:]):
+            if released[a] < released[b]:
+                problems.append(f"{where}: {a} (first public {released[a]}) listed above {b} ({released[b]}): "
+                                f"lists are newest release first")
+    if len(set(free)) > 1:
+        problems.append(f"{where}: {len(set(free))} models listed outside a release-ordered list "
+                        f"({', '.join(sorted(set(free))[:5])}{', ...' if len(set(free)) > 5 else ''})")
+    return problems
+
+
+def release_dates(root: Path) -> dict:
+    """{model id: first public date} from the results files under `root`."""
+    out = {}
+    for p in sorted((root / "results").glob("*.json")):
+        m = json.loads(p.read_text())["model"]
+        out[p.stem] = m.get("first_public") or m["source"]["date"]
+    return out
+
+
+def check_site(site: Path, tests: dict, released: dict | None = None) -> list[str]:
+    """Every problem with the order a built site prints: place wording, medals or a combined score in any
+    page, script or stylesheet a reader gets; lists of models that are not newest release first (`released`:
+    {model id: first public date}; None: no dates, so any list fails); and tier claims the resamples do not
+    support. `tests`: {test: order(...)}."""
     problems, claims = [], []
+    released = released or {}
     if not any(site.rglob("*.html")):
         return [f"{site}: no HTML pages to check"]
     for f in sorted(site.rglob("*")):
@@ -526,6 +469,7 @@ def check_site(site: Path, tests: dict) -> list[str]:
             text = "\n".join(pg.text)
             claims += pg.claims
             problems += [f"{rel}: tier text outside a verified claim in ...{x.strip()}..." for x in pg.loose]
+            problems += check_lists(pg.lists, pg.free, released, str(rel))
         else:
             text = src
         pats = RANK_TEXT if f.suffix == ".html" else RANK_TEXT[:1]   # scripts and styles: medals
@@ -550,28 +494,16 @@ def site_tests(root: Path) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=ROOT)
-    ap.add_argument("--section", default=SECTION, choices=[SECTION, TRUCK, "composite"])
+    ap.add_argument("--section", default=SECTION, choices=[SECTION, TRUCK])
     ap.add_argument("--check", type=Path, metavar="SITE", help="check a built site (site/_site) against the resamples")
     a = ap.parse_args(argv)
     if a.check:
         tests = site_tests(a.root)
-        problems = check_site(a.check, tests)
+        problems = check_site(a.check, tests, release_dates(a.root))
         for p in problems:
             print(f"FAIL {p}")
         print(f"{len(problems)} problems; tests with resamples: {', '.join(sorted(tests)) or 'none'}")
         return 1 if problems else 0
-    if a.section == "composite":
-        docs = [json.loads(p.read_text()) for p in sorted((a.root / "results").glob("*.json"))]
-        comp = g55_composite(docs, truck_scores(a.root))
-        tc = ((read_tiers(a.root) or {}).get("tests") or {}).get("composite", {"models": {}})
-        rows = sorted((kv for kv in comp.items() if kv[1].get("score") is not None),
-                      key=lambda kv: (tc["models"].get(kv[0], {}).get("tier", 99), -kv[1]["score_raw"]))
-        for m, s in rows:
-            p, t = s["pillars"], tc["models"].get(m, {})
-            print(f"tier {t.get('tier', '?')}  {m:<16} G55 score {s['score']:5.1f}  rank interval {t.get('rank_ci')}  "
-                  f"[path {p['path']:4.0f} | rec {p['recovery']:4.0f} | ol {p['open_loop']:4.0f} | smooth {p['smoothness']:4.0f}]  "
-                  f"CL 2s {s['cl_median']*100:4.1f} cm")
-        return 0
     if a.section == TRUCK:
         t = truck_scores(a.root)
         for m, s in sorted((t or {"models": {}})["models"].items(), key=lambda kv: (kv[1]["rank"], kv[1]["median"])):

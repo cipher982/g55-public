@@ -155,6 +155,8 @@ def section(work: Path, name: str, model_id: str, reg: dict, per_unit_root: Path
            "condition": cond, "baselines": bases, "metrics": metrics, "per_unit_file": per_unit}
     if by_group:
         out["by_group"] = by_group
+    if entry["meta"].get("simulator"):
+        out["simulator"] = entry["meta"]["simulator"]
     return out
 
 

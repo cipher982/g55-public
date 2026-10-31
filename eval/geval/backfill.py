@@ -106,8 +106,16 @@ def window_means(by_window: dict) -> dict:
     return out
 
 
-def merge_recovery(cfg, mid, test: str, units: dict, note: str):
+def merge_recovery(cfg, mid, test: str, units: dict, note: str, simulator: str | None = None):
+    """Add one recovery test's units to a model's stored truck_recovery entry. The entry keeps the units of
+    the other tests, so it must come from the same simulator: an entry from another one (or from before
+    simulators were recorded) refuses the merge; move the store's truck files aside and score every test."""
     entry = store.load(cfg.work, "truck_recovery", mid) or {"units": {}, "meta": {}}
+    if entry["units"] and entry["meta"].get("simulator") != simulator:
+        raise SystemExit(f"truck_recovery/{mid}: the store holds units from simulator "
+                         f"{entry['meta'].get('simulator')!r}, this run is {simulator!r}; move the old file aside")
+    if simulator:
+        entry["meta"]["simulator"] = simulator
     for wid, m in units.items():
         entry["units"].setdefault(wid, {})[test] = m
     notes = dict(entry["meta"].get("tests", {}))

@@ -624,3 +624,28 @@ table.vocab th[scope="row"] { min-width: 12rem; white-space: normal; }
 .foot { border-top: 1px solid var(--rule); padding-top: 16px; padding-bottom: 36px; color: var(--muted); font-size: 13px; }
 .tip { position: fixed; z-index: 30; max-width: min(380px, calc(100vw - 16px)); padding: 8px 11px; border-radius: 6px; background: var(--ink); color: var(--bg); font-size: 12.5px; line-height: 1.42; pointer-events: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+/* The results report (2026-10-31): scope, one table per test, disclosures */
+.hero-t { gap: 10px; }
+.scope { display: grid; gap: 8px; background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; font-size: 14.5px; color: var(--ink2); }
+.scope p, .scope ul { max-width: 90ch; }
+.results { display: grid; gap: 40px; min-width: 0; }
+.test { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }
+table.res th[scope="row"] { min-width: 170px; }
+table.res th[scope="row"] .th-s { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+table.res td.n { font-variant-numeric: tabular-nums; font-weight: 600; }
+table.res td .u { font-weight: 400; color: var(--muted); font-size: 12px; }
+table.res td .ci, table.res td .med { font-weight: 400; }
+.t-more { min-width: 0; }
+.t-more > p { color: var(--ink2); font-size: 14px; max-width: 90ch; margin-top: 6px; }
+.full, #method { display: grid; gap: 12px; }
+.full details > * + *, #method details > * + * { margin-top: 12px; }
+@media (max-width: 640px) {
+  table.res thead { display: none; }
+  table.res caption { display: block; }
+  table.res, table.res tbody, table.res tr, table.res th, table.res td { display: block; width: auto; }
+  table.res tr { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px 12px; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+  table.res th[scope="row"] { grid-column: 1 / -1; min-width: 0; padding: 0; border: 0; }
+  table.res td { padding: 0; border: 0; text-align: left; white-space: normal; }
+  table.res td::before { content: attr(data-l); display: block; font-size: 11px; font-weight: 400; color: var(--muted); margin-bottom: 2px; }
+}

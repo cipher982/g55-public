@@ -41,12 +41,17 @@ def model_arch(cfg, mid):
     return {}, None
 
 
-def cmd_build(cfg, ids):
+def cmd_build(cfg, ids, keep_scored: bool = False):
+    """Results files, then the rankings. keep_scored: a rebuild that changes no score (new wording from the
+    code) keeps each existing file's scoring date, so the log does not show a scoring run that did not happen."""
     res, pu = out_dirs(cfg)
     reg = results.registry(cfg.work)
     for mid in ids or [m for m in reg if any(store.load(cfg.work, s, m) for s in S.SECTIONS)]:
         arch, sha = model_arch(cfg, mid)
-        print(results.build(cfg.work, mid, arch, res, pu, sha256=sha, drives=results.truck_drives(cfg)))
+        old = res / f"{mid}.json"
+        when = json.loads(old.read_text())["scored"]["date"] if keep_scored and old.exists() else None
+        print(results.build(cfg.work, mid, arch, res, pu, sha256=sha, drives=results.truck_drives(cfg),
+                            scored_date=when))
     from .ranking import write_tiers, write_truck
     print(write_truck(cfg.work, res.parent))
     print(write_tiers(cfg.work, res.parent, results.truck_drives(cfg)))
@@ -77,6 +82,8 @@ def main(argv=None):
     sub.add_parser("backfill")
     b = sub.add_parser("build")
     b.add_argument("ids", nargs="*")
+    b.add_argument("--keep-scored", action="store_true", help="keep each results file's scoring date (a rebuild that "
+                   "changes wording, not scores)")
     q = sub.add_parser("queue")
     q.add_argument("--slots", type=int)
     q.add_argument("--stop-file", default="STOP")
@@ -91,7 +98,7 @@ def main(argv=None):
         print(json.dumps(log, indent=1))
         print("\n".join(written))
     elif a.cmd == "build":
-        cmd_build(cfg, a.ids)
+        cmd_build(cfg, a.ids, a.keep_scored)
     elif a.cmd == "queue":
         import os
         qc = cfg.get("queue", {})
