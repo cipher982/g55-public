@@ -18,9 +18,9 @@
   "notes": "Shipped in openpilot 0.11.2 (master 2026-10-10, PR #39047). Scored from the Hugging Face upload of 2026-10-14, whose tensors match the release's compiled model byte for byte. Vision base f22e06e5 with an RL residual head."
  },
  "scored": {
-  "date": "2026-10-31T21:54:15Z",
+  "date": "2026-10-31T23:59:14Z",
   "suite": "geval-1",
-  "code": "9f72247d2e73"
+  "code": "d8eb40eeba87"
  },
  "baselines": [
   "lebowski_877m",
@@ -2976,7 +2976,8 @@
    "clusters": 13,
    "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. The simulation starts from the truck's state (speed, yaw rate, steering, gear) in its CAN recording of the 2 s before the window; one window, whose 2 s before are not all valid CAN, starts steady at its recorded speed. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window. 98 windows (59 day, 39 night).",
    "baselines": [
-    "lebowski_877m"
+    "lebowski_877m",
+    "870a4823_12864"
    ],
    "metrics": [
     {
@@ -3005,6 +3006,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 13
+      },
+      "870a4823_12864": {
+       "delta": -0.0008397,
+       "median": -0.003732,
+       "ci": [
+        -0.01049,
+        0.009215
+       ],
+       "n": 98,
+       "wins": 53,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 9
       }
      }
     },
@@ -3034,6 +3048,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 8
+      },
+      "870a4823_12864": {
+       "delta": 0.01227,
+       "median": -0.006419,
+       "ci": [
+        -0.01,
+        0.03709
+       ],
+       "n": 98,
+       "wins": 50,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 4
       }
      }
     },
@@ -3063,6 +3090,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 5
+      },
+      "870a4823_12864": {
+       "delta": 0.008737,
+       "median": 0.01833,
+       "ci": [
+        -0.1057,
+        0.1387
+       ],
+       "n": 98,
+       "wins": 44,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 6
       }
      }
     },
@@ -3092,6 +3132,19 @@
        "ties": 76,
        "clusters": 13,
        "cluster_wins": 7
+      },
+      "870a4823_12864": {
+       "delta": 0.005102,
+       "median": 0.0,
+       "ci": [
+        -0.03686,
+        0.04593
+       ],
+       "n": 98,
+       "wins": 7,
+       "ties": 84,
+       "clusters": 13,
+       "cluster_wins": 4
       }
      }
     },
@@ -3121,6 +3174,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 13
+      },
+      "870a4823_12864": {
+       "delta": -0.001762,
+       "median": -0.006794,
+       "ci": [
+        -0.02716,
+        0.01951
+       ],
+       "n": 98,
+       "wins": 58,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 8
       }
      }
     },
@@ -3147,6 +3213,19 @@
        ],
        "n": 98,
        "wins": 64,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 8
+      },
+      "870a4823_12864": {
+       "delta": -0.004934,
+       "median": 0.003193,
+       "ci": [
+        -0.01948,
+        0.006349
+       ],
+       "n": 98,
+       "wins": 46,
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 8
@@ -3179,6 +3258,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 5
+      },
+      "870a4823_12864": {
+       "delta": -0.04275,
+       "median": -0.01326,
+       "ci": [
+        -0.1069,
+        0.007462
+       ],
+       "n": 98,
+       "wins": 51,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 8
       }
      }
     }
@@ -3206,6 +3298,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": -0.00237,
+         "median": -0.003778,
+         "ci": null,
+         "n": 14,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
         }
        }
       },
@@ -3226,6 +3328,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.0119,
+         "median": -0.01125,
+         "ci": null,
+         "n": 14,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
         }
        }
       },
@@ -3240,6 +3352,16 @@
         "lebowski_877m": {
          "delta": 0.6307,
          "median": -0.1259,
+         "ci": null,
+         "n": 14,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": 0.3714,
+         "median": -0.01419,
          "ci": null,
          "n": 14,
          "wins": 7,
@@ -3266,6 +3388,16 @@
          "ties": 9,
          "clusters": 2,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.0,
+         "median": 0.0,
+         "ci": null,
+         "n": 14,
+         "wins": 2,
+         "ties": 10,
+         "clusters": 2,
+         "cluster_wins": 1
         }
        }
       },
@@ -3283,6 +3415,16 @@
          "ci": null,
          "n": 14,
          "wins": 11,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": -0.0701,
+         "median": -0.01065,
+         "ci": null,
+         "n": 14,
+         "wins": 10,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
@@ -3306,6 +3448,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": 0.0004805,
+         "median": -0.00171,
+         "ci": null,
+         "n": 14,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
         }
        }
       },
@@ -3326,6 +3478,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.1962,
+         "median": -0.2616,
+         "ci": null,
+         "n": 14,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
         }
        }
       }
@@ -3352,6 +3514,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 5
+        },
+        "870a4823_12864": {
+         "delta": -0.01066,
+         "median": -0.01218,
+         "ci": null,
+         "n": 43,
+         "wins": 28,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 4
         }
        }
       },
@@ -3372,6 +3544,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 3
+        },
+        "870a4823_12864": {
+         "delta": 0.0008651,
+         "median": -0.03308,
+         "ci": null,
+         "n": 43,
+         "wins": 26,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 2
         }
        }
       },
@@ -3392,6 +3574,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 3
+        },
+        "870a4823_12864": {
+         "delta": -0.1545,
+         "median": -0.01823,
+         "ci": null,
+         "n": 43,
+         "wins": 24,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 5
         }
        }
       },
@@ -3410,6 +3602,16 @@
          "n": 43,
          "wins": 5,
          "ties": 33,
+         "clusters": 5,
+         "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": 0.01163,
+         "median": 0.0,
+         "ci": null,
+         "n": 43,
+         "wins": 3,
+         "ties": 37,
          "clusters": 5,
          "cluster_wins": 2
         }
@@ -3432,6 +3634,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 5
+        },
+        "870a4823_12864": {
+         "delta": 0.01553,
+         "median": -0.006327,
+         "ci": null,
+         "n": 43,
+         "wins": 25,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 2
         }
        }
       },
@@ -3452,6 +3664,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 3
+        },
+        "870a4823_12864": {
+         "delta": 0.005539,
+         "median": 0.009858,
+         "ci": null,
+         "n": 43,
+         "wins": 16,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 2
         }
        }
       },
@@ -3472,6 +3694,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": -0.0144,
+         "median": -0.03206,
+         "ci": null,
+         "n": 43,
+         "wins": 23,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 3
         }
        }
       }
@@ -3498,6 +3730,16 @@
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.01307,
+         "median": 0.006202,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
         }
        }
       },
@@ -3518,6 +3760,16 @@
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.00145,
+         "median": 0.009579,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
         }
        }
       },
@@ -3535,6 +3787,16 @@
          "ci": null,
          "n": 4,
          "wins": 3,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.16,
+         "median": -0.1324,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
@@ -3558,6 +3820,16 @@
          "ties": 3,
          "clusters": 1,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.0,
+         "median": 0.0,
+         "ci": null,
+         "n": 4,
+         "wins": 0,
+         "ties": 4,
+         "clusters": 1,
+         "cluster_wins": 0
         }
        }
       },
@@ -3572,6 +3844,16 @@
         "lebowski_877m": {
          "delta": -0.4954,
          "median": -0.3393,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.01361,
+         "median": -0.01478,
          "ci": null,
          "n": 4,
          "wins": 4,
@@ -3598,6 +3880,16 @@
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.1277,
+         "median": -0.05075,
+         "ci": null,
+         "n": 4,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
         }
        }
       },
@@ -3618,6 +3910,16 @@
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": -0.2645,
+         "median": -0.1939,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
         }
        }
       }
@@ -3644,6 +3946,16 @@
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 3
+        },
+        "870a4823_12864": {
+         "delta": 0.01792,
+         "median": 0.01537,
+         "ci": null,
+         "n": 18,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
         }
        }
       },
@@ -3664,6 +3976,16 @@
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": 0.06757,
+         "median": 0.05447,
+         "ci": null,
+         "n": 18,
+         "wins": 5,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
         }
        }
       },
@@ -3684,6 +4006,16 @@
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.1276,
+         "median": 0.09194,
+         "ci": null,
+         "n": 18,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
         }
        }
       },
@@ -3704,6 +4036,16 @@
          "ties": 16,
          "clusters": 3,
          "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": 0.0,
+         "median": 0.0,
+         "ci": null,
+         "n": 18,
+         "wins": 1,
+         "ties": 16,
+         "clusters": 3,
+         "cluster_wins": 0
         }
        }
       },
@@ -3724,6 +4066,16 @@
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 3
+        },
+        "870a4823_12864": {
+         "delta": 0.02508,
+         "median": 0.008159,
+         "ci": null,
+         "n": 18,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
         }
        }
       },
@@ -3744,6 +4096,16 @@
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.001618,
+         "median": -0.005004,
+         "ci": null,
+         "n": 18,
+         "wins": 10,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
         }
        }
       },
@@ -3761,6 +4123,16 @@
          "ci": null,
          "n": 18,
          "wins": 10,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": -0.03633,
+         "median": -0.008251,
+         "ci": null,
+         "n": 18,
+         "wins": 9,
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 2
@@ -3790,6 +4162,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": 0.001811,
+         "median": -0.003315,
+         "ci": null,
+         "n": 19,
+         "wins": 10,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
         }
        }
       },
@@ -3807,6 +4189,16 @@
          "ci": null,
          "n": 19,
          "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.005756,
+         "median": -0.02704,
+         "ci": null,
+         "n": 19,
+         "wins": 10,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 1
@@ -3830,6 +4222,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": 0.03387,
+         "median": 0.06589,
+         "ci": null,
+         "n": 19,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
         }
        }
       },
@@ -3850,6 +4252,16 @@
          "ties": 15,
          "clusters": 2,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.0,
+         "median": 0.0,
+         "ci": null,
+         "n": 19,
+         "wins": 1,
+         "ties": 17,
+         "clusters": 2,
+         "cluster_wins": 1
         }
        }
       },
@@ -3867,6 +4279,16 @@
          "ci": null,
          "n": 19,
          "wins": 19,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": -0.01349,
+         "median": -0.01439,
+         "ci": null,
+         "n": 19,
+         "wins": 12,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
@@ -3890,6 +4312,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.013,
+         "median": -0.0002204,
+         "ci": null,
+         "n": 19,
+         "wins": 10,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
         }
        }
       },
@@ -3910,12 +4342,23 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": 0.04679,
+         "median": 0.04378,
+         "ci": null,
+         "n": 19,
+         "wins": 7,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
         }
        }
       }
      ]
     }
-   }
+   },
+   "simulator": "g55-2026-10-31"
   },
   "truck_recovery": {
    "status": "ok",
@@ -3924,7 +4367,8 @@
    "clusters": 14,
    "condition": "Measured. The truck closed loop with a disturbance while the model drives; only the tests listed ran. 2° off heading: an extra 2°/s yaw for the first second. 98 windows (59 day, 39 night). 0.5 m off centre: an extra yaw-rate pulse, out and back over the first 2 s, that would move an uncorrected car 0.5 m sideways with no net heading change. 98 windows (59 day, 39 night). Braking lead: windows where the car ahead braked; the gap is derived from the lead distance seen on the recording minus how far the model ran ahead of the recorded car. 2 windows (2 day, 0 night).",
    "baselines": [
-    "lebowski_877m"
+    "lebowski_877m",
+    "870a4823_12864"
    ],
    "metrics": [
     {
@@ -3953,6 +4397,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 5
+      },
+      "870a4823_12864": {
+       "delta": -0.02632,
+       "median": -0.02585,
+       "ci": [
+        -0.03128,
+        -0.02184
+       ],
+       "n": 98,
+       "wins": 89,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 13
       }
      }
     },
@@ -3982,6 +4439,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 4
+      },
+      "870a4823_12864": {
+       "delta": 0.006975,
+       "median": 0.01142,
+       "ci": [
+        -0.01525,
+        0.02961
+       ],
+       "n": 98,
+       "wins": 45,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 7
       }
      }
     },
@@ -4011,6 +4481,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 13
+      },
+      "870a4823_12864": {
+       "delta": -0.003317,
+       "median": -0.01123,
+       "ci": [
+        -0.02983,
+        0.02119
+       ],
+       "n": 98,
+       "wins": 64,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 5
       }
      }
     },
@@ -4040,6 +4523,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 6
+      },
+      "870a4823_12864": {
+       "delta": -0.02933,
+       "median": -0.02916,
+       "ci": [
+        -0.03612,
+        -0.02267
+       ],
+       "n": 98,
+       "wins": 83,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 13
       }
      }
     },
@@ -4069,6 +4565,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 7
+      },
+      "870a4823_12864": {
+       "delta": 0.02559,
+       "median": 0.01534,
+       "ci": [
+        -0.007812,
+        0.06262
+       ],
+       "n": 98,
+       "wins": 39,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 3
       }
      }
     },
@@ -4098,6 +4607,19 @@
        "ties": 0,
        "clusters": 13,
        "cluster_wins": 13
+      },
+      "870a4823_12864": {
+       "delta": 0.01853,
+       "median": 0.00572,
+       "ci": [
+        -0.01722,
+        0.05558
+       ],
+       "n": 98,
+       "wins": 43,
+       "ties": 0,
+       "clusters": 13,
+       "cluster_wins": 5
       }
      }
     },
@@ -4118,6 +4640,16 @@
        "ci": null,
        "n": 2,
        "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "870a4823_12864": {
+       "delta": 0.6519,
+       "median": 0.6519,
+       "ci": null,
+       "n": 2,
+       "wins": 0,
        "ties": 0,
        "clusters": 1,
        "cluster_wins": 0
@@ -4144,6 +4676,16 @@
        "ties": 0,
        "clusters": 1,
        "cluster_wins": 0
+      },
+      "870a4823_12864": {
+       "delta": -2.92,
+       "median": -2.92,
+       "ci": null,
+       "n": 2,
+       "wins": 0,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
       }
      }
     },
@@ -4161,6 +4703,16 @@
       "lebowski_877m": {
        "delta": 0.04457,
        "median": 0.04457,
+       "ci": null,
+       "n": 2,
+       "wins": 1,
+       "ties": 0,
+       "clusters": 1,
+       "cluster_wins": 0
+      },
+      "870a4823_12864": {
+       "delta": 0.1817,
+       "median": 0.1817,
        "ci": null,
        "n": 2,
        "wins": 1,
@@ -4194,6 +4746,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.01135,
+         "median": -0.009287,
+         "ci": null,
+         "n": 14,
+         "wins": 12,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
         }
        }
       },
@@ -4214,6 +4776,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": -0.008609,
+         "median": -0.01102,
+         "ci": null,
+         "n": 14,
+         "wins": 8,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
         }
        }
       },
@@ -4231,6 +4803,16 @@
          "ci": null,
          "n": 14,
          "wins": 14,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": -0.04156,
+         "median": -0.02048,
+         "ci": null,
+         "n": 14,
+         "wins": 10,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
@@ -4254,6 +4836,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.01662,
+         "median": -0.01683,
+         "ci": null,
+         "n": 14,
+         "wins": 11,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
         }
        }
       },
@@ -4268,6 +4860,16 @@
         "lebowski_877m": {
          "delta": 0.07924,
          "median": 0.1396,
+         "ci": null,
+         "n": 14,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.03489,
+         "median": 0.03711,
          "ci": null,
          "n": 14,
          "wins": 6,
@@ -4294,6 +4896,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": -0.0006925,
+         "median": 0.00842,
+         "ci": null,
+         "n": 14,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
         }
        }
       }
@@ -4320,6 +4932,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 3
+        },
+        "870a4823_12864": {
+         "delta": -0.02592,
+         "median": -0.0254,
+         "ci": null,
+         "n": 43,
+         "wins": 40,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 5
         }
        }
       },
@@ -4340,6 +4962,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 3
+        },
+        "870a4823_12864": {
+         "delta": -0.01681,
+         "median": -0.0183,
+         "ci": null,
+         "n": 43,
+         "wins": 22,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 4
         }
        }
       },
@@ -4360,6 +4992,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 5
+        },
+        "870a4823_12864": {
+         "delta": -0.004081,
+         "median": -0.01347,
+         "ci": null,
+         "n": 43,
+         "wins": 30,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 2
         }
        }
       },
@@ -4380,6 +5022,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 4
+        },
+        "870a4823_12864": {
+         "delta": -0.03701,
+         "median": -0.03074,
+         "ci": null,
+         "n": 43,
+         "wins": 40,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 5
         }
        }
       },
@@ -4400,6 +5052,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 3
+        },
+        "870a4823_12864": {
+         "delta": 0.005825,
+         "median": -0.001086,
+         "ci": null,
+         "n": 43,
+         "wins": 22,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 2
         }
        }
       },
@@ -4420,6 +5082,16 @@
          "ties": 0,
          "clusters": 5,
          "cluster_wins": 5
+        },
+        "870a4823_12864": {
+         "delta": 0.01234,
+         "median": 0.004903,
+         "ci": null,
+         "n": 43,
+         "wins": 19,
+         "ties": 0,
+         "clusters": 5,
+         "cluster_wins": 3
         }
        }
       },
@@ -4437,6 +5109,16 @@
          "ci": null,
          "n": 2,
          "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": 0.6519,
+         "median": 0.6519,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 0
@@ -4460,6 +5142,16 @@
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": -2.92,
+         "median": -2.92,
+         "ci": null,
+         "n": 2,
+         "wins": 0,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
         }
        }
       },
@@ -4474,6 +5166,16 @@
         "lebowski_877m": {
          "delta": 0.04457,
          "median": 0.04457,
+         "ci": null,
+         "n": 2,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": 0.1817,
+         "median": 0.1817,
          "ci": null,
          "n": 2,
          "wins": 1,
@@ -4506,6 +5208,16 @@
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.03149,
+         "median": -0.03216,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
         }
        }
       },
@@ -4523,6 +5235,16 @@
          "ci": null,
          "n": 4,
          "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": 0.02549,
+         "median": 0.01281,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 0
@@ -4546,6 +5268,16 @@
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.02095,
+         "median": 0.01264,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
         }
        }
       },
@@ -4566,6 +5298,16 @@
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": -0.04297,
+         "median": -0.03244,
+         "ci": null,
+         "n": 4,
+         "wins": 4,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 1
         }
        }
       },
@@ -4586,6 +5328,16 @@
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.1429,
+         "median": 0.09212,
+         "ci": null,
+         "n": 4,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
         }
        }
       },
@@ -4606,6 +5358,16 @@
          "ties": 0,
          "clusters": 1,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.02565,
+         "median": 0.02598,
+         "ci": null,
+         "n": 4,
+         "wins": 1,
+         "ties": 0,
+         "clusters": 1,
+         "cluster_wins": 0
         }
        }
       }
@@ -4632,6 +5394,16 @@
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": -0.03429,
+         "median": -0.04691,
+         "ci": null,
+         "n": 18,
+         "wins": 16,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
         }
        }
       },
@@ -4646,6 +5418,16 @@
         "lebowski_877m": {
          "delta": -0.05671,
          "median": 0.09402,
+         "ci": null,
+         "n": 18,
+         "wins": 6,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": 0.04705,
+         "median": 0.02582,
          "ci": null,
          "n": 18,
          "wins": 6,
@@ -4672,6 +5454,16 @@
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 3
+        },
+        "870a4823_12864": {
+         "delta": -0.006566,
+         "median": -0.003847,
+         "ci": null,
+         "n": 18,
+         "wins": 9,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 1
         }
        }
       },
@@ -4692,6 +5484,16 @@
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 1
+        },
+        "870a4823_12864": {
+         "delta": -0.02072,
+         "median": -0.03591,
+         "ci": null,
+         "n": 18,
+         "wins": 13,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 3
         }
        }
       },
@@ -4712,6 +5514,16 @@
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": 0.08541,
+         "median": 0.03103,
+         "ci": null,
+         "n": 18,
+         "wins": 2,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
         }
        }
       },
@@ -4732,6 +5544,16 @@
          "ties": 0,
          "clusters": 3,
          "cluster_wins": 3
+        },
+        "870a4823_12864": {
+         "delta": 0.03623,
+         "median": 0.04179,
+         "ci": null,
+         "n": 18,
+         "wins": 3,
+         "ties": 0,
+         "clusters": 3,
+         "cluster_wins": 0
         }
        }
       }
@@ -4758,6 +5580,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": -0.02963,
+         "median": -0.03319,
+         "ci": null,
+         "n": 19,
+         "wins": 17,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
         }
        }
       },
@@ -4775,6 +5607,16 @@
          "ci": null,
          "n": 19,
          "wins": 6,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": 0.03042,
+         "median": 0.0231,
+         "ci": null,
+         "n": 19,
+         "wins": 7,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
@@ -4798,6 +5640,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": 0.02456,
+         "median": -0.01049,
+         "ci": null,
+         "n": 19,
+         "wins": 14,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
         }
        }
       },
@@ -4818,6 +5670,16 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": -0.02663,
+         "median": -0.02738,
+         "ci": null,
+         "n": 19,
+         "wins": 15,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 2
         }
        }
       },
@@ -4835,6 +5697,16 @@
          "ci": null,
          "n": 19,
          "wins": 9,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 0
+        },
+        "870a4823_12864": {
+         "delta": 0.0335,
+         "median": 0.02739,
+         "ci": null,
+         "n": 19,
+         "wins": 7,
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 0
@@ -4858,19 +5730,30 @@
          "ties": 0,
          "clusters": 2,
          "cluster_wins": 2
+        },
+        "870a4823_12864": {
+         "delta": 0.02843,
+         "median": -0.0164,
+         "ci": null,
+         "n": 19,
+         "wins": 14,
+         "ties": 0,
+         "clusters": 2,
+         "cluster_wins": 1
         }
        }
       }
      ]
     }
-   }
+   },
+   "simulator": "g55-2026-10-31"
   }
  },
  "stills": [],
  "limits": [
   "Open-loop scores compare a model's action with what the recording driver or car did; a model that drives differently but well is scored as wrong. comma's RL residual makes the lateral action smoother, and earlier than its base's by 0.10 to 0.26 s (measured on the G55 and on 16 of comma's cars); both score as error here. Measured on the 2026-10-27 deep dive: open-loop accuracy did not predict closed-loop driving.",
-  "Closed-loop numbers come from a generative world model, not a car. In a separate test on the G55's windows, worldmodel-4B followed an added yaw command through 2 s but showed 0 to 20% of an added lateral offset 3 to 4 s later; past about 4 s the recorded anchor frames also pull every model back toward the recorded path. The front-page ranking uses 2 s.",
-  "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below 10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
+  "Closed-loop numbers come from a generative world model, not a car. In a separate test on the G55's windows, worldmodel-4B followed an added yaw command through 2 s but showed 0 to 20% of an added lateral offset 3 to 4 s later; past about 4 s the recorded anchor frames also pull every model back toward the recorded path. The front page reports 2 s.",
+  "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below 10 drives there is no interval: the braking-lead test comes from one drive and reports means and win counts only.",
   "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its distance from 1); wins count units where the model is better in the metric's direction.",
   "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best correlates with the car's later lateral motion; a larger value means the request comes earlier. A value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
   "Truck open loop comes from few drives, and the camera setup changed between them (lens, housing, aim); the pooled number mixes setups, so read the per-setup numbers too. The 8 mm setups' wide camera recorded about 7-10 fps, so its frame can be up to ~60 ms from the narrow one. On the V14 setup up to 7 of a window's 700 steps are ~100 ms (one camera frame dropped). The camera's aim is the truck's live calibration learned on each drive; drives whose recorded calibration was carried over from another drive are left out.",

@@ -38,6 +38,8 @@ SECTIONS = {  # in page order: G55 first, comma public drives after
     "public_open_loop": "comma public drives (open loop)",
 }
 UNIT_WORD = {"segment": ("segment", "segments"), "window": ("window", "windows")}
+# Links the site never prints: the code repositories are private, so a reader would get a 404.
+PRIVATE_LINKS = ("https://github.com/cipher982/",)
 BETTER_TEXT = {"lower": "lower is better", "higher": "higher is better",
                "near1": "closer to 1 is better; the delta is the change in distance from 1"}
 MINUS = "−"
@@ -761,6 +763,8 @@ def log_feed(models, root) -> str:
             body += ": " + ", ".join(f'<a href="{esc(pg)}">{esc(nm)}</a>' for nm, pg in link)
         elif link and kind != "change":
             body = f'<a href="{esc(link)}">{body}</a>'
+        elif link and link.startswith(PRIVATE_LINKS):    # the code repos are private: name the commit, link nothing
+            body += f' <code class="lg-c">{esc(lab or link.rsplit("/", 1)[-1][:7])}</code>'
         elif link:
             body += f' <a class="lg-c" href="{esc(link)}">{esc(lab or "link")}</a>'
         rows.append(f'<li class="lg-{kind}"><time datetime="{date}"{rep}>{date}</time><span class="lg-k">{ {"change": "suite", "scored": "scored", "model": "model"}[kind]}</span><span>{body}</span></li>')

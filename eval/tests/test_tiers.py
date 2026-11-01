@@ -159,6 +159,7 @@ def test_lists_must_be_newest_release_first(tmp_path, tests, released):
         '<tbody data-order="release"><tr data-model="no_such_model"></tr><tr data-model="' + mids[0] + '"></tr></tbody>': "no release date",
         "<p>G55 score 91.7</p>": "combined score",
         "<p>91.7/100</p>": "combined score",
+        '<a href="https://github.com/cipher982/g55-public/tree/main/eval">code</a>': "private repository",
     }
     for body, want in cases.items():
         problems = ranking.check_site(_page(tmp_path, body), tests, released)

@@ -20,7 +20,7 @@
  "scored": {
   "date": "2026-10-28T04:04:40Z",
   "suite": "geval-1",
-  "code": "b47aaab777de"
+  "code": "d8eb40eeba87"
  },
  "baselines": [
   "lebowski_877m",
@@ -2674,7 +2674,7 @@
    "status": "not_run",
    "unit_of_evidence": "window",
    "n": 0,
-   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window.",
+   "condition": "Measured. worldmodel-4B as in the public closed loop, but the model drives a simulation of the G55's measured steering and powertrain response instead of the ideal car. The simulation starts from the truck's state (speed, yaw rate, steering, gear) in its CAN recording of the 2 s before the window; one window, whose 2 s before are not all valid CAN, starts steady at its recorded speed. Lane-following windows from the G55's drives, day and night; distance is to the driver's recorded path; seeds 0 and 1, averaged per window.",
    "baselines": [],
    "metrics": [],
    "per_unit_file": null
@@ -2692,8 +2692,8 @@
  "stills": [],
  "limits": [
   "Open-loop scores compare a model's action with what the recording driver or car did; a model that drives differently but well is scored as wrong. comma's RL residual makes the lateral action smoother, and earlier than its base's by 0.10 to 0.26 s (measured on the G55 and on 16 of comma's cars); both score as error here. Measured on the 2026-10-27 deep dive: open-loop accuracy did not predict closed-loop driving.",
-  "Closed-loop numbers come from a generative world model, not a car. In a separate test on the G55's windows, worldmodel-4B followed an added yaw command through 2 s but showed 0 to 20% of an added lateral offset 3 to 4 s later; past about 4 s the recorded anchor frames also pull every model back toward the recorded path. The front-page ranking uses 2 s.",
-  "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below 10 drives there is no interval: the truck sections come from fewer drives and report means and win counts only.",
+  "Closed-loop numbers come from a generative world model, not a car. In a separate test on the G55's windows, worldmodel-4B followed an added yaw command through 2 s but showed 0 to 20% of an added lateral offset 3 to 4 s later; past about 4 s the recorded anchor frames also pull every model back toward the recorded path. The front page reports 2 s.",
+  "Intervals are 95% percentile bootstraps that resample whole drives (the drive a public segment was cut from, the recorded drive a truck window comes from), so segments of one drive count once. Below 10 drives there is no interval: the braking-lead test comes from one drive and reports means and win counts only.",
   "Paired deltas are model minus baseline on the units both have (for lateral gain, the change in its distance from 1); wins count units where the model is better in the metric's direction.",
   "The lead of the lateral request is the shift, searched from 0 to 1.5 s, at which the request best correlates with the car's later lateral motion; a larger value means the request comes earlier. A value at either edge is censored and left out. Plan speed error at 3 s reads the plan head, which does not separate models built on one frozen base: it is identical on every segment for the four f22e06e5 models, and for Cinque v2 and v3.",
   "Truck open loop comes from few drives, and the camera setup changed between them (lens, housing, aim); the pooled number mixes setups, so read the per-setup numbers too. The 8 mm setups' wide camera recorded about 7-10 fps, so its frame can be up to ~60 ms from the narrow one. On the V14 setup up to 7 of a window's 700 steps are ~100 ms (one camera frame dropped). The camera's aim is the truck's live calibration learned on each drive; drives whose recorded calibration was carried over from another drive are left out.",

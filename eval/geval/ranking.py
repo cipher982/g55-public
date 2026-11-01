@@ -8,7 +8,8 @@ release first. It prints no combined score and no places (the G55 composite scor
    - place numbers, medals, leader wording or a combined score anywhere a reader can see them;
    - a list of models (`data-order="release"`) that is not newest release first, a model listed twice in
      one list, and two or more models listed outside such a list;
-   - a tier claim (`data-tier-<test>`) the resamples do not support.
+   - a tier claim (`data-tier-<test>`) the resamples do not support;
+   - a link into the private code repositories (a 404 for every reader).
 
 2. Tiers (`write_tiers`, `order`): whole drives resampled with replacement (TIER_REPS times, the same drives
    for every model and test that share them); a model sits in a higher tier only when it beat every model
@@ -311,6 +312,8 @@ RANK_TEXT = [
     (re.compile(r"\b(?:G55|composite)\s+score\b|\b\d{1,3}(?:\.\d+)?\s*/\s*100\b", re.IGNORECASE), "combined score"),
 ]
 TEXT_ATTRS = ("aria-label", "title", "data-tip", "alt", "content")
+# The code repositories are private: a link into one is a 404 for every reader.
+PRIVATE_LINKS = ("https://github.com/cipher982/",)
 TIER_TEXT = re.compile(r"\btiers?\s+\d", re.IGNORECASE)
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
 
@@ -331,6 +334,7 @@ class _Page(HTMLParser):
         self.stack, self.skip, self.claimed = [], 0, 0
         self.text, self.claims, self.loose = [], [], []
         self.open_lists, self.lists, self.free = [], [], []
+        self.private = []
 
     def _see(self, text: str, claimed: bool):
         self.text.append(text)
@@ -350,6 +354,9 @@ class _Page(HTMLParser):
             self.claimed += claim
         if self.skip:
             return
+        for k in ("href", "src"):
+            if (a.get(k) or "").startswith(PRIVATE_LINKS):
+                self.private.append(a[k])
         if listing:
             self.open_lists.append((a["data-order"], []))
         if a.get("data-model"):
@@ -470,6 +477,7 @@ def check_site(site: Path, tests: dict, released: dict | None = None) -> list[st
             claims += pg.claims
             problems += [f"{rel}: tier text outside a verified claim in ...{x.strip()}..." for x in pg.loose]
             problems += check_lists(pg.lists, pg.free, released, str(rel))
+            problems += [f"{rel}: link into a private repository {x}" for x in pg.private]
         else:
             text = src
         pats = RANK_TEXT if f.suffix == ".html" else RANK_TEXT[:1]   # scripts and styles: medals
