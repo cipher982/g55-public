@@ -13,11 +13,11 @@ result from one vehicle as a universal Mercedes specification.
 
 ## Layout
 
-- `can/` — curated CAN-C/CAN-B DBCs, body PDM/gateway topology notes, and reverse-engineering case studies.
-- `power/` — reusable BLE telemetry and register codecs for Victron Orion-Tr Smart DC-DC chargers and JBD/Eco-Worthy LiFePO4 BMS units.
-- `eval/` — open-loop and closed-loop evaluation of comma's released driving models and the site built from it (https://openpilot-gwagon-evals.drose.io). Agents add test results, new tests and explainers as their work lands; the private workspace's `eval-site` skill says how.
-- `cad/` — reusable CAD tooling and selected vehicle parts.
-- `l2/` — public high-level autonomy architecture and safety reasoning.
+- `can/`: curated CAN-C/CAN-B DBCs, body PDM/gateway topology notes, and reverse-engineering case studies.
+- `power/`: reusable BLE telemetry and register codecs for Victron Orion-Tr Smart DC-DC chargers and JBD/Eco-Worthy LiFePO4 BMS units.
+- `eval/`: open-loop and closed-loop evaluation of comma's released driving models and the site built from it (https://openpilot-gwagon-evals.drose.io). Agents add test results, new tests and explainers about comma's released models as their work lands; the private workspace's `eval-site` skill says how. The site ranks nothing (`geval.ranking.check_site`). The owner's own models and private findings never go here.
+- `cad/`: reusable CAD tooling and selected vehicle parts.
+- `l2/`: public high-level autonomy architecture and safety reasoning.
 ## Working rules
 
 - This repository is the source of truth for its public artifacts.

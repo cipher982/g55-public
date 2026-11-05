@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -111,7 +112,8 @@ def test_built_site_passes_newest_first(built, tests, released):
     for kind, mids in lanes:     # the front page's timeline: oldest first, left to right
         assert kind == "timeline" and mids == _newest_first(mids, released)[::-1], mids
     tests_pages = [(f, p) for f, p in parsed if f.parent.name == "tests" and f.name != "index.html"]
-    assert len(tests_pages) == 5, "one page per test"
+    listed = re.findall(r'<h2><a href="([^"]+)\.html"', (built / "tests" / "index.html").read_text())
+    assert len(listed) >= 5 and sorted(f.stem for f, _ in tests_pages) == sorted(listed), "one page per test on the Tests index"
     for f, p in tests_pages:     # every test page lays out the releases newest first
         rel = [mids for kind, mids in p.lists if kind == "release"]
         assert rel, f"{f.name} has no release-ordered list"
@@ -208,3 +210,13 @@ def test_history_is_exempt_but_only_inside_it(tmp_path, tests):
     old = "models are ranked 1..N with medals 🥇 for the top three"
     assert ranking.check_site(_page(tmp_path, f"<ol data-history><li>{old}</li></ol>"), tests) == []
     assert ranking.check_site(_page(tmp_path, f"<ol data-history><li>x</li></ol><p>{old}</p>"), tests)
+
+
+def test_feed_ids_are_the_same_on_every_build(built, tmp_path):
+    """A feed reader keys items by guid: a rebuild must not hand it the same entries under new ids."""
+    out = tmp_path / "again"
+    r = subprocess.run([sys.executable, str(EVAL / "site" / "build.py"), "--out", str(out)],
+                       capture_output=True, text=True, cwd=EVAL, check=False)
+    assert r.returncode == 0, r.stderr[-3000:]
+    guids = lambda d: re.findall(r"<guid[^>]*>([^<]+)</guid>", (d / "feed.xml").read_text())
+    assert guids(built) and guids(built) == guids(out)

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import hashlib
 import json
 import math
 import re
@@ -50,17 +51,6 @@ BETTER_TEXT = {"lower": "lower is better", "higher": "higher is better",
 MINUS = "−"
 # The G55 numbers on every model's row. Lateral action rate is a diagnostic with no better direction:
 # a lower rate can be a smaller request as well as a smoother one.
-KEY_METRICS = [
-    ("truck_closed_loop", "xtrack_2s", "G55 closed loop", "Median distance from the recorded path at 2 s"),
-    ("truck_open_loop", "lat_mae", "G55 lateral error", "Mean error between requested and measured lateral acceleration"),
-    ("truck_open_loop", "lat_rate_rms", "G55 lateral action rate", "Mean RMS rate of change of the lateral request"),
-]
-MORE_METRICS = [
-    ("truck_recovery", "heading_xtrack_2s", "G55 at 2 s after a 2° heading error", "Median over windows"),
-    ("truck_recovery", "offcentre_xtrack_2s", "G55 at 2 s after a 0.5 m offset", "Median over windows"),
-    ("public_closed_loop", "xtrack_2s", "Distance from path at 2 s on public segments", "Closed-loop median using comma's ideal car"),
-    ("public_open_loop", "lat_mae", "Lateral error on public segments", "Mean error against measured lateral acceleration"),
-]
 # Labels the site uses in place of a results file's own, for files written before a label changed.
 LABEL = {"lat_best_lag": "Lead of the lateral request over the car's motion",
          "lat_mae_bl": "Lateral error at the model's own best lead"}
@@ -335,33 +325,6 @@ def delta_cell(x, p, d) -> str:
             f'<span class="wins">{"lower" if x["key"] in NEUTRAL else "better"} on {p["wins"]}/{p["n"]}</span>{extra}</td>')
 
 
-def summary_table(models, cfg) -> str:
-    ref = cfg["reference_model"]
-    more = [(s, k, lab) for s, k, lab, _ in MORE_METRICS]
-    cols = [c for c in more if c[0].startswith("truck_")] + [(s, k, lab) for s, k, lab, _ in KEY_METRICS] + [c for c in more if not c[0].startswith("truck_")]
-    th = "".join(f'<th class="n" scope="col">{esc(lab)}<span class="th-s">{esc(SECTIONS[s])}</span></th>' for s, k, lab in cols)
-    body = []
-    for m in by_release(models):
-        cells = []
-        for s, k, _ in cols:
-            x, sec = find_metric(m, s, k)
-            if not x:
-                cells.append(f'<td class="na">{"not run" if not sec or sec["status"] == "not_run" else esc(sec["status"])}</td>')
-                continue
-            d = decimals_for(x["value"])
-            p = x["paired"].get(ref)
-            inner = f'{num(x["value"], d)}<span class="ci">{ci_text(x["ci"], d)}</span>'
-            if p:
-                v = verdict_of(x, p)
-                inner += f'<span class="dl">{mark(v)}{num(p["delta"], d, True)} vs lebowski</span>'
-            cells.append(f'<td class="n">{inner}</td>')
-        body.append(f'<tr data-model="{esc(m["model"]["id"])}"><th scope="row">{name_html(m, "models/" + m["model"]["id"] + ".html")}</th>{"".join(cells)}</tr>')
-    nd = max([(m["sections"].get(s) or {}).get("clusters", 0) for m in models for s in m["sections"] if s.startswith("truck_")] + [0])
-    g55 = (f"The G55 sections come from {nd} drives or fewer and carry no interval." if nd < 10 else "")
-    return (f'<div class="tw"><table class="sum"><caption>Mean with its 95% interval, then the paired difference from lebowski '
-            f'on the units both have. {g55}</caption>'
-            f'<thead><tr><th scope="col">Model</th>{th}</tr></thead><tbody data-order="release">{"".join(body)}</tbody></table></div>')
-
 
 def legend() -> str:
     return ('<p class="legend"><span>' + mark("better") + ' Better, 95% interval excludes zero</span>'
@@ -517,113 +480,6 @@ def g55_counts(models) -> tuple[int, int]:
     return (max((s.get("n", 0) for s in ok), default=0), max((s.get("clusters", 0) for s in ok), default=0))
 
 # ---------------------------------------------------------------- per-camera setup matrix (#setups)
-
-def camera_setups_section(models: list[dict], cfg: dict, root: Path) -> str:
-    """Interactive matrix showing model performance broken down by the 5 G55 camera hardware setups
-    (from `by_group` in results/*.json)."""
-    has_bg = any(
-        (m["sections"].get("truck_closed_loop") or {}).get("by_group")
-        or (m["sections"].get("truck_open_loop") or {}).get("by_group")
-        for m in models
-    )
-    if not has_bg:
-        return ""
-
-    views = [
-        ("cl2s", "Closed Loop (2 s, cm)", "truck_closed_loop", "xtrack_2s", "median", 100.0, 1, "cm", True),
-        ("heading", "2° Heading Recovery (cm)", "truck_recovery", "heading_xtrack_2s", "median", 100.0, 1, "cm", True),
-        ("offset", "0.5 m Offset Recovery (cm)", "truck_recovery", "offcentre_xtrack_2s", "median", 100.0, 1, "cm", True),
-        ("openloop", "Open-Loop Lateral Error (m/s²)", "truck_open_loop", "lat_mae", "value", 1.0, 3, "m/s²", False),
-    ]
-
-    tabs = []
-    panels = []
-    for idx_v, (vkey, vlabel, sec_name, mkey, stat, scale, dec, unit_str, cl_only) in enumerate(views):
-        active = idx_v == 0
-        tabs.append(
-            f'<button type="button" class="setup-tab" role="tab" aria-selected="{"true" if active else "false"}" '
-            f'data-setup-tab="{vkey}">{esc(vlabel)}</button>'
-        )
-
-        # Find which models have this section
-        pool = [m for m in models if (m["sections"].get(sec_name) or {}).get("status") == "ok"]
-        pool = by_release(pool)
-
-        # Compute column spans for heat shading
-        col_spans = {}
-        pooled_vals = []
-        for m in pool:
-            xm, _ = find_metric(m, sec_name, mkey)
-            if xm and xm.get(stat, xm.get("value")) is not None:
-                pooled_vals.append(float(xm.get(stat, xm["value"])))
-        col_spans["pooled"] = (min(pooled_vals), max(pooled_vals)) if pooled_vals else (0.0, 1.0)
-
-        group_counts = {}
-        for gkey, _, _ in CAMERA_GROUPS:
-            gvals = []
-            for m in pool:
-                bg = (m["sections"].get(sec_name) or {}).get("by_group", {}).get(gkey)
-                if bg:
-                    group_counts[gkey] = (bg.get("n", 0), bg.get("clusters", 0))
-                    gm = next((x for x in bg.get("metrics", []) if x["key"] == mkey), None)
-                    if gm and gm.get(stat, gm.get("value")) is not None:
-                        gvals.append(float(gm.get(stat, gm["value"])))
-            col_spans[gkey] = (min(gvals), max(gvals)) if gvals else (0.0, 1.0)
-
-        # Build table header
-        sec_sample = next(((m["sections"].get(sec_name) or {}) for m in pool), {})
-        th_pooled = f'<th class="n" scope="col">Pooled (all setups)<span class="th-s">{sec_sample.get("n", 0)} windows, {sec_sample.get("clusters", 0)} drives</span></th>'
-        th_groups = []
-        for gkey, glabel, gdesc in CAMERA_GROUPS:
-            gn, gc = group_counts.get(gkey, (0, 0))
-            th_groups.append(
-                f'<th class="n" scope="col" title="{esc(gdesc)}">{esc(glabel)}'
-                f'<span class="th-s">{gn} windows, {gc} drive{"s" if gc != 1 else ""}</span></th>'
-            )
-
-        trows = []
-        for m in pool:
-            mid = m["model"]["id"]
-            c_cls = model_class(m, cfg)
-            xm, _ = find_metric(m, sec_name, mkey)
-            if xm and xm.get(stat, xm.get("value")) is not None:
-                pv = float(xm.get(stat, xm["value"]))
-                p_cell = f'<td class="n setup-c">{num(pv * scale, dec)} <span class="gt-mu">{esc(unit_str)}</span></td>'
-            else:
-                p_cell = '<td class="na">—</td>'
-
-            g_cells = []
-            for gkey, _, _ in CAMERA_GROUPS:
-                bg = (m["sections"].get(sec_name) or {}).get("by_group", {}).get(gkey)
-                gm = next((x for x in (bg or {}).get("metrics", []) if x["key"] == mkey), None)
-                if gm and gm.get(stat, gm.get("value")) is not None:
-                    gv = float(gm.get(stat, gm["value"]))
-                    g_cells.append(f'<td class="n setup-c">{num(gv * scale, dec)}</td>')
-                else:
-                    g_cells.append('<td class="na">—</td>')
-
-            trows.append(
-                f'<tr data-model="{esc(mid)}"><th scope="row"><span class="sw sw-{c_cls}" aria-hidden="true"></span> '
-                f'{name_html(m, f"models/{mid}.html")}</th>{p_cell}{"".join(g_cells)}</tr>'
-            )
-
-        panels.append(
-            f'<div class="setup-panel" data-setup-panel="{vkey}"{" hidden" if not active else ""}>'
-            f'<div class="tw"><table class="setup-tbl">'
-            f'<thead><tr><th scope="col">Model</th>{th_pooled}{"".join(th_groups)}</tr></thead>'
-            f'<tbody data-order="release">{"".join(trows)}</tbody></table></div></div>'
-        )
-
-    return f"""<div id="setups" class="setups-sec">
-<div class="sec-head">
-<div>
-<h3>By camera setup</h3>
-<p class="sub">The G55's drives cover 5 camera mounts and lens combinations. Each column gives one setup's value beside the value over all drives: the median distance for the closed-loop tests, the mean lateral error for open loop. Rows are newest release first.</p>
-</div>
-<div class="setup-tabs" role="tablist" aria-label="Metric by camera setup">{"".join(tabs)}</div>
-</div>
-{"".join(panels)}
-</div>"""
 
 
 # ---------------------------------------------------------------- harness check & living parts
@@ -1330,7 +1186,7 @@ def rss(models, root, cfg) -> str:
                 if s:
                     parts.append(f"{title}: {metric_text(x, scale, unit) if x else 'not run'}")
             desc = "; ".join(parts)
-        guid = f'{site}/log.html#{e["date"]}-{abs(hash((e["kind"], e["title"]))) % 10**8}'
+        guid = f'{site}/log.html#{e["date"]}-{hashlib.sha256((e["kind"] + "|" + e["title"]).encode()).hexdigest()[:10]}'
         items.append(f"<item><title>{esc(KIND_TEXT[e['kind']] + ': ' + e['title'])}</title><link>{esc(link)}</link>"
                      f"<guid isPermaLink=\"false\">{esc(guid)}</guid><pubDate>{pub}</pubDate><description>{esc(desc)}</description></item>")
     return (f'<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>{esc(cfg["site_name"])}</title>'
@@ -1527,12 +1383,17 @@ def test_page(models, cfg, root, spec) -> str:
 {f'<section><h2>How this test has changed</h2><ol class="chg" data-history>{ch}</ol></section>' if ch else ""}"""
 
 
+def count_word(n: int) -> str:
+    return ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n] if n <= 10 else str(n)
+
+
 def tests_index(models) -> str:
     items = []
     for slug, title, section, cols, what in TABLES:
         k = sum(1 for m in models if section_ok(m, section))
         items.append(f'<li><h2><a href="{slug}.html">{esc(title)}</a></h2><p>{esc(what)}</p><p class="meta">Run on {k} of {len(models)} releases. Measures: {esc(join_words([c[1].lower() for c in cols]))}.</p></li>')
-    return (f'<section class="lead"><h1>Tests</h1><p>Five tests, the same for every release: three on the G55\'s own drives and two on comma\'s public segments. '
+    g55 = sum(1 for t in TABLES if t[2].startswith("truck_"))
+    return (f'<section class="lead"><h1>Tests</h1><p>{count_word(len(TABLES)).capitalize()} tests, the same for every release: {count_word(g55)} on the G55\'s own drives and {count_word(len(TABLES) - g55)} on comma\'s public segments. '
             f'Each page lays out every release with its 95% interval.</p></section><ul class="tlist">{"".join(items)}</ul>')
 
 
@@ -1763,7 +1624,7 @@ def inside_index(models, xr: dict) -> str:
     items = "".join(f'<li><a href="{esc(mid)}.html">What {esc(model_phrase(idx[mid]))} looks at when it steers</a><span>{esc(plain_name(idx[mid]))}, {len(clips)} public segments</span></li>'
                     for mid, clips in xr.items() if mid in idx)
     return (f'<section class="lead"><h1>Inside the models</h1><p>How a release turns the camera picture into a steering request, measured on comma\'s public segments. '
-            f'One release so far; each new one is added as it is run.</p></section><ul class="sl big">{items}</ul>')
+            f'{count_word(len(xr)).capitalize()} release{"s" if len(xr) != 1 else ""} so far; each new one is added as it is run.</p></section><ul class="sl big">{items}</ul>')
 
 
 # ---------------------------------------------------------------- main
@@ -1799,7 +1660,7 @@ def main() -> None:
     for spec in TABLES:
         (out / "tests" / f"{spec[0]}.html").write_text(
             page(cfg, f"{spec[1]} – {tag}", spec[4], test_page(models, cfg, root, spec), 1, "tests", f"tests/{spec[0]}.html"))
-    (out / "tests" / "index.html").write_text(page(cfg, f"Tests – {tag}", "The five tests every openpilot release gets here.",
+    (out / "tests" / "index.html").write_text(page(cfg, f"Tests – {tag}", f"The {count_word(len(TABLES))} tests every openpilot release gets here.",
                                                    tests_index(models), 1, "tests", "tests/index.html"))
     for mid, clips in xr.items():
         m = by_id(models)[mid]

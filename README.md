@@ -4,11 +4,11 @@ An AI-maintained collection of reusable engineering work from a 2011 Mercedes-Be
 
 The project explores five connected areas:
 
-- **CAN reverse engineering** — curated CAN-C/CAN-B DBCs, body PDM/gateway topology notes, and physical-layer diagnostics.
-- **BLE auxiliary power telemetry & control** — Victron Orion-Tr Smart BLE GATT register read/write & Instant Readout codecs plus JBD/Eco-Worthy LiFePO4 BMS telemetry.
-- **Driving model evaluation** — open-loop and closed-loop benchmark leaderboards and per-scenario evaluation artifacts.
-- **Code-first CAD** — parametric vehicle parts and the render/measure loop used by agents to inspect their own geometry.
-- **L2 preparation** — high-level architecture and safety reasoning for adding modern sensing and control to an older platform.
+- **CAN reverse engineering**: curated CAN-C/CAN-B DBCs, body PDM/gateway topology notes, and physical-layer diagnostics.
+- **BLE auxiliary power telemetry & control**: Victron Orion-Tr Smart BLE GATT register read/write & Instant Readout codecs plus JBD/Eco-Worthy LiFePO4 BMS telemetry.
+- **Driving model evaluation**: comma's released openpilot driving models tested on this truck's drives and on comma's public segments, with a public site (https://openpilot-gwagon-evals.drose.io) that lays out every release's results with 95% intervals and ranks nothing.
+- **Code-first CAD**: parametric vehicle parts and the render/measure loop used by agents to inspect their own geometry.
+- **L2 preparation**: high-level architecture and safety reasoning for adding modern sensing and control to an older platform.
 
 This is an engineering notebook and artifact collection, not a supported product, a certified safety case, or a complete openpilot port. Findings are often confirmed on one vehicle only. Read the evidence grade and validation status before relying on one.
 
@@ -32,7 +32,7 @@ The public workspace currently contains:
 |---|---|---|
 | CAN | [`can/README.md`](can/README.md) | DBCs, evidence grades, body PDM/gateway topology, and diagnostic case studies |
 | Power & BLE | [`power/README.md`](power/README.md) | Victron Orion-Tr Smart BLE GATT register read/write + Instant Readout and JBD/Eco-Worthy BMS codecs |
-| Driving Eval | [`eval/README.md`](eval/README.md) | Open-loop and closed-loop driving model benchmark results and static leaderboard site |
+| Driving Eval | [`eval/README.md`](eval/README.md) | Open-loop and closed-loop results for comma's released driving models, and the site built from them |
 | CAD | [`cad/README.md`](cad/README.md) | Agent geometry review tooling and printable parts |
 | L2 | [`l2/README.md`](l2/README.md) | Layer boundaries and validation principles |
 | Engine-control visual | [Shareable PNG](m113k-clutch-control.png) · [Editable SVG](m113k-clutch-control.svg) | Factory clutch switching, an offline diagnostic finding, and the unverified vehicle-control boundary |
