@@ -1,6 +1,7 @@
 """Unit tests for `public/power/ble_power.py` using synthetic keys and vectors."""
 from __future__ import annotations
 
+import hashlib
 import struct
 import sys
 from pathlib import Path
@@ -111,20 +112,23 @@ def test_public_workspace_dbc_and_pii_boundary():
         text=True,
         check=True,
     ).stdout.splitlines()
-    forbidden_substrings = (
-        "WDCYC",
-        "FC:5F:BB",
-        "fc:5f:bb",
-        "C1:06:0D",
-        "c1:06:0d",
-        "/home/drose",
-        "g55-pi",
-        "100.115.19.111",
-    )
+    # The forbidden strings (a VIN prefix, two device MAC prefixes, a home path, a hostname and a private IP) are
+    # stored only as (length, first 16 hex of sha256 of the lowercased string), so this file does not publish them.
+    forbidden = {
+        (5, "7f8be969d81537bf"),
+        (8, "6ac0a694faee4d75"),
+        (8, "ec0f0c1e0f9962d2"),
+        (11, "987963cb9086648c"),
+        (6, "70f61a234713c485"),
+        (14, "6f40c8521ea1aa5a"),
+    }
+    lengths = sorted({n for n, _ in forbidden})
     for rel in tracked + ["power/README.md", "power/ble_power.py", "can/case-studies/w463-body-pdm-and-gateway-topology.md"]:
         p = public_root / rel
-        if not p.is_file() or p.name == "test_ble_power.py":
+        if not p.is_file() or p.suffix in {".png", ".jpg", ".jpeg", ".webp", ".pdf", ".stl", ".3mf"}:
             continue
-        txt = p.read_text(errors="ignore")
-        for needle in forbidden_substrings:
-            assert needle not in txt, f"Forbidden string {needle!r} found in public/{rel}"
+        txt = p.read_text(errors="ignore").lower()
+        for n in lengths:
+            for i in range(len(txt) - n + 1):
+                h = hashlib.sha256(txt[i : i + n].encode()).hexdigest()[:16]
+                assert (n, h) not in forbidden, f"Forbidden string found in public/{rel} at offset {i}"
