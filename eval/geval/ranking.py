@@ -6,10 +6,12 @@ release first. It prints no combined score and no places (the G55 composite scor
 
 1. The check (`check_site`): `site/build.py` runs it and refuses to write a failing site. It fails on
    - place numbers, medals, leader wording or a combined score anywhere a reader can see them;
-   - a list of models (`data-order="release"`) that is not newest release first, a model listed twice in
-     one list, and two or more models listed outside such a list;
+   - a list of models (`data-order="release"`) that is not newest release first, a chronological axis
+     (`data-order="timeline"`, oldest first: a time axis read left to right) out of release order, a model
+     listed twice in one list, and two or more models listed outside such a list;
    - a tier claim (`data-tier-<test>`) the resamples do not support;
-   - a link into the private code repositories (a 404 for every reader).
+   - a link into the private code repositories (a 404 for every reader); cipher982/g55-public is public
+     since 2026-11-05 and may be linked.
 
 2. Tiers (`write_tiers`, `order`): whole drives resampled with replacement (TIER_REPS times, the same drives
    for every model and test that share them); a model sits in a higher tier only when it beat every model
@@ -314,8 +316,16 @@ RANK_TEXT = [
 TEXT_ATTRS = ("aria-label", "title", "data-tip", "alt", "content")
 # The code repositories are private: a link into one is a 404 for every reader.
 PRIVATE_LINKS = ("https://github.com/cipher982/",)
+PUBLIC_REPOS = ("https://github.com/cipher982/g55-public",)   # public since 2026-11-05 (David: "go public")
 TIER_TEXT = re.compile(r"\btiers?\s+\d", re.IGNORECASE)
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
+
+
+def is_private_link(url: str) -> bool:
+    """A link into one of David's private repositories: any cipher982 repository but the public ones."""
+    if not url.startswith(PRIVATE_LINKS):
+        return False
+    return not any(url == r or url.startswith(r + "/") or url.startswith(r + "#") for r in PUBLIC_REPOS)
 
 
 class _Page(HTMLParser):
@@ -325,8 +335,8 @@ class _Page(HTMLParser):
     (space-separated). Text that names a tier ("tier 2") must sit inside such an element, so every tier a
     reader sees is a claim the check verifies.
 
-    A list of models is an element with `data-order` (the only order is "release": newest first by first
-    public date). Each element with `data-model` inside it adds that model to the list, once per run of
+    A list of models is an element with `data-order`: "release" (newest first by first public date) or
+    "timeline" (a time axis, oldest first). Each element with `data-model` inside it adds that model to the list, once per run of
     elements for the same model. Elements with `data-model` outside every list are collected in `free`."""
 
     def __init__(self):
@@ -355,7 +365,7 @@ class _Page(HTMLParser):
         if self.skip:
             return
         for k in ("href", "src"):
-            if (a.get(k) or "").startswith(PRIVATE_LINKS):
+            if is_private_link(a.get(k) or ""):
                 self.private.append(a[k])
         if listing:
             self.open_lists.append((a["data-order"], []))
@@ -427,8 +437,8 @@ def check_lists(lists: list, free: list, released: dict, where: str) -> list[str
     models with a release date; a page lists at most one model outside a list."""
     problems = []
     for kind, mids in lists:
-        if kind != "release":
-            problems.append(f"{where}: a list ordered by {kind!r}; the only order is \"release\"")
+        if kind not in ("release", "timeline"):
+            problems.append(f"{where}: a list ordered by {kind!r}; the orders are \"release\" and \"timeline\"")
             continue
         twice = sorted({m for m in mids if mids.count(m) > 1})
         if twice:
@@ -438,9 +448,12 @@ def check_lists(lists: list, free: list, released: dict, where: str) -> list[str
             problems.append(f"{where}: no release date for {', '.join(unknown)}")
             continue
         for a, b in zip(mids, mids[1:]):
-            if released[a] < released[b]:
+            if kind == "release" and released[a] < released[b]:
                 problems.append(f"{where}: {a} (first public {released[a]}) listed above {b} ({released[b]}): "
                                 f"lists are newest release first")
+            if kind == "timeline" and released[a] > released[b]:
+                problems.append(f"{where}: {a} (first public {released[a]}) placed before {b} ({released[b]}) "
+                                f"on a timeline: a time axis is oldest first")
     if len(set(free)) > 1:
         problems.append(f"{where}: {len(set(free))} models listed outside a release-ordered list "
                         f"({', '.join(sorted(set(free))[:5])}{', ...' if len(set(free)) > 5 else ''})")

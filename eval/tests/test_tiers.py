@@ -104,11 +104,19 @@ def test_no_combined_score_in_the_tiers_file(tests):
 
 def test_built_site_passes_newest_first(built, tests, released):
     assert ranking.check_site(built, tests, released) == []
-    pages = dict((f.name, p) for f, p in _parsed(built) if f.parent == built)
-    lists = pages["index.html"].lists
-    assert len(lists) >= 5, "one release-ordered list per results table"
-    for kind, mids in lists:
-        assert kind == "release" and mids == _newest_first(mids, released), mids
+    parsed = _parsed(built)
+    pages = dict((f.name, p) for f, p in parsed if f.parent == built)
+    lanes = pages["index.html"].lists
+    assert len(lanes) >= 5, "one timeline lane per model family on the front page"
+    for kind, mids in lanes:     # the front page's timeline: oldest first, left to right
+        assert kind == "timeline" and mids == _newest_first(mids, released)[::-1], mids
+    tests_pages = [(f, p) for f, p in parsed if f.parent.name == "tests" and f.name != "index.html"]
+    assert len(tests_pages) == 5, "one page per test"
+    for f, p in tests_pages:     # every test page lays out the releases newest first
+        rel = [mids for kind, mids in p.lists if kind == "release"]
+        assert rel, f"{f.name} has no release-ordered list"
+        for mids in rel:
+            assert mids == _newest_first(mids, released), (f.name, mids)
     index = "\n".join(pages["index.html"].text)      # what a reader sees; the log (data-history) is history
     assert not ranking.TIER_TEXT.search(index) and "#1" not in index
     assert "G55 score" not in index and "/100" not in index
@@ -153,17 +161,22 @@ def test_lists_must_be_newest_release_first(tmp_path, tests, released):
     cases = {
         "".join(f'<tbody data-order="release"><tr data-model="{m}"></tr></tbody>' for m in by_value[:1])
         + '<tbody data-order="release">' + "".join(f'<tr data-model="{m}"></tr>' for m in by_value) + "</tbody>": "newest release first",
-        '<tbody data-order="value">' + "".join(f'<tr data-model="{m}"></tr>' for m in mids) + "</tbody>": "the only order",
+        '<tbody data-order="value">' + "".join(f'<tr data-model="{m}"></tr>' for m in mids) + "</tbody>": "the orders are",
         '<tbody data-order="release">' + "".join(f'<tr data-model="{m}"></tr>' for m in mids + mids[:1]) + "</tbody>": "listed twice",
         "".join(f'<p data-model="{m}">x</p>' for m in mids): "outside a release-ordered list",
         '<tbody data-order="release"><tr data-model="no_such_model"></tr><tr data-model="' + mids[0] + '"></tr></tbody>': "no release date",
         "<p>G55 score 91.7</p>": "combined score",
         "<p>91.7/100</p>": "combined score",
-        '<a href="https://github.com/cipher982/g55-public/tree/main/eval">code</a>': "private repository",
+        '<a href="https://github.com/cipher982/g55/tree/main">code</a>': "private repository",
+        '<a href="https://github.com/cipher982/g55-public-old">code</a>': "private repository",
+        '<div data-order="timeline">' + "".join(f'<a data-model="{m}"></a>' for m in mids) + "</div>": "a time axis is oldest first",
     }
     for body, want in cases.items():
         problems = ranking.check_site(_page(tmp_path, body), tests, released)
         assert any(want in p for p in problems), (want, problems)
+    # a time axis read left to right, oldest first, and a link into the public repository pass
+    axis = '<div data-order="timeline">' + "".join(f'<a data-model="{m}"></a>' for m in reversed(mids)) + "</div>"
+    assert ranking.check_site(_page(tmp_path, axis + '<a href="https://github.com/cipher982/g55-public/tree/main/eval">code</a>'), tests, released) == []
     # one model's own page names it outside a list; that is not a list
     assert ranking.check_site(_page(tmp_path, f'<h1 data-model="{mids[0]}">x</h1>'), tests, released) == []
 

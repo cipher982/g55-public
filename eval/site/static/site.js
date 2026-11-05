@@ -1,5 +1,6 @@
-// Hover and focus readout for table cells and bars, theme switch, the closed-loop player and setup tabs.
-// Nothing here reorders a table: every list of models is newest release first, as built.
+// Theme switch, hover and focus readouts, the release timeline, "since your last visit", the closed-loop player
+// (method page), setup tabs and the clip viewer (inside pages). Nothing here reorders a list: every list of
+// models is in the order the page was built with.
 (() => {
   const root = document.documentElement;
   const btn = document.querySelector(".theme");
@@ -178,67 +179,111 @@
   }
 })();
 
-// Sticky top nav active section highlight (click + hashchange + scroll-spy).
+// The release timeline: on a narrow screen it scrolls; start at the newest end.
 (() => {
-  const nav = document.querySelector(".top nav");
-  if (!nav) return;
-  const links = [...nav.querySelectorAll("a[href*='#']")];
-  const items = [];
-  for (const a of links) {
-    const idx = a.getAttribute("href").indexOf("#");
-    if (idx < 0) continue;
-    const id = a.getAttribute("href").slice(idx + 1);
-    const sec = document.getElementById(id);
-    if (sec) items.push({ id, a, sec });
+  for (const w of document.querySelectorAll(".tlw")) {
+    if (w.scrollWidth > w.clientWidth) w.scrollLeft = w.scrollWidth;
   }
+})();
+
+// "Since your last visit": entries newer than the last time this browser opened the front page or the log.
+(() => {
+  const feed = document.querySelector(".feedsec");
+  if (!feed) return;
+  const items = [...feed.querySelectorAll(".fe[data-date]")];
   if (!items.length) return;
-
-  let lockUntil = 0;
-  const setActive = (id) => {
-    for (const it of items) {
-      if (it.id === id) it.a.setAttribute("aria-current", "page");
-      else it.a.removeAttribute("aria-current");
+  const newest = items.map((e) => e.dataset.date).sort().pop();
+  let seen = null;
+  try { seen = localStorage.getItem("seen"); } catch (e) {}
+  if (seen) {
+    const fresh = items.filter((e) => e.dataset.date > seen);
+    for (const e of fresh) e.classList.add("fe-new");
+    const note = feed.querySelector(".since");
+    if (note && fresh.length) {
+      note.textContent = `${fresh.length} ${fresh.length === 1 ? "entry" : "entries"} since your last visit on ${seen}.`;
+      note.hidden = false;
     }
-  };
+  }
+  try { if (!seen || newest > seen) localStorage.setItem("seen", newest); } catch (e) {}
+})();
 
-  for (const it of items) {
-    it.a.addEventListener("click", () => {
-      setActive(it.id);
-      lockUntil = performance.now() + 700;
+// The clip viewer: two camera views with the 4 x 8 effect grid over them, a steering trace and a rows-over-time strip.
+(() => {
+  const box = document.querySelector(".xv");
+  const raw = document.getElementById("xv-data");
+  if (!box || !raw) return;
+  const clips = JSON.parse(raw.textContent).clips;
+  const imgs = { n: box.querySelector('img[data-view="n"]'), w: box.querySelector('img[data-view="w"]') };
+  const grids = { n: box.querySelector('[data-grid="n"]'), w: box.querySelector('[data-grid="w"]') };
+  for (const g of Object.values(grids)) g.innerHTML = "<i></i>".repeat(32);
+  const cells = { n: [...grids.n.children], w: [...grids.w.children] };
+  const scrub = box.querySelector(".xv-scrub"), read = box.querySelector(".xv-read"), play = box.querySelector(".xv-play");
+  const svg = box.querySelector(".xv-trace svg"), cv = box.querySelector(".xv-rows canvas"), ctx = cv.getContext("2d");
+  const btns = [...box.querySelectorAll(".xv-pick button")];
+  const cache = {};
+  let clip = null, dir = "", i = 0, playing = false, timer = null, scale = 1;
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const colour = (e, a) => `rgba(${css(e > 0 ? "--left" : "--right")}, ${a.toFixed(3)})`;
+  const src = (f, v) => `${dir}/${clip.images.pattern.replace("{f:04d}", String(f).padStart(4, "0")).replace("{n|w}", v)}`;
+
+  const draw = () => {
+    const fr = clip.frames[i];
+    for (const v of ["n", "w"]) imgs[v].src = src(fr.f, v);
+    let top = 0;
+    fr.eff.forEach((e, k) => { if (Math.abs(e) > Math.abs(fr.eff[top])) top = k; });
+    for (const v of ["n", "w"]) cells[v].forEach((c, k) => {
+      const a = Math.sqrt(Math.min(1, Math.abs(fr.eff[k]) / scale)) * 0.75;
+      c.style.background = colour(fr.eff[k], a);
+      c.classList.toggle("top", k === top);
     });
-  }
-
-  window.addEventListener("hashchange", () => {
-    const h = location.hash.replace(/^#/, "");
-    if (items.some((it) => it.id === h)) {
-      setActive(h);
-      lockUntil = performance.now() + 700;
-    }
-  });
-
-  const onScroll = () => {
-    if (performance.now() < lockUntil) return;
-    const y = window.scrollY + 130;
-    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 24) {
-      setActive(items[items.length - 1].id);
-      return;
-    }
-    let cur = items[0].id;
-    for (const it of items) {
-      const top = it.sec.getBoundingClientRect().top + window.scrollY;
-      if (top <= y) cur = it.id;
-    }
-    setActive(cur);
+    const r = Math.floor(top / 8) + 1, c = (top % 8) + 1;
+    read.textContent = `${fr.t.toFixed(1)} s, ${(fr.v * 3.6).toFixed(0)} km/h, strongest: row ${r}, column ${c}`;
+    const cur = svg.querySelector(".cur");
+    if (cur) { const x = (i / (clip.frames.length - 1)) * 1000; cur.setAttribute("x1", x); cur.setAttribute("x2", x); }
+    scrub.value = i;
   };
 
-  window.addEventListener("scroll", onScroll, { passive: true });
-  if (location.hash) {
-    const h = location.hash.replace(/^#/, "");
-    if (items.some((it) => it.id === h)) {
-      setActive(h);
-      lockUntil = performance.now() + 900;
-    }
-  } else {
-    onScroll();
-  }
+  const trace = () => {
+    const F = clip.frames, n = F.length;
+    const all = F.flatMap((f) => [f.a_lat, f.a_lat_meas]).filter((x) => x !== null && x !== undefined);
+    const lim = Math.max(0.5, ...all.map(Math.abs)) * 1.1;
+    const y = (v) => (60 - (v / lim) * 55).toFixed(1);
+    const path = (key) => F.map((f, k) => (f[key] === null || f[key] === undefined ? null : `${((k / (n - 1)) * 1000).toFixed(1)},${y(f[key])}`)).filter(Boolean).join(" ");
+    const sc = box.querySelector(".xv-scale");
+    if (sc) sc.textContent = `grey line: 0; top and bottom edges: ±${lim.toFixed(1)} m/s², left positive`;
+    svg.innerHTML = `<line class="z" x1="0" x2="1000" y1="60" y2="60"/><polyline class="pr" points="${path("a_lat_meas")}"/><polyline class="pm" points="${path("a_lat")}"/><line class="cur" x1="0" x2="0" y1="0" y2="120"/>`;
+  };
+
+  const rows = () => {
+    const F = clip.frames, n = F.length;
+    cv.width = n; cv.height = 4;
+    const sums = F.map((f) => [0, 1, 2, 3].map((r) => f.eff.slice(r * 8, r * 8 + 8).reduce((a, b) => a + b, 0)));
+    const m = Math.max(1e-6, ...sums.flat().map(Math.abs));
+    sums.forEach((s, k) => s.forEach((v, r) => { ctx.fillStyle = colour(v, Math.sqrt(Math.min(1, Math.abs(v) / m)) * 0.9 + 0.03); ctx.fillRect(k, r, 1, 1); }));
+  };
+
+  const load = async (k) => {
+    for (const b of btns) b.setAttribute("aria-pressed", String(Number(b.dataset.clip) === k));
+    dir = clips[k].dir;
+    clip = cache[dir] || (cache[dir] = await (await fetch(`${dir}/clip.json`)).json());
+    const mags = clip.frames.flatMap((f) => f.eff.map(Math.abs)).sort((a, b) => a - b);
+    scale = Math.max(1e-6, mags[Math.floor(mags.length * 0.99)]);
+    scrub.max = clip.frames.length - 1;
+    i = 0;
+    trace(); rows(); draw();
+    for (const f of clip.frames) { const im = new Image(); im.src = src(f.f, "n"); }
+  };
+
+  const setPlaying = (on) => {
+    playing = on;
+    play.classList.toggle("paused", !on);
+    play.setAttribute("aria-label", on ? "Pause" : "Play");
+    clearInterval(timer);
+    if (on) timer = setInterval(() => { i = (i + 1) % clip.frames.length; draw(); }, 1000 / (clip.images.hz || 5));
+  };
+  play.addEventListener("click", () => setPlaying(!playing));
+  scrub.addEventListener("input", () => { setPlaying(false); i = Number(scrub.value); draw(); });
+  for (const b of btns) b.addEventListener("click", async () => { setPlaying(false); await load(Number(b.dataset.clip)); });
+  new MutationObserver(() => { if (clip) { rows(); draw(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  load(0).then(() => setPlaying(false));
 })();
