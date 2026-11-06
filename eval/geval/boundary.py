@@ -1,8 +1,7 @@
 """The public boundary, checked on the built site (public/AGENTS.md, Boundary).
 
 A net, not a proof: it catches the identifiers agents have leaked before (drive, window and session ids,
-host names, file paths, private network and Bluetooth addresses, the VIN prefix, money, the owner's name,
-the IDs of frames the gateway sends). Wording that locates the truck or the owner still needs a reader.
+host names, file paths, private network and Bluetooth addresses, the VIN prefix, money, the owner's name). Wording that locates the truck or the owner still needs a reader.
 
     uv run python -m geval.boundary site/_site
 """
@@ -24,7 +23,6 @@ PATTERNS = {
     "VIN": r"\bWD[BC][A-Z0-9]{14}\b",
     "money": r"\$\s?\d",
     "owner's name": r"\b(David|Rose)\b",
-    "command frame ID": r"(?i)\b0x0*(111|238)\b",
 }
 SUFFIXES = {".html", ".xml", ".txt", ".json", ".csv", ".js", ".css", ".svg"}
 

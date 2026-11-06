@@ -16,7 +16,6 @@ LEAKS = {
     "VIN": "VIN WDCYC7BF9BX123456",
     "money": "about $30 on Modal",
     "owner's name": "David drove it",
-    "command frame ID": "taps on 0x238",
 }
 
 

@@ -1268,9 +1268,8 @@ def pill(kind: str) -> str:
 # ---------------------------------------------------------------- signals, from the DBC files in g55-public can/
 
 def signals() -> list[dict]:
-    """Every signal in the public DBC files, less the messages the gateway sends (signals.json)."""
+    """Every signal in the public DBC files (signals.json names them)."""
     cfg = _j("signals.json")
-    skip = {int(x, 16) for x in cfg["exclude"]}
     out = []
     for bus, name in cfg["files"]:
         f = EVAL.parent / "can" / name
@@ -1281,13 +1280,9 @@ def signals() -> list[dict]:
         cm_bo = {int(a): c for a, c in re.findall(r'CM_ BO_ (\d+) "((?:[^"\\]|\\.)*)";', t, re.S)}
         for m in re.finditer(r'^BO_ (\d+) (\w+): (\d+) (\w+)\n((?: SG_.*\n)*)', t, re.M):
             mid, msg, tx, body = int(m[1]), m[2], m[4], m[5]
-            if mid in skip:
-                continue
             for s in re.finditer(r' SG_ (\w+) ?(?:M|m\d+)? ?: (\d+)\|(\d+)@([01])([+-]) \(([^,]+),([^)]+)\) \[([^|]*)\|([^\]]*)\] "([^"]*)"', body):
                 c = cm_sg.get((mid, s[1]), "") or cm_bo.get(mid, "")
                 ev = re.match(r"(Measured|Derived|Borrowed|Hypothetical)", c)
-                for x in cfg["exclude"]:
-                    c = re.sub(rf"(?i)\b{x}\b", cfg["exclude_label"], c)
                 out.append({"bus": bus, "id": f"0x{mid:03X}", "msg": msg, "tx": tx, "sig": s[1], "start": int(s[2]), "len": int(s[3]),
                             "order": "LE" if s[4] == "1" else "BE", "signed": s[5] == "-", "scale": s[6], "offset": s[7], "unit": s[10],
                             "ev": ev[1] if ev else "Not labelled", "note": c})
@@ -1295,7 +1290,7 @@ def signals() -> list[dict]:
 
 
 def dbc_totals() -> tuple[int, int]:
-    """Signals and messages in the DBC files, the left-out message included."""
+    """Signals and messages in the DBC files."""
     ns = nm = 0
     for _, name in _j("signals.json")["files"]:
         f = EVAL.parent / "can" / name
@@ -1325,7 +1320,7 @@ def signals_page() -> str:
     files = " ".join(f'<a href="{esc(CFG["repo_url"])}/blob/main/can/{esc(n)}">{esc(n)}</a>' for _, n in cfg["files"])
     head = ["Bus", "ID", "Message", "Sender", "Signal", ">Start|bits", ">Scale + offset", "Unit", "Evidence", "Note"]
     return f"""<p class="d-crumb">signals</p><h1 class="d-h1">W463 CAN signals</h1>
-<p class="d-sum">Every signal decoded on this truck so far: {dbc_totals()[0]} in {dbc_totals()[1]} messages on two buses, {len(sigs)} listed here, read from the gateway's recordings of every drive. Each says how it is known. They were seen on one 2011 G55 and are not a Mercedes specification. They are for logging and reading a W463's buses. {esc(cfg["exclude_why"])} Files: {files}.</p>
+<p class="d-sum">Every signal decoded on this truck so far: {dbc_totals()[0]} in {dbc_totals()[1]} messages on two buses, read from the gateway's recordings of every drive. Each says how it is known. They were seen on one 2011 G55 and are not a Mercedes specification. Files: {files}.</p>
 <div class="d-g a"><div>{d_panel("Signals by sending module", f"{len(bym)} senders", d_table(["Module", "Bus", ">Signals"], [mods]))}</div>
 <div>{d_panel("How each is known", "from the DBC comments", d_table(["Evidence", ">Signals"], [f'<tr><td>{esc(k)}</td><td class="r m">{v}</td></tr>' for k, v in ev.most_common()]))}
 <p class="d-src">Byte order LE is Intel, BE is Motorola; s marks a signed value. Start bit as in the DBC.</p></div></div>

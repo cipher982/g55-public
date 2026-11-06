@@ -13,9 +13,6 @@ Evidence labels used in accompanying notes:
 
 The public copies intentionally exclude captured VIN payload definitions and private vehicle identity. Raw drive captures are not included.
 
-These files are for passive analysis, logging, and bench decoding. They are not
-instructions for transmitting or injecting frames into a vehicle.
-
 ## Files
 
 - [`g55-canc.dbc`](g55-canc.dbc) — curated CAN-C, nominally 500 kbit/s.
