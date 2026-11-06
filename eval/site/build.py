@@ -926,7 +926,7 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 <meta property="og:image" content="{esc(og)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="openpilot driving model evaluations">
+<meta property="og:image:alt" content="{esc(cfg['site_name'])}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="light dark">
 <script>try{{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}}catch(e){{}}</script>
@@ -1938,9 +1938,9 @@ def main() -> None:
         (out / "inside" / "index.html").write_text(page(cfg, f"Inside the models – {tag}", "How openpilot driving models turn the camera picture into steering.",
                                                         inside_index(models, xr), 1, "notes", "inside/index.html"))
     shutil.copy2(EVAL / "SCHEMA.md", out / "schema.txt")
-    desc = ("A working log of putting openpilot on a 2011 Mercedes-Benz G55: every comma driving model tested on the truck's own drives as it "
-            "is released, with 95% intervals, and notes on what was built and measured.")
-    (out / "index.html").write_text(page(cfg, f"openpilot on a G55 – {tag}", desc, index_page(models, cfg, root), 0, "releases", ""))
+    desc = ("Work log of a 2011 Mercedes-Benz G55 AMG: its CAN buses decoded, a patched engine ECU, open-source transmission firmware, "
+            "cruise control over CAN, and every comma openpilot driving model tested on the truck's own drives, with 95% intervals.")
+    (out / "index.html").write_text(page(cfg, tag, desc, index_page(models, cfg, root), 0, "releases", ""))
     (out / "log.html").write_text(page(cfg, f"Log – {tag}", "Every release, test run and change to the tests.", log_page(models, root), 0, "log", "log.html"))
     (out / "method.html").write_text(page(cfg, f"Method – {tag}", "Scoring methodology for open-loop replay, "
                                           "worldmodel-4B closed-loop rollouts, drive-clustered intervals, and CSV downloads.", method(models, cfg, root), 0, "method", "method.html"))
