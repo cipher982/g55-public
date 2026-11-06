@@ -1,0 +1,30 @@
+<h2>What was asked</h2>
+<p>N16 is comma's driving model (<code>96244b1f_12800</code>, "N16 nav"). In bench8, the closed-loop simulator built here (the model steers a simulated truck while the camera view is redrawn from recorded frames), N16 often fails to recover from sideways pushes. A "push" moves the simulated truck 1.0 or 1.5 m sideways off its recorded path, and "recovery" is the share of pushes the truck returns from. The question was whether a small steering correction (a residual) trained on top of a frozen N16 helps.</p>
+<h2>What was done</h2>
+<p>Baseline first: on 18 lane windows (36 episodes per push size), N16 recovered 0.36 of 1.0 m pushes and 0.25 of 1.5 m pushes, and 0 of 18 night episodes at 1.5 m, failing mostly by overshoot (1.0 m) or a wrong-way first response (1.5 m). Another driving model, lebowski, recovered 0.64 and 0.47.</p>
+<ul>
+<li>First residual (a small network adding up to 2 m/s&sup2; of lateral action), trained with DAgger (rollouts in the simulator labelled by a controller that knows the true pose). Fewer lane departures and no more jerk, but both paired intervals reached zero and it read worse on live-drive hard moments.</li>
+<li>Round 2 added inputs: +0.04 and +0.06 on 63 locked-test day windows (intervals include zero), worse than N16 at 1.5 m on a fresh evening.</li>
+<li>The "x3 start": N16's residual output written three times as wide, untrained. It already recovered more often than N16, and departed the lane less (dev windows, 135: 1.0 m 0.18 to 0.07, 1.5 m 0.39 to 0.14; locked test day windows, 63: recovery 0.60 to 0.71 and 0.40 to 0.48).</li>
+<li>TD3 (a reinforcement-learning method) started from the x3 start. Pilot 1 collapsed by epoch 24: the critic barely distinguished lateral actions and the actor drifted into a constant rightward shift (unpushed departures 0.04 to 0.83). Pilot 2 added correlated exploration noise, an anchor to the starting action, and a check that the critic had learned before the actor trained. It did not collapse; gains on windows it trained on (recovery 0.70 to 0.84 and 0.54 to 0.80) held after export to bench8.</li>
+<li>A 201-epoch run, three seeds, scored on 44 held-out windows.</li>
+</ul>
+<h2>Result</h2>
+<p>Recovery means returning to the policy's own unpushed path unless stated; brackets are 95% intervals.</p>
+<table>
+<thead><tr><th scope="col">Stage and windows</th><th scope="col">1.0 m</th><th scope="col">1.5 m</th></tr></thead>
+<tbody>
+<tr><td>First residual, locked test (18): N16 to residual</td><td>0.39 to 0.58, paired +0.19 [0.00, 0.39]</td><td>0.25 to 0.36, paired +0.11 [0.00, 0.22]</td></tr>
+<tr><td>Round 2, fresh evening (39): N16 to residual</td><td>0.64 to 0.58, paired -0.06 [-0.15, 0.01]</td><td>0.55 to 0.42, paired -0.13 [-0.23, -0.03]</td></tr>
+<tr><td>Long run, held out (44): x3 to run, paired</td><td>0.68 to 0.83, +0.14 [+0.04, +0.31]</td><td>0.58 to 0.76, +0.18 [+0.13, +0.33]</td></tr>
+<tr><td>Same, against the driver's recorded path</td><td>+0.01 [-0.04, +0.19]</td><td>+0.07 [+0.04, +0.17]</td></tr>
+<tr><td>Lane-centre reference, epoch 96, against the long run (held out)</td><td>+0.036 [-0.017, +0.143]</td><td>+0.009 [-0.058, +0.167]</td></tr>
+</tbody>
+</table>
+<p>In the long run every seed's interval over drives cleared zero against its own unpushed run. Wrong-way first turns at 1.5 m fell from 13 to 6-7 of 270 pushes, and lateral jerk dropped. On the 91 training windows the gain against the driver's path was +0.19 and +0.29, so the line was learned where it trained; recovery itself transferred. Training toward the lane centre instead did not change the held-out result measurably.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Held-out intervals resample 3 drives. The locked test, the learned truck plant and hard moments were not run for the long run, and nothing has gone to the truck.</li>
+<li>Which of pilot 2's four changes prevented the collapse was not separated.</li>
+<li>Simulation on recorded drives; the later stages use day windows only.</li>
+</ul>

@@ -1,0 +1,31 @@
+<h2>What was asked</h2>
+<p>comma's world model (worldmodel-4B) draws the next camera frames from past frames and a small sideways or turning nudge. To practise recovery from being off-centre inside it, it has to keep a commanded sideways offset: move the simulated truck 1 m left and the road should sit about 1 m right of where it was. Unmodified, it pulled the picture back toward the recorded lane centre. The question was whether inference changes, a learned offset reader, fine-tuning or reward training would fix that.</p>
+<p>The ruler is the reprojection: recorded frames geometrically re-rendered from a displaced camera, correct by construction out to about 1.5 m. "Road gain" is the offset the generated road implies divided by the true offset (bar: 0.8 to 1.2 at 3 and 4 s). "CFG" is the guidance strength used when sampling.</p>
+<h2>What was done</h2>
+<ul>
+<li>Fix 1, at inference: anchor frames re-rendered at the displaced pose, CFG 4 and 6, anchors removed. None made the model keep the offset.</li>
+<li>Fix 2: a two-frame offset reader used to steer sampling. Its first two versions scored well by reading a grey hole that grows with the offset, not the road. The third (v4) reads the offset with gain 1.03 to 1.13, but guiding with it left shift, gain and image quality unchanged (paired medians within 0.04).</li>
+<li>Fix 3: rank-32 LoRA adapters on the diffusion transformer, 3,000 steps, 391 windows from 10 drives, history and target both re-rendered from a displaced truck. Variant 2 added the truck's offset as conditioning (1,000 steps).</li>
+<li>Reward training: two post-training arms from the fix 3 model on 288 windows from 6 drives. One rewarded whole-picture shift and offset-reader accuracy; one trained on the model's own generated history. The pass gate was fixed before scoring.</li>
+</ul>
+<h2>Result</h2>
+<p>Fix 3 first looked like a success: the picture moved 0.82 of the true image shift at 3 s against 0.11 for the base model. The later road-geometry check corrected this. By day, fix 3 puts the road 20 to 40 percent too far and turns the picture about 0.9 degrees too much, so the larger shift was overshoot. The unmodified model already placed the road inside the bar by day. All models fail at night.</p>
+<table>
+<thead><tr><th scope="col">Model (by day, test windows)</th><th scope="col">Road gain, 3 s</th><th scope="col">Road gain, 4 s</th></tr></thead>
+<tbody>
+<tr><td>Unmodified (12 windows)</td><td>1.05 [0.85, 1.28]</td><td>1.02 [0.59, 1.21]</td></tr>
+<tr><td>Fix 3 (12 windows)</td><td>1.24 [1.04, 1.31]</td><td>1.39 [1.10, 1.64]</td></tr>
+<tr><td>Fix 3, variant 2 (6 windows)</td><td>1.12</td><td>1.14</td></tr>
+<tr><td>Fix 3 sampled at CFG 1.0</td><td>1.01 [0.92, 1.17]</td><td>1.03 [0.63, 1.50]</td></tr>
+<tr><td>Reward-trained arm</td><td>1.26</td><td>1.48</td></tr>
+</tbody>
+</table>
+<p>The reward arm improved what it was rewarded on (offset reader error at 3 s fell from 0.46 to 0.29 m) while the road stayed overshot and narrow-view PSNR fell 1.36 dB. The generated-history arm collapsed to a frozen picture (road gain 0.00) and was stopped. Neither passed.</p>
+<p>Recovery inside the world model stayed rare. For the N16 driving model at a 1.0 m push (9 test windows, 2 seeds): unmodified 0.11, fix 3 at CFG 2.0 0.06, at CFG 1.0 0.06. Two other policies scored 0.00 to 0.17. The cause was not found.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Small test sets: 15 windows (3 at night, one drive), one run per arm, one hyperparameter set each.</li>
+<li>The scorer was checked on reprojected frames; on generated frames it fits less well (correlation 0.50 against 0.75).</li>
+<li>By 3 s only 15 to 20 percent of recorded near-object blocks survive in a generated rollout, and neither model moves them with the offset.</li>
+<li>A reward on road gain and turn directly is untested, and the collapse was not investigated.</li>
+</ul>

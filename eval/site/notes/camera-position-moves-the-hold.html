@@ -1,0 +1,27 @@
+<h2>What was asked</h2>
+<p>N16 is comma's driving model (<code>96244b1f_12800</code>). In bench8, the closed-loop simulator built here (the model steers a simulated truck while the camera view is redrawn from recorded frames), the camera models end a few tenths of a metre left of the driver's recorded path. A "push" moves the simulated truck 1.0 or 1.5 m sideways; "recovery" is the share of pushes it returns from. The question was how much of that leftward hold comes from where the camera sits on the truck, and whether a correction can remove it. N16 centres its camera in the lane, so a lens off the truck's centreline should shift where it holds the truck.</p>
+<h2>What was done</h2>
+<ul>
+<li>Saved simulator runs on 198 day windows: median end offset (+ is left) was +0.14 m for N16, and -0.01 m for the oracle (a controller given the true pose). It was +0.09 to +0.10 on the mirror mounts and +0.14 to +0.20 on the passenger-visor mount. It is flat from about 4 s, and the models' lane centre is already left of the path in the first view. Two causes fit and these data could not separate them: the camera sitting right of centre, and the driver driving right of the lane centre.</li>
+<li>After right pushes N16 passes the path by more than 0.3 m far more often than after left pushes (1.0 m, mirror mounts: 0.90 against 0.33; oracle 0.24 and 0.26), as a held leftward offset predicts.</li>
+<li>The simulator was given a virtual camera moved sideways in the truck's frame (32 dev day windows, mirror mounts, unpushed). Shifting it 0.15 and 0.30 m toward the driver's side moved N16's median end offset from +0.217 to +0.062 and -0.071 m (-0.97 m per metre of shift). The share settling on the path did not clearly rise (0.53, 0.62, 0.53), since window-to-window spread is far larger than the median. With 1.5 m pushes, the right-minus-left gap past the path fell by 0.16 and 0.49 m (predicted about 0.25 and 0.5); the oracle did not change.</li>
+<li>Later, the current visor mount's 8 mm lens was recorded as 0.239 m right of the centreline. A correction warps each model view with a road-plane homography, as if the lens were centred. Three arms ran on 135 dev day windows: base, camera moved 0.239 m right, and moved with the warp.</li>
+</ul>
+<h2>Result</h2>
+<table>
+<thead><tr><th scope="col">Arm (135 windows)</th><th scope="col">Median unpushed hold, m</th><th scope="col">Recovered, lane centre, 1.0 m</th><th scope="col">1.5 m</th></tr></thead>
+<tbody>
+<tr><td>Base</td><td>+0.137</td><td>0.509</td><td>0.385</td></tr>
+<tr><td>Camera moved</td><td>+0.309</td><td>0.197</td><td>0.120</td></tr>
+<tr><td>Moved and warped</td><td>+0.233</td><td>0.394</td><td>0.291</td></tr>
+</tbody>
+</table>
+<p>Moving the camera shifted the median hold by +0.191 m [+0.182, +0.199]; the warp took back 0.099 m [-0.117, -0.088], leaving +0.083 above base. In open loop, N16's lane-centre reading moved -0.256 m under the problem and -0.031 m under the fix (about 88% corrected). At 1.0 m, recovery with the warp is above the moved-camera arm (+0.199 [+0.140, +0.253]) and below base (-0.115 [-0.152, -0.075]).</p>
+<h2>What it does not show</h2>
+<ul>
+<li>The warp is exact only on the road plane. Points 3 m up got worse (narrow view 6.3 to 11.0 px), and higher points more so.</li>
+<li>The warp alone, with the camera not moved, shifted the hold by about -0.10 m instead of -0.239 m. Part of that is the simulator's depth against the plane; the rest was not isolated.</li>
+<li>It has not run on the truck: the camera service does not set the correction yet.</li>
+<li>The visor mount is emulated on mirror-mount windows. The two lenses themselves, online calibration, 20 Hz, night and real drives were not tested.</li>
+<li>How much of the +0.14 to +0.20 m on the visor mount is the camera and how much is the driver's line is still open.</li>
+</ul>

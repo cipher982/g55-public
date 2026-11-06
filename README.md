@@ -6,7 +6,7 @@ The project explores five connected areas:
 
 - **CAN reverse engineering**: curated CAN-C/CAN-B DBCs, body PDM/gateway topology notes, and physical-layer diagnostics.
 - **BLE auxiliary power telemetry & control**: Victron Orion-Tr Smart BLE GATT register read/write & Instant Readout codecs plus JBD/Eco-Worthy LiFePO4 BMS telemetry.
-- **Driving model evaluation**: comma's released openpilot driving models tested on this truck's drives and on comma's public segments, with a public site (https://openpilot-gwagon-evals.drose.io) that lays out every release's results with 95% intervals and ranks nothing.
+- **Driving model evaluation**: comma's released openpilot driving models tested on this truck's drives, and notes on the driving work built around them (a simulator, a learned truck model, training), on a public site (https://openpilot-gwagon-evals.drose.io) that lays out every release's results with 95% intervals and ranks nothing.
 - **Code-first CAD**: parametric vehicle parts and the render/measure loop used by agents to inspect their own geometry.
 - **L2 preparation**: high-level architecture and safety reasoning for adding modern sensing and control to an older platform.
 

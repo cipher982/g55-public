@@ -1,0 +1,24 @@
+<h2>What was asked</h2>
+<p>When the simulated truck is pushed sideways off its recorded path, some of comma's driving models first steer the same way as the push, which takes the truck further off, and only then correct. The question was where in the model that first wrong turn comes from. The models tested were N16 (comma's driving model, "N16 nav") and a second comma model called Flip Flop; both have a base policy plus a residual head whose tanh output is added to the base's lateral acceleration, so it can add at most 1.0 m/s². A "push" moves the simulated truck 1.0 or 1.5 m sideways. bench8 is the closed-loop simulator built here: the model steers a simulated truck while the camera view is redrawn from recorded frames. A "wrong-way first turn" is a push where the model's correction (against its own unpushed run) falls to -0.2 m/s² or below before it reaches +0.2 m/s² or above, within the first second.</p>
+<h2>What was done</h2>
+<p>comma publishes residual-off copies of these models, identical except that the residual head's final weight and bias are zero. Both versions were run through the same pushes, on 198 daytime windows of recorded drives, with pushes to both sides. For each push the full model turned the wrong way first, the same push was checked in its residual-off copy. Separately, the residual's tanh output and the base action were read directly from inside comma's graph, on 34 windows (68 pushes per offset).</p>
+<p>Recovery uses the corrected rule: the truck must stay within 0.3 m of the model's own unpushed run for the last second, stay within 0.87 m of the recorded path, cover at least half the path, and keep at least 1 m/s, on valid renders. An earlier rule counted a stopped truck and a return on the last frame as recovered, so older recovery numbers are lower here.</p>
+<h2>Result</h2>
+<ul>
+<li>Of 258 pushes that a full model (N16, Flip Flop or a third comma model) turned the wrong way first, the residual-off copy also turned the wrong way first in 258. None went the other way.</li>
+<li>The residual removed 61 to 88 percent of the base's wrong-way first turns.</li>
+<li>In the wrong-way pushes at 1.5 m, the residual's first-step tanh was 0.994 (N16) and 0.988 (Flip Flop) toward the correct side, which is at its bound. The base alone asked 1.95 and 1.93 m/s² the wrong way, against 1.09 m/s² the right way for a path-following reference. Adding the full 1.0 would still leave the base's ask at about -0.95 m/s².</li>
+</ul>
+<table>
+<thead><tr><th scope="col">Model</th><th scope="col">Recovery, 1.0 m push</th><th scope="col">Recovery, 1.5 m push</th><th scope="col">Wrong-way first turns, 1.0 m</th><th scope="col">Wrong-way first turns, 1.5 m</th></tr></thead>
+<tbody>
+<tr><td>N16</td><td>0.64 [0.58, 0.68]</td><td>0.44 [0.36, 0.51]</td><td>19</td><td>48</td></tr>
+<tr><td>N16, residual off</td><td>0.11 [0.07, 0.15]</td><td>0.04 [0.02, 0.05]</td><td>161</td><td>154</td></tr>
+<tr><td>Flip Flop</td><td>0.65 [0.59, 0.70]</td><td>0.46 [0.39, 0.52]</td><td>34</td><td>60</td></tr>
+<tr><td>Flip Flop, residual off</td><td>0.12 [0.09, 0.16]</td><td>0.05 [0.03, 0.07]</td><td>165</td><td>152</td></tr>
+<tr><td>lebowski (comma model with no residual)</td><td>0.72 [0.66, 0.77]</td><td>0.60 [0.51, 0.67]</td><td>12</td><td>13</td></tr>
+</tbody>
+</table>
+<p>Intervals resample drives. Wrong-way counts are among the 382 (1.0 m) and 345 (1.5 m) pushes that a path-following reference recovered from.  A separate probe found that the base's action follows the truck's own yaw rate, which the push itself creates, even though the base reads the offset correctly.</p>
+<h2>What it does not show</h2>
+<p>Reprojected views are valid by day only, and results use one random seed at 5 Hz. The wrong-way subsets in the direct reads are 20 and 23 pushes at 1.5 m, too few for intervals. The bound arithmetic assumes the base stays frozen: a residual with a wider bound, or a retrained base, were not tried here.</p>

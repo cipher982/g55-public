@@ -1,0 +1,38 @@
+<h2>What was asked</h2>
+<p>N16 (comma's driving model, "N16 nav") assumes its input frames arrive 50 ms apart, 20 Hz, so its four-step history spans 200 ms. On every drive with N16 running, the truck's camera loop on the Jetson ran at 17.7 to 18.8 Hz instead. The question was why, and what the smallest fix is.</p>
+<h2>What was done</h2>
+<p>The loop's timing was read from 49 recorded sessions, together with the board's logged load and a read-only per-thread CPU sampler run on the Jetson during one drive. The camera itself delivered 29.95 frames per second in every session. A 20 Hz tick is skipped when the frame queued at the previous tick has not finished decoding.</p>
+<p>The cause was then reproduced offline by replaying a recorded two-camera segment at the camera's 30 fps. The fix was tried on the board, and a larger alternative, a rewrite of the decoder, was built and replayed for comparison.</p>
+<h2>Result</h2>
+<ul>
+<li>99.5 to 99.9 % of skipped ticks fell on a frame that carried a new wide-camera image. One decoder thread decoded the narrow JPEG and then the wide one in series, taking 36 to 39 ms typically (about 49 ms at the 99th percentile), against 18 to 21 ms when the wide frame was reused.</li>
+<li>N16 therefore saw frames 53.2 to 56.4 ms apart and a four-step span of 213 to 226 ms. That 6 to 13 % stretch is the size of its high speed reading in earlier entries.</li>
+<li>With the key on and the gateway streaming CAN speed, the board was 45 to 50 % busy, including at zero speed. Without CAN speed it was 18 to 25 % busy and held 19.98 Hz.</li>
+<li>From key-on, the camera service's 7 OpenBLAS worker threads (a linear-algebra library) used 24 to 26 % of a core each, 1.75 cores in total. With live IMU pitch on, the 38,400-ray ground grid is rebuilt about 5 times a second, and its matrix product is large enough that OpenBLAS splits it over 8 threads that keep spinning between rebuilds.</li>
+</ul>
+<p>The rebuild alone, measured with and without the fix:</p>
+<table>
+<thead><tr><th scope="col">OpenBLAS threads</th><th scope="col">Process CPU</th><th scope="col">Per rebuild</th></tr></thead>
+<tbody>
+<tr><td>unset (8 threads)</td><td>201.4 % of a core</td><td>8.8 ms</td></tr>
+<tr><td>1</td><td>3.5 %</td><td>6.8 ms</td></tr>
+</tbody>
+</table>
+<p>The installed loop replayed with that rebuild running beside it:</p>
+<table>
+<thead><tr><th scope="col">Rebuild load</th><th scope="col">Loop rate</th><th scope="col">Missed ticks</th></tr></thead>
+<tbody>
+<tr><td>none</td><td>20.00 Hz</td><td>0</td></tr>
+<tr><td>1 thread</td><td>20.00 Hz</td><td>0</td></tr>
+<tr><td>8 threads (default)</td><td>18.7 and 19.4 Hz (two runs)</td><td>7.0 % and 3.0 %</td></tr>
+</tbody>
+</table>
+<p>The 18.7 Hz run matches the drives (17.7 to 18.8 Hz, 53 to 56 ms spacing). The chosen fix is setting one OpenBLAS thread on three Jetson services (camera inference, fisheye recording, IMU). The decoder rewrite (two decode threads, wide frame converted ahead) reached 20.0 Hz under load but had a step 99th percentile of 53 ms against a 48 ms bar, and its hit rate was shown only after a change to the replay, so it is shelved.</p>
+<p>On the road, after the fix was installed on the Jetson: on the three drives that carried wheel speed, the loop ran 19.91 to 19.92 Hz with 0.36 to 0.47 % of ticks missed and a decode 99th percentile of 42.0 to 42.7 ms. Drives without wheel speed cannot be scored by the timing check.</p>
+<p>Correction: the earlier claim of 20.0 Hz when parked came from status lines. Recorded results show 18.1 to 18.8 Hz when parked with the key on.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>The road result is three drives. The board's CPU load after the fix is not reported here.</li>
+<li>The effect of the 6 to 13 % timing stretch on N16's output is taken from earlier entries, not measured again here.</li>
+<li>The shelved rewrite is not disproved. It should be revisited if a heavier model or a third camera brings the shortfall back.</li>
+</ul>

@@ -113,7 +113,7 @@ def test_built_site_passes_newest_first(built, tests, released):
         assert kind == "timeline" and mids == _newest_first(mids, released)[::-1], mids
     tests_pages = [(f, p) for f, p in parsed if f.parent.name == "tests" and f.name != "index.html"]
     listed = re.findall(r'<h2><a href="([^"]+)\.html"', (built / "tests" / "index.html").read_text())
-    assert len(listed) >= 5 and sorted(f.stem for f, _ in tests_pages) == sorted(listed), "one page per test on the Tests index"
+    assert len(listed) >= 3 and sorted(f.stem for f, _ in tests_pages) == sorted(listed), "one page per test on the Tests index"
     for f, p in tests_pages:     # every test page lays out the releases newest first
         rel = [mids for kind, mids in p.lists if kind == "release"]
         assert rel, f"{f.name} has no release-ordered list"

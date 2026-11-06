@@ -789,7 +789,17 @@ def method(models, cfg, root) -> str:
              'G55 sections publish scores only.</p>'
              '<div class="tw"><table><thead><tr><th scope="col">Model</th><th scope="col">Results</th><th scope="col">Per-segment CSVs</th></tr></thead>'
              f'<tbody data-order="release">{"".join(rows)}</tbody></table></div></section>')
-    return prose + table
+    return prose + harness_section(models) + table
+
+
+def harness_section(models) -> str:
+    items = "".join(f'<li><h3><a href="harness/{slug}.html">{esc(title)}</a></h3><p>{esc(what)}</p>'
+                    f'<p class="meta">Run on {sum(1 for m in models if section_ok(m, section))} of {len(models)} releases.</p></li>'
+                    for slug, title, section, cols, what in HARNESS_TABLES)
+    return ('<section id="harness" class="prose"><h2>Harness check on comma\'s public segments</h2>'
+            '<p>The same harness runs every release on comma\'s own public drives, from other cars. These numbers are not about the G55: '
+            'they show the harness gives sensible results on the data comma trains on, and anyone can rerun them from the public repository.</p>'
+            f'<ul class="tlist">{items}</ul></section>')
 
 
 # ================================================================ the living site (2026-11-05)
@@ -809,7 +819,9 @@ RELEASE_RX = [re.compile(r"Shipped in openpilot (\d+\.\d+\.\d+)"), re.compile(r"
               re.compile(r"The (\d+\.\d+\.\d+)(?: and \d+\.\d+\.\d+)? tags carry")]
 STATE_TEXT = {"release": "shipped in an openpilot release", "master": "on openpilot master", "upload": "on Hugging Face only"}
 # One headline number per test: the first column of its table.
-TESTS = [(spec[0], spec[1], spec[2], spec[3][0]) for spec in TABLES]   # (slug, title, section, (key, label, scale, unit))
+G55_TABLES = [t for t in TABLES if t[2].startswith("truck_")]        # the tests: the G55's own drives
+HARNESS_TABLES = [t for t in TABLES if not t[2].startswith("truck_")]  # comma's public segments: the harness check (Method)
+TESTS = [(spec[0], spec[1], spec[2], spec[3][0]) for spec in G55_TABLES]   # (slug, title, section, (key, label, scale, unit))
 TEST_BY_SECTION = {t[2]: t for t in TESTS}
 TEST_WORDS = {  # changelog lines that concern each test: any group whose words all appear
     "truck_closed_loop": (("g55", "closed"), ("simulator",), ("closed-loop",)),
@@ -890,7 +902,7 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
                  f'data-website-id="{esc(cfg["umami_website_id"])}"{dom}></script>')
     nav = []
     for href, label, key in ((f"{up}index.html", "Releases", "releases"), (f"{up}tests/index.html", "Tests", "tests"),
-                             (f"{up}inside/index.html", "Inside the models", "inside"), (f"{up}method.html", "Method", "method"),
+                             (f"{up}notes/index.html", "Notes", "notes"), (f"{up}method.html", "Method", "method"),
                              (f"{up}log.html", "Log", "log")):
         cur = ' aria-current="page"' if key == current else ""
         nav.append(f'<a href="{href}"{cur}>{label}</a>')
@@ -1102,9 +1114,25 @@ def brief(m: dict, up: str) -> str:
 
 # ---------------------------------------------------------------- the feed
 
-def explainers() -> list[dict]:
-    f = SITE / "explainers.json"
-    return json.loads(f.read_text())["explainers"] if f.exists() else []
+def notes() -> list[dict]:
+    """The work notes, newest first: site/notes.json holds each one's date, title, slug, summary, grade; site/notes/<slug>.html its body."""
+    f = SITE / "notes.json"
+    out = json.loads(f.read_text())["notes"] if f.exists() else []
+    return sorted(out, key=lambda n: (n["date"], n["title"]), reverse=True)
+
+
+def note_page(n: dict) -> str:
+    body = (SITE / "notes" / f'{n["slug"]}.html').read_text().replace("<table>", '<div class="tw"><table>').replace("</table>", "</table></div>")
+    return (f'<p class="crumb"><a href="index.html">Notes</a> / {esc(nice_date(n["date"]))}</p>'
+            f'<section class="lead"><h1>{esc(n["title"])}</h1><p>{esc(n["summary"])}</p>'
+            f'<p class="meta">{esc(nice_date(n["date"]))}. {esc(n["grade"])}</p></section>'
+            f'<article class="prose note">{body}</article>')
+
+
+def notes_index() -> str:
+    items = "".join(f'<li><a href="{esc(n["slug"])}.html">{esc(n["title"])}</a><span>{esc(nice_date(n["date"]))}. {esc(n["summary"])}</span></li>' for n in notes())
+    return ('<section class="lead"><h1>Notes</h1><p>Notes on the work behind this site: what was built for the G55, what was measured and what did not work. '
+            f'Newest first. Each says how its numbers were measured and what they cannot show.</p></section><ul class="sl big" data-history>{items}</ul>')
 
 
 def feed_items(models, root) -> list[dict]:
@@ -1124,14 +1152,14 @@ def feed_items(models, root) -> list[dict]:
             mid = link.split("/")[-1][:-5]
             out.append({"date": date, "kind": "release", "title": text, "page": link, "model": mid,
                         "results": first.get(mid) == date and mid in idx})
-    for e in explainers():
-        out.append({"date": e["date"], "kind": "explainer", "title": e["title"], "page": e["href"], "body": e["summary"], "model": None})
-    order = {"explainer": 0, "release": 1, "run": 2, "test": 3}
+    for n in notes():
+        out.append({"date": n["date"], "kind": "note", "title": n["title"], "page": f'notes/{n["slug"]}.html', "body": n["summary"], "model": None})
+    order = {"note": 0, "release": 1, "run": 2, "test": 3}
     out.sort(key=lambda e: (e["date"], -order[e["kind"]]), reverse=True)
     return out
 
 
-KIND_TEXT = {"release": "Release", "run": "Tested", "test": "Test change", "explainer": "Explainer"}
+KIND_TEXT = {"release": "Release", "run": "Tested", "test": "Test change", "note": "Note"}
 
 
 def feed_html(models, root, up: str, limit: int | None = None) -> str:
@@ -1148,7 +1176,7 @@ def feed_html(models, root, up: str, limit: int | None = None) -> str:
             rows.append(f'<h3 class="fm">{MONTHS[d.month - 1]} {d.year}</h3><ol class="feed" data-history>')
             month = mo
         k = e["kind"]
-        if k in ("release", "explainer"):
+        if k in ("release", "note"):
             title = f'<a href="{up}{esc(e["page"])}">{esc(e["title"])}</a>'
         else:
             title = esc(e["title"])
@@ -1190,7 +1218,7 @@ def rss(models, root, cfg) -> str:
         items.append(f"<item><title>{esc(KIND_TEXT[e['kind']] + ': ' + e['title'])}</title><link>{esc(link)}</link>"
                      f"<guid isPermaLink=\"false\">{esc(guid)}</guid><pubDate>{pub}</pubDate><description>{esc(desc)}</description></item>")
     return (f'<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>{esc(cfg["site_name"])}</title>'
-            f'<link>{esc(site)}/</link><description>New openpilot driving models and their test results on one 2011 Mercedes-Benz G55.</description>'
+            f'<link>{esc(site)}/</link><description>Notes on putting openpilot on a 2011 Mercedes-Benz G55, and every comma driving model tested on the truck as it is released.</description>'
             f'<language>en</language>{"".join(items)}</channel></rss>\n')
 
 
@@ -1198,19 +1226,23 @@ def rss(models, root, cfg) -> str:
 
 def index_page(models, cfg, root) -> str:
     nw = newest(models)
-    done = sum(1 for s in nw["sections"].values() if s.get("status") == "ok")
-    tot = len(nw["sections"])
+    g55 = [nw["sections"][t[2]] for t in TESTS if t[2] in nw["sections"]]
+    done, tot = sum(1 for s in g55 if s.get("status") == "ok"), len(g55)
     last = max(scored_at(m) for m in models)
-    side_ex = "".join(f'<li><a href="{esc(e["href"])}">{esc(e["title"])}</a><span>{esc(nice_date(e["date"]))}, {esc(e["covers"])}</span></li>' for e in explainers())
+    latest = "".join(f'<li><time datetime="{n["date"]}">{esc(nice_date(n["date"]))}</time><a href="notes/{esc(n["slug"])}.html">{esc(n["title"])}</a><p>{esc(n["summary"])}</p></li>'
+                     for n in notes()[:3])
+    side_notes = "".join(f'<li><a href="notes/{esc(n["slug"])}.html">{esc(n["title"])}</a><span>{esc(nice_date(n["date"]))}</span></li>' for n in notes()[:6])
     tests = "".join(
         f'<li><a href="tests/{slug}.html">{esc(title)}</a><span>{sum(1 for m in models if section_ok(m, section))} of {len(models)} releases</span></li>'
         for slug, title, section, _ in TESTS)
     return f"""<section class="lead">
-<h1>comma's driving models, {len(models)} releases</h1>
-<p>Each one tested on a 2011 Mercedes-Benz G55 and on comma's public segments. A new release on Hugging Face or openpilot master is found within 20 minutes and tested the same day. Last results {esc(nice_date(last))}.</p>
+<h1>openpilot on a 2011 Mercedes-Benz G55</h1>
+<p>A working log of putting openpilot on this truck. Every comma driving model is tested on the truck's own drives as it is released: {len(models)} releases so far, each found within 20 minutes of reaching Hugging Face or openpilot master. Notes record what was built and measured along the way. Last results {esc(nice_date(last))}.</p>
 <p class="nw">Newest: <a href="{esc(model_link(nw, ''))}">{esc(plain_name(nw))}</a>, first public {esc(nice_date(first_public(nw)))}, {esc(state_line(nw))}. {done} of {tot} tests done.</p>
 </section>
-<section class="tlsec" aria-label="Release timeline">
+<section class="latest" aria-labelledby="latest-notes"><h2 id="latest-notes">Latest notes</h2><ol data-history>{latest}</ol>
+<p class="more"><a href="notes/index.html">All {len(notes())} notes</a></p></section>
+<section class="tlsec" aria-labelledby="releases-h"><h2 id="releases-h">comma's releases, tested on the truck</h2>
 {timeline(models)}
 {timeline_key()}
 <p class="swipe">Swipe the timeline sideways for earlier releases.</p>
@@ -1218,13 +1250,13 @@ def index_page(models, cfg, root) -> str:
 <div class="cols">
 <section class="feedsec" aria-labelledby="what-happened">
 <h2 id="what-happened">What happened</h2>
-<p class="sub">New releases with their results, test runs, changes to the tests and explainers. Newest first.</p>
+<p class="sub">Notes, new releases with their results, test runs and changes to the tests. Newest first.</p>
 {feed_html(models, root, "", limit=16)}
 </section>
 <aside class="side">
 <section><h2>Tests</h2><ul class="sl">{tests}</ul></section>
-<section><h2>Explainers</h2><ul class="sl">{side_ex}</ul></section>
-<section><h2>Follow along</h2><ul class="sl"><li><a href="feed.xml">RSS feed</a><span>releases, results, test changes</span></li>
+<section><h2>Notes</h2><ul class="sl">{side_notes}</ul><p class="more"><a href="notes/index.html">All notes</a></p></section>
+<section><h2>Follow along</h2><ul class="sl"><li><a href="feed.xml">RSS feed</a><span>notes, releases, results, test changes</span></li>
 <li><a href="method.html#downloads">Results files</a><span>one JSON file per release</span></li>
 <li><a href="{esc(cfg['repo_url'])}/tree/main/eval">The harness and this site</a><span>on GitHub</span></li></ul></section>
 </aside>
@@ -1232,7 +1264,7 @@ def index_page(models, cfg, root) -> str:
 
 
 def log_page(models, root) -> str:
-    return (f'<section class="lead"><h1>Log</h1><p>Every release, test run and change to the tests since {nice_date(feed_items(models, root)[-1]["date"])}, newest first. '
+    return (f'<section class="lead"><h1>Log</h1><p>Every note, release, test run and change to the tests since {nice_date(feed_items(models, root)[-1]["date"])}, newest first. '
             f'Also as an <a href="feed.xml">RSS feed</a>.</p></section><section class="feedsec">{feed_html(models, root, "")}</section>')
 
 
@@ -1358,7 +1390,8 @@ def test_page(models, cfg, root, spec) -> str:
     uw = UNIT_WORD.get(secs[0]["unit_of_evidence"], ("unit", "units"))
     n, c = max((x["n"], x.get("clusters", 0)) for x in secs)
     sim = simulator_of(pool, section)
-    tabs = "".join(f'<a href="{s2}.html"{" aria-current=\"page\"" if s2 == slug else ""}>{esc(t2)}</a>' for s2, t2, _, _ in TESTS)
+    group = G55_TABLES if section.startswith("truck_") else HARNESS_TABLES
+    tabs = "".join(f'<a href="{t[0]}.html"{" aria-current=\"page\"" if t[0] == slug else ""}>{esc(t[1])}</a>' for t in group)
     charts = []
     for key, lab, scale, unit in cols:
         x0 = next((x for x in (find_metric(m, section, key)[0] for m in pool) if x), None)
@@ -1389,12 +1422,12 @@ def count_word(n: int) -> str:
 
 def tests_index(models) -> str:
     items = []
-    for slug, title, section, cols, what in TABLES:
+    for slug, title, section, cols, what in G55_TABLES:
         k = sum(1 for m in models if section_ok(m, section))
         items.append(f'<li><h2><a href="{slug}.html">{esc(title)}</a></h2><p>{esc(what)}</p><p class="meta">Run on {k} of {len(models)} releases. Measures: {esc(join_words([c[1].lower() for c in cols]))}.</p></li>')
-    g55 = sum(1 for t in TABLES if t[2].startswith("truck_"))
-    return (f'<section class="lead"><h1>Tests</h1><p>{count_word(len(TABLES)).capitalize()} tests, the same for every release: {count_word(g55)} on the G55\'s own drives and {count_word(len(TABLES) - g55)} on comma\'s public segments. '
-            f'Each page lays out every release with its 95% interval.</p></section><ul class="tlist">{"".join(items)}</ul>')
+    return (f'<section class="lead"><h1>Tests</h1><p>{count_word(len(G55_TABLES)).capitalize()} tests on the G55\'s own drives, the same for every release. '
+            f'Each page lays out every release with its 95% interval. The harness is also checked on comma\'s public segments: '
+            f'<a href="../method.html#harness">Method, harness check</a>.</p></section><ul class="tlist">{"".join(items)}</ul>')
 
 
 # ---------------------------------------------------------------- release pages
@@ -1434,7 +1467,8 @@ def release_tests(m, models) -> str:
 def history_of(m, models, root) -> str:
     mid = m["model"]["id"]
     ev = [(d, t) for d, k, t, link, _ in log_entries(models, root) if k == "model" and isinstance(link, str) and link.endswith(f"/{mid}.html")]
-    ev.append((m["scored"]["date"][:10], f'Tests run ({sum(1 for s in m["sections"].values() if s.get("status") == "ok")} of {len(m["sections"])}), results published'))
+    g55 = [m["sections"][t[2]] for t in TESTS if t[2] in m["sections"]]
+    ev.append((m["scored"]["date"][:10], f'Tests run ({sum(1 for s in g55 if s.get("status") == "ok")} of {len(g55)}), results published'))
     ev.sort(reverse=True)
     return "".join(f'<li><time datetime="{d}">{esc(nice_date(d))}</time><span>{esc(t)}</span></li>' for d, t in ev)
 
@@ -1442,7 +1476,7 @@ def history_of(m, models, root) -> str:
 def release_page(m, models, cfg, root, out, xrays: set) -> str:
     md, src = m["model"], m["model"]["source"]
     fam = md["family"]
-    order = [k for k in SECTIONS if k in m["sections"]] + [k for k in m["sections"] if k not in SECTIONS]
+    order = [k for k in SECTIONS if k in m["sections"] and k.startswith("truck_")]
     secs = "".join(section_block(m, k, m["sections"][k], models, root, out) for k in order)
     ident = [
         ("Model id", f'<code>{esc(md["id"])}</code>'),
@@ -1456,8 +1490,8 @@ def release_page(m, models, cfg, root, out, xrays: set) -> str:
     dl = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in ident)
     limits = "".join(f"<li>{esc(x)}</li>" for x in m.get("limits", []))
     jrel = f'results/{md["id"]}.json'
-    inside = (f'<p><a href="../inside/{esc(md["id"])}.html">Which parts of the camera view move its steering</a>, on 4 of comma\'s public segments.</p>'
-              if md["id"] in xrays else '<p>Not run for this release yet.</p>')
+    inside = (f'<section><h2>Inside the model</h2><p><a href="../inside/{esc(md["id"])}.html">Which parts of the camera view move its steering</a>.</p></section>'
+              if md["id"] in xrays else "")
     stills = ""
     if m.get("stills"):
         figs = "".join(f'<figure><img src="../{esc(copy_rel(root, out, s["file"]))}" alt="{esc(s["caption"])}" loading="lazy">'
@@ -1472,7 +1506,7 @@ def release_page(m, models, cfg, root, out, xrays: set) -> str:
 <p class="rstate"><i class="tm-k tm-{st}" aria-hidden="true"></i>{esc(state_line(m)[:1].upper() + state_line(m)[1:])}. First public {esc(nice_date(first_public(m)))}.{(" " + num(md["params_m"], 1) + "M parameters.") if md["params_m"] else ""}</p></section>
 <section><h2>Where it sits</h2>{where}</section>
 <section><h2>Tests</h2>{release_tests(m, models)}<p class="prov">{provenance(m)}</p></section>
-<section><h2>Inside the model</h2>{inside}</section>
+{inside}
 <section><details><summary>Every metric, with paired differences</summary>{legend()}{secs}</details></section>
 {stills}{f'<section><h2>Limits</h2><ul class="limits">{limits}</ul></section>' if limits else ""}
 <section><h2>The model file</h2><dl class="ident">{dl}</dl><p><a href="../{esc(jrel)}">Results file</a> (<code>{esc(jrel)}</code>)</p></section>
@@ -1644,7 +1678,7 @@ def main() -> None:
     TIERS.update(ranking.site_tests(root))
     if out.exists():
         shutil.rmtree(out)
-    for d in ("models", "results", "tests", "inside"):
+    for d in ("models", "results", "tests", "harness", "notes"):
         (out / d).mkdir(parents=True)
     for f in (SITE / "static").iterdir():
         if f.is_file():
@@ -1653,26 +1687,39 @@ def main() -> None:
     xr = {k: v for k, v in xray_sets(root).items() if k in by_id(models)}
     for m in models:
         shutil.copy2(m["_file"], out / "results" / m["_file"].name)
+        for sec in m["sections"].values():     # every per-unit CSV, the harness check's included (Method, Downloads)
+            if sec.get("per_unit_file"):
+                copy_rel(root, out, sec["per_unit_file"])
         mid = m["model"]["id"]
         (out / "models" / f"{mid}.html").write_text(
             page(cfg, f"{plain_name(m)} – {tag}", f"{plain_name(m)}: {state_line(m)}. {summary_line(m, cfg, as_html=False)}",
                  release_page(m, models, cfg, root, out, set(xr)), 1, "releases", f"models/{mid}.html"))
-    for spec in TABLES:
+    for spec in G55_TABLES:
         (out / "tests" / f"{spec[0]}.html").write_text(
             page(cfg, f"{spec[1]} – {tag}", spec[4], test_page(models, cfg, root, spec), 1, "tests", f"tests/{spec[0]}.html"))
-    (out / "tests" / "index.html").write_text(page(cfg, f"Tests – {tag}", f"The {count_word(len(TABLES))} tests every openpilot release gets here.",
+    for spec in HARNESS_TABLES:
+        (out / "harness" / f"{spec[0]}.html").write_text(
+            page(cfg, f"Harness check: {spec[1]} – {tag}", spec[4], test_page(models, cfg, root, spec), 1, "method", f"harness/{spec[0]}.html"))
+    for n in notes():
+        (out / "notes" / f'{n["slug"]}.html').write_text(page(cfg, f'{n["title"]} – {tag}', n["summary"], note_page(n), 1, "notes", f'notes/{n["slug"]}.html'))
+    (out / "notes" / "index.html").write_text(page(cfg, f"Notes – {tag}", "Notes on the work of putting openpilot on a 2011 Mercedes-Benz G55.",
+                                                   notes_index(), 1, "notes", "notes/index.html"))
+    (out / "tests" / "index.html").write_text(page(cfg, f"Tests – {tag}", f"The {count_word(len(G55_TABLES))} tests on the G55's own drives that every openpilot release gets here.",
                                                    tests_index(models), 1, "tests", "tests/index.html"))
+    if xr:
+        (out / "inside").mkdir()
     for mid, clips in xr.items():
         m = by_id(models)[mid]
         (out / "inside" / f"{mid}.html").write_text(
             page(cfg, f"What {model_phrase(m)} looks at when it steers – {tag}", "Which squares of the model's camera view move its steering, on comma's public segments.",
                  inside_page(m, models, clips, root, out), 1, "inside", f"inside/{mid}.html"))
-    (out / "inside" / "index.html").write_text(page(cfg, f"Inside the models – {tag}", "How openpilot driving models turn the camera picture into steering.",
-                                                    inside_index(models, xr), 1, "inside", "inside/index.html"))
+    if xr:
+        (out / "inside" / "index.html").write_text(page(cfg, f"Inside the models – {tag}", "How openpilot driving models turn the camera picture into steering.",
+                                                        inside_index(models, xr), 1, "notes", "inside/index.html"))
     shutil.copy2(EVAL / "SCHEMA.md", out / "schema.txt")
-    desc = ("comma's openpilot driving models as they are released, each tested on a 2011 Mercedes-Benz G55 and on comma's public "
-            "segments, with every value's 95% interval.")
-    (out / "index.html").write_text(page(cfg, f"comma's driving models, tested on one truck – {tag}", desc, index_page(models, cfg, root), 0, "releases", ""))
+    desc = ("A working log of putting openpilot on a 2011 Mercedes-Benz G55: every comma driving model tested on the truck's own drives as it "
+            "is released, with 95% intervals, and notes on what was built and measured.")
+    (out / "index.html").write_text(page(cfg, f"openpilot on a G55 – {tag}", desc, index_page(models, cfg, root), 0, "releases", ""))
     (out / "log.html").write_text(page(cfg, f"Log – {tag}", "Every release, test run and change to the tests.", log_page(models, root), 0, "log", "log.html"))
     (out / "method.html").write_text(page(cfg, f"Method – {tag}", "Scoring methodology for open-loop replay, "
                                           "worldmodel-4B closed-loop rollouts, drive-clustered intervals, and CSV downloads.", method(models, cfg, root), 0, "method", "method.html"))

@@ -1,0 +1,34 @@
+<h2>What was asked</h2>
+<p>A simulator needs a model of how the truck moves when given steering, torque and brake. The existing hand-built model (bicycle-style equations with parameters set by hand) was wrong enough to matter, so the question was whether a model learned from the G55's own recorded CAN data would predict the truck's motion better, and whether it could then be used inside the closed-loop simulator (bench8) in place of the hand-built one.</p>
+<p>The check came first. From a recorded moment the model gets 2 s of measured state, then only what a controller could command (steering-wheel angle, torque request, brake pedal, gear). It runs free for 4 s and is scored against what the truck did. The data is 102 driving sessions (36.5 h moving) split by evening. The test set is the 12 latest drives (9,704 rollouts), scored once per candidate.</p>
+<h2>What was done</h2>
+<ul>
+<li>Refit the same equations to the data by simulation error.</li>
+<li>Trained a small recurrent network (142k parameters, 47 minutes on CPUs) on 22 drives (80.8k windows, stops included) to predict acceleration and yaw acceleration at 20 Hz.</li>
+<li>Wired it into the simulator's truck with the measured 2 s history before each window, and checked the simulator reproduces the check's rollouts within 1e-6.</li>
+<li>Compared it as a 2 s predictor ("ghost") against constant speed and yaw rate, and against the driving models' own 2 s plan, using CAN dead-reckoning as truth.</li>
+</ul>
+<h2>Result</h2>
+<p>Mean absolute error after 4 s on the test drives [95 percent bootstrap within drives]:</p>
+<table>
+<thead><tr><th scope="col">Model</th><th scope="col">Sideways (m)</th><th scope="col">Heading (deg)</th><th scope="col">Speed (m/s)</th></tr></thead>
+<tbody>
+<tr><td>Hand-built</td><td>7.34 [6.98, 7.67]</td><td>11.63 [11.36, 11.91]</td><td>0.91 [0.87, 0.95]</td></tr>
+<tr><td>Hold speed and yaw rate</td><td>1.47 [1.39, 1.57]</td><td>5.69 [5.08, 6.36]</td><td>1.47 [1.37, 1.57]</td></tr>
+<tr><td>Same equations, refit</td><td>0.66 [0.63, 0.69]</td><td>1.70 [1.53, 1.88]</td><td>0.76 [0.73, 0.80]</td></tr>
+<tr><td>Learned network</td><td>0.29 [0.28, 0.30]</td><td>0.86 [0.77, 0.94]</td><td>0.46 [0.44, 0.48]</td></tr>
+</tbody>
+</table>
+<ul>
+<li>Most of the hand-built error was one stale number: it steered straight at +6.23 degrees, while the truck has driven straight near -6 degrees since a tyre and suspension change. The refit also found a larger understeer gradient (0.00148 against 0.00071 s²/m²).</li>
+<li>Adding physics under the network did not help at this data size, and the pre-change truck's older data did not help either.</li>
+<li>In the simulator, with the measured start history, the learned model (its mirrored variant) had a sideways error at 4 s of 0.17 m (invented steady start 0.30, history from 2 s earlier 0.75), against 0.52 for the hand-built model.</li>
+<li>The learned model was not made the simulator's default: asked for -2.5 m/s² from 10 m/s, it never came to rest in 10 s (lowest speed 1.24 m/s). The hand-built equations, with the corrected centre (-7.4 degrees) and understeer gradient 0.00148, stay the default.</li>
+<li>As a 2 s ghost on test (sideways, along the road, m): constant speed and yaw rate 0.30, 0.79; learned model with commands held at their start values 0.22, 0.23; the N16 plan 0.17 sideways, 2.40 along the road. The driving model's plan is closer sideways and farther off in speed.</li>
+</ul>
+<h2>What it does not show</h2>
+<ul>
+<li>Nothing about a steering actuator: all steering in the data is a human hand on the wheel, so this maps wheel angle to motion, not a motor command.</li>
+<li>Braking strength: the CAN carries only brake on or off, so the learned model's braking is inferred from history. The truck's cruise torque request never appears in the data.</li>
+<li>Twelve test drives over four evenings and one truck configuration. Nothing here was run in the world-model loop, and the effect of the measured start on any driving policy's score was not measured.</li>
+</ul>

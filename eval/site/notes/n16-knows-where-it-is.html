@@ -1,0 +1,21 @@
+<h2>What was asked</h2>
+<p>After a simulated push, N16 (comma's driving model, "N16 nav") often steers the wrong way first. Three explanations were open: its internal representation of the camera view does not contain the truck's sideways offset; the offset is in the vision features but the model's temporal summary loses it; or the offset is present in both and the model's output stage reads it wrongly. A "push" moves the simulated truck 1.0 or 1.5 m sideways off its recorded path, here in open loop: the truck's path is prescribed, not driven by the model.</p>
+<h2>What was done</h2>
+<p>135 daytime windows of recorded drives were used, from 4 recording sessions and 8 drives. In each window the model was warmed up on 3.2 s of recorded frames, then run for 10 episodes of 2 s: one with no push, six pushes up to 1.5 m on both sides, and three heading holds of up to 4 degrees. Four things were read out: the current frame's vision tokens, the base policy's temporal summary token, the summarizer's output tokens, and the model's outputs.</p>
+<p>A ridge regression (a linear fit) was trained to predict the truck's true lateral offset and heading from each of these, trained on all sessions but one and tested on the held-out session. The offset label is measured from the recorded path, not the lane centre. Control: with shuffled labels R² was at most 0.010.</p>
+<p>A second fit asked what each output responds to: its change from the no-push episode was fitted against offset, heading and yaw rate together.</p>
+<h2>Result</h2>
+<p>Both representations hold offset and heading, linearly, on held-out sessions. Values are R² with the interval resampling sessions, then drives.</p>
+<table>
+<thead><tr><th scope="col">Read from</th><th scope="col">0.2 s</th><th scope="col">0.5 s</th><th scope="col">1.0 s</th><th scope="col">2.0 s</th></tr></thead>
+<tbody>
+<tr><td>Offset, current frame's vision tokens</td><td>0.93</td><td>0.89</td><td>0.90</td><td>0.84</td></tr>
+<tr><td>Offset, base summary token</td><td>0.98</td><td>0.95</td><td>0.92</td><td>0.87</td></tr>
+<tr><td>Offset, lane centre alone</td><td>0.05</td><td>0.19</td><td>0.50</td><td>0.30</td></tr>
+<tr><td>Heading, vision tokens</td><td>0.85</td><td>0.85</td><td>0.89</td><td>0.72</td></tr>
+<tr><td>Heading, base summary token</td><td>0.97</td><td>0.92</td><td>0.88</td><td>0.72</td></tr>
+</tbody>
+</table>
+<p>The summary holds the offset at least as well as the vision tokens, so the first two explanations are ruled out. The third holds. The base action answers the offset the right way (+3.1 m/s² per metre at 0.5 s, +1.8 at 1.0 s) but answers the truck's own yaw rate by steering further into the turn: -0.134 [-0.153, -0.117] m/s² per deg/s at 0.5 s and -0.155 [-0.176, -0.142] at 1.0 s. The residual head (bounded at 1.0 m/s²) steers against that term (+0.131 and +0.155), and the full action's net response to yaw rate is about zero (-0.003 and -0.001). The share of the 1,197 pushed episodes where the output points back toward the path, at 0.2 / 0.5 / 1.0 / 2.0 s, is 0.02 / 0.56 / 0.69 / 0.97 for the base action and 0.81 / 0.94 / 0.95 / 0.98 for the full action.</p>
+<h2>What it does not show</h2>
+<p>The probe shows the information can be decoded, not how the base uses it. That a base trained to copy human driving keeps a turn going, because drivers usually do, is an inference. The data is open loop, on stock-lens day windows only, with a wide view synthesized from the narrow camera, and N16 only. At 0.2 s the offset is a few centimetres and tied to heading, so R² there mostly reflects heading and yaw rate. With 4 sessions and 8 drives the intervals are coarse.</p>
