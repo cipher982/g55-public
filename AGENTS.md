@@ -15,7 +15,7 @@ result from one vehicle as a universal Mercedes specification.
 
 - `can/`: curated CAN-C/CAN-B DBCs, body PDM/gateway topology notes, and reverse-engineering case studies.
 - `power/`: reusable BLE telemetry and register codecs for Victron Orion-Tr Smart DC-DC chargers and JBD/Eco-Worthy LiFePO4 BMS units.
-- `eval/`: the harness that tests comma's released driving models on the truck's drives, and the site built from it (https://openpilot-gwagon-evals.drose.io), a log of the G55 driving work. Agents add a note for each finding as it lands, rewritten under the Boundary above (no drive, window or job ids, hosts, paths, names or places); the private workspace's `eval-site` skill says how. comma's public segments appear only as the harness check on the Method page. comma1M results never go here (comma Confidential). The site ranks nothing (`geval.ranking.check_site`).
+- `eval/`: the harness that tests comma's released driving models on the truck's drives, and the site built from it (https://my-self-driving-g-wagon.drose.io), a log of the G55 driving work. Agents add a note for each finding as it lands, rewritten under the Boundary above (no drive, window or job ids, hosts, paths, names or places); the private workspace's `eval-site` skill says how. comma's public segments appear only as the harness check on the Method page. comma1M results never go here (comma Confidential). The site ranks nothing (`geval.ranking.check_site`).
 - `cad/`: reusable CAD tooling and selected vehicle parts.
 - `l2/`: public high-level autonomy architecture and safety reasoning.
 ## Working rules

@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.11"
 # ///
-"""Build the openpilot G-Wagon evals site from results/*.json: a living record of comma's driving models.
+"""Build the My Self-Driving G-Wagon site (until 2026-11-06 "openpilot G-Wagon evals") from results/*.json: a living record of comma's driving models.
 
 Since 2026-11-05 (David: "a living growing website that collects and tracks and explains over time") the
 front page is comma's releases on a time axis and a feed of what happened; each release has a page that

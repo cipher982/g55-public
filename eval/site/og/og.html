@@ -1,19 +1,23 @@
 <!doctype html>
 <!-- Source of static/og.png, the 1200x630 link-preview card. Text only, so it does not go stale when
-     scores change. Re-render: open this file in a browser at 1200x630 and save a screenshot as static/og.png. -->
+     scores change. Re-render: open this file in a browser at 1200x630 and save a screenshot as static/og.png
+     (headless Chrome: --headless --screenshot=og.png --window-size=1200,630 file://.../og.html). -->
 <html lang="en"><head><meta charset="utf-8"><title>og card</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+Condensed:wght@700&family=IBM+Plex+Sans:wght@400&display=swap">
 <style>
 html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
-body { background: #15181c; color: #e8ebee; font-family: Overpass, sans-serif; position: relative; }
-.line { position: absolute; top: 0; left: 0; right: 0; height: 18px; border-top: 6px solid #e2a400; border-bottom: 6px solid #e2a400; box-sizing: border-box; }
-.in { position: absolute; left: 80px; right: 80px; top: 104px; }
-.site { font-size: 30px; font-weight: 800; color: #b8c0c9; }
-h1 { font-size: 78px; line-height: 1.02; font-weight: 800; letter-spacing: -0.025em; margin: 26px 0 30px; max-width: 980px; }
-p { font-size: 31px; line-height: 1.4; color: #b8c0c9; margin: 0; max-width: 1000px; }
+body { background: #ffffff; color: #2b2f33; font-family: "IBM Plex Sans", sans-serif; position: relative; }
+.bar { position: absolute; top: 0; left: 0; right: 0; height: 14px; display: flex; }
+.bar i { flex: 1; }
+.in { position: absolute; left: 80px; right: 80px; top: 112px; }
+.site { font: 500 26px "IBM Plex Mono", monospace; color: #5e646b; }
+h1 { font: 700 92px/1.0 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -0.01em; margin: 26px 0 34px; }
+p { font-size: 32px; line-height: 1.38; color: #3f444a; margin: 0; max-width: 1020px; }
+.road { position: absolute; left: 80px; right: 80px; bottom: 64px; height: 6px; background: #e0a800; }
 </style></head>
-<body><div class="line"></div><div class="in">
-<div class="site">openpilot G-Wagon evals</div>
-<h1>openpilot driving model evaluations</h1>
-<p>Every comma.ai openpilot driving model, including Hugging Face uploads, scored on comma's public drives and on drives from a 2011 Mercedes G55, in open and closed loop.</p>
-</div></body></html>
+<body><div class="bar"><i style="background:#2a78d6"></i><i style="background:#eb6834"></i><i style="background:#1baf7a"></i></div>
+<div class="in">
+<div class="site">my-self-driving-g-wagon.drose.io</div>
+<h1>My Self-Driving G-Wagon</h1>
+<p>A 2011 Mercedes G55 AMG: its CAN buses decoded, a patched engine ECU, custom transmission firmware, cruise control driven over CAN, and comma's openpilot driving models run on the truck's own drives.</p>
+</div><div class="road"></div></body></html>

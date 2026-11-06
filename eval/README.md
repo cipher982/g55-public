@@ -81,6 +81,6 @@ regenerates it from them).
 
 `uv run python site/build.py` writes the static site to `site/_site/` (index, method, one page per
 model, the results files) from `results/` and `per_unit/`; there is no server side. The public copy
-at https://openpilot-gwagon-evals.drose.io follows `main`: the web host checks for a new commit
+at https://my-self-driving-g-wagon.drose.io (until 2026-11-06 openpilot-gwagon-evals.drose.io, which redirects) follows `main`: the web host checks for a new commit
 every 15 minutes, runs this build on it and publishes the result, one release per commit. Pushing
 to `main` is how a new results file goes live.

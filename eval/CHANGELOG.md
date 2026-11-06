@@ -4,6 +4,7 @@ The site's log reads this file: one line per change, newest first, `- YYYY-MM-DD
 optionally ending in a link. Model releases and scoring runs come from the results files and are
 not listed here.
 
+- 2026-11-06: The site is renamed My Self-Driving G-Wagon and moves to https://my-self-driving-g-wagon.drose.io; openpilot-gwagon-evals.drose.io redirects there. No value changed.
 - 2026-11-06: The Signals page lists every message in the DBC files, the steering-column message the gateway sends for cruise control included; the build no longer refuses command frame IDs. No value changed.
 - 2026-11-06: The site is dense: one front page with the truck's parts and what is on each, every release's G55 results with intervals in one table, the findings, the open questions, the log, the signals and a glossary. New: a page per part (the engine ECU first), the truck's parts list and a W463 CAN signals table built from the DBC files. The build refuses drive, window and session ids, host names, file paths, private IP and Bluetooth addresses, the VIN prefix, money, the owner's name and the gateway's command frame IDs (`geval.boundary`). No value changed.
 - 2026-11-06: The site is a log of the G55 work. The tests are the three on the G55's own drives; comma's public segments move to a harness check on the Method page. The N16 x-ray on comma's public segments is taken down until it runs on the G55's own drives. Notes record the work behind the tests. No value changed.
