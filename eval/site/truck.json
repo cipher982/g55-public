@@ -1,0 +1,65 @@
+{
+ "_doc": "The parts list under the truck drawing on the front page (truck.svg). n matches the drawing's callout. kind: added (built or fitted for this project) or factory. Every line is a fact from the private as-built record, rewritten under public/AGENTS.md's Boundary; update it when the truck changes.",
+ "parts": [
+  {
+   "n": 1,
+   "kind": "added",
+   "name": "Cameras",
+   "text": "An ELP AR0234 on an 8 mm lens for the narrow view and an Arducam IMX662 for the wide view, in one case on the sun-visor mount. Both are recorded on every drive."
+  },
+  {
+   "n": 2,
+   "kind": "added",
+   "name": "Tablet",
+   "text": "A Galaxy Tab Active5 Pro in the cabin running a dashboard written for this truck, with a voice assistant. It shows the decoded vehicle state and the driving model's path."
+  },
+  {
+   "n": 3,
+   "kind": "added",
+   "name": "Gateway, Raspberry Pi 5",
+   "text": "A Rust service that records every frame on both CAN buses from key-in to key-out and decodes 62 signals live for the tablet and the driving model."
+  },
+  {
+   "n": 4,
+   "kind": "added",
+   "name": "Jetson Orin NX 16 GB",
+   "text": "Runs comma's N16 driving model (406M parameters) with TensorRT at 20 Hz on the truck's cameras, with YOLO26s for objects and SegFormer-B0 for free ground beside it."
+  },
+  {
+   "n": 5,
+   "kind": "added",
+   "name": "Compute battery",
+   "text": "A 314 Ah LiFePO4 battery in the trunk, charged from the starting battery through a Victron Orion-Tr 12/12-30A DC-DC charger. The gateway reads both over Bluetooth."
+  },
+  {
+   "n": 6,
+   "kind": "factory",
+   "name": "Engine ECU, Bosch ME 2.8.1",
+   "text": "The controller of the M113K supercharged 5.4 L V8. Since 3 Nov 2026 it runs patched firmware that accepts a torque request on CAN at 50 Hz with a 100 ms watchdog. The patch was run on an emulator of the ECU before it was written over K-line."
+  },
+  {
+   "n": 7,
+   "kind": "factory",
+   "name": "Transmission, 722.6 five-speed",
+   "text": "Controlled by Ultimate-NAG52, the open-source replacement for the factory EGS52, on a firmware build with five G55 patches (since 18 Oct 2026)."
+  },
+  {
+   "n": 8,
+   "kind": "factory",
+   "name": "Cruise control stalk",
+   "text": "Since 29 Oct 2026 the gateway presses the factory cruise control over CAN-C, on a command from the tablet."
+  },
+  {
+   "n": 9,
+   "kind": "factory",
+   "name": "Steering",
+   "text": "Hydraulic, with no electric motor. Nothing steers the truck yet: steering is tested and trained in a simulator built from the truck's own drives."
+  },
+  {
+   "n": 10,
+   "kind": "factory",
+   "name": "CAN buses",
+   "text": "CAN-C at 500 kbit/s for powertrain and chassis, CAN-B at 83.3 kbit/s for the body. 131 signals in 47 messages are decoded in the project's DBC files."
+  }
+ ]
+}

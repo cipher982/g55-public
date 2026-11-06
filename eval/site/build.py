@@ -1135,6 +1135,44 @@ def notes_index() -> str:
             f'Newest first. Each says how its numbers were measured and what they cannot show.</p></section><ul class="sl big" data-history>{items}</ul>')
 
 
+def truck_section() -> str:
+    """The front page's drawing of the truck (site/truck.svg) and its parts list (site/truck.json)."""
+    svg = (SITE / "truck.svg").read_text()
+    parts = json.loads((SITE / "truck.json").read_text())["parts"]
+    kinds = {"added": "Added", "factory": "Factory"}
+    items = "".join(
+        f'<li class="{esc(p["kind"])}"><span class="pn" aria-hidden="true">{p["n"]}</span><div><h3>{esc(p["name"])}'
+        f'<span class="pk">{kinds[p["kind"]]}</span></h3><p>{esc(p["text"])}</p></div></li>' for p in parts)
+    return (f'<section class="rig" aria-labelledby="rig-h"><h2 id="rig-h" class="sr">What is on the truck</h2>'
+            f'<figure class="truckfig">{svg}<figcaption><span class="key added">Added for this project</span>'
+            f'<span class="key factory">Factory</span><span class="key bus">CAN-C</span><span class="key bus b">CAN-B</span></figcaption></figure><ol class="parts">{items}</ol></section>')
+
+
+def year_section() -> str:
+    """Commits per month and the dated milestones (site/year.json)."""
+    y = json.loads((SITE / "year.json").read_text())
+    months = y["commits"]
+    top = max(c for _, c in months)
+    w, h, gap = 64, 150, 10
+    bars = []
+    for i, (ym, c) in enumerate(months):
+        bh = 0 if c == 0 else max(2.0, c / top * h)
+        x = i * w
+        yr, mo = ym.split("-")
+        year = f'<text class="y" x="{x + gap / 2}" y="{h + 44}">{yr}</text>' if i == 0 or mo == "01" else ""
+        bars.append(f'<g><rect x="{x + gap / 2}" y="{h - bh:.1f}" width="{w - gap}" height="{bh:.1f}" rx="2"/>'
+                    f'<text class="v" x="{x + w / 2}" y="{h - bh - 7:.1f}">{c}</text>'
+                    f'<text class="m" x="{x + w / 2}" y="{h + 22}">{MONTHS[int(mo) - 1][:3]}</text>{year}</g>')
+    total = sum(c for _, c in months)
+    chart = (f'<svg class="commits" viewBox="0 -26 {len(months) * w} {h + 80}" role="img" aria-label="Commits per month, '
+             f'December 2025 to {esc(nice_date(y["counted"]))}: '
+             + ", ".join(f"{c}" for _, c in months) + f'">{"".join(bars)}</svg>')
+    ms = "".join(f'<li><time datetime="{d}">{esc(nice_date(d))}</time><p>{esc(t)}</p></li>' for d, t in y["milestones"])
+    return (f'<section class="year" aria-labelledby="year-h"><h2 id="year-h">Since December 2025</h2>'
+            f'<p class="sub">{total:,} commits to the project\'s repository, per month, counted to {esc(nice_date(y["counted"]))}.</p>'
+            f'{chart}<ol class="miles">{ms}</ol></section>')
+
+
 def feed_items(models, root) -> list[dict]:
     """Everything that happened, newest first: releases, scoring runs, changes to the tests, explainers."""
     idx = by_id(models)
@@ -1235,14 +1273,17 @@ def index_page(models, cfg, root) -> str:
     tests = "".join(
         f'<li><a href="tests/{slug}.html">{esc(title)}</a><span>{sum(1 for m in models if section_ok(m, section))} of {len(models)} releases</span></li>'
         for slug, title, section, _ in TESTS)
-    return f"""<section class="lead">
-<h1>openpilot on a 2011 Mercedes-Benz G55</h1>
-<p>A working log of putting openpilot on this truck. Every comma driving model is tested on the truck's own drives as it is released: {len(models)} releases so far, each found within 20 minutes of reaching Hugging Face or openpilot master. Notes record what was built and measured along the way. Last results {esc(nice_date(last))}.</p>
-<p class="nw">Newest: <a href="{esc(model_link(nw, ''))}">{esc(plain_name(nw))}</a>, first public {esc(nice_date(first_public(nw)))}, {esc(state_line(nw))}. {done} of {tot} tests done.</p>
+    return f"""<section class="lead hero">
+<h1>openpilot on a 2011 Mercedes-Benz G55 AMG</h1>
+<p class="big">The G55 left the factory with hydraulic steering and no driver-assistance computer. Since December 2025 both of its CAN buses have been tapped and decoded, comma's driving model has been put on its own cameras, the transmission moved to open-source firmware, the engine ECU patched to take a torque request, and a simulator built from the truck's drives to test and train driving models in.</p>
+<p>This site is the log of that work. It also tests every new comma driving model on the truck's drives as it is released: {len(models)} releases so far, the last results {esc(nice_date(last))}.</p>
 </section>
+{truck_section()}
 <section class="latest" aria-labelledby="latest-notes"><h2 id="latest-notes">Latest notes</h2><ol data-history>{latest}</ol>
 <p class="more"><a href="notes/index.html">All {len(notes())} notes</a></p></section>
+{year_section()}
 <section class="tlsec" aria-labelledby="releases-h"><h2 id="releases-h">comma's releases, tested on the truck</h2>
+<p class="sub nw">Newest: <a href="{esc(model_link(nw, ''))}">{esc(plain_name(nw))}</a>, first public {esc(nice_date(first_public(nw)))}, {esc(state_line(nw))}. {done} of {tot} tests done.</p>
 {timeline(models)}
 {timeline_key()}
 <p class="swipe">Swipe the timeline sideways for earlier releases.</p>

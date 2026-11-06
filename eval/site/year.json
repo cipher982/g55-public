@@ -1,0 +1,20 @@
+{
+  "_doc": "The front page's 'Since December 2025' section. commits: commits per month to the project's private repository (git log on main, counted 2026-11-06; the last month is partial, to 'counted'). milestones: dated, each from the private build log or git history, rewritten under public/AGENTS.md's Boundary.",
+  "counted": "2026-11-06",
+  "commits": [
+    ["2025-12", 1], ["2026-01", 2], ["2026-02", 5], ["2026-03", 0], ["2026-04", 0], ["2026-05", 8],
+    ["2026-06", 60], ["2026-07", 201], ["2026-08", 346], ["2026-09", 567], ["2026-10", 1788], ["2026-11", 176]
+  ],
+  "milestones": [
+    ["2025-12-05", "The project's repository starts."],
+    ["2026-06-08", "CAN-B identified as fault-tolerant CAN and the bus adapter chosen; the Ultimate-NAG52 transmission controller ordered."],
+    ["2026-06-10", "The in-car gateway designed: a Raspberry Pi on both CAN buses and the engine ECU's K-line."],
+    ["2026-08-04", "The Jetson's first live camera detections, YOLO26 on TensorRT."],
+    ["2026-10-09", "comma's driving model runs on the Jetson at 20 Hz on the truck's camera."],
+    ["2026-10-12", "A closed-loop simulator built from the truck's recorded drives."],
+    ["2026-10-18", "The transmission runs a custom Ultimate-NAG52 firmware build; the object and free-ground models run beside the driving model."],
+    ["2026-10-27", "Every new comma driving model is tested on the truck's drives as it is released."],
+    ["2026-10-29", "The gateway drives the factory cruise control over CAN."],
+    ["2026-11-03", "The engine ECU runs patched firmware that accepts a torque request on CAN."]
+  ]
+}

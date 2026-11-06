@@ -1,0 +1,60 @@
+<svg class="truck" viewBox="-10 -56 1030 532" role="img" aria-labelledby="truck-t truck-d" xmlns="http://www.w3.org/2000/svg">
+<title id="truck-t">The G55, side view, with what has been added to it</title>
+<desc id="truck-d">Line drawing of a 2011 Mercedes-Benz G55 from the left side. Parts drawn in the accent colour were added for this project; parts in grey are factory. Numbers match the list below the drawing.</desc>
+<g class="tf">
+  <line class="ground" x1="-10" y1="412" x2="1020" y2="412"/>
+  <path class="body" d="M52 296 L52 184 L60 178 L334 170 L354 42 L362 34 L886 34 L896 44 L898 296 L864.7 296 A100 100 0 0 0 675.3 296 L299.7 296 A100 100 0 0 0 110.3 296 Z"/>
+  <path d="M310 300 A110 110 0 0 0 100 300 M875 300 A110 110 0 0 0 665 300"/>
+  <path class="glass" d="M368 54 L500 54 L500 162 L352 162 Z M516 54 L640 54 L640 162 L516 162 Z M660 54 L882 54 L882 162 L660 162 Z"/>
+  <path d="M338 172 L896 172 M358 46 L892 46 M60 178 L60 296 M508 44 L508 294 M650 44 L650 294 M342 172 L342 294 M300 232 L890 232"/>
+  <path d="M346 142 L322 137 L320 160 L346 160 Z"/>
+  <rect x="74" y="164" width="24" height="10" rx="3"/>
+  <rect x="335" y="188" width="10" height="12" rx="2"/><rect x="335" y="262" width="10" height="12" rx="2"/>
+  <rect x="502" y="188" width="10" height="12" rx="2"/><rect x="502" y="262" width="10" height="12" rx="2"/>
+  <rect x="468" y="184" width="26" height="6" rx="3"/><rect x="612" y="184" width="26" height="6" rx="3"/>
+  <rect x="30" y="266" width="32" height="32" rx="4"/>
+  <rect x="890" y="270" width="24" height="28" rx="4"/>
+  <rect x="898" y="112" width="48" height="156" rx="20"/><path d="M922 116 L922 264"/>
+  <rect x="312" y="300" width="318" height="8" rx="3"/>
+  <rect x="628" y="299" width="44" height="12" rx="6"/><circle cx="666" cy="305" r="3.5"/>
+  <circle class="tire" cx="205" cy="328" r="84"/><circle cx="205" cy="328" r="52"/><circle cx="205" cy="328" r="12"/>
+  <circle class="tire" cx="770" cy="328" r="84"/><circle cx="770" cy="328" r="52"/><circle cx="770" cy="328" r="12"/>
+</g>
+<g class="tg">
+  <rect x="92" y="190" width="186" height="80" rx="10"/>
+  <rect x="290" y="252" width="150" height="34" rx="8"/>
+  <path d="M122 262 L180 284"/>
+  <path class="bus" d="M266 222 L266 292 L712 292 L712 216 M393 186 L393 292 M417 278 L417 292"/>
+  <path class="bus b" d="M352 196 L352 282 L724 282 L724 216"/>
+</g>
+<g class="part">
+  <rect x="250" y="200" width="32" height="22" rx="3"/>
+  <rect x="402" y="256" width="30" height="22" rx="3"/>
+  <rect x="384" y="178" width="18" height="8" rx="2"/>
+  <rect x="108" y="270" width="22" height="18" rx="3"/>
+</g>
+<g class="ta">
+  <rect x="370" y="56" width="26" height="14" rx="3"/>
+  <rect x="372" y="138" width="26" height="20" rx="2"/>
+  <rect x="700" y="196" width="34" height="20" rx="3"/>
+  <rect x="744" y="186" width="50" height="30" rx="3"/>
+  <rect x="808" y="180" width="56" height="44" rx="3"/>
+  <path class="wire" d="M396 63 L769 63 L769 186"/>
+  <path class="wire" d="M734 206 L744 206"/>
+  <path class="wire" d="M398 148 L430 148 L430 206 L700 206"/>
+  <path class="wire" d="M808 202 L794 202"/>
+</g>
+<g class="callouts">
+  <path d="M383 56 L300 -15 M385 138 L460 -15 M717 196 L640 -15 M769 186 L770 -15 M836 180 L900 -15 M266 222 L236 429 M417 278 L380 429 M393 186 L520 429 M119 288 L120 429 M600 292 L650 429"/>
+  <g><circle cx="300" cy="-32" r="17"/><text x="300" y="-32">1</text></g>
+  <g><circle cx="460" cy="-32" r="17"/><text x="460" y="-32">2</text></g>
+  <g><circle cx="640" cy="-32" r="17"/><text x="640" y="-32">3</text></g>
+  <g><circle cx="770" cy="-32" r="17"/><text x="770" y="-32">4</text></g>
+  <g><circle cx="900" cy="-32" r="17"/><text x="900" y="-32">5</text></g>
+  <g><circle cx="236" cy="446" r="17"/><text x="236" y="446">6</text></g>
+  <g><circle cx="380" cy="446" r="17"/><text x="380" y="446">7</text></g>
+  <g><circle cx="520" cy="446" r="17"/><text x="520" y="446">8</text></g>
+  <g><circle cx="120" cy="446" r="17"/><text x="120" y="446">9</text></g>
+  <g><circle cx="650" cy="446" r="17"/><text x="650" y="446">10</text></g>
+</g>
+</svg>

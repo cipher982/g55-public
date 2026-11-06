@@ -458,3 +458,60 @@ ul.plain { padding-left: 1.2em; display: grid; gap: 8px; max-width: 76ch; }
 .latest li a { font-weight: 600; }
 .latest li p { margin: 4px 0 0; color: var(--ink2); font-size: 15px; }
 @media (max-width: 560px) { .latest li { grid-template-columns: 1fr; } .latest time { grid-row: auto; } }
+
+/* ---------------------------------------------------------------- front page: the truck (2026-11-06) */
+.hero { max-width: none; gap: 12px; }
+.hero p { max-width: 76ch; }
+.hero h1 { font-size: clamp(32px, 5vw, 58px); font-weight: 700; line-height: 1.02; }
+.hero p.big { font-size: clamp(17px, 2vw, 20px); line-height: 1.5; color: var(--ink); }
+.rig { margin-top: 12px; }
+.rig + .latest { margin-top: 44px; }
+.truckfig { margin: 0; }
+.truck { display: block; width: 100%; height: auto; }
+.truck .tf { fill: none; stroke: var(--ink2); stroke-width: 2; stroke-linejoin: round; }
+.truck .tf .body { fill: var(--wash); }
+.truck .tf .glass { fill: var(--bg); }
+.truck .tf .tire { stroke-width: 5; }
+.truck .tf .ground { stroke: var(--rule2); stroke-width: 1.5; }
+.truck .tg { fill: none; stroke: var(--faint); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.truck .tg .bus { stroke: var(--muted); stroke-width: 2.5; stroke-dasharray: none; }
+.truck .tg .bus.b { stroke-dasharray: 8 5; }
+.truck .part { fill: var(--bg); stroke: var(--ink2); stroke-width: 2; }
+.truck .ta rect { fill: var(--accent-wash); stroke: var(--accent); stroke-width: 2.5; }
+.truck .ta .wire { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
+.truck .callouts path { fill: none; stroke: var(--faint); stroke-width: 1; }
+.truck .callouts circle { fill: var(--bg); stroke: var(--ink2); stroke-width: 1.5; }
+.truck .callouts g:nth-of-type(-n+5) circle { stroke: var(--accent); stroke-width: 2.5; }
+.truck .callouts text { font: 600 19px var(--heading); fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+.truckfig figcaption { display: flex; gap: 20px; flex-wrap: wrap; color: var(--muted); font-size: 14px; margin-top: 4px; }
+.key::before { content: ""; display: inline-block; width: 14px; height: 10px; margin-right: 7px; border-radius: 2px; vertical-align: -1px; }
+.key.added::before { background: var(--accent-wash); border: 2px solid var(--accent); }
+.key.bus::before { height: 0; border-top: 3px solid var(--muted); border-radius: 0; vertical-align: 3px; }
+.key.bus.b::before { border-top-style: dashed; }
+.key.factory::before { background: var(--bg); border: 2px solid var(--ink2); }
+.parts { list-style: none; padding: 0; margin: 18px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 18px 32px; }
+.parts li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: start; border-top: 1px solid var(--rule); padding-top: 12px; }
+.parts .pn { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--ink2); display: grid; place-items: center; font: 600 14px var(--heading); }
+.parts li.added .pn { border: 2.5px solid var(--accent); }
+.parts h3 { font-size: 17px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.parts .pk { font: 400 13px var(--sans); color: var(--muted); }
+.parts p { margin-top: 4px; color: var(--ink2); font-size: 15px; }
+.year { margin-top: 44px; }
+.year h2, .rig h2 { font-size: 24px; }
+.year .sub { margin-bottom: 14px; }
+.commits { display: block; width: 100%; max-width: 860px; height: auto; }
+.commits rect { fill: var(--accent); }
+.commits text { font: 500 13px var(--sans); fill: var(--muted); text-anchor: middle; }
+.commits text.v { fill: var(--ink); }
+.commits text.y { text-anchor: start; fill: var(--ink2); font-weight: 600; }
+.miles { list-style: none; padding: 0; margin: 22px 0 0; max-width: 78ch; border-left: 2px solid var(--rule2); }
+.miles li { display: grid; grid-template-columns: 8em minmax(0, 1fr); gap: 14px; padding: 6px 0 6px 18px; position: relative; }
+.miles li::before { content: ""; position: absolute; left: -6px; top: 13px; width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+.miles time { color: var(--muted); font-size: 14px; padding-top: 1px; }
+.miles p { color: var(--ink2); }
+@media (max-width: 560px) {
+  .truck .callouts text { font-size: 30px; }
+  .truck .callouts circle { r: 24; }
+  .commits text { font-size: 22px; }
+  .miles li { grid-template-columns: 1fr; gap: 2px; }
+}
