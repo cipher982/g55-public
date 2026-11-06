@@ -33,7 +33,7 @@ from pathlib import Path
 SITE = Path(__file__).resolve().parent
 EVAL = SITE.parent
 sys.path.insert(0, str(EVAL))
-from geval import ranking, sections as GS  # noqa: E402  the order check; the simulators and limits
+from geval import boundary, ranking, sections as GS  # noqa: E402  the boundary and order checks; the simulators and limits
 sys.path.insert(0, str(SITE))
 
 SECTIONS = {  # in page order: G55 first, comma public drives after
@@ -901,8 +901,9 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
         umami = (f'<script defer src="{esc(cfg["umami_src"])}" '
                  f'data-website-id="{esc(cfg["umami_website_id"])}"{dom}></script>')
     nav = []
-    for href, label, key in ((f"{up}index.html", "Releases", "releases"), (f"{up}tests/index.html", "Tests", "tests"),
-                             (f"{up}notes/index.html", "Notes", "notes"), (f"{up}method.html", "Method", "method"),
+    for href, label, key in ((f"{up}truck/index.html", "Truck", "truck"), (f"{up}index.html#models", "Models", "releases"),
+                             (f"{up}tests/index.html", "Tests", "tests"), (f"{up}notes/index.html", "Notes", "notes"),
+                             (f"{up}signals.html", "Signals", "signals"), (f"{up}method.html", "Method", "method"),
                              (f"{up}log.html", "Log", "log")):
         cur = ' aria-current="page"' if key == current else ""
         nav.append(f'<a href="{href}"{cur}>{label}</a>')
@@ -931,7 +932,7 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 <script>try{{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}}catch(e){{}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <link rel="stylesheet" href="{up}style.css?v={css_v}">
 <link rel="icon" href="{up}favicon.svg" type="image/svg+xml">
 {extra_head}{umami}
@@ -946,7 +947,7 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 {body}
 </main>
 <footer class="foot"><div class="wrap foot-in">
-<p>Independent tests of comma.ai's openpilot driving models, not affiliated with comma.ai. Results come from one 2011 Mercedes-Benz G55 AMG (W463) and comma's public segments.</p>
+<p>Independent work on one 2011 Mercedes-Benz G55 AMG (W463). Not affiliated with comma.ai or Mercedes-Benz. Grades: <span class="d-pill mea">measured</span> on the truck or its recorded drives, <span class="d-pill sim">simulation</span> on recorded drives.</p>
 <p><a href="{up}feed.xml">RSS</a> <a href="{up}method.html#downloads">Results files</a> <a href="{esc(cfg['repo_url'])}/tree/main/eval">Code</a> <a href="{up}schema.txt">File format</a></p>
 </div></footer>
 <div id="tip" class="tip" role="status" hidden></div>
@@ -1135,44 +1136,6 @@ def notes_index() -> str:
             f'Newest first. Each says how its numbers were measured and what they cannot show.</p></section><ul class="sl big" data-history>{items}</ul>')
 
 
-def truck_section() -> str:
-    """The front page's drawing of the truck (site/truck.svg) and its parts list (site/truck.json)."""
-    svg = (SITE / "truck.svg").read_text()
-    parts = json.loads((SITE / "truck.json").read_text())["parts"]
-    kinds = {"added": "Added", "factory": "Factory"}
-    items = "".join(
-        f'<li class="{esc(p["kind"])}"><span class="pn" aria-hidden="true">{p["n"]}</span><div><h3>{esc(p["name"])}'
-        f'<span class="pk">{kinds[p["kind"]]}</span></h3><p>{esc(p["text"])}</p></div></li>' for p in parts)
-    return (f'<section class="rig" aria-labelledby="rig-h"><h2 id="rig-h" class="sr">What is on the truck</h2>'
-            f'<figure class="truckfig">{svg}<figcaption><span class="key added">Added for this project</span>'
-            f'<span class="key factory">Factory</span><span class="key bus">CAN-C</span><span class="key bus b">CAN-B</span></figcaption></figure><ol class="parts">{items}</ol></section>')
-
-
-def year_section() -> str:
-    """Commits per month and the dated milestones (site/year.json)."""
-    y = json.loads((SITE / "year.json").read_text())
-    months = y["commits"]
-    top = max(c for _, c in months)
-    w, h, gap = 64, 150, 10
-    bars = []
-    for i, (ym, c) in enumerate(months):
-        bh = 0 if c == 0 else max(2.0, c / top * h)
-        x = i * w
-        yr, mo = ym.split("-")
-        year = f'<text class="y" x="{x + gap / 2}" y="{h + 44}">{yr}</text>' if i == 0 or mo == "01" else ""
-        bars.append(f'<g><rect x="{x + gap / 2}" y="{h - bh:.1f}" width="{w - gap}" height="{bh:.1f}" rx="2"/>'
-                    f'<text class="v" x="{x + w / 2}" y="{h - bh - 7:.1f}">{c}</text>'
-                    f'<text class="m" x="{x + w / 2}" y="{h + 22}">{MONTHS[int(mo) - 1][:3]}</text>{year}</g>')
-    total = sum(c for _, c in months)
-    chart = (f'<svg class="commits" viewBox="0 -26 {len(months) * w} {h + 80}" role="img" aria-label="Commits per month, '
-             f'December 2025 to {esc(nice_date(y["counted"]))}: '
-             + ", ".join(f"{c}" for _, c in months) + f'">{"".join(bars)}</svg>')
-    ms = "".join(f'<li><time datetime="{d}">{esc(nice_date(d))}</time><p>{esc(t)}</p></li>' for d, t in y["milestones"])
-    return (f'<section class="year" aria-labelledby="year-h"><h2 id="year-h">Since December 2025</h2>'
-            f'<p class="sub">{total:,} commits to the project\'s repository, per month, counted to {esc(nice_date(y["counted"]))}.</p>'
-            f'{chart}<ol class="miles">{ms}</ol></section>')
-
-
 def feed_items(models, root) -> list[dict]:
     """Everything that happened, newest first: releases, scoring runs, changes to the tests, explainers."""
     idx = by_id(models)
@@ -1262,46 +1225,224 @@ def rss(models, root, cfg) -> str:
 
 # ---------------------------------------------------------------- the front page
 
+def _j(name: str) -> dict:
+    return json.loads((SITE / name).read_text())
+
+
+def d_bar(v: float, lo: float, hi: float, a: float, b: float, w: int = 64) -> str:
+    """A tiny interval strip: the range [lo, hi] and the point v on an axis a..b."""
+    sx = lambda x: 2 + (min(max(x, a), b) - a) / (b - a) * (w - 4)
+    return (f'<svg class="d-bar" viewBox="0 0 {w} 10" aria-hidden="true"><line class="ax" x1="2" y1="9" x2="{w - 2}" y2="9"/>'
+            f'<line class="rg" x1="{sx(lo):.1f}" y1="5" x2="{sx(hi):.1f}" y2="5"/><circle class="pt" cx="{sx(v):.1f}" cy="5" r="2.2"/></svg>')
+
+
+def d_table(head: list[str], rows: list[str], cls: str = "", attrs: str = "") -> str:
+    th = "".join(f"<th{' class=r' if h.startswith('>') else ''}>{h.lstrip('>')}</th>" for h in head)
+    return f'<div class="d-tw"><table class="d-t {cls}"{attrs}><thead><tr>{th}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
+
+
+def d_panel(title: str, note: str, body: str, ident: str = "", cls: str = "") -> str:
+    i = f' id="{ident}"' if ident else ""
+    return f'<section class="d-p {cls}"{i}><h2>{title}<small>{note}</small></h2>{body}</section>'
+
+
+KIND_PILL = {"measured": "mea", "simulation": "sim", "open": "open"}
+
+
+def pill(kind: str) -> str:
+    return f'<span class="d-pill {KIND_PILL.get(kind, "fac")}">{esc(kind)}</span>'
+
+
+# ---------------------------------------------------------------- signals, from the DBC files in g55-public can/
+
+def signals() -> list[dict]:
+    """Every signal in the public DBC files, less the messages the gateway sends (signals.json)."""
+    cfg = _j("signals.json")
+    skip = {int(x, 16) for x in cfg["exclude"]}
+    out = []
+    for bus, name in cfg["files"]:
+        f = EVAL.parent / "can" / name
+        if not f.exists():
+            continue
+        t = f.read_text()
+        cm_sg = {(int(a), b): c for a, b, c in re.findall(r'CM_ SG_ (\d+) (\w+) "((?:[^"\\]|\\.)*)";', t, re.S)}
+        cm_bo = {int(a): c for a, c in re.findall(r'CM_ BO_ (\d+) "((?:[^"\\]|\\.)*)";', t, re.S)}
+        for m in re.finditer(r'^BO_ (\d+) (\w+): (\d+) (\w+)\n((?: SG_.*\n)*)', t, re.M):
+            mid, msg, tx, body = int(m[1]), m[2], m[4], m[5]
+            if mid in skip:
+                continue
+            for s in re.finditer(r' SG_ (\w+) ?(?:M|m\d+)? ?: (\d+)\|(\d+)@([01])([+-]) \(([^,]+),([^)]+)\) \[([^|]*)\|([^\]]*)\] "([^"]*)"', body):
+                c = cm_sg.get((mid, s[1]), "") or cm_bo.get(mid, "")
+                ev = re.match(r"(Measured|Derived|Borrowed|Hypothetical)", c)
+                for x in cfg["exclude"]:
+                    c = re.sub(rf"(?i)\b{x}\b", cfg["exclude_label"], c)
+                out.append({"bus": bus, "id": f"0x{mid:03X}", "msg": msg, "tx": tx, "sig": s[1], "start": int(s[2]), "len": int(s[3]),
+                            "order": "LE" if s[4] == "1" else "BE", "signed": s[5] == "-", "scale": s[6], "offset": s[7], "unit": s[10],
+                            "ev": ev[1] if ev else "Not labelled", "note": c})
+    return out
+
+
+def dbc_totals() -> tuple[int, int]:
+    """Signals and messages in the DBC files, the left-out message included."""
+    ns = nm = 0
+    for _, name in _j("signals.json")["files"]:
+        f = EVAL.parent / "can" / name
+        if f.exists():
+            t = f.read_text()
+            nm += len(re.findall(r"^BO_ ", t, re.M))
+            ns += len(re.findall(r"^ SG_ ", t, re.M))
+    return ns, nm
+
+
+def signals_page() -> str:
+    sigs = signals()
+    cfg = _j("signals.json")
+    import collections
+    bym = collections.Counter((s["tx"], s["bus"]) for s in sigs)
+    ev = collections.Counter(s["ev"] for s in sigs)
+    msgs = len({(s["bus"], s["id"]) for s in sigs})
+    mods = "".join(f'<tr><td class="m">{esc(m)}</td><td class="k">{b}</td><td class="r m">{c}</td></tr>' for (m, b), c in bym.most_common())
+    rows = "".join(
+        f'<tr data-bus="{s["bus"]}" data-ev="{esc(s["ev"])}" data-mod="{esc(s["tx"])}"><td class="k">{s["bus"]}</td><td class="m">{s["id"]}</td>'
+        f'<td class="m">{esc(s["msg"])}</td><td class="m">{esc(s["tx"])}</td><td class="m"><b>{esc(s["sig"])}</b></td>'
+        f'<td class="r m">{s["start"]}|{s["len"]} {s["order"]}{" s" if s["signed"] else ""}</td>'
+        f'<td class="r m">{esc(s["scale"])}{"" if s["offset"] in ("0", "0.0") else " + " + esc(s["offset"])}</td><td class="m">{esc(s["unit"])}</td>'
+        f'<td>{pill("measured") if s["ev"] == "Measured" else esc(s["ev"])}</td><td class="k wrap">{esc(s["note"])}</td></tr>' for s in sigs)
+    opts = "".join(f"<option>{esc(m)}</option>" for m in sorted({s["tx"] for s in sigs}))
+    evs = "".join(f"<option>{esc(e)}</option>" for e in sorted(ev))
+    files = " ".join(f'<a href="{esc(CFG["repo_url"])}/blob/main/can/{esc(n)}">{esc(n)}</a>' for _, n in cfg["files"])
+    head = ["Bus", "ID", "Message", "Sender", "Signal", ">Start|bits", ">Scale + offset", "Unit", "Evidence", "Note"]
+    return f"""<p class="d-crumb">signals</p><h1 class="d-h1">W463 CAN signals</h1>
+<p class="d-sum">Every signal decoded on this truck so far: {dbc_totals()[0]} in {dbc_totals()[1]} messages on two buses, {len(sigs)} listed here, read from the gateway's recordings of every drive. Each says how it is known. They were seen on one 2011 G55 and are not a Mercedes specification. They are for logging and reading a W463's buses. {esc(cfg["exclude_why"])} Files: {files}.</p>
+<div class="d-g a"><div>{d_panel("Signals by sending module", f"{len(bym)} senders", d_table(["Module", "Bus", ">Signals"], [mods]))}</div>
+<div>{d_panel("How each is known", "from the DBC comments", d_table(["Evidence", ">Signals"], [f'<tr><td>{esc(k)}</td><td class="r m">{v}</td></tr>' for k, v in ev.most_common()]))}
+<p class="d-src">Byte order LE is Intel, BE is Motorola; s marks a signed value. Start bit as in the DBC.</p></div></div>
+<div class="d-tools"><input id="sq" type="search" placeholder="Search: wheel, gear, door, rpm" aria-label="Search signals">
+<select id="sb" aria-label="Bus"><option value="">Both buses</option><option>CAN-C</option><option>CAN-B</option></select>
+<select id="sm" aria-label="Sender"><option value="">Every sender</option>{opts}</select>
+<select id="se" aria-label="Evidence"><option value="">Any evidence</option>{evs}</select><span id="sc" class="d-src"></span></div>
+{d_table(head, [rows], "sigs")}
+<script>(function(){{var q=document.getElementById('sq'),b=document.getElementById('sb'),m=document.getElementById('sm'),e=document.getElementById('se'),c=document.getElementById('sc');
+function f(){{var t=q.value.toLowerCase(),n=0;document.querySelectorAll('table.sigs tbody tr').forEach(function(r){{var ok=(!b.value||r.dataset.bus===b.value)&&(!m.value||r.dataset.mod===m.value)&&(!e.value||r.dataset.ev===e.value)&&(!t||r.textContent.toLowerCase().indexOf(t)>=0);r.hidden=!ok;if(ok)n++}});c.textContent=n+' of {len(sigs)} signals'}}
+[q,b,m,e].forEach(function(x){{x.addEventListener('input',f)}});f()}})();</script>"""
+
+
+# ---------------------------------------------------------------- the truck
+
+def truck_svg(up: str) -> str:
+    """The drawing with each callout linked to its part page, or to the parts list."""
+    parts = {p["n"]: p for p in _j("truck.json")["parts"]}
+    svg = (SITE / "truck.svg").read_text()
+    def link(m):
+        n = int(m.group(4))
+        p = parts.get(n, {})
+        href = f'{up}truck/{p["page"]}.html' if p.get("page") else f"{up}truck/index.html#p{n}"
+        return f'<a href="{href}"><g>{m.group(1)}<text x="{m.group(2)}" y="{m.group(3)}">{n}</text></g></a>'
+    return re.sub(r'<g>(<circle [^>]+/>)<text x="([\d.]+)" y="(-?[\d.]+)">(\d+)</text></g>', link, svg)
+
+
+def spec_rows(up: str, full: bool = False) -> list[str]:
+    out = []
+    for p in _j("truck.json")["parts"]:
+        name = f'<a href="{up}truck/{p["page"]}.html">{esc(p["name"])}</a>' if p.get("page") else esc(p["name"])
+        kind = f'<span class="d-pill {"add" if p["kind"] == "added" else "fac"}">{"added" if p["kind"] == "added" else "factory"}</span>'
+        since = p["since"] if p["since"] == "factory" else p["since"][5:]
+        extra = f'<td class="k wrap">{esc(p["text"])}</td>' if full else ""
+        out.append(f'<tr id="p{p["n"]}"><td class="m k">{p["n"]}</td><td>{name} {kind}</td><td>{esc(p["hardware"])}</td>'
+                   f'<td>{esc(p["software"])}</td><td class="m k">{esc(since)}</td>{extra}</tr>')
+    return out
+
+
+def truck_index() -> str:
+    head = ["#", "Part", "Hardware", "Software, rate", "Since", "What it does"]
+    return (f'<p class="d-crumb">truck</p><h1 class="d-h1">The truck</h1><p class="d-sum">A 2011 Mercedes-Benz G55 AMG (W463): M113K 5.4 L supercharged V8, '
+            f'722.6 five-speed, permanent four-wheel drive, hydraulic steering, no driver-assistance computer from the factory. What was added and what was changed, '
+            f'from the as-built record. Dates are 2026.</p><div class="d-fig">{truck_svg("../")}</div>{d_table(head, spec_rows("../", full=True))}')
+
+
+def part_page(p: dict) -> str:
+    return f'<p class="d-crumb"><a href="index.html">truck</a> / {p["n"]} / {esc(p["name"])}</p>' + (SITE / "truck" / f'{p["page"]}.html').read_text()
+
+
+# ---------------------------------------------------------------- the front page
+
+MATRIX = [("truck_open_loop", "lat_mae", "OL lateral error", "m/s²", 1, 2, (0.1, 0.4)),
+          ("truck_closed_loop", "xtrack_2s", "CL path at 2 s", "cm", 100, 1, (0, 40)),
+          ("truck_closed_loop", "xtrack_7s", "CL path at 7.2 s", "m", 1, 2, (0, 5)),
+          ("truck_recovery", "heading_xtrack_2s", "2° heading, 2 s", "cm", 100, 1, (0, 80)),
+          ("truck_recovery", "offcentre_xtrack_2s", "0.5 m offset, 2 s", "cm", 100, 1, (0, 80))]
+
+
+def matrix(models, up: str = "") -> str:
+    rows, ns = [], {}
+    for m in by_release(models):
+        md = m["model"]
+        h = short_hash(m)
+        name = f'<a href="{up}{esc(model_link(m, ""))}">{esc(md["name"] or h or md["id"])}</a>' + (f' <span class="d-h">{esc(h)}</span>' if md["name"] and h else "")
+        cells = []
+        for sec, key, _, unit, sc, d, (a, b) in MATRIX:
+            s = m["sections"].get(sec)
+            x = next((x for x in s["metrics"] if x["key"] == key), None) if s and s.get("status") == "ok" else None
+            if not x or not x.get("ci"):
+                cells.append('<td class="r d-na">not run</td>')
+                continue
+            v, lo, hi = x["value"] * sc, x["ci"][0] * sc, x["ci"][1] * sc
+            cells.append(f'<td class="r"><span class="m">{v:.{d}f}</span> <span class="d-ci">[{lo:.{d}f}, {hi:.{d}f}]</span>{d_bar(v, lo, hi, a, b)}</td>')
+            ns[sec] = (s["n"], s["clusters"])
+        where = "master" if md.get("on_master") else "Hugging Face"
+        rows.append(f'<tr><td>{name}</td><td class="m k">{esc(first_public(m))}</td><td class="k">{esc(md.get("family") or "")}</td>'
+                    f'<td class="r m">{md.get("params_m") or ""}</td><td class="k">{where}</td>{"".join(cells)}</tr>')
+    head = ["Release", "First public", "Family", ">Params, M", "Where"] + [f">{c[2]}<br><span class=d-u>{c[3]}, mean [95%]</span>" for c in MATRIX]
+    lab = {"truck_open_loop": "open loop", "truck_closed_loop": "closed loop", "truck_recovery": "recovery"}
+    foot = "; ".join(f"{lab.get(sec, sec)}: {n} windows from {c} drives" for sec, (n, c) in ns.items())
+    return d_table(head, rows) + f'<p class="d-src">{esc(foot)}. Intervals resample whole drives. results/&lt;id&gt;.json for every number.</p>'
+
+
 def index_page(models, cfg, root) -> str:
+    sigs = signals()
+    notes_ = notes()
+    year = _j("year.json")
+    truck = _j("truck.json")
+    last = max([scored_at(m) for m in models] + [n["date"] for n in notes_] + [year["counted"]])
+    commits = sum(c for _, c in year["commits"])
+    allsig, allmsg = dbc_totals()
+    tick = [*truck["status"], ("decoded", f"<b>{allsig}</b> signals in <b>{allmsg}</b> messages"),
+            ("comma releases tested", f"<b>{len(models)}</b>"), ("notes", f"<b>{len(notes_)}</b>"),
+            ("commits", f"<b>{commits:,}</b> since Dec 2025"), ("updated", f"<b>{esc(last)}</b>")]
+    ticker = "".join(f"<span>{esc(k)}: {v}</span>" for k, v in tick)
+    find = [f'<tr><td class="m k">{n["date"][5:]}</td><td><a href="notes/{esc(n["slug"])}.html">{esc(n["title"])}</a></td>'
+            f'<td class="m wrap">{esc(n["result"])}</td><td class="k">{esc(n["n"])}</td><td>{pill(n["kind"])}</td></tr>' for n in notes_]
+    opn = [f'<tr><td>{esc(q)}</td><td class="k">{esc(b)}</td><td class="k">{esc(s)}</td></tr>' for q, b, s in _j("open.json")["questions"]]
+    log = []
+    for e in feed_items(models, root)[:14]:
+        t = f'<a href="{esc(e["page"])}">{esc(e["title"])}</a>' if e.get("page") else esc(e["title"])
+        log.append(f'<tr><td class="m k">{e["date"][5:]}</td><td class="k nw">{KIND_TEXT[e["kind"]].lower()}</td><td>{t}</td></tr>')
+    import collections
+    bym = collections.Counter((s["tx"], s["bus"]) for s in sigs)
+    ev = collections.Counter(s["ev"] for s in sigs)
+    sigrows = [f'<tr><td class="m">{esc(m)}</td><td class="k">{b}</td><td class="r m">{c}</td></tr>' for (m, b), c in bym.most_common(10)]
+    top = max(c for _, c in year["commits"])
+    spark = "".join(f'<i style="height:{max(1, c / top * 100):.0f}%" title="{ym}: {c} commits"></i>' for ym, c in year["commits"])
+    sparkl = "".join(f'<span>{MONTHS[int(ym[5:]) - 1][0]}</span>' for ym, _ in year["commits"])
+    miles = "".join(f'<li><time datetime="{d}">{d[2:]}</time><span>{esc(t)}</span></li>' for d, t in reversed(year["milestones"]))
+    gl = "".join(f"<p><b>{esc(a)}</b> {esc(b)}</p>" for a, b in _j("glossary.json")["terms"])
     nw = newest(models)
-    g55 = [nw["sections"][t[2]] for t in TESTS if t[2] in nw["sections"]]
-    done, tot = sum(1 for s in g55 if s.get("status") == "ok"), len(g55)
-    last = max(scored_at(m) for m in models)
-    latest = "".join(f'<li><time datetime="{n["date"]}">{esc(nice_date(n["date"]))}</time><a href="notes/{esc(n["slug"])}.html">{esc(n["title"])}</a><p>{esc(n["summary"])}</p></li>'
-                     for n in notes()[:3])
-    side_notes = "".join(f'<li><a href="notes/{esc(n["slug"])}.html">{esc(n["title"])}</a><span>{esc(nice_date(n["date"]))}</span></li>' for n in notes()[:6])
-    tests = "".join(
-        f'<li><a href="tests/{slug}.html">{esc(title)}</a><span>{sum(1 for m in models if section_ok(m, section))} of {len(models)} releases</span></li>'
-        for slug, title, section, _ in TESTS)
-    return f"""<section class="lead hero">
-<h1>openpilot on a 2011 Mercedes-Benz G55 AMG</h1>
-<p class="big">The G55 left the factory with hydraulic steering and no driver-assistance computer. Since December 2025 both of its CAN buses have been tapped and decoded, comma's driving model has been put on its own cameras, the transmission moved to open-source firmware, the engine ECU patched to take a torque request, and a simulator built from the truck's drives to test and train driving models in.</p>
-<p>This site is the log of that work. It also tests every new comma driving model on the truck's drives as it is released: {len(models)} releases so far, the last results {esc(nice_date(last))}.</p>
-</section>
-{truck_section()}
-<section class="latest" aria-labelledby="latest-notes"><h2 id="latest-notes">Latest notes</h2><ol data-history>{latest}</ol>
-<p class="more"><a href="notes/index.html">All {len(notes())} notes</a></p></section>
-{year_section()}
-<section class="tlsec" aria-labelledby="releases-h"><h2 id="releases-h">comma's releases, tested on the truck</h2>
-<p class="sub nw">Newest: <a href="{esc(model_link(nw, ''))}">{esc(plain_name(nw))}</a>, first public {esc(nice_date(first_public(nw)))}, {esc(state_line(nw))}. {done} of {tot} tests done.</p>
+    return f"""<p class="d-tag">Work log of a 2011 Mercedes-Benz G55 AMG (W463, M113K 5.4 L supercharged V8, 722.6 five-speed) and comma.ai's openpilot driving models.
+Since December 2025 both CAN buses have been decoded, comma's driving model put on the truck's own cameras, the transmission moved to open-source firmware and the engine ECU patched to take a torque request.</p>
+<div class="d-tick">{ticker}</div>
+<div class="d-g a" id="truck">{d_panel("The truck", "select a number", f'<div class="d-fig">{truck_svg("")}</div>')}
+{d_panel("What is on it", '<a href="truck/index.html">all parts</a>', d_table(["#", "Part", "Hardware", "Software, rate", "Since"], spec_rows("")) + '<p class="d-src">From the as-built record. Dates are 2026.</p>')}</div>
+{d_panel("comma's releases on the truck's drives", f'newest first; nothing ranked; newest <a href="{esc(model_link(nw, ""))}">{esc(plain_name(nw))}</a>', matrix(models), "models")}
+<div class="d-g a">{d_panel("Findings", f'<a href="notes/index.html">{len(notes_)} notes</a>', d_table(["Date", "Finding", "Result", "n", "Grade"], find, "find"), "findings")}
+{d_panel("Open questions", "what decides the next step", d_table(["Question", "Blocks", "Settled by"], opn))}</div>
+<div class="d-g c">{d_panel("Log", '<a href="log.html">all</a>', d_table(["Date", "Kind", "What"], log, attrs=" data-history"))}
+{d_panel("Signals", f'<a href="signals.html">all {len(sigs)}</a>', d_table(["Sender", "Bus", ">Signals"], sigrows) + f'<p class="d-src">{ev["Measured"]} measured; the rest not yet labelled in the DBC. One truck, not a Mercedes specification.</p>')}
+{d_panel("Since December 2025", f"{commits:,} commits", f'<div class="d-spark">{spark}</div><div class="d-sparkl">{sparkl}</div><ul class="d-ml">{miles}</ul>')}</div>
+<section class="d-p tlsec"><h2>Release timeline<small>every comma release by model family</small></h2>
 {timeline(models)}
 {timeline_key()}
-<p class="swipe">Swipe the timeline sideways for earlier releases.</p>
-</section>
-<div class="cols">
-<section class="feedsec" aria-labelledby="what-happened">
-<h2 id="what-happened">What happened</h2>
-<p class="sub">Notes, new releases with their results, test runs and changes to the tests. Newest first.</p>
-{feed_html(models, root, "", limit=16)}
-</section>
-<aside class="side">
-<section><h2>Tests</h2><ul class="sl">{tests}</ul></section>
-<section><h2>Notes</h2><ul class="sl">{side_notes}</ul><p class="more"><a href="notes/index.html">All notes</a></p></section>
-<section><h2>Follow along</h2><ul class="sl"><li><a href="feed.xml">RSS feed</a><span>notes, releases, results, test changes</span></li>
-<li><a href="method.html#downloads">Results files</a><span>one JSON file per release</span></li>
-<li><a href="{esc(cfg['repo_url'])}/tree/main/eval">The harness and this site</a><span>on GitHub</span></li></ul></section>
-</aside>
-</div>"""
+<p class="swipe">Swipe the timeline sideways for earlier releases.</p></section>
+{d_panel("Glossary", "", f'<div class="d-gl">{gl}</div>')}"""
 
 
 def log_page(models, root) -> str:
@@ -1764,7 +1905,19 @@ def main() -> None:
     (out / "log.html").write_text(page(cfg, f"Log – {tag}", "Every release, test run and change to the tests.", log_page(models, root), 0, "log", "log.html"))
     (out / "method.html").write_text(page(cfg, f"Method – {tag}", "Scoring methodology for open-loop replay, "
                                           "worldmodel-4B closed-loop rollouts, drive-clustered intervals, and CSV downloads.", method(models, cfg, root), 0, "method", "method.html"))
+    (out / "truck").mkdir()
+    (out / "truck" / "index.html").write_text(page(cfg, f"The truck – {tag}", "What is on the 2011 G55: what was added, what was changed, hardware, software and dates.",
+                                                   truck_index(), 1, "truck", "truck/index.html"))
+    for p in _j("truck.json")["parts"]:
+        if p.get("page"):
+            (out / "truck" / f'{p["page"]}.html').write_text(page(cfg, f'{p["name"]} – {tag}', p["text"], part_page(p), 1, "truck", f'truck/{p["page"]}.html'))
+    (out / "signals.html").write_text(page(cfg, f"W463 CAN signals – {tag}", "Every CAN signal decoded on a 2011 G55, with how each is known.",
+                                           signals_page(), 0, "signals", "signals.html"))
     (out / "feed.xml").write_text(rss(models, root, cfg))
+    leaks = boundary.check(out)
+    if leaks:
+        print("\n".join(f"FAIL boundary {x}" for x in leaks), file=sys.stderr)
+        raise SystemExit(f"{len(leaks)} boundary hits (geval.boundary, public/AGENTS.md); {out} is not publishable")
     problems = ranking.check_site(out, TIERS, {m["model"]["id"]: first_public(m) for m in models})
     if problems:
         print("\n".join(f"FAIL {x}" for x in problems), file=sys.stderr)

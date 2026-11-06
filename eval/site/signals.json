@@ -1,0 +1,18 @@
+{
+ "_doc": "The Signals page, built from the DBC files in g55-public can/. exclude: messages the gateway sends, left out of the table.",
+ "files": [
+  [
+   "CAN-C",
+   "g55-canc.dbc"
+  ],
+  [
+   "CAN-B",
+   "g55-canb.dbc"
+  ]
+ ],
+ "exclude": [
+  "0x238"
+ ],
+ "exclude_why": "The steering-column message the gateway sends for cruise control is left out: the site lists signals to read, not frames to send.",
+ "exclude_label": "the steering-column message left out here"
+}

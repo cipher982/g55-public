@@ -1,0 +1,53 @@
+{
+ "_doc": "The glossary at the foot of the front page.",
+ "terms": [
+  [
+   "N16",
+   "comma's driving model 96244b1f_12800 (N16 nav), 406M parameters, with navigation inputs. The model on the truck."
+  ],
+  [
+   "push",
+   "the simulated truck moved 1.0 or 1.5 m sideways off its recorded path; the model must bring it back."
+  ],
+  [
+   "recovery",
+   "the share of pushes the model returns from: back within 0.3 m for 1 s, inside a safe corridor, still moving."
+  ],
+  [
+   "bench8",
+   "the closed-loop simulator built here: the model steers a simulated G55 while the camera view is redrawn from recorded frames."
+  ],
+  [
+   "open loop (OL)",
+   "the model watches a recorded drive; its requests are compared with what the truck did next."
+  ],
+  [
+   "closed loop (CL)",
+   "the model drives a simulated G55 in comma's world model; scored by distance from the driver's recorded path."
+  ],
+  [
+   "worldmodel-4B",
+   "comma's video model that draws the next camera frames for a given motion."
+  ],
+  [
+   "residual",
+   "a small learned correction added to a frozen model's steering output."
+  ],
+  [
+   "window",
+   "a stretch of a recorded drive used as one test case. Intervals resample whole drives."
+  ],
+  [
+   "KOEO",
+   "key on, engine off: ignition in position 2."
+  ],
+  [
+   "CAN-C, CAN-B",
+   "the W463's powertrain and chassis bus (500 kbit/s) and its fault-tolerant body bus (83.3 kbit/s)."
+  ],
+  [
+   "Ultimate-NAG52",
+   "an open-source replacement for the 722.6 transmission's EGS52 controller."
+  ]
+ ]
+}

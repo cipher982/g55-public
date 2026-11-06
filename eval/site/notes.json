@@ -1,61 +1,85 @@
 {
-  "_doc": "Work notes on the site, newest first by date. Each: date, title, slug, summary, grade (measured, derived, borrowed or hypothetical, and where); the body is site/notes/<slug>.html.",
-  "notes": [
-    {
-      "date": "2026-11-04",
-      "title": "A trained steering correction on N16 recovers more often in simulation",
-      "slug": "training-a-steering-correction",
-      "summary": "On 44 held-out simulator windows, a TD3-trained correction on N16 recovered from 1.5 m pushes 0.76 of the time against 0.58 for its untrained starting point (+0.18 [+0.13, +0.33]). Against the driver's recorded line the gain was +0.07 at 1.5 m and +0.01 at 1.0 m.",
-      "grade": "Measured in simulation on recorded G55 drives, 3 held-out drives; exploratory, locked test not run, nothing deployed."
-    },
-    {
-      "date": "2026-11-04",
-      "title": "Camera position moves where N16 holds the truck in its lane",
-      "slug": "camera-position-moves-the-hold",
-      "summary": "In simulation, moving N16's virtual camera sideways moves its held lane position by -0.97 m per metre of shift. A road-plane warp for a lens 0.239 m right of centre took back about half of the +0.191 m median shift in the hold and restored 0.394 of 1.0 m pushes against 0.197 uncorrected (base 0.509).",
-      "grade": "Measured in simulation on recorded G55 drives (135 dev day windows, mirror-mount windows emulating the visor mount); not tested on a real drive."
-    },
-    {
-      "date": "2026-11-04",
-      "title": "N16's frozen vision tokens do not replace a box detector",
-      "slug": "what-n16-vision-tokens-carry",
-      "summary": "A head on N16's frozen vision tokens found 2.7 % of vehicles at IoU 0.5, against 55.5 % for YOLO26s on the same frames. Added to the box, the tokens gave a speed error of 3.88 to 4.44 m/s against 2.31 m/s for the analytical tracker.",
-      "grade": "Measured offline on recorded G55 drives with hand-checked and hindsight truth; exploratory, one head configuration, nothing deployed."
-    },
-    {
-      "date": "2026-11-03",
-      "title": "The camera loop ran below 20 Hz because OpenBLAS threads spun",
-      "slug": "camera-loop-frame-rate",
-      "summary": "On N16 drives the camera loop ran 17.7 to 18.8 Hz: a serial decoder skipped ticks while OpenBLAS worker threads used 1.75 cores. With one OpenBLAS thread per service, three drives held 19.91 to 19.92 Hz.",
-      "grade": "Measured on recorded drives, in replay on the truck's Jetson board, and on three drives after the fix was installed."
-    },
-    {
-      "date": "2026-10-31",
-      "title": "comma's models turn the wrong way first because of the base policy",
-      "slug": "wrong-way-first-turns",
-      "summary": "In 258 of 258 pushes where a full comma model first steered with the push, its residual-off copy did too. The residual removes 61-88% of these turns but sits at its 1.0 m/s² bound on the rest.",
-      "grade": "Measured in simulation on recorded G55 drives with comma's own residual-off files; exploratory, one seed, daytime reprojection only, not a deployed change."
-    },
-    {
-      "date": "2026-10-30",
-      "title": "After a push, N16 still encodes the truck's offset and heading",
-      "slug": "n16-knows-where-it-is",
-      "summary": "A linear probe reads the truck's lateral offset from N16's vision tokens at R² 0.84-0.93 and from its base summary at 0.87-0.98 on held-out sessions. The wrong-way first turn comes from the base's readout of yaw rate, not from missing information.",
-      "grade": "Measured in open-loop simulation on recorded G55 drives; exploratory, daytime stock-lens windows and N16 only, not a deployed change."
-    },
-    {
-      "date": "2026-10-29",
-      "title": "Teaching comma's world model to keep a sideways offset",
-      "slug": "world-model-follows-steering",
-      "summary": "By day comma's world model as shipped already puts the road at a commanded offset (road gain 1.05 at 3 s). Fine-tuning made it overshoot (1.24), reward training did not pass its gate, and no version holds the road at night.",
-      "grade": "Measured in simulation on recorded G55 drives; exploratory, small test sets, not a deployed change."
-    },
-    {
-      "date": "2026-10-29",
-      "title": "A truck model learned from the G55's CAN predicts motion better",
-      "slug": "learned-truck-model",
-      "summary": "On 12 held-out drives a recurrent network learned from the truck's CAN data has a sideways error of 0.29 m after 4 s of free running, against 7.34 m for the hand-built model and 0.66 m for the same equations refit. It fails a stopping check, so the simulator's default stays hand-built.",
-      "grade": "Measured on recorded G55 drives, with the test set scored once per candidate; exploratory, one truck configuration, no steering actuator."
-    }
-  ]
+ "_doc": "Work notes on the site, newest first by date. Each: date, title, slug, summary, grade (measured, derived, borrowed or hypothetical, and where); the body is site/notes/<slug>.html.",
+ "notes": [
+  {
+   "date": "2026-11-04",
+   "title": "A trained steering correction on N16 recovers more often in simulation",
+   "slug": "training-a-steering-correction",
+   "summary": "On 44 held-out simulator windows, a TD3-trained correction on N16 recovered from 1.5 m pushes 0.76 of the time against 0.58 for its untrained starting point (+0.18 [+0.13, +0.33]). Against the driver's recorded line the gain was +0.07 at 1.5 m and +0.01 at 1.0 m.",
+   "grade": "Measured in simulation on recorded G55 drives, 3 held-out drives; exploratory, locked test not run, nothing deployed.",
+   "result": "+0.18 [+0.13, +0.33] recovery at 1.5 m",
+   "n": "44 windows, 3 drives",
+   "kind": "simulation"
+  },
+  {
+   "date": "2026-11-04",
+   "title": "Camera position moves where N16 holds the truck in its lane",
+   "slug": "camera-position-moves-the-hold",
+   "summary": "In simulation, moving N16's virtual camera sideways moves its held lane position by -0.97 m per metre of shift. A road-plane warp for a lens 0.239 m right of centre took back about half of the +0.191 m median shift in the hold and restored 0.394 of 1.0 m pushes against 0.197 uncorrected (base 0.509).",
+   "grade": "Measured in simulation on recorded G55 drives (135 dev day windows, mirror-mount windows emulating the visor mount); not tested on a real drive.",
+   "result": "-0.97 m per m of camera shift",
+   "n": "135 windows",
+   "kind": "simulation"
+  },
+  {
+   "date": "2026-11-04",
+   "title": "N16's frozen vision tokens do not replace a box detector",
+   "slug": "what-n16-vision-tokens-carry",
+   "summary": "A head on N16's frozen vision tokens found 2.7 % of vehicles at IoU 0.5, against 55.5 % for YOLO26s on the same frames. Added to the box, the tokens gave a speed error of 3.88 to 4.44 m/s against 2.31 m/s for the analytical tracker.",
+   "grade": "Measured offline on recorded G55 drives with hand-checked and hindsight truth; exploratory, one head configuration, nothing deployed.",
+   "result": "2.7 % of vehicles, against 55.5 % for YOLO26s",
+   "n": "recorded drives, offline",
+   "kind": "measured"
+  },
+  {
+   "date": "2026-11-03",
+   "title": "The camera loop ran below 20 Hz because OpenBLAS threads spun",
+   "slug": "camera-loop-frame-rate",
+   "summary": "On N16 drives the camera loop ran 17.7 to 18.8 Hz: a serial decoder skipped ticks while OpenBLAS worker threads used 1.75 cores. With one OpenBLAS thread per service, three drives held 19.91 to 19.92 Hz.",
+   "grade": "Measured on recorded drives, in replay on the truck's Jetson board, and on three drives after the fix was installed.",
+   "result": "17.7-18.8 Hz, then 19.91-19.92 Hz",
+   "n": "3 drives after the fix",
+   "kind": "measured"
+  },
+  {
+   "date": "2026-10-31",
+   "title": "comma's models turn the wrong way first because of the base policy",
+   "slug": "wrong-way-first-turns",
+   "summary": "In 258 of 258 pushes where a full comma model first steered with the push, its residual-off copy did too. The residual removes 61-88% of these turns but sits at its 1.0 m/s² bound on the rest.",
+   "grade": "Measured in simulation on recorded G55 drives with comma's own residual-off files; exploratory, one seed, daytime reprojection only, not a deployed change.",
+   "result": "258 of 258",
+   "n": "pushes",
+   "kind": "simulation"
+  },
+  {
+   "date": "2026-10-30",
+   "title": "After a push, N16 still encodes the truck's offset and heading",
+   "slug": "n16-knows-where-it-is",
+   "summary": "A linear probe reads the truck's lateral offset from N16's vision tokens at R² 0.84-0.93 and from its base summary at 0.87-0.98 on held-out sessions. The wrong-way first turn comes from the base's readout of yaw rate, not from missing information.",
+   "grade": "Measured in open-loop simulation on recorded G55 drives; exploratory, daytime stock-lens windows and N16 only, not a deployed change.",
+   "result": "R² 0.84-0.93 from the tokens",
+   "n": "held-out sessions",
+   "kind": "simulation"
+  },
+  {
+   "date": "2026-10-29",
+   "title": "Teaching comma's world model to keep a sideways offset",
+   "slug": "world-model-follows-steering",
+   "summary": "By day comma's world model as shipped already puts the road at a commanded offset (road gain 1.05 at 3 s). Fine-tuning made it overshoot (1.24), reward training did not pass its gate, and no version holds the road at night.",
+   "grade": "Measured in simulation on recorded G55 drives; exploratory, small test sets, not a deployed change.",
+   "result": "road gain 1.05 at 3 s; fine-tuned 1.24",
+   "n": "small test sets",
+   "kind": "simulation"
+  },
+  {
+   "date": "2026-10-29",
+   "title": "A truck model learned from the G55's CAN predicts motion better",
+   "slug": "learned-truck-model",
+   "summary": "On 12 held-out drives a recurrent network learned from the truck's CAN data has a sideways error of 0.29 m after 4 s of free running, against 7.34 m for the hand-built model and 0.66 m for the same equations refit. It fails a stopping check, so the simulator's default stays hand-built.",
+   "grade": "Measured on recorded G55 drives, with the test set scored once per candidate; exploratory, one truck configuration, no steering actuator.",
+   "result": "0.29 m after 4 s, against 7.34 m",
+   "n": "12 held-out drives",
+   "kind": "measured"
+  }
+ ]
 }
