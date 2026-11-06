@@ -1,5 +1,5 @@
 {
- "_doc": "The parts list under the truck drawing on the front page (truck.svg). n matches the drawing's callout. kind: added (built or fitted for this project) or factory. Every line is a fact from the private as-built record, rewritten under public/AGENTS.md's Boundary; update it when the truck changes. hardware, software, since: the spec table on the front page. page: the part's own page, site/truck/<page>.html. status: the front page's status line, [label, HTML].",
+ "_doc": "The parts list under the truck drawing on the front page (truck.svg). n matches the drawing's callout. kind: added (built or fitted for this project) or factory. Every line is a fact from the private as-built record, rewritten under public/AGENTS.md's Boundary; update it when the truck changes. hardware, software, since: the spec table on the front page. page: the part's own page, site/truck/<page>.html. status: the front page's status line, [label, HTML]. domain: p, c or e (domains), the colour the part carries across the site. status: [label, HTML, good|warn|crit].",
  "parts": [
   {
    "n": 1,
@@ -8,7 +8,8 @@
    "text": "An ELP AR0234 on an 8 mm lens for the narrow view and an Arducam IMX662 for the wide view, in one case on the sun-visor mount. Both are recorded on every drive.",
    "hardware": "ELP AR0234 on an 8 mm lens; Arducam B0576 IMX662",
    "software": "MJPEG, 20 fps recorded; one case on the sun-visor mount",
-   "since": "2026-10-22"
+   "since": "2026-10-22",
+   "domain": "p"
   },
   {
    "n": 2,
@@ -17,7 +18,8 @@
    "text": "A Galaxy Tab Active5 Pro in the cabin running a dashboard written for this truck, with a voice assistant. It shows the decoded vehicle state and the driving model's path.",
    "hardware": "Galaxy Tab Active5 Pro",
    "software": "dashboard v139, Kotlin and Compose; voice assistant",
-   "since": "2026-11-05"
+   "since": "2026-11-05",
+   "domain": "e"
   },
   {
    "n": 3,
@@ -26,7 +28,8 @@
    "text": "A Rust service that records every frame on both CAN buses from key-in to key-out and decodes 62 signals live for the tablet and the driving model.",
    "hardware": "Raspberry Pi 5 on NVMe",
    "software": "Rust gateway; 62 signals decoded live; every frame on both buses",
-   "since": "2026-10-26"
+   "since": "2026-10-26",
+   "domain": "e"
   },
   {
    "n": 4,
@@ -35,7 +38,8 @@
    "text": "Runs comma's N16 driving model (406M parameters) with TensorRT at 20 Hz on the truck's cameras, with YOLO26s for objects and SegFormer-B0 for free ground beside it.",
    "hardware": "Jetson Orin NX 16 GB, 2 TB NVMe",
    "software": "N16, TensorRT fp16, 32.5 ms a step; YOLO26s at 10 Hz; SegFormer-B0 at 5 Hz",
-   "since": "2026-10-26"
+   "since": "2026-10-26",
+   "domain": "p"
   },
   {
    "n": 5,
@@ -44,7 +48,8 @@
    "text": "A 314 Ah LiFePO4 battery in the trunk, charged from the starting battery through a Victron Orion-Tr 12/12-30A DC-DC charger. The gateway reads both over Bluetooth.",
    "hardware": "Eco-Worthy 314 Ah LiFePO4, 4,019 Wh; Victron Orion-Tr 12/12-30A",
    "software": "battery and charger read over Bluetooth every 10 s",
-   "since": "2026-10-26"
+   "since": "2026-10-26",
+   "domain": "e"
   },
   {
    "n": 6,
@@ -54,7 +59,8 @@
    "hardware": "Bosch ME 2.8.1, Infineon C167, 512 KB flash",
    "software": "stock code and calibration; torque request at 50 Hz, 100 ms watchdog; 10 Hz telemetry",
    "since": "2026-11-03",
-   "page": "ecu"
+   "page": "ecu",
+   "domain": "c"
   },
   {
    "n": 7,
@@ -63,7 +69,8 @@
    "text": "Controlled by Ultimate-NAG52, the open-source replacement for the factory EGS52, on a firmware build with five G55 patches (since 18 Oct 2026).",
    "hardware": "722.6 with the Ultimate-NAG52 controller",
    "software": "firmware V15: upstream dev with 5 G55 patches; live data at 10 Hz",
-   "since": "2026-10-18"
+   "since": "2026-10-18",
+   "domain": "c"
   },
   {
    "n": 8,
@@ -72,7 +79,8 @@
    "text": "Since 29 Oct 2026 the gateway presses the factory cruise control over CAN-C, on a command from the tablet.",
    "hardware": "factory stalk on the steering-column module",
    "software": "the gateway's cruise controller; SET+ accepted 7 of 7",
-   "since": "2026-10-29"
+   "since": "2026-10-29",
+   "domain": "c"
   },
   {
    "n": 9,
@@ -81,7 +89,8 @@
    "text": "Hydraulic, with no electric motor. Nothing steers the truck yet: steering is tested and trained in a simulator built from the truck's own drives.",
    "hardware": "factory hydraulic steering box, no motor",
    "software": "nothing steers yet; simulation only",
-   "since": "factory"
+   "since": "factory",
+   "domain": "c"
   },
   {
    "n": 10,
@@ -90,25 +99,35 @@
    "text": "CAN-C at 500 kbit/s for powertrain and chassis, CAN-B at 83.3 kbit/s for the body. 131 signals in 47 messages are decoded in the project's DBC files.",
    "hardware": "CAN-C 500 kbit/s, CAN-B 83.3 kbit/s",
    "software": "131 signals in 47 messages in the DBC files; 62 decoded live",
-   "since": "factory"
+   "since": "factory",
+   "domain": "e"
   }
  ],
  "status": [
   [
    "on the truck",
-   "<b>N16</b> at <b>20 Hz</b>, 32.5 ms a step"
+   "<b>N16</b> at <b>20 Hz</b>, 32.5 ms a step",
+   "good"
   ],
   [
    "ECU",
-   "torque request at <b>50 Hz</b>, checked key on, engine off"
+   "torque request at <b>50 Hz</b>, checked key on, engine off",
+   "warn"
   ],
   [
    "cruise",
-   "SET+ accepted <b>7 of 7</b>"
+   "SET+ accepted <b>7 of 7</b>",
+   "good"
   ],
   [
    "steering",
-   "<b>none</b> yet"
+   "<b>none</b> yet",
+   "crit"
   ]
- ]
+ ],
+ "domains": {
+  "p": "Perception and models",
+  "c": "Control and powertrain",
+  "e": "Electrical and CAN"
+ }
 }

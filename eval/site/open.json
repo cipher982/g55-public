@@ -1,40 +1,47 @@
 {
- "_doc": "Open questions on the front page: what each blocks and what will settle it. From the private autonomy README (Open) and research-program goals; remove a row when it is settled and write a note.",
+ "_doc": "Open questions on the front page: what each blocks and what will settle it. From the private autonomy README (Open) and research-program goals; remove a row when it is settled and write a note. Each row: question, blocks, settled by, domain (truck.json domains).",
  "questions": [
   [
    "Does the ESP take SET−, RESUME and CANCEL from the gateway?",
    "full cruise control",
-   "a parked test on the truck"
+   "a parked test on the truck",
+   "c"
   ],
   [
    "Does the ESP relay a braking request from the gateway?",
    "braking with no new hardware",
-   "a parked test, then a road test"
+   "a parked test, then a road test",
+   "c"
   ],
   [
    "How hard does factory cruise brake, and does it fade on a descent?",
    "longitudinal safety",
-   "measured descents"
+   "measured descents",
+   "c"
   ],
   [
    "Does a donor electric column fit between the steering column and the centre joint?",
    "the steering actuator",
-   "one measurement on the truck"
+   "one measurement on the truck",
+   "c"
   ],
   [
    "What torque does the steering take at the rim, stationary and rolling?",
    "the steering torque budget",
-   "a measurement on the truck"
+   "a measurement on the truck",
+   "c"
   ],
   [
    "Is the closed-loop renderer valid at night?",
    "every night result",
-   "the world model's geometry check, day and night apart"
+   "the world model's geometry check, day and night apart",
+   "p"
   ],
   [
    "Does a reward-trained N16 recover from pushes more often on held-out drives?",
    "training inside comma's model",
-   "the locked test and a fresh evening"
+   "the locked test and a fresh evening",
+   "p"
   ]
  ]
 }

@@ -554,7 +554,7 @@ table.d-t { border-collapse: collapse; width: 100%; font-size: 12.5px; }
 .d-pill.add { color: var(--accent); } .d-pill.fac { color: var(--muted); } .d-pill.mea { color: var(--pass); } .d-pill.sim { color: #a8740a; } .d-pill.open { color: var(--fail); }
 :root[data-theme="dark"] .d-pill.sim { color: #e3b341; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .d-pill.sim { color: #e3b341; } }
-svg.d-bar { width: 64px; height: 10px; vertical-align: middle; margin-left: 4px; }
+svg.d-bar { width: 44px; height: 10px; vertical-align: middle; margin-left: 4px; }
 svg.d-bar .rg { stroke: var(--muted); stroke-width: 1.5; } svg.d-bar .pt { fill: var(--ink); } svg.d-bar .ax { stroke: var(--rule2); }
 .d-fig .truck { max-width: 100%; }
 .d-spark { display: flex; align-items: flex-end; gap: 2px; height: 40px; margin: 4px 0 2px; } .d-spark i { flex: 1; background: var(--accent); min-height: 1px; display: block; }
@@ -575,3 +575,60 @@ svg.d-bar .rg { stroke: var(--muted); stroke-width: 1.5; } svg.d-bar .pt { fill:
 .d-flash .lbl { font: 600 11px var(--sans); fill: var(--muted); text-anchor: start; }
 .d-mono { line-height: 1.7; }
 .tlsec .tl { margin-top: 4px; }
+
+/* ---------------------------------------------------------------- colour that carries information (2026-11-06)
+   Subsystems (identity; validated all-pairs, light and dark, dataviz validate_palette.js): d-p perception and models,
+   d-c control and powertrain, d-e electrical and CAN. Always shown with their name. Status is separate and reserved:
+   good on the truck or measured, warn simulation or partly checked, crit open or not done. */
+:root { --dp: #2a78d6; --dc: #eb6834; --de: #1baf7a; --dpw: rgba(42,120,214,.16); --dcw: rgba(235,104,52,.16); --dew: rgba(27,175,122,.18);
+  --good: #0ca30c; --warn: #b77a00; --crit: #d03b3b; --goodw: rgba(12,163,12,.12); --warnw: rgba(250,178,25,.20); --critw: rgba(208,59,59,.12); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --dp: #3987e5; --dc: #d95926; --de: #199e70; --dpw: rgba(57,135,229,.22); --dcw: rgba(217,89,38,.22); --dew: rgba(25,158,112,.24);
+  --good: #3cc13c; --warn: #fab219; --crit: #e66767; --goodw: rgba(12,163,12,.20); --warnw: rgba(250,178,25,.18); --critw: rgba(208,59,59,.22); } }
+:root[data-theme="dark"] { --dp: #3987e5; --dc: #d95926; --de: #199e70; --dpw: rgba(57,135,229,.22); --dcw: rgba(217,89,38,.22); --dew: rgba(25,158,112,.24);
+  --good: #3cc13c; --warn: #fab219; --crit: #e66767; --goodw: rgba(12,163,12,.20); --warnw: rgba(250,178,25,.18); --critw: rgba(208,59,59,.22); }
+.dp { --d: var(--dp); --dw: var(--dpw); } .dc { --d: var(--dc); --dw: var(--dcw); } .de { --d: var(--de); --dw: var(--dew); }
+.d-dom { display: inline-flex; align-items: center; gap: 5px; font: 500 11.5px var(--sans); color: var(--ink2); white-space: nowrap; margin-right: 10px; }
+.d-dom::before { content: ""; width: 10px; height: 10px; border-radius: 2px; background: var(--d); }
+.d-p > h2 small .d-dom { margin-right: 8px; }
+/* rows carry their subsystem as a bar on the left */
+.d-t tr.rd > td:first-child { box-shadow: inset 3px 0 0 var(--d, transparent); padding-left: 8px; }
+.d-t tr.rd:hover td { background: var(--dw, var(--wash)); }
+/* status */
+.d-tick .st-good b { color: var(--good); } .d-tick .st-warn b { color: var(--warn); } .d-tick .st-crit b { color: var(--crit); }
+.d-tick span[class^="st-"]::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.d-tick .st-good::before { background: var(--good); } .d-tick .st-warn::before { background: var(--warn); } .d-tick .st-crit::before { background: var(--crit); }
+.d-pill { border: 0; padding: 1px 6px; }
+.d-pill.mea { color: var(--good); background: var(--goodw); } .d-pill.sim { color: var(--warn); background: var(--warnw); } .d-pill.open { color: var(--crit); background: var(--critw); }
+.d-pill.add { color: var(--ink); background: var(--wash); box-shadow: inset 0 0 0 1px var(--rule2); } .d-pill.fac { color: var(--muted); background: none; box-shadow: inset 0 0 0 1px var(--rule2); }
+/* the drawing: parts and callouts in their subsystem colour; filled = added, outlined = factory */
+.truck .ta rect.dp, .truck .ta rect.de { fill: var(--dw); stroke: var(--d); }
+.truck .ta .wire.dp, .truck .ta .wire.de { stroke: var(--d); }
+.truck .part rect.dc { fill: var(--bg); stroke: var(--d); stroke-width: 2.5; }
+.truck .tg rect.dc, .truck .tg path.dc { stroke: var(--dc); opacity: .7; }
+.truck .tg .bus { stroke: var(--de); }
+.truck .callouts g.co circle { stroke: var(--d); stroke-width: 2.5; fill: var(--bg); }
+.truck .callouts g.co.add circle { fill: var(--d); }
+.truck .callouts g.co.add text { fill: #fff; }
+.truck a:hover g.co circle { fill: var(--ink); stroke: var(--ink); } .truck a:hover g.co text { fill: var(--bg); }
+.d-key { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-size: 11.5px; color: var(--muted); margin: 6px 0; }
+.d-k { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.d-k.fill::before, .d-k.line::before { content: ""; width: 12px; height: 9px; border-radius: 2px; border: 2px solid var(--ink2); }
+.d-k.fill::before { background: var(--ink2); }
+.d-k.bus::before { content: ""; width: 18px; border-top: 3px solid var(--de); }
+.d-k.bus.b::before { border-top-style: dashed; }
+/* the results matrix: the interval coloured by the paired change against the release before it */
+.d-t td.vs-better svg.d-bar .rg, .d-t td.vs-better svg.d-bar .pt { stroke: var(--better); fill: var(--better); }
+.d-t td.vs-worse svg.d-bar .rg, .d-t td.vs-worse svg.d-bar .pt { stroke: var(--worse); fill: var(--worse); }
+.d-t td.vs-better { background: color-mix(in srgb, var(--better) 9%, transparent); } .d-t td.vs-worse { background: color-mix(in srgb, var(--worse) 10%, transparent); }
+.d-g9 { font-size: 10px; margin-left: 2px; display: inline-block; width: 1em; }
+.vs-better .d-g9 { color: var(--better); } .vs-worse .d-g9 { color: var(--worse); }
+.d-k.vs::before { content: ""; width: 12px; height: 10px; border-radius: 2px; }
+.d-k.vs.better::before { background: color-mix(in srgb, var(--better) 35%, transparent); } .d-k.vs.worse::before { background: color-mix(in srgb, var(--worse) 35%, transparent); }
+.d-k.vs.tie::before { background: var(--wash); box-shadow: inset 0 0 0 1px var(--rule2); } .d-k.vs.first::before { background: none; box-shadow: inset 0 0 0 1px var(--rule2); }
+/* milestones */
+.d-ml li { position: relative; padding-left: 12px; }
+.d-ml li::before { content: ""; position: absolute; left: 0; top: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--d, var(--faint)); }
+/* buses */
+.d-bus { font: 600 10.5px var(--mono); padding: 1px 5px; border-radius: 2px; color: var(--de); box-shadow: inset 0 0 0 1px var(--de); white-space: nowrap; }
+.d-bus.c { background: var(--dew); }
+.d-spark i { background: var(--dp); }

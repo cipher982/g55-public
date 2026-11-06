@@ -1249,6 +1249,18 @@ def d_panel(title: str, note: str, body: str, ident: str = "", cls: str = "") ->
 KIND_PILL = {"measured": "mea", "simulation": "sim", "open": "open"}
 
 
+def dom(d: str) -> str:
+    """A subsystem tag: its colour and its name (truck.json domains)."""
+    if not d:
+        return ""
+    return f'<span class="d-dom d{d}">{esc(_j("truck.json")["domains"][d])}</span>'
+
+
+def dom_key() -> str:
+    names = _j("truck.json")["domains"]
+    return "".join(f'<span class="d-dom d{k}">{esc(v)}</span>' for k, v in names.items())
+
+
 def pill(kind: str) -> str:
     return f'<span class="d-pill {KIND_PILL.get(kind, "fac")}">{esc(kind)}</span>'
 
@@ -1303,7 +1315,7 @@ def signals_page() -> str:
     msgs = len({(s["bus"], s["id"]) for s in sigs})
     mods = "".join(f'<tr><td class="m">{esc(m)}</td><td class="k">{b}</td><td class="r m">{c}</td></tr>' for (m, b), c in bym.most_common())
     rows = "".join(
-        f'<tr data-bus="{s["bus"]}" data-ev="{esc(s["ev"])}" data-mod="{esc(s["tx"])}"><td class="k">{s["bus"]}</td><td class="m">{s["id"]}</td>'
+        f'<tr data-bus="{s["bus"]}" data-ev="{esc(s["ev"])}" data-mod="{esc(s["tx"])}"><td><span class="d-bus {s["bus"][-1].lower()}">{s["bus"]}</span></td><td class="m">{s["id"]}</td>'
         f'<td class="m">{esc(s["msg"])}</td><td class="m">{esc(s["tx"])}</td><td class="m"><b>{esc(s["sig"])}</b></td>'
         f'<td class="r m">{s["start"]}|{s["len"]} {s["order"]}{" s" if s["signed"] else ""}</td>'
         f'<td class="r m">{esc(s["scale"])}{"" if s["offset"] in ("0", "0.0") else " + " + esc(s["offset"])}</td><td class="m">{esc(s["unit"])}</td>'
@@ -1337,7 +1349,8 @@ def truck_svg(up: str) -> str:
         n = int(m.group(4))
         p = parts.get(n, {})
         href = f'{up}truck/{p["page"]}.html' if p.get("page") else f"{up}truck/index.html#p{n}"
-        return f'<a href="{href}"><g>{m.group(1)}<text x="{m.group(2)}" y="{m.group(3)}">{n}</text></g></a>'
+        cls = f'co d{p.get("domain", "")} {"add" if p.get("kind") == "added" else "fac"}'
+        return f'<a href="{href}"><g class="{cls}">{m.group(1)}<text x="{m.group(2)}" y="{m.group(3)}">{n}</text></g></a>'
     return re.sub(r'<g>(<circle [^>]+/>)<text x="([\d.]+)" y="(-?[\d.]+)">(\d+)</text></g>', link, svg)
 
 
@@ -1348,16 +1361,21 @@ def spec_rows(up: str, full: bool = False) -> list[str]:
         kind = f'<span class="d-pill {"add" if p["kind"] == "added" else "fac"}">{"added" if p["kind"] == "added" else "factory"}</span>'
         since = p["since"] if p["since"] == "factory" else p["since"][5:]
         extra = f'<td class="k wrap">{esc(p["text"])}</td>' if full else ""
-        out.append(f'<tr id="p{p["n"]}"><td class="m k">{p["n"]}</td><td>{name} {kind}</td><td>{esc(p["hardware"])}</td>'
+        out.append(f'<tr id="p{p["n"]}" class="rd d{p["domain"]}"><td class="m k">{p["n"]}</td><td>{name} {kind}</td><td>{esc(p["hardware"])}</td>'
                    f'<td>{esc(p["software"])}</td><td class="m k">{esc(since)}</td>{extra}</tr>')
     return out
+
+
+def truck_key() -> str:
+    return (f'<p class="d-key">{dom_key()}<span class="d-k fill">added</span><span class="d-k line">factory</span>'
+            f'<span class="d-k bus">CAN-C</span><span class="d-k bus b">CAN-B</span></p>')
 
 
 def truck_index() -> str:
     head = ["#", "Part", "Hardware", "Software, rate", "Since", "What it does"]
     return (f'<p class="d-crumb">truck</p><h1 class="d-h1">The truck</h1><p class="d-sum">A 2011 Mercedes-Benz G55 AMG (W463): M113K 5.4 L supercharged V8, '
             f'722.6 five-speed, permanent four-wheel drive, hydraulic steering, no driver-assistance computer from the factory. What was added and what was changed, '
-            f'from the as-built record. Dates are 2026.</p><div class="d-fig">{truck_svg("../")}</div>{d_table(head, spec_rows("../", full=True))}')
+            f'from the as-built record. Dates are 2026.</p><div class="d-fig">{truck_svg("../")}</div>{truck_key()}{d_table(head, spec_rows("../", full=True))}')
 
 
 def part_page(p: dict) -> str:
@@ -1373,9 +1391,30 @@ MATRIX = [("truck_open_loop", "lat_mae", "OL lateral error", "m/s²", 1, 2, (0.1
           ("truck_recovery", "offcentre_xtrack_2s", "0.5 m offset, 2 s", "cm", 100, 1, (0, 80))]
 
 
+def vs_previous(m, ordered, sec, key):
+    """(class, glyph, title): this release against the next older one that has the metric, on the same windows."""
+    i = ordered.index(m)
+    for o in ordered[i + 1:]:
+        s = o["sections"].get(sec)
+        if s and s.get("status") == "ok" and any(x["key"] == key for x in s["metrics"]):
+            x = next(x for x in m["sections"][sec]["metrics"] if x["key"] == key)
+            p = (x.get("paired") or {}).get(o["model"]["id"])
+            if not p or not p.get("ci"):
+                return "tie", "", ""
+            lo, hi = p["ci"]
+            ttl = f'against {short_name(o)}: {p["delta"]:+.3g} [{lo:+.3g}, {hi:+.3g}]'
+            if lo > 0:
+                return ("worse" if x["better"] == "lower" else "better"), "▲", ttl
+            if hi < 0:
+                return ("better" if x["better"] == "lower" else "worse"), "▼", ttl
+            return "tie", "", ttl
+    return "first", "", "no earlier release on these windows"
+
+
 def matrix(models, up: str = "") -> str:
     rows, ns = [], {}
-    for m in by_release(models):
+    ordered = by_release(models)
+    for m in ordered:
         md = m["model"]
         h = short_hash(m)
         name = f'<a href="{up}{esc(model_link(m, ""))}">{esc(md["name"] or h or md["id"])}</a>' + (f' <span class="d-h">{esc(h)}</span>' if md["name"] and h else "")
@@ -1387,15 +1426,20 @@ def matrix(models, up: str = "") -> str:
                 cells.append('<td class="r d-na">not run</td>')
                 continue
             v, lo, hi = x["value"] * sc, x["ci"][0] * sc, x["ci"][1] * sc
-            cells.append(f'<td class="r"><span class="m">{v:.{d}f}</span> <span class="d-ci">[{lo:.{d}f}, {hi:.{d}f}]</span>{d_bar(v, lo, hi, a, b)}</td>')
+            cls, glyph, ttl = vs_previous(m, ordered, sec, key)
+            cells.append(f'<td class="r vs-{cls}" title="{esc(ttl)}"><span class="m">{v:.{d}f}</span><span class="d-g9">{glyph}</span> '
+                         f'<span class="d-ci">[{lo:.{d}f}, {hi:.{d}f}]</span>{d_bar(v, lo, hi, a, b)}</td>')
             ns[sec] = (s["n"], s["clusters"])
         where = "master" if md.get("on_master") else "Hugging Face"
-        rows.append(f'<tr><td>{name}</td><td class="m k">{esc(first_public(m))}</td><td class="k">{esc(md.get("family") or "")}</td>'
-                    f'<td class="r m">{md.get("params_m") or ""}</td><td class="k">{where}</td>{"".join(cells)}</tr>')
+        rows.append(f'<tr><td>{name}</td><td class="m k nw">{esc(first_public(m))}</td><td class="k nw">{esc(md.get("family") or "")}</td>'
+                    f'<td class="r m">{md.get("params_m") or ""}</td><td class="k nw">{where}</td>{"".join(cells)}</tr>')
     head = ["Release", "First public", "Family", ">Params, M", "Where"] + [f">{c[2]}<br><span class=d-u>{c[3]}, mean [95%]</span>" for c in MATRIX]
     lab = {"truck_open_loop": "open loop", "truck_closed_loop": "closed loop", "truck_recovery": "recovery"}
     foot = "; ".join(f"{lab.get(sec, sec)}: {n} windows from {c} drives" for sec, (n, c) in ns.items())
-    return d_table(head, rows) + f'<p class="d-src">{esc(foot)}. Intervals resample whole drives. results/&lt;id&gt;.json for every number.</p>'
+    key = ('<p class="d-key">Against the release before it, paired on the same windows, interval clear of zero: '
+           '<span class="d-k vs better">▼ lower</span><span class="d-k vs worse">▲ higher</span><span class="d-k vs tie">no separable change</span>'
+           '<span class="d-k vs first">first on these windows</span>. Every column is an error or a distance: lower is closer to what the truck did.</p>')
+    return key + d_table(head, rows) + f'<p class="d-src">{esc(foot)}. Intervals resample whole drives; the comparison is paired on the same windows. Hover a cell for the difference. results/&lt;id&gt;.json for every number.</p>'
 
 
 def index_page(models, cfg, root) -> str:
@@ -1409,10 +1453,10 @@ def index_page(models, cfg, root) -> str:
     tick = [*truck["status"], ("decoded", f"<b>{allsig}</b> signals in <b>{allmsg}</b> messages"),
             ("comma releases tested", f"<b>{len(models)}</b>"), ("notes", f"<b>{len(notes_)}</b>"),
             ("commits", f"<b>{commits:,}</b> since Dec 2025"), ("updated", f"<b>{esc(last)}</b>")]
-    ticker = "".join(f"<span>{esc(k)}: {v}</span>" for k, v in tick)
-    find = [f'<tr><td class="m k">{n["date"][5:]}</td><td><a href="notes/{esc(n["slug"])}.html">{esc(n["title"])}</a></td>'
+    ticker = "".join(f'<span class="st-{x[2]}">{esc(x[0])}: {x[1]}</span>' if len(x) > 2 else f"<span>{esc(x[0])}: {x[1]}</span>" for x in tick)
+    find = [f'<tr class="rd d{n.get("domain", "")}"><td class="m k">{n["date"][5:]}</td><td><a href="notes/{esc(n["slug"])}.html">{esc(n["title"])}</a></td>'
             f'<td class="m wrap">{esc(n["result"])}</td><td class="k">{esc(n["n"])}</td><td>{pill(n["kind"])}</td></tr>' for n in notes_]
-    opn = [f'<tr><td>{esc(q)}</td><td class="k">{esc(b)}</td><td class="k">{esc(s)}</td></tr>' for q, b, s in _j("open.json")["questions"]]
+    opn = [f'<tr class="rd d{d}"><td>{esc(q)}</td><td class="k">{esc(b)}</td><td class="k">{esc(s_)}</td></tr>' for q, b, s_, d in _j("open.json")["questions"]]
     log = []
     for e in feed_items(models, root)[:14]:
         t = f'<a href="{esc(e["page"])}">{esc(e["title"])}</a>' if e.get("page") else esc(e["title"])
@@ -1424,16 +1468,16 @@ def index_page(models, cfg, root) -> str:
     top = max(c for _, c in year["commits"])
     spark = "".join(f'<i style="height:{max(1, c / top * 100):.0f}%" title="{ym}: {c} commits"></i>' for ym, c in year["commits"])
     sparkl = "".join(f'<span>{MONTHS[int(ym[5:]) - 1][0]}</span>' for ym, _ in year["commits"])
-    miles = "".join(f'<li><time datetime="{d}">{d[2:]}</time><span>{esc(t)}</span></li>' for d, t in reversed(year["milestones"]))
+    miles = "".join(f'<li class="d{dm}"><time datetime="{d}">{d[2:]}</time><span>{esc(t)}</span></li>' for d, t, dm in reversed(year["milestones"]))
     gl = "".join(f"<p><b>{esc(a)}</b> {esc(b)}</p>" for a, b in _j("glossary.json")["terms"])
     nw = newest(models)
     return f"""<p class="d-tag">Work log of a 2011 Mercedes-Benz G55 AMG (W463, M113K 5.4 L supercharged V8, 722.6 five-speed) and comma.ai's openpilot driving models.
 Since December 2025 both CAN buses have been decoded, comma's driving model put on the truck's own cameras, the transmission moved to open-source firmware and the engine ECU patched to take a torque request.</p>
 <div class="d-tick">{ticker}</div>
-<div class="d-g a" id="truck">{d_panel("The truck", "select a number", f'<div class="d-fig">{truck_svg("")}</div>')}
+<div class="d-g a" id="truck">{d_panel("The truck", "select a number", f'<div class="d-fig">{truck_svg("")}</div>' + truck_key())}
 {d_panel("What is on it", '<a href="truck/index.html">all parts</a>', d_table(["#", "Part", "Hardware", "Software, rate", "Since"], spec_rows("")) + '<p class="d-src">From the as-built record. Dates are 2026.</p>')}</div>
 {d_panel("comma's releases on the truck's drives", f'newest first; nothing ranked; newest <a href="{esc(model_link(nw, ""))}">{esc(plain_name(nw))}</a>', matrix(models), "models")}
-<div class="d-g a">{d_panel("Findings", f'<a href="notes/index.html">{len(notes_)} notes</a>', d_table(["Date", "Finding", "Result", "n", "Grade"], find, "find"), "findings")}
+<div class="d-g a">{d_panel("Findings", f'{dom_key()} <a href="notes/index.html">{len(notes_)} notes</a>', d_table(["Date", "Finding", "Result", "n", "Grade"], find, "find"), "findings")}
 {d_panel("Open questions", "what decides the next step", d_table(["Question", "Blocks", "Settled by"], opn))}</div>
 <div class="d-g c">{d_panel("Log", '<a href="log.html">all</a>', d_table(["Date", "Kind", "What"], log, attrs=" data-history"))}
 {d_panel("Signals", f'<a href="signals.html">all {len(sigs)}</a>', d_table(["Sender", "Bus", ">Signals"], sigrows) + f'<p class="d-src">{ev["Measured"]} measured; the rest not yet labelled in the DBC. One truck, not a Mercedes specification.</p>')}

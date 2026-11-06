@@ -9,7 +9,8 @@
    "grade": "Measured in simulation on recorded G55 drives, 3 held-out drives; exploratory, locked test not run, nothing deployed.",
    "result": "+0.18 [+0.13, +0.33] recovery at 1.5 m",
    "n": "44 windows, 3 drives",
-   "kind": "simulation"
+   "kind": "simulation",
+   "domain": "p"
   },
   {
    "date": "2026-11-04",
@@ -19,7 +20,8 @@
    "grade": "Measured in simulation on recorded G55 drives (135 dev day windows, mirror-mount windows emulating the visor mount); not tested on a real drive.",
    "result": "-0.97 m per m of camera shift",
    "n": "135 windows",
-   "kind": "simulation"
+   "kind": "simulation",
+   "domain": "p"
   },
   {
    "date": "2026-11-04",
@@ -29,7 +31,8 @@
    "grade": "Measured offline on recorded G55 drives with hand-checked and hindsight truth; exploratory, one head configuration, nothing deployed.",
    "result": "2.7 % of vehicles, against 55.5 % for YOLO26s",
    "n": "recorded drives, offline",
-   "kind": "measured"
+   "kind": "measured",
+   "domain": "p"
   },
   {
    "date": "2026-11-03",
@@ -39,7 +42,8 @@
    "grade": "Measured on recorded drives, in replay on the truck's Jetson board, and on three drives after the fix was installed.",
    "result": "17.7-18.8 Hz, then 19.91-19.92 Hz",
    "n": "3 drives after the fix",
-   "kind": "measured"
+   "kind": "measured",
+   "domain": "p"
   },
   {
    "date": "2026-10-31",
@@ -49,7 +53,8 @@
    "grade": "Measured in simulation on recorded G55 drives with comma's own residual-off files; exploratory, one seed, daytime reprojection only, not a deployed change.",
    "result": "258 of 258",
    "n": "pushes",
-   "kind": "simulation"
+   "kind": "simulation",
+   "domain": "p"
   },
   {
    "date": "2026-10-30",
@@ -59,7 +64,8 @@
    "grade": "Measured in open-loop simulation on recorded G55 drives; exploratory, daytime stock-lens windows and N16 only, not a deployed change.",
    "result": "R² 0.84-0.93 from the tokens",
    "n": "held-out sessions",
-   "kind": "simulation"
+   "kind": "simulation",
+   "domain": "p"
   },
   {
    "date": "2026-10-29",
@@ -69,7 +75,8 @@
    "grade": "Measured in simulation on recorded G55 drives; exploratory, small test sets, not a deployed change.",
    "result": "road gain 1.05 at 3 s; fine-tuned 1.24",
    "n": "small test sets",
-   "kind": "simulation"
+   "kind": "simulation",
+   "domain": "p"
   },
   {
    "date": "2026-10-29",
@@ -79,7 +86,8 @@
    "grade": "Measured on recorded G55 drives, with the test set scored once per candidate; exploratory, one truck configuration, no steering actuator.",
    "result": "0.29 m after 4 s, against 7.34 m",
    "n": "12 held-out drives",
-   "kind": "measured"
+   "kind": "measured",
+   "domain": "c"
   }
  ]
 }
