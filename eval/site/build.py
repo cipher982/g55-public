@@ -1614,7 +1614,7 @@ def inside_page(m, models, clips: list[Path], root: Path, out: Path) -> str:
 <section class="prose"><h2>Limits</h2><ul>
 <li>One release, {len(meta)} clips of 20 s on comma's public segments. Nothing here comes from the G55.</li>
 <li>Hiding a square replaces it with its average over the clip; another replacement gives other numbers.</li>
-<li>These runs use a PyTorch copy of the model file; it has not been compared with the original on these clips.</li>
+<li>These runs use the model as PyTorch modules split from comma\'s ONNX file, in fp32. On 40 frames of a G55 drive those modules matched ONNX Runtime on the same file within 8.5e-6 of each output\'s largest value, and the shipped fp16 file within 2.2e-3. That comparison was not repeated on these four clips.</li>
 <li>The extraction code is not in this repository yet.</li>
 </ul></section>"""
 
