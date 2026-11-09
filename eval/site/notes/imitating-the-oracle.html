@@ -1,0 +1,48 @@
+<h2>What was asked</h2>
+<p>N16 is comma's driving model (<code>96244b1f_12800</code>). Its steering is a base policy plus a small residual head added at a fixed scale. The "x3 start" is that head written at three times its shipped scale, untrained; in bench8, the closed-loop simulator built here (the model steers a simulated truck while the camera view is redrawn from recorded frames), it recovers more pushed episodes than N16 as shipped, and reinforcement-learning runs on top of it had not beaten it on the current cameras' held-out drives. The question was whether imitation in closed loop does: the residual head trained to copy the steering of the oracle (a controller given the true pose) on the states the policy itself visits, the DAgger method (Ross, Gordon and Bagnell, 2011).</p>
+<h2>What was done</h2>
+<ul>
+<li>Three training seeds from the x3 start on the day windows of the two training drives, 20 epochs. Only the steering copied the oracle; the speed target was the start's own action. The weights at epoch 20 were scored, with no selection.</li>
+<li>Scored on every day window of the validation set (73 windows, 9 drives) and the hold-out set (20 windows, 2 drives), unpushed and with 1.0 and 1.5 m pushes to each side under three push shapes (a yaw doublet, a sideways offset with no yaw, a 3.2 s slow drift), beside N16 as shipped and the x3 start.</li>
+<li>The bar, fixed before the run: beat the x3 start on the share of pushed episodes recovered, on both sets, with the 95% interval over drives above zero. "Recovered" means the truck returns to the policy's own unpushed path; an episode whose views leave the area the simulator can draw counts as a failure.</li>
+<li>A control whose head reads another episode's inputs, meant to show what a constant correction alone does.</li>
+<li>A follow-up check on three locked-test drives, one seed beside the x3 start. That test set had already been used by earlier runs; nothing was selected or claimed from it.</li>
+</ul>
+<h2>Result</h2>
+<p>Share of pushed episodes recovered, trained seed minus the x3 start, points, with the 95% interval over drives:</p>
+<table>
+<thead><tr><th scope="col">Set (windows, drives)</th><th scope="col">Push</th><th scope="col">Seed 0</th><th scope="col">Seed 1</th><th scope="col">Seed 2</th></tr></thead>
+<tbody>
+<tr><td>Validation (73, 9)</td><td>Doublet</td><td>+1.0 [-7.7, +9.7]</td><td>+7.9 [+0.0, +15.8]</td><td>-0.7 [-10.1, +9.4]</td></tr>
+<tr><td>Validation</td><td>Offset only</td><td>-14.0 [-23.6, -2.1]</td><td>-12.0 [-20.8, +1.3]</td><td>-5.8 [-12.9, +1.9]</td></tr>
+<tr><td>Validation</td><td>Slow drift</td><td>-7.2 [-15.2, +1.3]</td><td>-1.4 [-9.6, +5.4]</td><td>-7.5 [-14.6, +0.4]</td></tr>
+<tr><td>Hold-out (20, 2)</td><td>Doublet</td><td>-10.0 [-27.3, +5.0]</td><td>+1.2 [-12.5, +13.8]</td><td>-3.8 [-17.0, +8.3]</td></tr>
+<tr><td>Hold-out</td><td>Offset only</td><td>-17.5 [-37.5, +1.4]</td><td>-3.8 [-13.6, +4.2]</td><td>-3.8 [-18.2, +9.7]</td></tr>
+<tr><td>Hold-out</td><td>Slow drift</td><td>-5.0 [-20.0, +8.3]</td><td>+6.2 [-6.9, +21.6]</td><td>-6.2 [-21.2, +13.9]</td></tr>
+</tbody>
+</table>
+<ul>
+<li>No seed meets the bar. On its own training windows (24 windows, doublet) the training worked: pushed episodes recovered to the driver's path rose from 26.0% at the start to 46.9 to 59.4%.</li>
+<li>On the validation and hold-out drives the unpushed run moved left. Its median end offset was +0.26 to +0.37 m (validation) and +0.14 to +0.19 m (hold-out) left of the driver's path, against +0.04 and -0.01 m for the x3 start. Unpushed episodes ending on the driver's path fell from 58.9% to 34.2 to 42.5% on validation.</li>
+<li>The two training drives were recorded after the narrow camera was re-aimed about 1.7 degrees further down; every validation and hold-out drive was recorded before. The truck runs the new aim.</li>
+<li>The control did not do its job: it read mismatched inputs from the first epoch, so it started broken and ended 42 to 62 points below the x3 start. With no gain to explain, the result above does not depend on it.</li>
+</ul>
+<p>The follow-up check, unpushed end offset in metres (+ is left), seed 1 minus the x3 start paired by window, with the 95% interval over windows:</p>
+<table>
+<thead><tr><th scope="col">Locked-test drive (windows)</th><th scope="col">Camera aim</th><th scope="col">Seed 1 - x3 start</th><th scope="col">Median distance from the driver's path, x3 / seed 1</th><th scope="col">Unpushed recovered, x3 / seed 1</th></tr></thead>
+<tbody>
+<tr><td>A (39)</td><td>Before the re-aim</td><td>+0.11 [-0.07, +0.28]</td><td>0.34 / 0.26 m</td><td>33 / 36%</td></tr>
+<tr><td>B (17)</td><td>After</td><td>-0.03 [-0.30, +0.17]</td><td>0.29 / 0.36 m</td><td>35 / 47%</td></tr>
+<tr><td>C (79)</td><td>After</td><td>-0.04 [-0.11, +0.03]</td><td>0.18 / 0.27 m</td><td>63 / 42%</td></tr>
+</tbody>
+</table>
+<ul>
+<li>The leftward shift appears on the drive from before the re-aim and not on the two from after. Drive A's interval includes zero, but the gap between the two policies' median offsets there (+0.18 m) is inside the range of the six larger validation and hold-out drives for the same seed (+0.14 to +0.26 m, all before the re-aim).</li>
+<li>On drive C, from after the re-aim, the trained head had no sideways bias but ended further from the driver's path than the x3 start and recovered fewer unpushed episodes.</li>
+</ul>
+<h2>What it does not show</h2>
+<ul>
+<li>Whether the shift is the re-aim itself or something else that changed at the same point, such as the roads driven. Which part of the re-aim the head responds to was not tested: each drive is shown to the model through its own camera calibration.</li>
+<li>Whether imitation beats the x3 start when training and validation both include drives from each camera aim, or with more training drives. That has not been run.</li>
+<li>Nothing at night and nothing about the truck, which runs N16 as shipped.</li>
+</ul>

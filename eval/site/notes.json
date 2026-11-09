@@ -2,6 +2,17 @@
  "_doc": "Work notes on the site, newest first by date. Each: date, title, slug, summary, grade (measured, derived, borrowed or hypothetical, and where); the body is site/notes/<slug>.html.",
  "notes": [
   {
+   "date": "2026-11-09",
+   "title": "Imitation training of N16's residual head did not beat its untrained start",
+   "slug": "imitating-the-oracle",
+   "summary": "Trained in the simulator to copy an oracle's steering on the states it visits (DAgger), N16's residual head recovered more pushes on its two training drives but did not beat the untrained 3x start on 9 validation and 2 hold-out drives. There its unpushed line sat 0.14 to 0.37 m left of the driver's path; a follow-up check ties that shift to the camera being re-aimed between the training and the evaluation drives.",
+   "grade": "Measured in simulation on recorded G55 drives: 2 training, 9 validation and 2 hold-out drives, and a check on 3 locked-test drives with nothing claimed; a negative result, nothing deployed.",
+   "result": "-17.5 to +7.9 points against the 3x start",
+   "n": "93 windows, 11 drives",
+   "kind": "simulation",
+   "domain": "p"
+  },
+  {
    "date": "2026-11-08",
    "title": "N16's residual head at two to four times its scale recovers more pushes",
    "slug": "residual-head-scale",
