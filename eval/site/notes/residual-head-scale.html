@@ -1,0 +1,35 @@
+<h2>What was asked</h2>
+<p>N16 is comma's driving model (<code>96244b1f_12800</code>). Its steering is a base policy plus a small residual head whose output is added at a fixed scale. Earlier training runs on the G55 started from that head written at three times its shipped scale, untrained (the "x3 start"), and some of their tables compared trained policies with the x3 start while calling it N16. The question was how much the scale alone changes recovery in bench8, the closed-loop simulator built here (the model steers a simulated truck while the camera view is redrawn from recorded frames), on the current camera's drives.</p>
+<h2>What was done</h2>
+<ul>
+<li>N16 at residual scales 1 (as shipped), 2, 3 and 4, untrained, on every day window of the current camera's validation set (73 windows, 9 drives) and hold-out set (20 windows, 2 drives).</li>
+<li>Each window was scored unpushed and with pushes of 1.0 and 1.5 m to each side, under three push shapes: a yaw doublet, a sideways offset with no yaw, and a 3.2 s slow drift.</li>
+<li>"Recovered" here means the truck returns to the policy's own unpushed path; an episode whose views leave the area the simulator can draw counts as a failure.</li>
+<li>The windows came from a split registry, the run recorded its code, configuration and data hashes, and every episode was kept. Paired differences use a 95% bootstrap over drives, then windows.</li>
+<li>A check that scoring order does not matter: N16 at scale 1 scored first and again last in one job gave identical results on all 100 hold-out doublet episodes.</li>
+</ul>
+<h2>Result</h2>
+<p>Share of pushed episodes recovered, %, and scale 3 minus scale 1 with its 95% interval over drives:</p>
+<table>
+<thead><tr><th scope="col">Set (windows, drives)</th><th scope="col">Push</th><th scope="col">1x</th><th scope="col">2x</th><th scope="col">3x</th><th scope="col">4x</th><th scope="col">3x - 1x</th></tr></thead>
+<tbody>
+<tr><td>Validation (73, 9)</td><td>Doublet</td><td>42.1</td><td>51.0</td><td>52.7</td><td>53.1</td><td>+10.6 [+5.7, +16.5]</td></tr>
+<tr><td>Validation</td><td>Offset only</td><td>40.8</td><td>62.7</td><td>68.5</td><td>67.8</td><td>+27.7 [+19.8, +35.1]</td></tr>
+<tr><td>Validation</td><td>Slow drift</td><td>33.6</td><td>41.1</td><td>43.8</td><td>42.8</td><td>+10.3 [+6.0, +15.8]</td></tr>
+<tr><td>Hold-out (20, 2)</td><td>Doublet</td><td>55.0</td><td>70.0</td><td>68.8</td><td>71.2</td><td>+13.8 [+2.8, +22.7]</td></tr>
+<tr><td>Hold-out</td><td>Offset only</td><td>53.8</td><td>72.5</td><td>76.2</td><td>83.8</td><td>+22.5 [+11.4, +33.8]</td></tr>
+<tr><td>Hold-out</td><td>Slow drift</td><td>38.8</td><td>48.8</td><td>50.0</td><td>48.8</td><td>+11.2 [+5.0, +17.5]</td></tr>
+</tbody>
+</table>
+<ul>
+<li>Scale 2 gets most of the gain. On validation, 4x minus 3x is -1.0 to +0.3 points, every interval inside -5.5 to +3.6.</li>
+<li>Most of the gain is fewer episodes that leave the drawable area: on validation 49, 44 and 49% of pushed episodes did at 1x, against 37, 20 and 43% at 3x (doublet, offset only, slow drift). Among episodes whose views stayed drawable, 3x recovered 60.9, 57.9 and 52.4% against 56.4, 49.7 and 51.4% at 1x; that comparison selects on an outcome, so it is not the effect either.</li>
+<li>11 of the 73 validation windows (15%) leave the drawable area even unpushed, at every scale; none of the hold-out windows do. Nothing was excluded after the fact.</li>
+<li>With two drives, the hold-out's interval over drives is close to its interval over windows.</li>
+</ul>
+<h2>What it does not show</h2>
+<ul>
+<li>Nothing about the truck: it runs scale 1. Nothing at night or on the locked test.</li>
+<li>bench8 cannot say whether an excursion that leaves the drawable area would have come back, so part of the gain may be the larger scale keeping the truck where the simulator can render it.</li>
+<li>Gains that earlier notes credit to training on top of the x3 start are separate from this; on the current camera's held-out drives, later training runs did not beat the x3 start.</li>
+</ul>

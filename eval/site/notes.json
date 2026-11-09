@@ -2,6 +2,17 @@
  "_doc": "Work notes on the site, newest first by date. Each: date, title, slug, summary, grade (measured, derived, borrowed or hypothetical, and where); the body is site/notes/<slug>.html.",
  "notes": [
   {
+   "date": "2026-11-08",
+   "title": "N16's residual head at two to four times its scale recovers more pushes",
+   "slug": "residual-head-scale",
+   "summary": "Untrained, N16 with comma's residual steering head at three times its shipped scale recovered 43.8 to 68.5 % of pushed episodes on 73 validation windows from 9 drives, against 33.6 to 42.1 % as shipped (+10.3 to +27.7 points, every 95 % interval over drives above zero). Most of the gain is fewer episodes leaving the area the simulator can draw.",
+   "grade": "Measured in simulation on recorded G55 drives, 9 validation and 2 hold-out drives; untrained, locked test not run, nothing deployed (the truck runs scale 1).",
+   "result": "+10.3 to +27.7 points recovered at 3x",
+   "n": "93 windows, 11 drives",
+   "kind": "simulation",
+   "domain": "p"
+  },
+  {
    "date": "2026-11-04",
    "title": "A trained steering correction on N16 recovers more often in simulation",
    "slug": "training-a-steering-correction",
