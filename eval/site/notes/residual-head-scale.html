@@ -3,7 +3,7 @@
 <h2>What was done</h2>
 <ul>
 <li>N16 at residual scales 1 (as shipped), 2, 3 and 4, untrained, on every day window of the current camera's validation set (73 windows, 9 drives) and hold-out set (20 windows, 2 drives).</li>
-<li>Each window was scored unpushed and with pushes of 1.0 and 1.5 m to each side, under three push shapes: a yaw doublet, a sideways offset with no yaw, and a 3.2 s slow drift.</li>
+<li>Each window was scored unpushed and with pushes of 1.0 and 1.5 m to each side, under three push shapes: a yaw doublet, a sideways offset with no yaw, and a 3.2 s slow drift. The slow drift actually pushed 1.6 and 2.4 m; see the correction below the table.</li>
 <li>"Recovered" here means the truck returns to the policy's own unpushed path; an episode whose views leave the area the simulator can draw counts as a failure.</li>
 <li>The windows came from a split registry, the run recorded its code, configuration and data hashes, and every episode was kept. Paired differences use a 95% bootstrap over drives, then windows.</li>
 <li>A check that scoring order does not matter: N16 at scale 1 scored first and again last in one job gave identical results on all 100 hold-out doublet episodes.</li>
@@ -15,15 +15,18 @@
 <tbody>
 <tr><td>Validation (73, 9)</td><td>Doublet</td><td>42.1</td><td>51.0</td><td>52.7</td><td>53.1</td><td>+10.6 [+5.7, +16.5]</td></tr>
 <tr><td>Validation</td><td>Offset only</td><td>40.8</td><td>62.7</td><td>68.5</td><td>67.8</td><td>+27.7 [+19.8, +35.1]</td></tr>
-<tr><td>Validation</td><td>Slow drift</td><td>33.6</td><td>41.1</td><td>43.8</td><td>42.8</td><td>+10.3 [+6.0, +15.8]</td></tr>
+<tr><td>Validation</td><td>Slow drift, 1.6 and 2.4 m</td><td>33.6</td><td>41.1</td><td>43.8</td><td>42.8</td><td>+10.3 [+6.0, +15.8]</td></tr>
 <tr><td>Hold-out (20, 2)</td><td>Doublet</td><td>55.0</td><td>70.0</td><td>68.8</td><td>71.2</td><td>+13.8 [+2.8, +22.7]</td></tr>
 <tr><td>Hold-out</td><td>Offset only</td><td>53.8</td><td>72.5</td><td>76.2</td><td>83.8</td><td>+22.5 [+11.4, +33.8]</td></tr>
-<tr><td>Hold-out</td><td>Slow drift</td><td>38.8</td><td>48.8</td><td>50.0</td><td>48.8</td><td>+11.2 [+5.0, +17.5]</td></tr>
+<tr><td>Hold-out</td><td>Slow drift, 1.6 and 2.4 m</td><td>38.8</td><td>48.8</td><td>50.0</td><td>48.8</td><td>+11.2 [+5.0, +17.5]</td></tr>
+<tr><td>Validation (rerun)</td><td>Slow drift, 1.0 and 1.5 m</td><td>58.6</td><td>-</td><td>66.4</td><td>-</td><td>+7.9 [+0.5, +14.7]</td></tr>
+<tr><td>Hold-out (rerun)</td><td>Slow drift, 1.0 and 1.5 m</td><td>77.5</td><td>-</td><td>85.0</td><td>-</td><td>+7.5 [+0.0, +15.9]</td></tr>
 </tbody>
 </table>
+<p>Correction, 2026-11-09: the slow-drift rows of this run pushed 1.6 and 2.4 m, not the 1.0 and 1.5 m first stated here, because of a push-sizing error in the simulator's slow drift, since fixed. Every scale got the same push, so the differences in those rows hold at those distances. The rows marked rerun come from a later run at the stated distances, scales 1 and 3 only. The doublet and offset-only rows were unaffected.</p>
 <ul>
 <li>Scale 2 gets most of the gain. On validation, 4x minus 3x is -1.0 to +0.3 points, every interval inside -5.5 to +3.6.</li>
-<li>Most of the gain is fewer episodes that leave the drawable area: on validation 49, 44 and 49% of pushed episodes did at 1x, against 37, 20 and 43% at 3x (doublet, offset only, slow drift). Among episodes whose views stayed drawable, 3x recovered 60.9, 57.9 and 52.4% against 56.4, 49.7 and 51.4% at 1x; that comparison selects on an outcome, so it is not the effect either.</li>
+<li>Most of the gain is fewer episodes that leave the drawable area: on validation 49, 44 and 28% of pushed episodes did at 1x, against 37, 20 and 23% at 3x (doublet, offset only, and the slow drift from the rerun). Among episodes whose views stayed drawable, 3x recovered 60.9, 57.9 and 59.1% against 56.4, 49.7 and 56.7% at 1x; that comparison selects on an outcome, so it is not the effect either.</li>
 <li>11 of the 73 validation windows (15%) leave the drawable area even unpushed, at every scale; none of the hold-out windows do. Nothing was excluded after the fact.</li>
 <li>With two drives, the hold-out's interval over drives is close to its interval over windows.</li>
 </ul>

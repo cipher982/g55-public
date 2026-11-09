@@ -3,6 +3,17 @@
  "notes": [
   {
    "date": "2026-11-09",
+   "title": "comma's 2026-11-05 model recovers more pushes than N16 in the simulator",
+   "slug": "comma-f22-in-the-simulator",
+   "summary": "Untrained, comma's f22e06e5_56320 recovered 49.3 to 69.5 % of pushed episodes on 73 validation windows from 9 drives, against 40.8 to 58.6 % for N16 (+7.2 to +11.0 points; the doublet interval includes zero). At three times the residual scale its gain over N16 at 3x was +4.8 to +8.2 points, every validation interval including zero. Unpushed, it ends 0.07 to 0.16 m right of the driver's path.",
+   "grade": "Measured in simulation on recorded G55 drives, 9 validation and 2 hold-out drives, all from before the camera re-aim; untrained, no bar set in advance, nothing deployed.",
+   "result": "+7.2 to +11.0 points over N16 as shipped",
+   "n": "93 windows, 11 drives",
+   "kind": "simulation",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-09",
    "title": "Imitation training of N16's residual head did not beat its untrained start",
    "slug": "imitating-the-oracle",
    "summary": "Trained in the simulator to copy an oracle's steering on the states it visits (DAgger), N16's residual head recovered more pushes on its two training drives but did not beat the untrained 3x start on 9 validation and 2 hold-out drives. There its unpushed line sat 0.14 to 0.37 m left of the driver's path; a follow-up check ties that shift to the camera being re-aimed between the training and the evaluation drives.",
@@ -16,9 +27,9 @@
    "date": "2026-11-08",
    "title": "N16's residual head at two to four times its scale recovers more pushes",
    "slug": "residual-head-scale",
-   "summary": "Untrained, N16 with comma's residual steering head at three times its shipped scale recovered 43.8 to 68.5 % of pushed episodes on 73 validation windows from 9 drives, against 33.6 to 42.1 % as shipped (+10.3 to +27.7 points, every 95 % interval over drives above zero). Most of the gain is fewer episodes leaving the area the simulator can draw.",
+   "summary": "Untrained, N16 with comma's residual steering head at three times its shipped scale recovered 52.7 to 68.5 % of pushed episodes on 73 validation windows from 9 drives, against 40.8 to 58.6 % as shipped (+7.9 to +27.7 points, every 95 % interval over drives above zero). Most of the gain is fewer episodes leaving the area the simulator can draw. Corrected 2026-11-09: the first slow-drift run pushed 1.6 times the stated distance; its figures here are from a rerun.",
    "grade": "Measured in simulation on recorded G55 drives, 9 validation and 2 hold-out drives; untrained, locked test not run, nothing deployed (the truck runs scale 1).",
-   "result": "+10.3 to +27.7 points recovered at 3x",
+   "result": "+7.9 to +27.7 points recovered at 3x",
    "n": "93 windows, 11 drives",
    "kind": "simulation",
    "domain": "p"

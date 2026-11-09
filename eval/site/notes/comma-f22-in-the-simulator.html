@@ -1,0 +1,48 @@
+<h2>What was asked</h2>
+<p>comma released a new driving model, <code>f22e06e5_56320</code>, on 2026-11-05; its scores on the G55's drives are on <a href="../models/f22e06e5_56320.html">its release page</a>. N16 (<code>96244b1f_12800</code>) is the model this project builds on. In both, steering is a base policy plus a residual head added at a fixed scale, and N16 recovers more pushes with that head at three times its scale (<a href="residual-head-scale.html">an earlier note</a>). The question was how the new model compares with N16 in bench8, the closed-loop simulator built here (the model steers a simulated truck while the camera view is redrawn from recorded frames), as shipped and at three times its residual scale.</p>
+<h2>What was done</h2>
+<ul>
+<li>Four untrained policies on every day window of the validation set (73 windows, 9 drives) and the hold-out set (20 windows, 2 drives): N16 as shipped, N16 at 3x, the new model as shipped and the new model at 3x.</li>
+<li>Each window was scored unpushed and with pushes of 1.0 and 1.5 m to each side under three push shapes: a yaw doublet, a sideways offset with no yaw, and a 3.2 s slow drift. "Recovered" means the truck returns to the policy's own unpushed path; an episode whose views leave the area the simulator can draw counts as a failure.</li>
+<li>N16 was given the route, drawn, as its navigation input. The new model has no navigation input.</li>
+<li>No bar was set before the run: it measures and selects nothing. Paired differences use a 95% bootstrap over drives, then windows.</li>
+<li>N16's doublet and offset-only results matched the earlier scale run exactly on both sets.</li>
+</ul>
+<h2>Result</h2>
+<p>Share of pushed episodes recovered, %:</p>
+<table>
+<thead><tr><th scope="col">Set (windows, drives)</th><th scope="col">Push</th><th scope="col">N16</th><th scope="col">N16 3x</th><th scope="col">New model</th><th scope="col">New model 3x</th></tr></thead>
+<tbody>
+<tr><td>Validation (73, 9)</td><td>Doublet</td><td>42.1</td><td>52.7</td><td>49.3</td><td>61.0</td></tr>
+<tr><td>Validation</td><td>Offset only</td><td>40.8</td><td>68.5</td><td>51.0</td><td>73.3</td></tr>
+<tr><td>Validation</td><td>Slow drift</td><td>58.6</td><td>66.4</td><td>69.5</td><td>71.9</td></tr>
+<tr><td>Hold-out (20, 2)</td><td>Doublet</td><td>55.0</td><td>68.8</td><td>67.5</td><td>78.8</td></tr>
+<tr><td>Hold-out</td><td>Offset only</td><td>53.8</td><td>76.2</td><td>63.7</td><td>95.0</td></tr>
+<tr><td>Hold-out</td><td>Slow drift</td><td>77.5</td><td>85.0</td><td>87.5</td><td>91.2</td></tr>
+</tbody>
+</table>
+<p>Paired differences, points, with the 95% interval over drives:</p>
+<table>
+<thead><tr><th scope="col">Set</th><th scope="col">Push</th><th scope="col">New model - N16</th><th scope="col">New model 3x - N16 3x</th><th scope="col">New model - N16 3x</th></tr></thead>
+<tbody>
+<tr><td>Validation</td><td>Doublet</td><td>+7.2 [-1.7, +12.8]</td><td>+8.2 [-1.4, +14.7]</td><td>-3.4 [-13.4, +2.5]</td></tr>
+<tr><td>Validation</td><td>Offset only</td><td>+10.3 [+1.9, +17.6]</td><td>+4.8 [-6.4, +13.6]</td><td>-17.5 [-27.8, -6.7]</td></tr>
+<tr><td>Validation</td><td>Slow drift</td><td>+11.0 [+0.0, +21.7]</td><td>+5.5 [-6.8, +15.1]</td><td>+3.1 [-8.2, +14.7]</td></tr>
+<tr><td>Hold-out</td><td>Doublet</td><td>+12.5 [+0.0, +26.1]</td><td>+10.0 [+0.0, +20.5]</td><td>-1.2 [-11.2, +10.0]</td></tr>
+<tr><td>Hold-out</td><td>Offset only</td><td>+10.0 [+1.2, +22.2]</td><td>+18.8 [+8.8, +28.7]</td><td>-12.5 [-23.9, -1.1]</td></tr>
+<tr><td>Hold-out</td><td>Slow drift</td><td>+10.0 [+2.3, +18.1]</td><td>+6.2 [-1.2, +13.6]</td><td>+2.5 [-5.7, +12.5]</td></tr>
+</tbody>
+</table>
+<ul>
+<li>As shipped, the new model recovered 7.2 to 11.0 points more than N16 on validation; the doublet interval includes zero. At 3x it recovered 4.8 to 8.2 points more than N16 at 3x, and every validation interval includes zero.</li>
+<li>As shipped, the new model recovered fewer offset-only pushes than N16 at 3x: -17.5 [-27.8, -6.7] points on validation.</li>
+<li>Part of the difference is fewer pushed episodes leaving the drawable area: on validation 49.0, 43.5 and 28.1% for N16 against 43.8, 38.7 and 20.9% for the new model (doublet, offset only, slow drift).</li>
+<li>Unpushed, the new model ends right of the driver's path: median end offset -0.073 m on validation and -0.164 m on hold-out (+ is left), against +0.043 and -0.025 m for N16. It returned to the driver's path in more unpushed episodes: 63.0 against 58.9% on validation, 65.0 against 45.0% on hold-out.</li>
+</ul>
+<h2>What it does not show</h2>
+<ul>
+<li>Every validation and hold-out drive was recorded before the narrow camera was re-aimed; the truck runs the new aim. Nothing at night or on the locked test.</li>
+<li>Whether the route input matters: N16 had it and the new model has none.</li>
+<li>bench8 cannot say whether an excursion that leaves the drawable area would have come back.</li>
+<li>Nothing about the truck, which runs N16 as shipped.</li>
+</ul>
