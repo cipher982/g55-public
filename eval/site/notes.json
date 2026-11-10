@@ -2,6 +2,17 @@
  "_doc": "Work notes on the site, newest first by date. Each: date, title, slug, summary, grade (measured, derived, borrowed or hypothetical, and where); the body is site/notes/<slug>.html.",
  "notes": [
   {
+   "date": "2026-11-10",
+   "title": "The simulator could not draw highway views: one source frame every 0.2 s was too few",
+   "slug": "simulator-blanks-highway-views",
+   "summary": "In the closed-loop simulator, 35 of 95 windows at 30 to 33 m/s and 18 of 24 at 33 to 36 m/s ended the unpushed episode in a view it could not draw, and none between 12 and 24 m/s. The view is warped from a recorded frame kept every 0.2 s, up to 6.6 m behind the truck at 33 m/s; warped past about 6 m the near road is left empty. Drawing from every recorded frame cut such endings from 61 of 160 unpushed episodes to 1 on the same 80 windows. They had been scored as the model failing to recover.",
+   "grade": "Measured in simulation on recorded G55 drives from after the camera re-aim: 320 windows for the speed table, 2,880 warps of real frames on 80 windows for coverage, 80 windows for the before and after. A correction to the method; the model comparison it interrupted is not finished.",
+   "result": "undrawn unpushed episodes 61 of 160, then 1 of 160",
+   "n": "80 windows, 9 drives",
+   "kind": "simulation",
+   "domain": "p"
+  },
+  {
    "date": "2026-11-09",
    "title": "comma's 2026-11-05 model recovers more pushes than N16 in the simulator",
    "slug": "comma-f22-in-the-simulator",

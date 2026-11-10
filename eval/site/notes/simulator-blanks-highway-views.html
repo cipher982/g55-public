@@ -1,0 +1,56 @@
+<h2>What was asked</h2>
+<p>bench8 is the closed-loop simulator built here: the model steers a simulated truck while the camera view is redrawn from recorded frames, each warped to where the simulated truck is using an estimated depth map. A view counts as drawn when at least 80% of it is covered by warped pixels; below that the episode ends and was scored as not recovered. A comparison of comma's 2026-11-05 model with N16 on the current camera aim (the same test as <a href="comma-f22-in-the-simulator.html">this earlier note</a>, on 1,039 newer windows) showed a large share of episodes ending that way before any push. The question was why.</p>
+<h2>What was done</h2>
+<ul>
+<li>Unpushed episodes from the first 320 windows of that comparison were sorted by the truck's speed.</li>
+<li>The renderer was tested against real frames with no model involved: on 80 windows spread over every speed, a recorded frame was warped to the recorded position of the frame 0.2, 0.4 and 0.6 s later and the covered share measured, 2,880 renders in all.</li>
+<li>The cause found: each 10 s window kept one recorded frame every 0.2 s as a source, one in four of a 20 frames a second recording, on the same clock as the model's 5 Hz step. A view is drawn from the kept frame at or behind the truck, so the warp reaches forward by up to 0.2 s of travel: 2 m at 10 m/s, 6.6 m at 33 m/s. The renderer moves source pixels one at a time; warped far forward, the pixels of the near road spread apart and the lower half of the narrow camera's view is left empty.</li>
+<li>The change: every recorded frame is a source, each with its own depth map, and a view is drawn from the one at or behind the truck. The forward warp is then at most one frame's travel, 1.8 m at 36 m/s. The model's step is unchanged.</li>
+<li>The 80 windows of the comparison's first slice were scored unpushed again with the change, with N16 as shipped and at three times its residual scale.</li>
+</ul>
+<h2>Result</h2>
+<p>Windows whose unpushed episode ended in a view the simulator could not draw, under all four policies, by speed (320 windows, one source frame every 0.2 s):</p>
+<table>
+<thead><tr><th scope="col">Speed, m/s</th><th scope="col">Windows</th><th scope="col">Ended undrawn</th></tr></thead>
+<tbody>
+<tr><td>6 to 9</td><td>8</td><td>0</td></tr>
+<tr><td>9 to 12</td><td>33</td><td>4 (12%)</td></tr>
+<tr><td>12 to 24</td><td>72</td><td>0</td></tr>
+<tr><td>24 to 27</td><td>24</td><td>1 (4%)</td></tr>
+<tr><td>27 to 30</td><td>64</td><td>14 (22%)</td></tr>
+<tr><td>30 to 33</td><td>95</td><td>35 (37%)</td></tr>
+<tr><td>33 to 36</td><td>24</td><td>18 (75%)</td></tr>
+</tbody>
+</table>
+<p>Those episodes ended at a median of 0.6 s, with the truck a median 0.19 m from the recorded path. Share of the model's view covered when a real frame is warped forward (the lower of the two cameras):</p>
+<table>
+<thead><tr><th scope="col">Forward distance, m</th><th scope="col">Renders</th><th scope="col">Covered, median</th><th scope="col">Under the 80% rule</th></tr></thead>
+<tbody>
+<tr><td>0 to 3</td><td>331</td><td>0.99 to 1.00</td><td>0%</td></tr>
+<tr><td>3 to 4.5</td><td>392</td><td>0.99</td><td>2%</td></tr>
+<tr><td>4.5 to 6</td><td>460</td><td>0.94</td><td>0%</td></tr>
+<tr><td>6 to 7.5</td><td>374</td><td>0.80</td><td>53%</td></tr>
+<tr><td>7.5 to 9</td><td>212</td><td>0.67</td><td>100%</td></tr>
+<tr><td>9 to 10.5</td><td>231</td><td>0.58</td><td>100%</td></tr>
+</tbody>
+</table>
+<p>Unpushed episodes ending in an undrawn view on the same 80 windows, before and after the change:</p>
+<table>
+<thead><tr><th scope="col">Speed, m/s</th><th scope="col">Episodes</th><th scope="col">One source every 0.2 s</th><th scope="col">Every recorded frame</th></tr></thead>
+<tbody>
+<tr><td>6 to 24</td><td>54</td><td>0</td><td>0</td></tr>
+<tr><td>24 to 30</td><td>46</td><td>18</td><td>0</td></tr>
+<tr><td>30 to 36</td><td>60</td><td>43</td><td>1</td></tr>
+<tr><td>All</td><td>160</td><td>61 (38%)</td><td>1 (1%)</td></tr>
+</tbody>
+</table>
+<p>In the one episode left, the simulated truck ended 3.2 m from the recorded path.</p>
+<p>The comparison itself was stopped at 240 of its 1,039 windows (9 drives) to make the change. On those, with the old sources and an undrawn view counted as not recovered, comma's 2026-11-05 model as shipped recovered 46.9 to 54.2% of pushed episodes against 39.4 to 45.3% for N16, a paired difference of +7.5 to +10.9 points with each 95% interval over drives at or above zero. Between 28 and 46% of pushed episodes ended in an undrawn view. The comparison is being run again with every recorded frame as a source.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>How comma's model compares with N16 once highway views are drawn. The 240-window figures come from a renderer that could not draw about a quarter of its windows.</li>
+<li>How much earlier results in this simulator were affected. They used windows from before the camera re-aim, where 11 of 73 ended the unpushed episode undrawn; the cause of those was not checked.</li>
+<li>That a view still lost after a push means the truck left the road. A sideways move also opens holes, and the renderer test here only moved forward.</li>
+<li>That the picture is right where it is covered. Only coverage was read, not the difference from the real frame.</li>
+<li>Why 4 of 33 windows at 9 to 12 m/s ended undrawn.</li>
+</ul>
