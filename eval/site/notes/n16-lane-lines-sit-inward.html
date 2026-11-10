@@ -1,0 +1,36 @@
+<h2>What was asked</h2>
+<p>The dashboard tablet draws N16's lane lines and road edges in a 3D scene around a model of the truck at its real width. While driving, the lines often ran under the truck's wheels, on a highway as on a narrow town road. The question was whether N16 puts the lines there, or whether the drawing does.</p>
+<h2>What was done</h2>
+<ul>
+<li>The truth comes from the camera frames alone. Each frame is resampled onto the road plane with the measured lens height (1.80 m), the lens calibration and the mount's online calibration, 0.02 m across by 0.1 m ahead. Paint is a line brighter, or yellower, than the 0.8 m of road around it; each line's place is read separately 6 to 10 m and 10 to 14 m ahead, and a frame counts only when the two agree (a wrong pitch would part them) and the lane is 2.0 to 4.3 m wide. On one frame the result was checked a second way, from the vanishing point of its three painted lines: the same width, and a pitch within 0.01 degrees of the calibration.</li>
+<li>Frames used: straight road, both of N16's inner lines at probability 0.7 or more, from four drives on the current camera mount, highway and town.</li>
+<li>N16's inner lane lines at the same distances were set against the paint, in the camera's own frame. The narrow camera sits 0.239 m right of the truck's centreline, under the road-plane warp that shows N16 the road as if from 1.45 m.</li>
+<li>Two corrections were compared, each fitted on highway frames and tested on town frames and the other way round: one scale for every distance from the camera, and one fixed outward move for each line.</li>
+</ul>
+<h2>Result</h2>
+<table>
+<thead><tr><th scope="col">Roads</th><th scope="col">Frames</th><th scope="col">Paint lane, m</th><th scope="col">N16 lane, m</th><th scope="col">Each line outward of N16's, m (median)</th><th scope="col">Width ratio</th></tr></thead>
+<tbody>
+<tr><td>Highway</td><td>34</td><td>3.36</td><td>2.94</td><td>0.211</td><td>1.146</td></tr>
+<tr><td>Highway and town, 3.4 to 3.5 m lanes</td><td>42</td><td>3.50</td><td>3.07</td><td>0.208</td><td>1.144</td></tr>
+<tr><td>Town, 2.0 to 3.4 m lanes</td><td>102</td><td>2.77</td><td>2.11</td><td>0.256</td><td>1.246</td></tr>
+</tbody>
+</table>
+<p>The outward move is the same at every distance of the line from the camera that occurred, 0.55 to 2.15 m, on either side (0.21 to 0.27 m in each 0.3 to 0.4 m bin). A scale would grow with that distance.</p>
+<table>
+<thead><tr><th scope="col">Fitted on, tested on</th><th scope="col">No correction, median error L / R, m</th><th scope="col">One scale</th><th scope="col">Fixed outward move</th></tr></thead>
+<tbody>
+<tr><td>Highway, town</td><td>0.26 / 0.25</td><td>0.07 / 0.09 (scale 1.155)</td><td>0.04 / 0.04 (0.218 m)</td></tr>
+<tr><td>Town, highway</td><td>0.20 / 0.24</td><td>0.18 / 0.08 (scale 1.234)</td><td>0.06 / 0.03 (0.256 m)</td></tr>
+</tbody>
+</table>
+<p>The tablet now moves each lane line and road edge 0.23 m outward from the camera, easing to nothing within 0.5 m of it, and moves everything the camera reports 0.239 m onto the truck's centreline. The plan is left as N16 gives it. On 10 moments from two drives, the lines the tablet builds 10 m ahead were set against the paint in the same frames: on 9, every line within 0.10 m (the 10th, the paint finder took a line two lanes over). Before the change the right line was drawn 0.41 to 0.51 m too close to the truck on all 10, under the truck's body on 4 of 5 highway moments, and the left within 0.14 m, because the camera's offset and N16's inward lines nearly cancel on that side.</p>
+<p>On one town frame where the line was drawn under the truck's left wheels, the paint puts the inner yellow line 0.92 m left of the truck's centreline, about where its left side is. There the drawing was close to right: the truck was driving on the line.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Why N16 places lines inward on this camera. The warp to 1.45 m leaves the lane width close to what N16 gave without it on an earlier, separate highway test.</li>
+<li>Whether road edges, the outer lane lines, the plan or the lead are off in the same way. Only the inner lines were measured; the edges are moved with them so the lines stay on the road.</li>
+<li>Curves. Only straight road was measured, and whether N16's distances ahead are also short could not be told from eight curved lines.</li>
+<li>Night, rain, faded paint, or another driving model or camera mount: each needs measuring again.</li>
+<li>Driving. Nothing the truck acts on changed.</li>
+</ul>
