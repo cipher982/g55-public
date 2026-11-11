@@ -3,6 +3,17 @@
  "notes": [
   {
    "date": "2026-11-11",
+   "title": "Removing CPU warps, cold graph loads and single-GPU limits speeds training and simulation 3x to 107x at parity",
+   "slug": "ml-pipeline-speedups",
+   "summary": "Measured before and after on two 230 W 24 GB GPUs with NVLink and 64 CPU cores: memory-mapped graph caching cut model load from 19.64 s to 0.93 s (21.0x); batched vmap in bfloat16 with float32 adapter weights raised step throughput from 11.3 to 200.9 samples/s across 2 GPUs (17.7x) and cut a 4-epoch adapter run on 1 GPU from 3.01 h to 1.15 h (2.6x) at 0.030 / 0.024 m validation lane error; moving simulator splatting, hole fill and camera warps onto CUDA cut render time from 172.2 ms to 5.64 ms/view (30.6x) and 60-episode rollouts to 30.0 s across 2 GPUs (5.9x, 0 episode flips); and memory-mapped 5 Hz drive packs cut random-access model jump-ins from 1,385 ms to 13.0 ms (106.6x, 0.0 difference).",
+   "grade": "Measured on recorded G55 drives and dense closed-loop simulation windows with NVML hardware counters and paired output/recovery checks; reference model-table simulator unchanged.",
+   "result": "17.7x step rate, 5.9x sim rollout, 106.6x jump-in",
+   "n": "31,555 train steps, 10 val drives, 60 sim episodes",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-11",
    "title": "A rank-8 vision adapter puts lane lines within 3 to 6 cm of road paint and keeps push recovery",
    "slug": "camera-rig-adapter",
    "summary": "Trained on 4 dual-camera visor-mount drives (31,555 steps) with comma's policy frozen and folded back into an ordinary ONNX file, a rank-8 low-rank adapter on N16's vision weights moved validation lane-line error from 0.230 / 0.262 m (1.45 m warp) and 0.505 / 0.517 m (exact geometry) to 0.052 / 0.028 m on 10 unseen drives (0.023 / 0.026 m on 2 locked hold-out drives), and 0.057 / 0.040 m when run unchanged on f22e06e5_56320. In 77-window closed-loop simulation, leaving steering lateral acceleration unsupervised reached 73.7 % relative push recovery (+2.9 points [+0.9, +5.7] over the 1.45 m baseline), whereas supervising open-loop turn acceleration lowered push recovery to 62.6 %.",

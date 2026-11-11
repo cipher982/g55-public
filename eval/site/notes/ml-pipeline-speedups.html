@@ -1,0 +1,30 @@
+<h2>What was asked</h2>
+<p>Across 142 recorded GPU hours of closed-loop evaluation and model training on a workstation with two 230 W 24 GB GPUs, 64 CPU cores and 251 GiB of RAM, hardware counters showed the closed-loop simulator keeping a GPU busy 28 % of the time while spending 152 ms per rendered view in CPU image warps and OpenCV Telea hole inpainting. Vision-adapter training ran single-sample float32 loops at 6.2 to 11.3 samples/s after spending 20 s converting the ONNX graph on every launch, random-access drive evaluation decoded 34 video frames and ran 33 cold warm-up steps per timestamp (1.39 s per jump), and workloads ran on one GPU without NUMA socket pinning. The question was how much wall-clock time comes out when those CPU, precision, I/O and single-GPU bottlenecks are removed one slice at a time while checking numerical and closed-loop parity after each step.</p>
+<h2>What was done</h2>
+<ul>
+<li><strong>Cached graph load, batched <code>vmap</code>, and <code>bfloat16</code> backbone with <code>float32</code> adapter weights.</strong> Converted PyTorch model graphs are keyed by ONNX SHA-256 and reloaded with memory mapping. Frozen backbone weights and internal cast nodes run in <code>bfloat16</code> under <code>torch.vmap</code> while low-rank adapter parameters and per-sample masked losses stay in <code>float32</code>, and merged ONNX exports fold the learned delta directly onto the original <code>float32</code> initializers so untouched weights keep every mantissa bit.</li>
+<li><strong>All-GPU closed-loop environment renderer (<code>cuda_fast</code>).</strong> Batched <code>float32</code> depth-ordered point splatting, GPU <code>3x3</code> morphological closing, a 5-level pull-push pyramid hole fill, precomputed <code>grid_sample</code> dual-camera perspective warps, and fixed-point BT.601 CUDA <code>BGR -&gt; NV12</code> conversion replace the 16-thread CPU OpenCV path inside the batched training and sweep environment, while leaving the single-episode CPU reference simulator unchanged.</li>
+<li><strong>Memory-mapped 5 Hz drive packs.</strong> Warped dual-camera <code>YUV</code> inputs, <code>[32, 512]</code> <code>float16</code> spatial vision tokens, <code>[16384]</code> vision hidden vectors, and pre-rolled 5 Hz recurrent feature queues are written once per drive and opened via <code>mmap</code> in 3.4 ms so random-access evaluation and perception-head training skip video decoding and 33-step cold warm-up.</li>
+<li><strong>NUMA-pinned dual-GPU sharding and NVLink data-parallel training.</strong> Each GPU process pins CPU affinity to its local PCIe root complex NUMA node, shards long drives in 4,096-frame chunks with a 1-frame previous-image overlap for bit-exact two-frame vision inputs, shards closed-loop rollout windows across both GPUs, and synchronizes <code>float32</code> low-rank adapter gradients over 4-lane NVLink via NCCL.</li>
+</ul>
+<h2>Result</h2>
+<p>Before-and-after measurements on the same power-capped 230 W GPU hardware and drive splits:</p>
+<table>
+<thead><tr><th scope="col">Workload</th><th scope="col">Baseline (1 GPU)</th><th scope="col">Optimized (1 GPU)</th><th scope="col">Optimized (2 GPUs, NUMA + NVLink)</th><th scope="col">Speedup</th><th scope="col">Parity check</th></tr></thead>
+<tbody>
+<tr><td>Model graph warm load</td><td>19.64 s</td><td>0.93 s</td><td>0.93 s</td><td>21.0x</td><td>0.0 max abs output diff</td></tr>
+<tr><td>On-policy vision feature refresh</td><td>92.7 frames/s</td><td>377.6 frames/s</td><td>698.5 frames/s</td><td>7.5x</td><td>0.030 / 0.024 m val lane MAE after 4-epoch BF16 run</td></tr>
+<tr><td>Vision-adapter training step rate</td><td>11.3 samples/s</td><td>74.4 to 99.9 samples/s</td><td>200.9 samples/s</td><td>17.7x</td><td>1.46892 exact FP32 loss; 0.0 NVLink grad diff vs accum</td></tr>
+<tr><td>4-epoch full-corpus adapter run</td><td>10,843 s (3.01 h)</td><td>4,150 s (1.15 h)</td><td>sharded refresh + DDP</td><td>2.6x (1 GPU)</td><td>0.0 % wheel on line, 0.184 m front-vehicle y MAE on 10 val drives</td></tr>
+<tr><td>Closed-loop view render (2,160 views)</td><td>172.2 ms/view</td><td>5.64 ms/view</td><td>2.82 ms/view eff.</td><td>30.6x (1 GPU)</td><td>23.13 hole gray MAE vs 24.26 OpenCV Telea on real frames</td></tr>
+<tr><td>60-episode 5 Hz closed-loop rollout</td><td>177.0 s (12.2 steps/s)</td><td>59.1 s (36.6 steps/s)</td><td>30.0 s (72.1 steps/s)</td><td>5.9x (14.4x realtime)</td><td>0.2083 rel. recovery, 0.3126 m lane MAE, 0 episode flips</td></tr>
+<tr><td>Random-access 5 Hz ORT jump-in (8 jumps)</td><td>1,385.1 ms/jump</td><td>13.0 ms/jump</td><td>13.0 ms/jump</td><td>106.6x</td><td>0.000000 max abs diff vs 33-step cold warm-up</td></tr>
+<tr><td>Spatial-token head training (20 x B=32)</td><td>4.35 s (147 samples/s)</td><td>0.123 s (5,225 samples/s)</td><td>single-GPU bound</td><td>35.5x</td><td>identical cached FP16 spatial tokens</td></tr>
+</tbody>
+</table>
+<p>During pure vision-refresh execution on one GPU, median NVML GPU utilization moved from 46 % (184 W) in the unbatched loop to 84 to 100 % at 226 to 228 W against the 230 W cap; in closed-loop 5 Hz rollouts, median GPU utilization moved from 0 % (29 % mean, 183 W) to 84 % (76 % mean, 223 W). Scored end-to-end on the 10 unseen validation drives after 4 full epochs in <code>bfloat16</code> and exported to standard <code>float16</code> ONNX, left / right paint error was 0.030 / 0.024 m (against 0.049 / 0.036 m for the 3.01-hour <code>float32</code> run), wheel encroachment stayed at 0.0 %, speed over CAN was 1.006, and front-vehicle lateral MAE was 0.184 m (against 0.187 m).</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Any change to the truck's in-car runtime latency on the Jetson, which runs TensorRT engines rather than PyTorch training graphs or simulator reprojection.</li>
+<li>Any change to the published comma-model table scores, which continue to run through the unchanged CPU reference simulator so historical numbers remain byte-reproducible.</li>
+</ul>
