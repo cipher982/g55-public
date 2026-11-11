@@ -2,6 +2,17 @@
  "_doc": "Work notes on the site, newest first by date. Each: date, title, slug, summary, grade (measured, derived, borrowed or hypothetical, and where); the body is site/notes/<slug>.html.",
  "notes": [
   {
+   "date": "2026-11-11",
+   "title": "A rank-8 vision adapter puts lane lines within 3 to 6 cm of road paint and keeps push recovery",
+   "slug": "camera-rig-adapter",
+   "summary": "Trained on 4 dual-camera visor-mount drives (31,555 steps) with comma's policy frozen and folded back into an ordinary ONNX file, a rank-8 low-rank adapter on N16's vision weights moved validation lane-line error from 0.230 / 0.262 m (1.45 m warp) and 0.505 / 0.517 m (exact geometry) to 0.052 / 0.028 m on 10 unseen drives (0.023 / 0.026 m on 2 locked hold-out drives), and 0.057 / 0.040 m when run unchanged on f22e06e5_56320. In 77-window closed-loop simulation, leaving steering lateral acceleration unsupervised reached 73.7 % relative push recovery (+2.9 points [+0.9, +5.7] over the 1.45 m baseline), whereas supervising open-loop turn acceleration lowered push recovery to 62.6 %.",
+   "grade": "Measured offline on 10 validation and 2 locked hold-out G55 drives and in closed-loop simulation on 77 dense-source windows; nothing deployed to the truck.",
+   "result": "lane error 0.052 / 0.028 m; 73.7 % rel. push recovery",
+   "n": "10 val + 2 hold-out drives, 77 sim windows",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
    "date": "2026-11-10",
    "title": "N16 puts each lane line about 0.23 m too close to the camera on the truck",
    "slug": "n16-lane-lines-sit-inward",

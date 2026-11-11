@@ -1,0 +1,44 @@
+<h2>What was asked</h2>
+<p>On the current windscreen visor mount (1.80 m above the road, 0.239 m right of the truck's centreline, 8.5 degrees down), stock N16 places each inner lane line 0.23 to 0.26 m inside the road paint even after shifting by the camera offset, and under-reads speed unless the picture is warped from 1.78 m to 1.45 m. A picture warp can correct camera rotation, because rotating a lens does not change what hides behind what; it cannot correct height and sideways offset across both flat road and upright objects at once. The question was whether a small low-rank adapter on the model's vision weights, folded back into an ordinary ONNX model file while leaving comma's policy weights untouched, puts the lane lines, path and speed on the truck's centreline and holds up in closed-loop simulation and on a newer comma release.</p>
+<h2>What was done</h2>
+<ul>
+<li>Each model is split into its vision encoder and its recurrent policy. Rank-8 low-rank factors (113 vision weight tensors, 3.30M parameters) are attached only to the vision part; the policy stays frozen, and zero-initialized factors merge back into the ONNX file with 0.0 difference in onnxruntime.</li>
+<li>Training used 4 dual-camera drives from the visor mount (31,555 steps at 5 Hz), separated by drive and day from 10 validation drives (11,128 steps) and 2 locked hold-out drives (2,134 steps). Vision history features were refreshed sequentially along each drive every 120 updates so recurrent state stayed matched to the adapted encoder.</li>
+<li>Supervision combined the driver's recorded path and CAN speed, inner lane lines measured directly from road paint where near (6 to 10 m) and mid (10 to 14 m) bands agreed within 0.12 m, and a per-column teacher from the stock model on a 1.22 m road-plane warp with lane lines, road edges and all six lead-vehicle hypotheses shifted by +0.239 m onto the truck's centreline.</li>
+<li>Four N16 variants were compared on the 10 unseen validation drives: exact camera geometry vs keeping the 1.45 m input warp, and leaving immediate steering lateral acceleration unsupervised vs supervising it to steady-state <code>v * yaw_rate</code> on human-driven turns. All variants were then scored in closed-loop simulation on 77 dense-source windows (385 episodes per policy, 1.0 m and 1.5 m pushes left and right), checked with an untouched independent road-paint ruler (216 to 220 frames), tested on comma's 2026-11-05 model (<code>f22e06e5_56320</code>) with no code changes, and scored once on the 2 locked hold-out drives.</li>
+</ul>
+<h2>Result</h2>
+<p>Open-loop stateful 5 Hz evaluation on 10 unseen validation drives (11,128 steps; 192 to 196 strict paint frames across the 8 drives with two-band lane stripes; 95 % intervals across drives):</p>
+<table>
+<thead><tr><th scope="col">N16 configuration</th><th scope="col">Frame</th><th scope="col">Lane error L / R, m (shifted to truck)</th><th scope="col">Model lane width, m (paint 3.31)</th><th scope="col">Wheel on line, %</th><th scope="col">Speed over CAN (95 % CI)</th><th scope="col">1 s plan MAE, m</th></tr></thead>
+<tbody>
+<tr><td>Shipped, exact geometry</td><td>camera</td><td>0.505 / 0.517</td><td>2.29 [2.11, 2.43]</td><td>32.8</td><td>0.928 [0.900, 0.952]</td><td>0.054</td></tr>
+<tr><td>1.45 m warp, shipped</td><td>camera</td><td>0.230 / 0.262</td><td>2.83 [2.65, 2.98]</td><td>7.8</td><td>0.992 [0.973, 1.009]</td><td>0.056</td></tr>
+<tr><td>Exact geometry, vision adapter</td><td>truck</td><td>0.056 / 0.045</td><td>3.25 [3.07, 3.36]</td><td>0.5</td><td>0.993 [0.989, 0.997]</td><td>0.065</td></tr>
+<tr><td>Warped 1.45 m, vision adapter</td><td>truck</td><td>0.052 / 0.028</td><td>3.27 [3.08, 3.40]</td><td>1.0</td><td>0.990 [0.983, 0.996]</td><td>0.057</td></tr>
+<tr><td>Turn-supervised adapter, exact</td><td>truck</td><td>0.053 / 0.028</td><td>3.27 [3.08, 3.39]</td><td>0.0</td><td>0.994 [0.989, 0.999]</td><td>0.058</td></tr>
+<tr><td>Action-supervised adapter, 1.45 m</td><td>truck</td><td>0.049 / 0.036</td><td>3.28 [3.09, 3.40]</td><td>0.0</td><td>0.997 [0.992, 1.001]</td><td>0.053</td></tr>
+</tbody>
+</table>
+<p>Measured with the untouched road-paint ruler from the 2026-11-10 note across all 10 validation drives (216 to 220 frames, median paint width 3.42 m), median left / right error moved from 0.494 / 0.557 m (exact, model width 2.35 m) and 0.232 / 0.267 m (1.45 m warp, model width 2.87 m) to 0.045 / 0.020 m on the 1.45 m adapter without action loss (median model width 3.37 m) and 0.033 / 0.018 m with action loss (3.36 m).</p>
+<p>Closed-loop simulation on 77 validation windows with dense frame sources (1.0 m and 1.5 m pushes left and right; paired differences and 95 % intervals clustered by drive):</p>
+<table>
+<thead><tr><th scope="col">N16 configuration</th><th scope="col">Unpushed offset left, m</th><th scope="col">Unpushed MAE, m</th><th scope="col">Pushed recovered, %</th><th scope="col">Pushed rel. recovered, %</th><th scope="col">Paired rel. diff vs 1.45 m shipped (95 % CI)</th></tr></thead>
+<tbody>
+<tr><td>Raw geometry, shipped</td><td>+0.020</td><td>0.240</td><td>46.1</td><td>67.2</td><td>-3.6 [-5.0, 0.0]</td></tr>
+<tr><td>Live 1.45 m warp, shipped</td><td>-0.002</td><td>0.228</td><td>48.7</td><td>70.8</td><td>reference</td></tr>
+<tr><td>Sideways -0.239 m warp, shipped</td><td>-0.094</td><td>0.231</td><td>45.8</td><td>76.6</td><td>+5.8 [-2.1, +8.8]</td></tr>
+<tr><td>No-warp vision adapter</td><td>+0.011</td><td>0.230</td><td>49.4</td><td>67.5</td><td>-3.3 [-5.5, +8.3]</td></tr>
+<tr><td>1.45 m vision adapter</td><td>+0.007</td><td>0.232</td><td>49.7</td><td>73.7</td><td>+2.9 [+0.9, +5.7]</td></tr>
+<tr><td>Unwarped adapter + action loss</td><td>+0.030</td><td>0.229</td><td>38.5</td><td>58.6</td><td>-12.6 [-19.2, -0.6]</td></tr>
+<tr><td>1.45 m adapter + action loss</td><td>+0.042</td><td>0.216</td><td>40.5</td><td>62.6</td><td>-8.8 [-22.5, +3.4]</td></tr>
+</tbody>
+</table>
+<p>In closed loop, supervising immediate steering lateral acceleration on human-driven turns lowered relative push recovery by 8.9 to 11.1 percentage points (from 73.7 % to 62.6 % with the 1.45 m warp, and 67.5 % to 58.6 % on exact geometry), concentrated on rightward pushes. On human-driven roads where sideways error is near zero, matching open-loop steering acceleration to steady-state road curvature dampens off-centre corrective steering; supervising perception and the trajectory plan alone left the frozen policy's corrective response intact (+2.9 points [+0.9, +5.7] over the 1.45 m shipped baseline, and +6.5 points [+3.1, +8.3] over exact geometry, while holding within 0.007 m of centre unpushed against -0.094 m for the sideways picture warp).</p>
+<p>Applied unchanged to comma's 2026-11-05 model (<code>f22e06e5_56320</code>, exact geometry, 4 training drives), validation lane error moved from 0.240 / 0.264 m (model width 2.81 m, wheel on line 8.2 %) to 0.057 [0.043, 0.075] / 0.040 [0.030, 0.049] m (model width 3.28 m vs 3.31 m paint, wheel on line 0.0 %, speed over CAN 0.996 [0.987, 1.003]). Scored once on the 2 locked hold-out drives (2,134 steps, 61 paint frames), the chosen N16 1.45 m adapter gave 0.023 / 0.026 m left / right lane error (against 0.203 / 0.239 m for the 1.45 m shipped baseline and 0.483 / 0.493 m exact), 3.33 m lane width against 3.34 m paint, 0.0 % wheel on line, and 1.013 speed over CAN.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Behaviour on the road. Nothing was installed on the truck; the runtime and tablet carry the output-frame tag in bench tests only.</li>
+<li>Lane-line accuracy on unmarked roads, in rain, or at night where two-band paint stripes were absent (2 of the 10 validation drives had zero strict paint frames and contributed only to path, speed, pose and lead-vehicle checks).</li>
+<li>Whether exact-geometry vision adaptation matches the 1.45 m warp in closed loop when trained on a larger visor-mount corpus or higher rank.</li>
+</ul>
