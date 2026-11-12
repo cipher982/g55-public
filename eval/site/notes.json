@@ -3,23 +3,23 @@
  "notes": [
   {
    "date": "2026-11-11",
-   "title": "Removing CPU warps, cold graph loads and single-GPU limits speeds training and simulation 3x to 107x at parity",
+   "title": "Removing CPU warps, cold graph loads and single-GPU limits speeds training and simulation 2.6x to 107x",
    "slug": "ml-pipeline-speedups",
-   "summary": "Measured before and after on two 230 W 24 GB GPUs with NVLink and 64 CPU cores: memory-mapped graph caching cut model load from 19.64 s to 0.93 s (21.0x); batched vmap in bfloat16 with float32 adapter weights raised step throughput from 11.3 to 200.9 samples/s across 2 GPUs (17.7x) and cut a 4-epoch adapter run on 1 GPU from 3.01 h to 1.15 h (2.6x) at 0.030 / 0.024 m validation lane error; moving simulator splatting, hole fill and camera warps onto CUDA cut render time from 172.2 ms to 5.64 ms/view (30.6x) and 60-episode rollouts to 30.0 s across 2 GPUs (5.9x, 0 episode flips); and memory-mapped 5 Hz drive packs cut random-access model jump-ins from 1,385 ms to 13.0 ms (106.6x, 0.0 difference).",
-   "grade": "Measured on recorded G55 drives and dense closed-loop simulation windows with NVML hardware counters and paired output/recovery checks; reference model-table simulator unchanged.",
-   "result": "17.7x step rate, 5.9x sim rollout, 106.6x jump-in",
+   "summary": "Measured before and after on two 230 W 24 GB GPUs with NVLink and 64 CPU cores: memory-mapped graph caching cut model load from 21.22 s to 1.24 s in FP32 (17.1x, 0.0 diff) and 19.12 s to 1.15 s in BF16 (16.7x); batched vmap in bfloat16 with float32 adapter weights cut a 4-epoch full-corpus adapter run from 3.41 h to 1.26 h (2.7x) within 1.6 mm on all 4,552 validation paint frames, and scaled to 200.3 samples/s across 2 GPUs with NVLink DDP (1.98x vs 1-GPU B=64 accumulation, 0.0 step-1 gradient diff); CUDA splatting, pull-push hole fill and grid_sample warps (cuda_fast) cut render time from 172.2 ms to 5.64 ms/view (30.6x) and 60-episode rollouts to 29.9 s across 2 GPUs (5.9x, matching aggregate recovery while diverging earlier than the CPU reference at trajectory level, onset p = 0.00098); and memory-mapped 5 Hz drive packs cut random-access ORT jump-ins from 1,385 ms to 13.0 ms (106.6x, 0.0 diff after a 149.2 s one-time pack build).",
+   "grade": "Measured on recorded G55 drives and dense closed-loop simulation windows with NVML hardware counters, gradient parity checks and trajectory-equivalence tests; CPU reference simulator unchanged.",
+   "result": "2.7x 4-epoch train, 5.9x sim rollout, 106.6x jump-in",
    "n": "31,555 train steps, 10 val drives, 60 sim episodes",
    "kind": "measured",
    "domain": "p"
   },
   {
    "date": "2026-11-11",
-   "title": "A rank-8 vision adapter puts lane lines within 3 to 6 cm of road paint and keeps push recovery",
+   "title": "A rank-8 vision adapter puts lane lines within 3 to 5 cm of road paint and keeps push recovery when drives are balanced",
    "slug": "camera-rig-adapter",
-   "summary": "Trained on 4 dual-camera visor-mount drives (31,555 steps) with comma's policy frozen and folded back into an ordinary ONNX file, a rank-8 low-rank adapter on N16's vision weights moved validation lane-line error from 0.230 / 0.262 m (1.45 m warp) and 0.505 / 0.517 m (exact geometry) to 0.052 / 0.028 m on 10 unseen drives (0.023 / 0.026 m on 2 locked hold-out drives), and 0.057 / 0.040 m when run unchanged on f22e06e5_56320. In 77-window closed-loop simulation, leaving steering lateral acceleration unsupervised reached 73.7 % relative push recovery (+2.9 points [+0.9, +5.7] over the 1.45 m baseline), whereas supervising open-loop turn acceleration lowered push recovery to 62.6 %.",
-   "grade": "Measured offline on 10 validation and 2 locked hold-out G55 drives and in closed-loop simulation on 77 dense-source windows; nothing deployed to the truck.",
-   "result": "lane error 0.052 / 0.028 m; 73.7 % rel. push recovery",
-   "n": "10 val + 2 hold-out drives, 77 sim windows",
+   "summary": "Trained on 4 dual-camera visor-mount drives with comma's policy frozen and merged back into an ordinary ONNX file, a rank-8 low-rank adapter on N16's vision weights moved full-sequence validation lane-line error across all 10 unseen drives (60,787 steps, 4,552 paint frames) from 0.196 / 0.254 m (1.45 m warp) and 0.488 / 0.505 m (exact geometry) to 0.032 / 0.032 m (0.023 / 0.026 m on 2 locked hold-out drives, and 0.057 / 0.040 m unchanged on f22e06e5_56320). On the same 87 dense closed-loop windows (435 episodes per policy), the balanced 1.45 m adapter reached 71.6 to 72.4 % relative push recovery (+2.3 to +3.2 points over the 1.45 m baseline, +4.6 to +5.5 points over a -0.239 m camera warp while holding within 0.005 to 0.021 m of centre); a 2x2 ablation showed uncapping an 88-minute highway drive (84.5 % of updates) cost 7.5 points of push recovery and open-loop turn supervision cost a further 2.0 points.",
+   "grade": "Measured offline across all 60,787 5 Hz steps of 10 validation drives, 2 locked hold-out drives, an untouched 1,384-to-1,529-frame paint ruler, and 87 paired closed-loop windows; nothing deployed to the truck.",
+   "result": "lane error 0.032 / 0.032 m; 71.6 to 72.4 % rel. recovery",
+   "n": "10 val + 2 hold-out drives, 87 sim windows",
    "kind": "measured",
    "domain": "p"
   },
