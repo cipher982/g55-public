@@ -1,0 +1,41 @@
+<h2>What was asked</h2>
+<p>Three questions about whether a model can use what it has already seen of a road. (1) Is the rig adapter's gain memory of the roads it trained on? (2) Does the driving model's plan error repeat at the same place across different drives? (3) If so, does remembering the speed the driver held at that place lower the error of the model's planned speed? The models are comma's openpilot driving model ("stock") and the same model with a rank-8 vision adapter trained on 4 of the truck's drives ("adapted"). One truck, one driver, open loop.</p>
+<p>The short answer to the third question is yes, and it is route memory. It helps only on road the truck has already driven, and it is not an improvement to the driving model.</p>
+<h2>What was done</h2>
+<p><em>1. Where the adapter's gain comes from.</em> The adapted and stock models were scored on 17 other drives. Each step was grouped by its distance to the paths of the 4 training drives: same road and same direction, same road in the other direction, 15 to 200 m away, and over 200 m away. A second adapter trained for 16 epochs instead of 4 was scored on the roads it trained on.</p>
+<p><em>2. Does error repeat by place?</em> The signed lateral plan error at 4 s was paired between passes of the same place on different drives, and its correlation taken. A control paired each step with a place shifted along the route. A fitted fraction of the earlier pass's error was then subtracted from the adapted model's error.</p>
+<p><em>3. Planned speed ahead.</em> For each step, the speed the driver held at the same place on earlier drives was looked up (within 15 m, same direction, the scored drive always excluded). It was blended with the model's planned speed using a least-squares weight fitted with the scored drive left out. The control took the memory from the same earlier drives but 60 seconds further along the route, which is the wrong place. A "hold" baseline assumes the current speed continues. The stock model was scored on 13 drives and 16,098 steps on repeated road.</p>
+<h2>Result</h2>
+<p><em>1. The adapter's gain is not memory of its training roads.</em> Adapted minus stock, lateral plan error at 4 s (negative is lower error):</p>
+<table>
+<thead><tr><th scope="col">Distance to training drives</th><th scope="col">Adapted minus stock</th><th scope="col">Drives better</th></tr></thead>
+<tbody>
+<tr><td>Same road, same direction</td><td>-0.023 m</td><td>7 of 7</td></tr>
+<tr><td>Same road, other direction</td><td>+0.003 m</td><td>1 of 8</td></tr>
+<tr><td>15 to 200 m away</td><td>-0.040 m</td><td>8 of 12</td></tr>
+<tr><td>Over 200 m away</td><td>-0.017 m</td><td>13 of 17</td></tr>
+</tbody>
+</table>
+<p>The speed-scale gain at time zero holds on every drive in every group, 17 of 17 beyond 200 m. Training 16 epochs instead of 4 did not improve the plan on roads the adapter trained on. A vision adapter has no input that says where it is, so training harder on a road does not make it remember that road.</p>
+<p><em>2. Plan error repeats by place, weakly.</em> The signed lateral plan error at 4 s correlates 0.29 between passes of the same place on different drives, against 0.06 for the shifted-place control. Subtracting a fitted fraction (about 0.4) of the earlier pass's error lowers the adapted model's 4 s lateral error on repeated road by 0.010 m from 0.354 m (9 of 13 drives), and by 0.022 m in turns. This is small.</p>
+<p><em>3. Remembered speed lowers planned speed error.</em> Stock model, planned speed error in m/s on repeated road:</p>
+<table>
+<thead><tr><th scope="col">Horizon</th><th scope="col">Model plan</th><th scope="col">Blend with memory</th><th scope="col">Wrong-place control</th><th scope="col">Hold current speed</th></tr></thead>
+<tbody>
+<tr><td>4 s</td><td>1.03</td><td>0.95</td><td>1.03</td><td>1.76</td></tr>
+<tr><td>6 s</td><td>1.42</td><td>1.25</td><td>1.43</td><td>2.49</td></tr>
+<tr><td>8 s</td><td>1.83</td><td>1.52</td><td>1.85</td><td>3.01</td></tr>
+</tbody>
+</table>
+<p>At 8 s the blend lowers the error by 0.31 m/s (interval -0.50 to -0.12), on 11 of 13 drives. Using only earlier drives recorded at least 12 hours before the scored one, 8 s error falls from 1.82 to 1.56 m/s (10 of 12 drives); at 2 s and 4 s the interval then includes zero. The adapted model shows the same gain: 1.79 to 1.53 m/s at 8 s.</p>
+<p><strong>What it means.</strong> This is route memory. The scorer gives the model no map or navigation input, so the remembered speed most likely supplies what a map would: fixed stops, turn speeds and the habitual route. It helps only on road the truck has already driven. It is not an improvement to the driving model, and no model was trained on it. The branch is parked.</p>
+<p>Two outside model reviews agreed with that reading and added three points. The wrong-place control is weak because moving 60 seconds along the route changes road type. Open-loop speed error can fall by hedging toward an average without the driving being better. Using past traversals as a prior is published work.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Nothing here is closed loop. Lower open-loop speed error has not been shown to drive better.</li>
+<li>Repeated road is about a tenth of the scored distance, so the gains apply to a small share of what was scored.</li>
+<li>One driver and one truck. Memory of one driver's habits says nothing about other drivers.</li>
+<li>The wrong-place control changes road type as well as place, so it does not isolate place cleanly.</li>
+<li>The 12-hour-gap check leaves 12 drives and loses the short-horizon gain.</li>
+<li>Nothing was trained or deployed from this. It is a measurement of what a route-memory input would buy.</li>
+</ul>
