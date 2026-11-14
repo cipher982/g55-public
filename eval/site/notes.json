@@ -3,6 +3,17 @@
  "notes": [
   {
    "date": "2026-11-14",
+   "title": "Given the route on its map input, the frozen model slows a little more before turns, but a corridor that stops at the junction does as much",
+   "slug": "route-on-map-input-planned-speed",
+   "summary": "Open loop on one truck and one driver, no training: the frozen model (as it runs on the truck) rolled out under five navigation map inputs (zeros, roads, a corridor along the current road that stops at the first junction, the driven route, and the route mirrored) on 8 drives, 37,362 steps. At 8 s the route lowers planned-speed error on turn approaches by 0.70 m/s (-1.03 to -0.38, 8 of 8 drives), against 3.53 with zeros. Before braking starts (229 steps) the corridor that stops at the junction does as much (-0.66) as the route (-0.64) and the mirrored route (-0.66), so the effect is not route-specific; the route separates only where the driver is already braking. Part of every gain is that the baseline plan is already 0.5 m/s fast. The first reading, that a route helps anticipation, did not survive two outside reviews. Not run: straight-through and wrong-turn corridors, timing shifts, a corridor-width sweep, a zeros-map adapter baseline. No adapter trained; the branch is parked.",
+   "grade": "Measured open loop on recorded drives of one truck and one driver: 8 drives, 46,844 steps (37,362 with a valid route and speed of 2 m/s or more); the not-yet-braking cells are 229 and 106 steps. No training, no closed-loop run. Two outside-model reviews changed the reading; nothing deployed.",
+   "result": "route turn approaches: 8 s error 3.53 m/s with zeros, -0.70 with the route; before braking the stopping corridor does as much (-0.66 against -0.64), so not route-specific",
+   "n": "8 drives, 37,362 steps; 229 steps before braking starts",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-14",
    "title": "The stock model's planned speed is 2 to 4 m/s fast before route turns the driver has not begun braking for",
    "slug": "planned-speed-error-where",
    "summary": "Open loop on one truck and one driver, no training: three checks on the stock model's planned speed. (1) The earlier metric included the model's error in reading current speed (0.75 m/s on stock). Anchored to measured speed, the 8 s error is 1.331 m/s for stock and 1.293 for the shipped adapter, against 1.823 for holding speed, so the adapter's planned-speed gain is mostly a better reading of current speed. This corrects the route-memory note: the remembered-speed blend lowers 8 s error on repeated road from 1.73 to 1.48 m/s (-0.24 [-0.39, -0.09], 11 of 13 drives), not 1.83 to 1.52. (2) In the step average a route has little room: route turns are 3.2% of steps and about 7% of absolute error, and above 22 m/s the plan is no better than holding speed (per-drive difference +0.006 [-0.124, +0.111] m/s). (3) Per event, before a route turn the driver has not begun braking for, the plan slows about half as much as the driver and is 2 to 4 m/s fast at 8 s (412 steps, 9 drives). Not shown: whether the turns were optional or forced, and the effect of lead vehicles. Next: feed the frozen stock model the planned route and see whether it plans more of the slowing.",

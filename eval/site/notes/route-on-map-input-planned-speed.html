@@ -1,0 +1,43 @@
+<h2>What was asked</h2>
+<p>The previous note found that the stock model's plan is 2 to 4 m/s fast at 8 s before route turns the driver has not begun braking for, with the model's navigation map input left all zeros. Does the frozen model plan more slowing when that input shows the route? Nothing was trained.</p>
+<h2>What was done</h2>
+<p>Ten validation packs from 8 recorded drives of one truck and one driver: 46,844 steps after warm-up, 37,362 with a valid route and a speed of 2 m/s or more. The model's cached camera features were computed with the shipped adapter, so this is the model as it runs on the truck. The policy was rolled out step by step under five map inputs:</p>
+<ul>
+<li><em>zeros</em>: the input all zero, as the earlier tests ran it.</li>
+<li><em>roads</em>: the road network only.</li>
+<li><em>corridor</em>: the roads plus a corridor along the current road, which stops at the first junction.</li>
+<li><em>route</em>: the roads plus a corridor along the path the driver actually took, 200 m ahead, through junctions. It is built from the drive's later positions, and the rendering was checked by eye: it follows mapped roads.</li>
+<li><em>route_wrong</em>: that route mirrored left to right, roads unchanged.</li>
+</ul>
+<p>The plan is anchored to measured speed, as in the previous note. Each difference is against zeros, per drive, with a 95% bootstrap interval over drives (8 drives, 7 where a cell is empty on one).</p>
+<h2>Result</h2>
+<p>Mean absolute planned-speed error at 8 s, in m/s. The zeros column is the error; the others are the change against zeros, with the interval and the number of drives where the error fell.</p>
+<table>
+<thead><tr><th scope="col">Steps</th><th scope="col">n</th><th scope="col">zeros</th><th scope="col">corridor</th><th scope="col">route</th><th scope="col">route_wrong</th></tr></thead>
+<tbody>
+<tr><td>all steps</td><td>37,216</td><td>1.344</td><td>+0.050 [-0.001, +0.122], 2/8</td><td>-0.104 [-0.157, -0.057], 8/8</td><td>-0.090 [-0.138, -0.049], 8/8</td></tr>
+<tr><td>turn in outer reach</td><td>686</td><td>3.53</td><td>-0.20 [-0.68, +0.10], 4/8</td><td>-0.70 [-1.03, -0.38], 8/8</td><td>-0.52 [-0.96, -0.23], 8/8</td></tr>
+<tr><td>... not yet braking</td><td>229</td><td>3.03</td><td>-0.66 [-1.74, -0.02], 6/8</td><td>-0.64 [-1.53, -0.06], 7/8</td><td>-0.66 [-1.61, -0.06], 6/8</td></tr>
+<tr><td>... not yet braking, 10 m/s or more</td><td>106</td><td>4.06</td><td>-0.89, 5/6</td><td>-0.95, 5/6</td><td>-0.84, 4/6</td></tr>
+<tr><td>... already braking</td><td>457</td><td>3.78</td><td>+0.05 [-0.09, +0.19], 3/8</td><td>-0.75 [-1.37, -0.28], 8/8</td><td>-0.48 [-0.65, -0.30], 8/8</td></tr>
+<tr><td>no turn in reach</td><td>35,802</td><td>1.27</td><td>+0.06 [+0.01, +0.15], 2/8</td><td>-0.06 [-0.10, -0.03], 8/8</td><td>-0.07 [-0.13, -0.03], 7/8</td></tr>
+<tr><td>no turn, above 22 m/s</td><td>21,867</td><td>0.89</td><td>-0.02 [-0.13, +0.08], 1/5</td><td>+0.03 [-0.01, +0.06], 2/5</td><td>-0.01 [-0.03, +0.00], 4/5</td></tr>
+</tbody>
+</table>
+<p>Roads alone are slightly worse than zeros on turn approaches (+0.15 m/s, better on 2 of 8 drives). With the route the plan is still 2.2 m/s fast in the outer reach, against 2.7 with zeros.</p>
+<p><strong>Reading after outside review.</strong> The first reading, that this is a first sign a route helps speed anticipation, did not survive two outside reviews.</p>
+<ul>
+<li>In the cell the test was built for (turn ahead, driver not yet braking), the corridor that stops at the junction does as much as the route, and so does the mirrored route. What the frozen model responds to there is a corridor that ends or bends ahead, not the route. The route separates from the corridor only where the driver is already braking, which is not anticipation.</li>
+<li>The mirrored route is a weak control for speed. It also slows the plan where there is no turn (signed error -0.16 m/s on those steps against -0.04 for the route). The plan with zeros is already 0.5 m/s fast, so anything that slows it lowers the error. Part of every gain here is that.</li>
+<li>The all-steps gain (-0.104 per drive at 8 s, 8 of 8 drives) is mostly low-speed steps with no flagged turn, and is half as large pooled over steps (1.344 to 1.293) as per drive. It may come from unflagged events inside the 200 m corridor or from a generic response to corridor pixels. This was not resolved.</li>
+<li>Both reviews said the model was trained with this input, so the conservative statement is that zeros is a degraded condition and restoring the input recovers a little.</li>
+</ul>
+<h2>What it does not show</h2>
+<ul>
+<li>The not-yet-braking cells are 229 steps (46 s) and 106 steps. The right unit is turn events, which were not counted.</li>
+<li>The route is built from the path actually driven, which includes stops and pull-offs a route planner would not produce. This was not audited.</li>
+<li>Controls that were not run: a corridor going straight through the junction where the truck turns, a corridor turning where the truck goes straight, and a turn drawn 50 m early or late. Also not run: a sweep of corridor width and value against the rendering the model was trained with, and an adapter trained on zeros as the baseline for any trained arm.</li>
+<li>Open loop only, 8 drives. Nothing was deployed.</li>
+</ul>
+<h2>Decision</h2>
+<p>No adapter was trained. At best this is the use of an input the model's maker built and later removed, and the effect before braking is not route-specific. The practical meaning is small: once the truck feeds the model a map, expect slightly earlier slowing near junctions, and roads-only rendering does not help. The route-for-speed branch is parked until the controls above are run.</p>
