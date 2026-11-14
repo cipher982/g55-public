@@ -3,6 +3,17 @@
  "notes": [
   {
    "date": "2026-11-14",
+   "title": "The stock model's planned speed is 2 to 4 m/s fast before route turns the driver has not begun braking for",
+   "slug": "planned-speed-error-where",
+   "summary": "Open loop on one truck and one driver, no training: three checks on the stock model's planned speed. (1) The earlier metric included the model's error in reading current speed (0.75 m/s on stock). Anchored to measured speed, the 8 s error is 1.331 m/s for stock and 1.293 for the shipped adapter, against 1.823 for holding speed, so the adapter's planned-speed gain is mostly a better reading of current speed. This corrects the route-memory note: the remembered-speed blend lowers 8 s error on repeated road from 1.73 to 1.48 m/s (-0.24 [-0.39, -0.09], 11 of 13 drives), not 1.83 to 1.52. (2) In the step average a route has little room: route turns are 3.2% of steps and about 7% of absolute error, and above 22 m/s the plan is no better than holding speed (per-drive difference +0.006 [-0.124, +0.111] m/s). (3) Per event, before a route turn the driver has not begun braking for, the plan slows about half as much as the driver and is 2 to 4 m/s fast at 8 s (412 steps, 9 drives). Not shown: whether the turns were optional or forced, and the effect of lead vehicles. Next: feed the frozen stock model the planned route and see whether it plans more of the slowing.",
+   "grade": "Measured open loop on recorded drives of one truck and one driver: 23 drives, 114,375 steps (19 validation drives, 84,869 steps; map context on 10 drives, 60,526 steps). No training, no closed-loop run. Two outside-model reviews changed check 3; nothing deployed.",
+   "result": "anchored 8 s planned-speed error 1.331 m/s (stock); plan is 2 to 4 m/s fast before route turns the driver has not begun braking for",
+   "n": "23 drives, 114,375 steps; 412 steps on 9 drives for the turn approaches",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-14",
    "title": "In closed loop no adapter variant separates from the shipped adapter, and stock is 4 points behind it",
    "slug": "adapter-variants-closed-loop",
    "summary": "Closed loop in the simulator on one truck and one driver: five arms (the shipped rig adapter, two lane-paint-plus-teacher variants without driver labels, an all-terms 2-minute variant, and stock with no adapter) on 30 held-out windows from 6 sessions, each run unpushed and pushed 1.0 and 1.5 m (120 pushed episodes per arm). Pushed recovery is 0.492 for shipped and 0.475 to 0.483 for the variants, with intervals about 6 points wide, so no variant separates from shipped and a loss of up to about 7 points is not excluded. Stock recovers 0.450, 4 points behind. Relative recovery is identical across arms on shared episodes, so these windows cannot separate models this close, and the recipe differences are not read as effects. One seed per arm; the adapter line is closed for the general goal.",

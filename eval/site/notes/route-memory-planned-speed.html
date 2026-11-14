@@ -28,6 +28,7 @@
 </tbody>
 </table>
 <p>At 8 s the blend lowers the error by 0.31 m/s (interval -0.50 to -0.12), on 11 of 13 drives. Using only earlier drives recorded at least 12 hours before the scored one, 8 s error falls from 1.82 to 1.56 m/s (10 of 12 drives); at 2 s and 4 s the interval then includes zero. The adapted model shows the same gain: 1.79 to 1.53 m/s at 8 s.</p>
+<p>Correction, 2026-11-14: the baseline above is the raw plan, which includes the model's error in reading current speed. With the plan anchored to measured speed, 8 s error on repeated road is 1.73 m/s for the plan and 1.48 m/s with the blend, a difference of -0.24 m/s (interval -0.39 to -0.09) on 11 of 13 drives, about a fifth smaller than the 0.31 above. See <a href="planned-speed-error-where.html">where the planned-speed error is</a>.</p>
 <p><strong>What it means.</strong> This is route memory. The scorer gives the model no map or navigation input, so the remembered speed most likely supplies what a map would: fixed stops, turn speeds and the habitual route. It helps only on road the truck has already driven. It is not an improvement to the driving model, and no model was trained on it. The branch is parked.</p>
 <p>Two outside model reviews agreed with that reading and added three points. The wrong-place control is weak because moving 60 seconds along the route changes road type. Open-loop speed error can fall by hedging toward an average without the driving being better. Using past traversals as a prior is published work.</p>
 <h2>What it does not show</h2>

@@ -1,0 +1,57 @@
+<h2>What was asked</h2>
+<p>Where is the driving model's planned-speed error? Earlier notes measured it as a single number and tried to lower it by remembering the speed the driver held at the same place. Before choosing the next branch, three checks were run on the stock model with no training and no GPU: is the metric itself clean, how much of the error sits in the events a route or map could explain, and how does the plan behave in those events one by one. One truck, one driver, open loop.</p>
+<p>The short answer is that the earlier metric included the model's error in reading current speed, that a route has little room in the step average, and that the plan is 2 to 4 m/s fast at 8 s before route turns the driver has not yet begun braking for. The last is a real gap that is small in total.</p>
+<h2>What was done</h2>
+<p>The captures are per-step outputs of the model at 5 Hz on 23 recorded drives (114,375 steps). 19 of those are validation drives (84,869 steps). Map context exists for 10 validation drives (60,526 steps); the map-based splits use only those.</p>
+<ul>
+<li><em>1. Anchoring.</em> The plan's speed at time zero differs from the measured speed. The plan was re-expressed as measured speed plus the plan's speed at horizon h minus its speed at time zero, so that only the planned change in speed is scored.</li>
+<li><em>2. Step average.</em> Steps were grouped by what was within reach of 8 s of driving: a route turn of 30 degrees or more, a mapped stop or signal, a junction, or none of these. Steps were also grouped by current speed, with a hold-current-speed baseline beside the plan.</li>
+<li><em>3. Per event.</em> For each cause, only steps where it lies in the outer 40% of reach were kept, split by whether the driver had already begun braking (acceleration over the past second at or below -0.3 m/s2). The plan's speed change at 8 s was set against the driver's. Per-drive differences are given as the number of drives where the plan was closer than the driver, or faster.</li>
+</ul>
+<p>Two outside model reviews examined a first version of check 3. Both said its claim that the model already predicts 70% of the slowing was inflated: the selection kept steps where the driver was already braking, and a step average buries rare events. Check 3 was redone with the not-yet-braking split.</p>
+<h2>Result</h2>
+<p><em>1. The earlier metric included the model's reading of current speed.</em> The plan's speed at time zero differs from measured speed by 0.75 m/s on stock (3.8%) and by 0.48 m/s on the shipped rig adapter. Mean absolute planned-speed error at 8 s on all 23 drives, in m/s:</p>
+<table>
+<thead><tr><th scope="col">Model</th><th scope="col">Raw</th><th scope="col">Anchored</th><th scope="col">Signed, anchored</th><th scope="col">Hold speed</th></tr></thead>
+<tbody>
+<tr><td>stock</td><td>1.669</td><td>1.331</td><td>+0.10</td><td>1.823</td></tr>
+<tr><td>shipped adapter</td><td>1.492</td><td>1.293</td><td>+0.42</td><td>1.823</td></tr>
+</tbody>
+</table>
+<p>The shipped adapter's planned-speed gain at 8 s is mostly a better reading of current speed: anchored it is 1.29 against 1.33, and no paired test was run. Its anchored plan is 0.3 m/s faster than stock's against the driver. Before route turns it plans less slowing than stock (-2.90 against -3.22 m/s, where the driver's is -4.58). The driver labels on 4 drives did not teach anticipation. Read the adapter's speed claim in earlier notes as "reads current speed better", not "plans speed better".</p>
+<p><strong>Correction to the route-memory note.</strong> That note's baseline was the raw plan. Rerun with the anchored plan as the baseline, 8 s error on repeated road is 1.73 m/s for the plan and 1.48 m/s with the remembered-speed blend, a difference of -0.24 m/s (interval -0.39 to -0.09) on 11 of 13 drives. The note gave 1.83 to 1.52 and -0.31. The result stands and is about a fifth smaller. The branch stays parked.</p>
+<p><em>2. In the step average, a route has little room.</em> Steps with a route turn of 30 degrees or more within reach of 8 s are 3.2% of steps and about 7% of the total absolute error. Mapped stops and signals are under 2% of steps. 79% of steps have no turn, stop, signal or junction in reach. By speed, on the anchored plan at 8 s, with the per-drive difference from hold shown with its 95% interval (negative favours the plan):</p>
+<table>
+<thead><tr><th scope="col">Current speed</th><th scope="col">Steps</th><th scope="col">Drives</th><th scope="col">Plan, m/s</th><th scope="col">Hold, m/s</th><th scope="col">Plan minus hold, per drive</th></tr></thead>
+<tbody>
+<tr><td>2 to 8 m/s</td><td>7,472</td><td>19</td><td>1.889</td><td>3.887</td><td>-1.978 [-2.277, -1.620]</td></tr>
+<tr><td>8 to 15 m/s</td><td>20,655</td><td>19</td><td>1.906</td><td>3.710</td><td>-2.104 [-2.494, -1.764]</td></tr>
+<tr><td>15 to 22 m/s</td><td>15,276</td><td>19</td><td>1.749</td><td>2.170</td><td>-0.397 [-0.594, -0.238]</td></tr>
+<tr><td>above 22 m/s</td><td>41,466</td><td>7</td><td>0.838</td><td>0.771</td><td>+0.006 [-0.124, +0.111]</td></tr>
+</tbody>
+</table>
+<p>Above 22 m/s, which is 49% of validation steps on 7 drives, the plan is no better than holding speed. Below 15 m/s it is closer than hold on 19 of 19 drives and about halves hold's error. Step-weighted means are dominated by the long fast drives.</p>
+<p><em>3. Per event, the plan is late before route turns.</em> 8 s horizon, anchored. The driver's and the plan's columns are the mean change in speed over the horizon, in m/s; the last column is the plan minus the driver, so a positive value means the plan slows less than the driver did.</p>
+<table>
+<thead><tr><th scope="col">Steps selected by cause</th><th scope="col">Steps</th><th scope="col">Drives</th><th scope="col">Driver's change</th><th scope="col">Plan's change</th><th scope="col">Plan minus driver</th></tr></thead>
+<tbody>
+<tr><td>route turn in the outer 40% of reach, already braking</td><td>716</td><td>10</td><td>-7.21</td><td>-5.38</td><td>+1.83 (10 of 10 drives)</td></tr>
+<tr><td>same, not yet braking</td><td>412</td><td>9</td><td>-5.58</td><td>-3.32</td><td>+2.26 (7 of 9)</td></tr>
+<tr><td>same, not yet braking, speed 10 m/s or more</td><td>190</td><td>8</td><td>-6.85</td><td>-3.23</td><td>+3.63 (7 of 8)</td></tr>
+<tr><td>stop or signal in outer reach, not yet braking</td><td>301</td><td>9</td><td>-2.88</td><td>-2.25</td><td>+0.63 (7 of 9)</td></tr>
+<tr><td>no route turn, map curvature ahead needs 3 m/s less than current speed, not yet braking</td><td>4,310</td><td>9</td><td>-0.33</td><td>+0.19</td><td>+0.53 (9 of 9)</td></tr>
+</tbody>
+</table>
+<p>With no route, the model plans about half of the slowing for a turn the driver has not yet begun braking for, and is 2 to 4 m/s fast at 8 s. That is 412 steps, 82 s of driving, on 9 drives: a real event-level gap that is small in total.</p>
+<p><strong>What it means.</strong> The step-average reading, that a route has little to add, is replaced by the event-level one. The shipped adapter's speed claim is a claim about reading current speed. Whether a route input helps is open and is the next test.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Whether the turns were optional (the road continued straight) or forced (the camera can see a T junction or bend). The map context has no field for that and it was not split.</li>
+<li>Lead vehicles are not in the captures, so whether the rest of the error is the driver and traffic is untested. Both reviews said so.</li>
+<li>The curvature threshold (2.0 m/s2) was picked once and not varied.</li>
+<li>The anchoring is additive. A multiplicative version changes the totals by under 0.03 m/s.</li>
+<li>10 of 19 validation drives have map context. Whether the other 9 differ in road type was not checked.</li>
+<li>Open loop only. Nothing was trained or deployed.</li>
+</ul>
+<h2>What is tested next</h2>
+<p>Whether the frozen stock model, given the planned route on its existing navigation inputs, plans more of the slowing on the not-yet-braking turn approaches. The test runs on these validation drives, roads the model never trained on. Map or route for speed is not closed.</p>
