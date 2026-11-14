@@ -1,0 +1,37 @@
+<h2>What was asked</h2>
+<p>The shipped rig adapter (a rank-8 vision LoRA trained on 4 drives for 4 epochs, described in the earlier adapter note) was trained with five loss terms at once. Which term buys which result, and how little driving does a port need? This note is a measured account of the adapter recipe. No variant beats the shipped adapter on anything except turn gain, where the cost is plan error and speed error. It is not a method that improves comma's model.</p>
+<h2>What was done</h2>
+<p>27 training runs and 3 stock scorings, all scored open loop on the same 17 validation drives (the 10 of the earlier table plus 7 that arrived since). Numbers are step-weighted means over those 17 drives, or paint-frame-weighted for lane metrics. One seed unless stated. No closed-loop score was run. Retraining the shipped recipe from the shipped cache reproduces the shipped adapter's scores to four decimals on every metric.</p>
+<p>The lane truth is the same classical paint detector that made the training labels. It is scored only on straight, clearly painted frames at 8 to 12 m. Training and validation drives are disjoint by session, not by road.</p>
+<p>Two outside-model reviews of a first draft found and led to fixes: lane-plus-teacher rows had been averaged over 19 drives against 17 for the rest; lane metrics had been weighted by scored steps where the scorer uses paint frames; stock's lane error included the camera offset; and "lower is better" had been printed for turn gain, which is a slope.</p>
+<h2>Result</h2>
+<p><em>1. The lane fix is mostly geometry and needs no driver labels.</em></p>
+<ul>
+<li>Stock scored as on the truck before the adapter (road plane 1.78/1.45): right lane line 0.49 m from the paint, 0.25 m after adding the known 0.239 m camera offset. Lane width 2.93 m against about 3.3 m painted.</li>
+<li>Stock with no training, fed the teacher's warp (road plane 1.80/1.22) and shifted by the camera offset: right 0.042 m, left 0.086 m, wheels on a line 0.4% of paint frames. The shipped adapter: 0.034 m, 0.039 m, 0.3%. So an input warp plus a constant shift gets most of the lane result. It is not a usable port: on that warp stock's 4 s plan error is 0.420 m (0.376 m on the normal warp), speed error 6.9% (3.6%), and its pose speed reads 5.8% high.</li>
+<li>4 drives, lane paint plus teacher, no driver labels: right 0.034 m, left 0.040 m, the same as shipped. Two minutes of one continuous stretch with the same terms: right 0.08 to 0.09 m (two seeds), and 0.12 m and 0.18 m from two other stretches. 30 s: 0.14 m.</li>
+<li>Teacher alone (copy stock's outputs from the teacher warp) moves the right line only to 0.37 m, with or without the mask fix described below. Lane-paint labels are what place the lines.</li>
+</ul>
+<p><em>2. The shipped adapter's plan and speed gains come from the driver's path and speed labels.</em></p>
+<table>
+<thead><tr><th scope="col">Training terms (shipped data)</th><th scope="col">Plan error at 4 s</th><th scope="col">Speed error</th></tr></thead>
+<tbody>
+<tr><td>Stock (no adapter)</td><td>0.376 m</td><td>3.6%</td></tr>
+<tr><td>Full recipe (shipped)</td><td>0.352 m</td><td>2.1%</td></tr>
+<tr><td>Without path and speed labels, with CAN speed and yaw (pose)</td><td>0.371 m</td><td>3.7%</td></tr>
+<tr><td>Lane paint plus teacher only</td><td>0.384 m</td><td>4.9%</td></tr>
+</tbody>
+</table>
+<p>With lane paint plus teacher only, the plan is worse than stock on 16 of 17 drives. On the 7 newest drives alone the shipped plan gain is -0.011 m [-0.042, +0.001], on 4 of 7 drives; the speed gain holds on 7 of 7.</p>
+<p><em>3. Those labels also lower turn gain.</em> Plan lateral acceleration over the driver's in turns (1.0 is the driver; this is a slope, not a score with a better direction): stock 0.853, shipped 0.829 (lower on 14 of 17 drives), lane paint plus teacher plus pose 0.855, lane paint plus teacher 0.872. Whether 0.83 against 0.85 matters in closed loop is not known.</p>
+<p><em>4. The damage from two minutes of data came from over-training, not from the driver labels.</em> Full recipe on one 2-minute stretch, held to the shipped run's optimizer steps (63 epochs): plan 0.468 m, speed 8.1% (second seed 0.439 m, 8.8%). The same stretch at 6 epochs: plan 0.378 m, speed 2.9% (better than stock on 15 of 17 drives), right lane 0.12 m. A 2-minute stretch of another drive at 63 epochs did no damage (0.394 m, 2.8%). An earlier reading, that driver labels damage plan and speed on little data, was wrong: those arms confounded the label terms with 63 to 284 passes over one clip.</p>
+<p><em>5. Lead distance.</em> Every adapter's lead distance differs from stock's by 2 to 6 m. Stock on the teacher warp differs from stock on the normal warp by 2.59 m, and the shipped adapter by 2.61 m, so the shipped gap comes from the warp the teacher was run on. Over-trained small-data arms reach 5 to 6 m, which is damage. There is no lead truth on these drives, so which warp gives the truer range is not known.</p>
+<p><em>6. A gap in the loss that did not matter.</em> The per-sample loss turns the teacher off on any output that has a label, even when that label's weight is 0. Handing those outputs back to the teacher changes nothing measurable in the shipped recipe (same scores to four decimals; the static teacher mask already drops the turn columns) and little in the others. The recipe code was not changed.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>It is open loop only, on 17 validation drives, mostly one seed. No closed-loop score was run on these checkpoints.</li>
+<li>The lane truth is the same paint detector that made the training labels, scored only on straight, clearly painted frames at 8 to 12 m.</li>
+<li>Training and validation drives are disjoint by session, not by road.</li>
+<li>Reviewers named three tests that were not run: closed-loop bench8 on these checkpoints, an affine fit on 30 s of paint labels applied to stock outputs, and three seeds by three windows.</li>
+<li>Nothing here is new as a principle: distillation to hold unlabelled outputs is Learning without Forgetting (2016).</li>
+</ul>

@@ -2,6 +2,17 @@
  "_doc": "Work notes on the site, newest first by date. Each: date, title, slug, summary, grade (measured, derived, borrowed or hypothetical, and where); the body is site/notes/<slug>.html.",
  "notes": [
   {
+   "date": "2026-11-14",
+   "title": "The rig adapter's lane fix is mostly geometry; its plan and speed gains need the driver's labels, and two minutes of data over-trains",
+   "slug": "rig-adapter-loss-terms",
+   "summary": "A measured account of the adapter recipe: 27 training runs and 3 stock scorings, open loop on 17 validation drives, mostly one seed. Stock fed the teacher's warp and shifted by the 0.239 m camera offset reaches right lane 0.042 m and left 0.086 m from paint (shipped adapter 0.034 m, 0.039 m), but its 4 s plan error is 0.420 m. Lane paint plus teacher with no driver labels matches the shipped lane result (0.034 m, 0.040 m). The shipped plan (0.352 m against stock 0.376 m) and speed (2.1% against 3.6%) gains need the path and speed labels, which also lower turn gain (0.829 against 0.853). Two minutes of one stretch over-trained at 63 epochs (plan 0.468 m, speed 8.1%) and did not at 6 epochs (0.378 m, 2.9%). No variant beats the shipped adapter except on turn gain. The lane truth is the same paint detector that made the training labels.",
+   "grade": "Measured open loop on 17 validation drives of recorded G55 drives, mostly one seed, no closed-loop run; lane truth is the same classical paint detector that made the training labels, scored on straight, clearly painted frames at 8 to 12 m. Two outside-model reviews; nothing deployed to the truck.",
+   "result": "no variant beats the shipped adapter; lane 0.034 / 0.039 m, plan 0.352 m, speed 2.1%",
+   "n": "27 training runs, 17 val drives",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
    "date": "2026-11-11",
    "title": "Removing CPU warps, cold graph loads and single-GPU limits speeds training and simulation 2.6x to 107x",
    "slug": "ml-pipeline-speedups",
