@@ -3,6 +3,17 @@
  "notes": [
   {
    "date": "2026-11-14",
+   "title": "In closed loop no adapter variant separates from the shipped adapter, and stock is 4 points behind it",
+   "slug": "adapter-variants-closed-loop",
+   "summary": "Closed loop in the simulator on one truck and one driver: five arms (the shipped rig adapter, two lane-paint-plus-teacher variants without driver labels, an all-terms 2-minute variant, and stock with no adapter) on 30 held-out windows from 6 sessions, each run unpushed and pushed 1.0 and 1.5 m (120 pushed episodes per arm). Pushed recovery is 0.492 for shipped and 0.475 to 0.483 for the variants, with intervals about 6 points wide, so no variant separates from shipped and a loss of up to about 7 points is not excluded. Stock recovers 0.450, 4 points behind. Relative recovery is identical across arms on shared episodes, so these windows cannot separate models this close, and the recipe differences are not read as effects. One seed per arm; the adapter line is closed for the general goal.",
+   "grade": "Measured in simulation on recorded G55 drives: 30 held-out windows from 6 sessions, one training seed per arm, no per-episode rows saved, session intervals use 6 clusters. Two outside-model reviews; nothing deployed to the truck.",
+   "result": "no variant separates from shipped (recovered 0.475 to 0.483 against 0.492); stock 0.450",
+   "n": "30 windows, 120 pushed episodes per arm",
+   "kind": "simulation",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-14",
    "title": "Remembering a road helps planned speed, but it is route memory",
    "slug": "route-memory-planned-speed",
    "summary": "Open loop on one truck and one driver. The rig adapter's gain is not memory of its training roads: adapted minus stock lateral plan error at 4 s is -0.017 m on roads over 200 m from the training drives, and the time-zero speed-scale gain holds on 17 of 17 drives there. Training 16 epochs instead of 4 did not improve the plan on trained roads. Plan error repeats weakly by place (correlation 0.29 against 0.06 for a shifted control). Blending the speed the driver held at the same place on earlier drives into stock's planned speed lowers 8 s speed error from 1.83 to 1.52 m/s on 11 of 13 drives. This is route memory: it helps only on road already driven, and it is not an improvement to the driving model. Two outside model reviews agreed. No model was trained on it and the branch is parked.",

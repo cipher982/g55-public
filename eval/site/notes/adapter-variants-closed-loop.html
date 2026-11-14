@@ -1,0 +1,39 @@
+<h2>What was asked</h2>
+<p>An earlier open-loop study compared several recipes for the rig adapter, the small vision adapter trained on the truck's drives and merged into comma's openpilot driving model. It did not say whether the variants drive differently in closed loop. Two questions follow. Does a camera port need the driver's labels? Does it need more than two minutes of data? One truck, one driver, one training seed per arm.</p>
+<p>The short answer is that no variant separates from the shipped adapter on this test. The question as asked is not answered.</p>
+<h2>What was done</h2>
+<p>Five arms were driven in the closed-loop simulator on 30 held-out windows from 6 recorded sessions. Each window was run unpushed and pushed 1.0 m and 1.5 m to each side, which gives 30 unpushed and 120 pushed episodes per arm. Map and navigation inputs were zero. The variant models were rebuilt from their saved adapters and their file hashes match the records made at training time.</p>
+<ul>
+<li><em>shipped</em>: the adapter as deployed. It was run twice, in two shards, and gave identical numbers.</li>
+<li><em>lanes_teacher_4drives</em>: lane paint plus teacher terms, no driver labels, 4 drives.</li>
+<li><em>lanes_teacher_2min</em>: the same terms on one 2-minute stretch.</li>
+<li><em>full_2min_6ep</em>: all terms, the same 2 minutes, 6 epochs.</li>
+<li><em>stock</em>: comma's model with no adapter.</li>
+</ul>
+<p>Differences are arm minus shipped, paired by window, with a 95% bootstrap interval over the 30 windows. The first launch was killed at a memory cap, and the rerun at a higher cap finished clean.</p>
+<h2>Result</h2>
+<p>Pushed episodes (120 per arm). Brackets are 95% intervals for the difference from shipped.</p>
+<table>
+<thead><tr><th scope="col">Arm</th><th scope="col">Recovered</th><th scope="col">Departure</th><th scope="col">Lane error, m</th><th scope="col">Touched a line</th></tr></thead>
+<tbody>
+<tr><td>shipped</td><td>0.492</td><td>0.158</td><td>0.829</td><td>0.617</td></tr>
+<tr><td>lanes_teacher_4drives</td><td>0.483 (-0.008 [-0.067, +0.050])</td><td>0.167</td><td>0.894 (+0.065 [+0.012, +0.136])</td><td>0.600</td></tr>
+<tr><td>lanes_teacher_2min</td><td>0.475 (-0.017 [-0.075, +0.042])</td><td>0.158</td><td>0.817 (-0.012 [-0.109, +0.079])</td><td>0.592</td></tr>
+<tr><td>full_2min_6ep</td><td>0.483 (-0.008 [-0.075, +0.058])</td><td>0.175</td><td>0.870 (+0.040 [-0.019, +0.104])</td><td>0.658 (+0.042 [0.000, +0.083])</td></tr>
+<tr><td>stock</td><td>0.450 (-0.042 [-0.083, -0.008])</td><td>0.167</td><td>0.856 (+0.027 [-0.028, +0.081])</td><td>0.600</td></tr>
+</tbody>
+</table>
+<p>Unpushed, lane error is 0.225 m for shipped, 0.238 m for stock and 0.247 to 0.248 m for the three variants. No arm departs the lane unpushed. Speed error is 0.83 to 0.90 m/s in every arm. At the 1.0 m push alone, stock is 6.7 points behind shipped on recovered ([-0.133, -0.017]). At 1.5 m every arm touches a line in 90% or more of episodes, and recovered differs by one episode in 60.</p>
+<p><strong>What it means.</strong> No variant separates from shipped on recovery or departure. The intervals are about 6 points wide, so a loss of up to about 7 points is not excluded. Stock is 4 points behind shipped on pooled recovery and about 7 points behind at the 1.0 m push, with nothing on departure. That fits the open-loop study, where the adapter's large gain was lane-line placement and its plan gain was 0.024 m at 4 s.</p>
+<p>Relative recovery is the same in every arm on the episodes both arms share. The paired difference prints +0.000 [0, 0] for every variant against shipped except one: for full_2min_6ep it is -0.020, from two episodes. The pooled rates differ only because different episodes are defined in different arms. Whether an episode recovers is set by the window more than by which of these five models drives, so these 30 windows cannot separate models that differ by as little as these do.</p>
+<p>The recipe differences are not read as effects. The +0.065 m pushed lane error, the +4.2 points of line contact and the +0.02 m unpushed lane error for every variant come from about 150 intervals, one seed and one shared baseline run. The 2-minute arm also beats the 4-drive arm on pushed lane error, which is not the order that more data would give. A separate result from the same study sets the bench's sensitivity: when turn supervision was added earlier, relative recovery moved by 9 to 11 points on these windows. The bench can see a change of that size, so the better reading is that these adapters differ little in closed-loop recovery.</p>
+<p>Two outside model reviews examined the first reading of these numbers. Both rejected an early summary that the bench "barely sees the adapter", because it confuses an insensitive bench with a small effect. The adapter line is closed for the goal of improving comma's model in general: a camera port for one truck cannot show that, and stock already scores close to shipped here.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>One training seed per arm and one shared baseline run.</li>
+<li>Session intervals use 6 clusters and are narrower than they should be.</li>
+<li>The run saved no per-episode rows, so left against right pushes and agreement on the other verdicts cannot be tabulated without a rerun. It was not rerun.</li>
+<li>Whether stock sits nearly in distribution in the simulator with the camera warp set to zero was not checked.</li>
+<li>Not run: a degraded-arm control, an affine baseline, and three seeds on three window sets.</li>
+<li>Nothing was deployed to the truck.</li>
+</ul>
