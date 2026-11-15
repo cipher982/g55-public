@@ -1,7 +1,7 @@
 <h2>What was asked</h2>
 <p>An earlier open-loop study of the truck's camera adapter found that the shipped adapter lowers the turn gain (the plan's lateral acceleration over the driver's) a little: 0.853 for the stock model, 0.829 for the shipped adapter, 0.872 for a variant trained on lane paint with a teacher and without the driver's path labels. It left open whether that matters when the model drives. In closed loop, where does each of the three sit in turns?</p>
 <h2>What was done</h2>
-<p>The turn measure from the delay-request note was applied to the stock model and to the variant (lane paint + teacher, trained on 4 drives), on the same closed-loop bench, settings and 30 validation windows, one seed, from per-step traces. The measure is the offset to the outside of the driver's recorded path, on the steps where the shipped adapter's unpushed run commands 0.7 m/s&sup2; or more. 9 of the 30 windows, from 3 drives, have such steps. Differences are against the shipped adapter, paired by window, with 95% intervals over windows. A third variant (lane paint + teacher + pose) was not run.</p>
+<p>The turn measure from the delay-request note was applied to the stock model and to the variant (lane paint + teacher, trained on 4 drives), on the same closed-loop bench, settings and 30 validation windows, one seed, from per-step traces. The measure is the offset to the outside of the driver's recorded path, on the steps where the shipped adapter's unpushed run commands 0.7 m/s&sup2; or more. 9 of the 30 windows, from 3 drives, have such steps. Differences are against the shipped adapter, paired by window, with 95% intervals over windows. Two more variants were run later the same day and are in the addendum below.</p>
 <h2>Result</h2>
 <table>
 <thead><tr><th scope="col">Model</th><th scope="col">Outside of the path in turns (m)</th><th scope="col">Difference</th><th scope="col">Windows further inside than shipped</th><th scope="col">Distance from path, straight steps (m)</th><th scope="col">Push displacement at 2 s (m)</th><th scope="col">Difference</th></tr></thead>
@@ -12,6 +12,16 @@
 </tbody>
 </table>
 <p>The shipped adapter does not run wider than the stock model in turns; the interval of the difference spans zero. The variant with the highest open-loop turn gain runs widest, 15 cm further out than the shipped adapter, and is wider on all nine windows. So the open-loop turn gain did not predict closed-loop turn tracking here. The driver's path labels in the shipped recipe, which the variant lacks, are what keep the truck on the driver's line in turns. An earlier closed-loop score could not separate these variants on recovery; this measure does.</p>
+<h2>Addendum: two more variants</h2>
+<p>Two more models were traced the same way, on the same bench, windows and settings: the shipped recipe trained for 16 epochs (four times the training, on the same four drives), and a variant trained on lane paint + teacher + pose labels (also on the 4 drives), still without the driver's path labels. Differences are against the shipped adapter, paired by window, with 95% intervals over windows.</p>
+<table>
+<thead><tr><th scope="col">Model</th><th scope="col">Outside of the path in turns (m)</th><th scope="col">Difference vs shipped</th><th scope="col">Windows further inside than shipped</th><th scope="col">Push displacement at 2 s (m)</th><th scope="col">Difference</th></tr></thead>
+<tbody>
+<tr><td>shipped recipe, 16 epochs</td><td>0.213</td><td>+0.014 [-0.026, +0.059]</td><td>3 of 9</td><td>0.657</td><td>+0.024 [+0.015, +0.032]</td></tr>
+<tr><td>lane paint + teacher + pose</td><td>0.275</td><td>+0.075 [+0.057, +0.095]</td><td>0 of 9</td><td>0.632</td><td>-0.001 [-0.009, +0.007]</td></tr>
+</tbody>
+</table>
+<p>Offset to the outside of the path in turns, lowest to highest, for all five models: shipped adapter (0.199 m), shipped recipe at 16 epochs (0.213 m), stock model (0.231 m), lane paint + teacher + pose (0.275 m), lane paint + teacher without driver labels (0.345 m). The driver's path labels are the term that matters for this measure. Adding pose labels to the variant recovers about half of the gap to the shipped adapter. Four times the training on the same drives adds nothing in turns (the interval spans zero) and costs about 2 cm of push displacement at 2 s. This was a quick signal test for training longer to track turns better; it showed no signal, so no longer run was started. The limits above apply: nine windows from three drives, one seed, the driver's path as the reference, a simulated vehicle, nothing deployed, no outside review.</p>
 <h2>What it does not show</h2>
 <ul>
 <li>Scale: nine windows from three drives, one seed, a simulated vehicle.</li>
