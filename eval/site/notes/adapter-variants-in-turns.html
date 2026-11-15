@@ -1,0 +1,21 @@
+<h2>What was asked</h2>
+<p>An earlier open-loop study of the truck's camera adapter found that the shipped adapter lowers the turn gain (the plan's lateral acceleration over the driver's) a little: 0.853 for the stock model, 0.829 for the shipped adapter, 0.872 for a variant trained on lane paint with a teacher and without the driver's path labels. It left open whether that matters when the model drives. In closed loop, where does each of the three sit in turns?</p>
+<h2>What was done</h2>
+<p>The turn measure from the delay-request note was applied to the stock model and to the variant (lane paint + teacher, trained on 4 drives), on the same closed-loop bench, settings and 30 validation windows, one seed, from per-step traces. The measure is the offset to the outside of the driver's recorded path, on the steps where the shipped adapter's unpushed run commands 0.7 m/s&sup2; or more. 9 of the 30 windows, from 3 drives, have such steps. Differences are against the shipped adapter, paired by window, with 95% intervals over windows. A third variant (lane paint + teacher + pose) was not run.</p>
+<h2>Result</h2>
+<table>
+<thead><tr><th scope="col">Model</th><th scope="col">Outside of the path in turns (m)</th><th scope="col">Difference</th><th scope="col">Windows further inside than shipped</th><th scope="col">Distance from path, straight steps (m)</th><th scope="col">Push displacement at 2 s (m)</th><th scope="col">Difference</th></tr></thead>
+<tbody>
+<tr><td>shipped adapter</td><td>0.199</td><td></td><td></td><td>0.170</td><td>0.633</td><td></td></tr>
+<tr><td>stock</td><td>0.231</td><td>+0.031 [-0.046, +0.100]</td><td>2 of 9</td><td>0.171</td><td>0.612</td><td>-0.021 [-0.030, -0.013]</td></tr>
+<tr><td>lane paint + teacher</td><td>0.345</td><td>+0.146 [+0.109, +0.184]</td><td>0 of 9</td><td>0.171</td><td>0.623</td><td>-0.011 [-0.021, +0.001]</td></tr>
+</tbody>
+</table>
+<p>The shipped adapter does not run wider than the stock model in turns; the interval of the difference spans zero. The variant with the highest open-loop turn gain runs widest, 15 cm further out than the shipped adapter, and is wider on all nine windows. So the open-loop turn gain did not predict closed-loop turn tracking here. The driver's path labels in the shipped recipe, which the variant lacks, are what keep the truck on the driver's line in turns. An earlier closed-loop score could not separate these variants on recovery; this measure does.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Scale: nine windows from three drives, one seed, a simulated vehicle.</li>
+<li>Anything about the lane centre. The reference is the driver's path, and a variant trained toward that path is expected to sit closer to it.</li>
+<li>Any change on the truck: nothing is deployed, and the shipped adapter stays.</li>
+<li>Outside review. None, because the result confirms the shipped choice and claims no improvement.</li>
+</ul>
