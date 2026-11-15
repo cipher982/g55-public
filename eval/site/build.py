@@ -70,6 +70,14 @@ def esc(x) -> str:
     return html.escape("" if x is None else str(x), quote=True)
 
 
+def safe_json_str(raw: str) -> str:
+    return raw.replace("<", "\\u003c").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
+
+
+def safe_json(obj) -> str:
+    return safe_json_str(json.dumps(obj))
+
+
 # ---------------------------------------------------------------- numbers
 
 def decimals_for(v) -> int:
@@ -440,7 +448,7 @@ def hero_visual(models, cfg) -> str:
 <figcaption><p><strong>One public segment in closed loop.</strong> Each model drove comma's ideal car for 7.2 s from the same recorded start while <code>worldmodel-4B</code> generated the camera view it saw. Recorded shows the drive as logged. Dashed yellow is the driver's path, solid is the model's own, the ring is where each is at 2 s. Distance from the driver's path at 2 s: {esc(names2)}.</p>
 <p class="cl-how"><code>worldmodel-4B</code> generates one {fw}&times;{fh} frame per 0.2 s step, 5 frames per second. The frames are shown at that resolution, scaled to the screen by the browser, with no frames added between them. The page draws the paths, rings and distances from the logged positions, moving between the 0.2 s steps.</p>
 <p class="cl-how">Segment <code>{esc(h["segment"])}</code> from comma's public CI data, at {num(h["v0"], 1)} m/s on a left curve, chosen because it is the segment where these three models differ most at 2 s. On every other segment all three are within 0.35 m of the driver's path at 2 s. Seed {h["seed"]} of the two the scores average, re-run to keep the frames; its paths are within 0.15 m of the scored run.</p></figcaption>
-<script type="application/json" id="cl-data">{data}</script>
+<script type="application/json" id="cl-data">{safe_json_str(data)}</script>
 </figure>"""
 
 
@@ -1809,7 +1817,7 @@ def inside_page(m, models, clips: list[Path], root: Path, out: Path) -> str:
     share = (pooled or {}).get("rows", {}).get("top1_cell_row_share")
     rows_line = (f"<p>The bottom row, the road closest to the car, holds the square that moves the steering most in {share[3]} of {sum(share)} frames.</p>"
                  if share else "")
-    data = json.dumps({"clips": [{"dir": f"{mid}/{c['segment']}", "segment": c["segment"], "car": c["car"]} for c in meta]})
+    data = safe_json({"clips": [{"dir": f"{mid}/{c['segment']}", "segment": c["segment"], "car": c["car"]} for c in meta]})
     picker = "".join(f'<button type="button" data-clip="{i}"{" aria-pressed=\"true\"" if i == 0 else " aria-pressed=\"false\""}>{esc(car_name(c["car"]))}<span>{esc(c["segment"])}</span></button>' for i, c in enumerate(meta))
     return f"""<p class="crumb"><a href="index.html">Inside the models</a> / <a href="../models/{esc(mid)}.html">{esc(plain_name(m))}</a></p>
 <section class="lead"><h1>What {esc(model_phrase(m))} looks at when it steers</h1>

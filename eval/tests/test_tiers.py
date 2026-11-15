@@ -220,3 +220,18 @@ def test_feed_ids_are_the_same_on_every_build(built, tmp_path):
     assert r.returncode == 0, r.stderr[-3000:]
     guids = lambda d: re.findall(r"<guid[^>]*>([^<]+)</guid>", (d / "feed.xml").read_text())
     assert guids(built) and guids(built) == guids(out)
+
+
+def test_site_escapes_inline_json_and_avoids_innerhtml():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("eval_site_build", EVAL / "site" / "build.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    payload = {"tag": "</script><img onerror=alert(1)>"}
+    escaped = mod.safe_json(payload)
+    assert "<" not in escaped
+    assert json.loads(escaped) == payload
+
+    site_js = (EVAL / "site" / "static" / "site.js").read_text()
+    assert "innerHTML" not in site_js

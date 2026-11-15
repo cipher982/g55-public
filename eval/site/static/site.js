@@ -112,8 +112,12 @@
     const key = `${view}:${fi >> 1}`;
     if (key !== last) {
       last = key;
-      const sw = `<i class="sw sw-${d.cls[view]}"></i>`;
-      lab.innerHTML = view === "rec" ? `${sw}${d.names.rec}` : `${sw}${d.names[view]} · ${ f < d.history ? "0.00 m" : `${dist(view, p).toFixed(2)} m`}`;
+      const sw = document.createElement("i");
+      sw.className = `sw sw-${d.cls[view]}`;
+      const text = view === "rec"
+        ? d.names.rec
+        : `${d.names[view]} · ${f < d.history ? "0.00 m" : `${dist(view, p).toFixed(2)} m`}`;
+      lab.replaceChildren(sw, document.createTextNode(text));
       time.textContent = f < d.history ? `history ${(f / d.fps).toFixed(1)} s` : `${(p / d.fps).toFixed(1)} / ${((d.steps - 1) / d.fps).toFixed(1)} s`;
     }
     for (const m of models) reads[m].textContent = `${(f < d.history ? 0 : dist(m, p)).toFixed(2)} m`;
@@ -215,7 +219,9 @@
   const clips = JSON.parse(raw.textContent).clips;
   const imgs = { n: box.querySelector('img[data-view="n"]'), w: box.querySelector('img[data-view="w"]') };
   const grids = { n: box.querySelector('[data-grid="n"]'), w: box.querySelector('[data-grid="w"]') };
-  for (const g of Object.values(grids)) g.innerHTML = "<i></i>".repeat(32);
+  for (const g of Object.values(grids)) {
+    g.replaceChildren(...Array.from({ length: 32 }, () => document.createElement("i")));
+  }
   const cells = { n: [...grids.n.children], w: [...grids.w.children] };
   const scrub = box.querySelector(".xv-scrub"), read = box.querySelector(".xv-read"), play = box.querySelector(".xv-play");
   const svg = box.querySelector(".xv-trace svg"), cv = box.querySelector(".xv-rows canvas"), ctx = cv.getContext("2d");
@@ -251,7 +257,18 @@
     const path = (key) => F.map((f, k) => (f[key] === null || f[key] === undefined ? null : `${((k / (n - 1)) * 1000).toFixed(1)},${y(f[key])}`)).filter(Boolean).join(" ");
     const sc = box.querySelector(".xv-scale");
     if (sc) sc.textContent = `grey line: 0; top and bottom edges: ±${lim.toFixed(1)} m/s², left positive`;
-    svg.innerHTML = `<line class="z" x1="0" x2="1000" y1="60" y2="60"/><polyline class="pr" points="${path("a_lat_meas")}"/><polyline class="pm" points="${path("a_lat")}"/><line class="cur" x1="0" x2="0" y1="0" y2="120"/>`;
+    const svgNs = "http://www.w3.org/2000/svg";
+    const mk = (tag, attrs) => {
+      const el = document.createElementNS(svgNs, tag);
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+      return el;
+    };
+    svg.replaceChildren(
+      mk("line", { class: "z", x1: "0", x2: "1000", y1: "60", y2: "60" }),
+      mk("polyline", { class: "pr", points: path("a_lat_meas") }),
+      mk("polyline", { class: "pm", points: path("a_lat") }),
+      mk("line", { class: "cur", x1: "0", x2: "0", y1: "0", y2: "120" }),
+    );
   };
 
   const rows = () => {
