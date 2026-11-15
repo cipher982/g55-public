@@ -1,0 +1,50 @@
+<h2>What was asked</h2>
+<p>comma's driving policy outputs a base action plus a learned correction that passes through a tanh, so the correction is bounded at 1 m/s&sup2;. The two are summed into one lateral-acceleration request. We split the exported model so each step gives the two parts separately, with the driving outputs unchanged (checked). What does each part do, first when the bench imposes a turn on a simulated vehicle, and then at turns the driver actually made on recorded drives?</p>
+<h2>What was done</h2>
+<p><strong>Push bench</strong> (simulated vehicle, 30 validation windows from recorded drives of one truck and one driver). Each pushed episode is compared with the same window unpushed. Only the first five steps of the push are used, while the bench is turning the vehicle one way. Of the 30 windows, 5 are under 10 m/s and 17 are at 18 m/s and over; 60 pushed episodes per push size. Signs: + means steering with the imposed turn.</p>
+<p><strong>Real driving, open loop.</strong> The same split model was run over 17 held-out drives (74,032 steps) with the stock model and with the truck's camera adapter. The request is compared with the lateral acceleration the truck had 0.5 s later (speed times yaw rate from the vehicle's CAN data). The scorer drops steps under 5 m/s, so "under 10 m/s" means 5 to 10 m/s, and no route is fed to the model.</p>
+<p>The main table counts whole turn events: runs of steps where the base asks 1 m/s&sup2; or more, widened by 1 s each way. The request and the driver's lateral acceleration are each summed over the event, so a time shift inside the event does not matter. Intervals are 95% over drives.</p>
+<h2>Result</h2>
+<p><strong>Push bench.</strong> The correction opposes the imposed turn in 93 to 100% of steps at every speed. Above 10 m/s the base does not respond to the turn, so the whole policy steers against it. Under 10 m/s the base steers with the turn by 1.2 to 2.2 m/s&sup2;, which is more than the correction's bound of 1, so the correction is pinned and the whole policy steers with the turn in 70 to 96% of steps.</p>
+<table>
+<thead><tr><th scope="col">Speed</th><th scope="col">Model</th><th scope="col">Push</th><th scope="col">Base, m/s&sup2;</th><th scope="col">Correction</th><th scope="col">Net</th><th scope="col">Base with the turn, share of steps</th><th scope="col">Net with the turn</th><th scope="col">Correction above 0.95 of bound</th></tr></thead>
+<tbody>
+<tr><td>under 10 m/s (5 windows)</td><td>stock</td><td>1.0 m</td><td>+1.24</td><td>-0.83</td><td>+0.41</td><td>92%</td><td>74%</td><td>44%</td></tr>
+<tr><td>under 10 m/s</td><td>stock</td><td>1.5 m</td><td>+2.15</td><td>-0.95</td><td>+1.20</td><td>100%</td><td>94%</td><td>70%</td></tr>
+<tr><td>under 10 m/s</td><td>adapter</td><td>1.0 m</td><td>+1.25</td><td>-0.87</td><td>+0.38</td><td>94%</td><td>70%</td><td>46%</td></tr>
+<tr><td>under 10 m/s</td><td>adapter</td><td>1.5 m</td><td>+2.18</td><td>-0.95</td><td>+1.23</td><td>100%</td><td>96%</td><td>70%</td></tr>
+<tr><td>18 m/s and over (17 windows)</td><td>stock</td><td>1.0 m</td><td>+0.01</td><td>-0.49</td><td>-0.47</td><td>55%</td><td>7%</td><td>3%</td></tr>
+<tr><td>18 m/s and over</td><td>adapter</td><td>1.5 m</td><td>+0.04</td><td>-0.61</td><td>-0.57</td><td>57%</td><td>11%</td><td>14%</td></tr>
+</tbody>
+</table>
+<p>At low speed the push is a 10 to 15 degree swing of the heading in 1 s. A swing like that looks like the start of a turn, so a base that follows it may be reasonable behaviour for a policy that is given no route. "The wrong way" is the bench's label, not a fact about a road. The model's input views were checked against the recorded heading for one slow and one fast window, and showed no sign that the bench draws less rotation than it records, so the weak response to the push is the model's output.</p>
+<p><strong>Real driving, per turn event.</strong> Ratios are the summed request over the summed driver acceleration; 1.000 is the same as the driver.</p>
+<table>
+<thead><tr><th scope="col">Speed</th><th scope="col">Model</th><th scope="col">Events (drives)</th><th scope="col">Action / driver</th><th scope="col">Base / driver</th><th scope="col">Action minus base per event, m/s</th></tr></thead>
+<tbody>
+<tr><td>5 to 10 m/s</td><td>stock</td><td>69 (16)</td><td>0.939 [0.872, 1.014]</td><td>0.999 [0.959, 1.052]</td><td>-0.290 [-0.471, -0.102]</td></tr>
+<tr><td>5 to 10 m/s</td><td>adapter</td><td>68 (16)</td><td>0.914 [0.865, 0.967]</td><td>0.985 [0.956, 1.023]</td><td>-0.347 [-0.491, -0.193]</td></tr>
+<tr><td>10 to 18 m/s</td><td>stock</td><td>99 (13)</td><td>0.981 [0.950, 1.017]</td><td>0.961 [0.932, 0.999]</td><td>+0.112 [+0.017, +0.161]</td></tr>
+<tr><td>10 to 18 m/s</td><td>adapter</td><td>100 (13)</td><td>0.958 [0.932, 0.981]</td><td>0.951 [0.936, 0.972]</td><td>+0.037 [-0.058, +0.097]</td></tr>
+<tr><td>18 m/s and over</td><td>stock</td><td>195 (9)</td><td>1.046 [1.026, 1.108]</td><td>1.004 [0.978, 1.040]</td><td>+0.187 [+0.070, +0.286]</td></tr>
+<tr><td>18 m/s and over</td><td>adapter</td><td>168 (9)</td><td>0.985 [0.970, 1.043]</td><td>0.965 [0.924, 1.011]</td><td>+0.101 [-0.045, +0.283]</td></tr>
+</tbody>
+</table>
+<p>Over whole turn events at 5 to 10 m/s, the full policy asks 6 to 9% less lateral acceleration than the driver took (stock 0.939, adapter 0.914). The base asks the same as the driver (0.999 and 0.985). The difference between the two parts excludes zero by drive. Above 10 m/s the correction adds a little instead.</p>
+<p><strong>Correction to the first table.</strong> The first table, per step, grouped steps by the size of the driver's later turn. That selects on the driver's outcome, which shrinks any predictor in the top bins. In turns of 2 m/s&sup2; and over under 10 m/s it gave the full policy 83% of what the driver did and the base 93%. The 17% gap was inflated by the selection; the per-event figure above (6 to 9%) replaces it.</p>
+<p><strong>Controls</strong>, on the same steps:</p>
+<ul>
+<li>Lag. The base correlates better with the driver than the full action at lags of 0, 0.2, 0.5 and 1.0 s (0.966, 0.972, 0.966, 0.926 against 0.890, 0.911, 0.925, 0.915).</li>
+<li>Binning on the base's own request instead of the driver's outcome, at 5 to 10 m/s: where the base asks 2.30 m/s&sup2; the driver then had 2.27 and the full action asks 2.03; where the base asks 1.45 the driver had 1.45 and the action 1.31. At 18 m/s and over the correction is within 0.1 of zero in every bin.</li>
+<li>Over all steps the correction is above 0.95 of its bound in 0.02% of steps, so on real driving the bound almost never binds.</li>
+</ul>
+<p><strong>Corrections of the reading.</strong> Two outside model reviews criticised the first reading. They said that the per-step table selects on the outcome, that the real-driving case (opposing a driver's turn) and the bench case (opposing an imposed disturbance) are different events, so "both show the same thing" was too strong, and that nothing here measures running wide. All three are accepted above. Part of the open-loop picture was also already known from earlier work in this project: the base alone is closer to the driver than the full policy in open loop, the base alone does not steer in closed loop (0.70 m path error against 0.32 m), and the correction largely replaces the base. What this note adds is the split by speed and the per-event account.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>That the correction is wrong, or that anything here is an improvement. This describes how the two parts divide the work, and the size is modest. The base was trained to imitate drivers, so it is closer to a driver by construction; the correction was trained in closed loop to hold a lane, which in open loop shows up as disagreement with the driver.</li>
+<li>That the base alone is usable. It does not drive in closed loop.</li>
+<li>That the truck runs wide in tight low-speed turns. Nothing here measures that; it would need a closed-loop test on turn windows, comparing the base alone and the full policy against the lane.</li>
+<li>Anything under 5 m/s: those steps are not in the data. The turns include junction turns that the model, given no route, had no way to know were intended.</li>
+<li>Whether the opposition is ordinary lane feedback. The split by whether the truck is inside or outside the lane centre during the turn was not run. One reviewer pointed to a possible cause in comma's training notes: the correction's loss charges curvature rate, which weighs far more at low speed in lateral terms. This was not tested.</li>
+<li>Scale: 5 slow bench windows, a simulated vehicle, 17 drives of one truck and one driver, open loop, no training, nothing deployed.</li>
+</ul>
