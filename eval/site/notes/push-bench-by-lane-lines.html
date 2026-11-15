@@ -1,0 +1,36 @@
+<h2>What was asked</h2>
+<p>In the closed-loop push bench, some pushed episodes are not back on the path by 4 s. Do those episodes share a road type, as seen through the model's own lane-line confidences?</p>
+<h2>What was done</h2>
+<p>No new run. The per-step trace of the adapter at its current settings (simulated vehicle, 30 validation windows from 6 recorded drives of one truck and one driver, yaw pushes of 1.0 m and 1.5 m to each side) was read again with the model's lane-line confidences. A window's class comes from its unpushed run: the median confidence, 2 to 4 s in, of the line to the left of the truck and of the line to the right, each called seen at 0.5 or more. The classes:</p>
+<ul>
+<li>lines on both sides: 17 windows (median speed 22 m/s);</li>
+<li>a line on the left only: 12 windows (median 17 m/s, four of them under 10 m/s). Stills from three of these show daylight two-way roads with a double yellow centre line and a curb, and no painted right line. On a two-way road the left is the centre-line side;</li>
+<li>neither: 1 window, not tabulated.</li>
+</ul>
+<h2>Result</h2>
+<p>Medians over episodes of the pushed run minus the same window's unpushed run, in metres. Positive is the side pushed to.</p>
+<table>
+<thead><tr><th scope="col">Lines seen</th><th scope="col">Push</th><th scope="col">Side</th><th scope="col">Episodes</th><th scope="col">At 2 s</th><th scope="col">At 4 s</th><th scope="col">At 5.6 s</th></tr></thead>
+<tbody>
+<tr><td>both</td><td>1.0 m</td><td>left</td><td>17</td><td>0.52</td><td>0.05</td><td>0.02</td></tr>
+<tr><td>both</td><td>1.0 m</td><td>right</td><td>17</td><td>0.34</td><td>-0.26</td><td>-0.10</td></tr>
+<tr><td>both</td><td>1.5 m</td><td>left</td><td>17</td><td>0.92</td><td>-0.02</td><td>-0.01</td></tr>
+<tr><td>both</td><td>1.5 m</td><td>right</td><td>17</td><td>0.70</td><td>-0.24</td><td>-0.09</td></tr>
+<tr><td>left only</td><td>1.0 m</td><td>left</td><td>12</td><td>0.60</td><td>0.02</td><td>0.04</td></tr>
+<tr><td>left only</td><td>1.0 m</td><td>right</td><td>12</td><td>0.37</td><td>-0.53</td><td>-0.18</td></tr>
+<tr><td>left only</td><td>1.5 m</td><td>left</td><td>12</td><td>1.00</td><td>0.03</td><td>0.07</td></tr>
+<tr><td>left only</td><td>1.5 m</td><td>right</td><td>12</td><td>0.61</td><td>-0.60</td><td>-0.19</td></tr>
+</tbody>
+</table>
+<p>By the confidence in both lines instead of by class: where it is 0.9 or more (56 episodes, 14 windows, median 26 m/s) the median distance from the unpushed run is 0.25 m at 4 s and 0.09 m at 5.6 s. Where it is under 0.1 (28 episodes, 7 windows, median 16.5 m/s) it is 0.67 m at 4 s and 0.48 m at 5.6 s.</p>
+<p>In the median episode, a push to the left is back within 5 cm of the unpushed run by 4 s on both road classes. A push to the right displaces the truck less while it is applied (0.34 to 0.37 m against 0.52 to 0.60 m for the 1.0 m push) and is followed by a swing past the unpushed run to the left: about a quarter of a metre where both lines are seen, 0.53 to 0.60 m where only the centre line is, shrinking to 0.1 to 0.2 m by 5.6 s.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>The tail. These are medians. The episodes that keep diverging are a different set, mostly slow windows.</li>
+<li>That road type is the cause. Road class is confounded with speed and with curvature.</li>
+<li>Scale: 12 and 17 windows from 6 drives, one seed, a simulated vehicle, no training, nothing deployed. The class comes from the adapter's own confidences.</li>
+<li>How close the truck came to a line. The model's reading of the centre line's distance moved by only 0.06 to 0.56 of the truck's true offset in these steps, so it is not a measurement of position.</li>
+<li>That the asymmetry between left and right pushes is real driving behaviour. It may come from the bench: earlier work here found the unpushed runs sit left of the recorded path because the models put the lane centre there, and the views after a push are synthesized.</li>
+<li>Outside review. None, because nothing is claimed from it.</li>
+</ul>
+<p>What it changes: a recovery share from this bench mixes two road types and two push directions that behave differently, so those should be reported apart.</p>

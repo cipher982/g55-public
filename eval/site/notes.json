@@ -3,6 +3,17 @@
  "notes": [
   {
    "date": "2026-11-15",
+   "title": "Push bench by which lane lines the road has: on centre-line-only roads a push to the right ends half a metre past the unpushed path at 4 s",
+   "slug": "push-bench-by-lane-lines",
+   "summary": "The closed-loop push bench's 30 validation windows (simulated vehicle, 6 drives of one truck and one driver) split by which lane lines the model sees in the unpushed run: 17 with a line on both sides, 12 with a centre line only (two-way roads with a double yellow line and a curb), 1 with neither. Medians over episodes, pushed minus unpushed, 1.0 m push: to the left, 0.05 m (both) and 0.02 m (centre only) at 4 s; to the right, -0.26 m (both) and -0.53 m (centre only) at 4 s, -0.10 and -0.18 m at 5.6 s. A push to the right displaces the truck less while applied (0.34 to 0.37 m against 0.52 to 0.60 m) and is followed by a swing past the unpushed run to the left, about a quarter of a metre with both lines and about half a metre with the centre line only. These are medians, not the tail; road type is confounded with speed and curvature; 12 and 17 windows, one seed; the class comes from the model's own confidences; the model's line distance is not a position measurement; the asymmetry may come from the bench. No outside review, because nothing is claimed. A recovery share from this bench mixes road types and push directions that behave differently, so it should be reported apart.",
+   "grade": "Measured in simulation on recorded G55 drives: 30 validation windows from 6 drives of one truck and one driver (17 and 12 in the two classes tabulated), one seed, no training, nothing deployed. A description of the bench; no outside review.",
+   "result": "1.0 m push to the left is back within 5 cm by 4 s on both road types; a push to the right swings past the unpushed run to the left: -0.26 m (both lines) and -0.53 m (centre line only) at 4 s, -0.10 and -0.18 m at 5.6 s",
+   "n": "30 windows (17 both lines, 12 centre line only, 1 neither); 17 or 12 episodes per cell",
+   "kind": "simulation",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-15",
    "title": "The policy's steering responds to its lateral delay request: each extra 0.1 s takes a few centimetres off a push's displacement and overshoot, and nothing by 5.6 s",
    "slug": "lateral-delay-request",
    "summary": "comma's policy takes an input for how much steering delay it should compensate; the truck adapter feeds 0.275 s. Closed-loop push bench, simulated vehicle, 25 validation windows at 10 m/s and over (100 pushed episodes), request set to 0.275, 0.375, 0.475 and 0.775 s, paired by episode to 0.275 s. The displacement peak within the push is smaller in 50 of 50 episodes at every larger request: 1.0 m push -0.034 m [-0.038, -0.030] at 0.375 s, -0.068 [-0.079, -0.059] at 0.475 s, -0.129 [-0.153, -0.111] at 0.775 s; 1.5 m push -0.071, -0.136, -0.227 m. Overshoot (1.0 m) -0.031 [-0.046, -0.018], -0.066, -0.102 m. By 5.6 s no difference (+0.003 m [-0.015, +0.019] at 0.375 s). Unpushed steering activity rises with the request. This is a sensitivity result, not a better setting: the effect grows steadily with no best value, and the bench's controller already compensates the simulated vehicle's lag. The first reading, a matched value with a larger gain, was wrong: the larger number came from taking the peak over the whole episode and from the slow windows, and two outside model reviews caught it. One seed, simulated vehicle; the vehicle has no steering actuator, so nothing changes on the road.",
