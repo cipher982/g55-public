@@ -1,0 +1,56 @@
+<h2>What was asked</h2>
+<p>comma's driving policy outputs a base action plus a learned correction that passes through a tanh, so the correction is bounded at 1. Editing the exported model file (no training) can raise that bound to 2 or 3 while leaving small corrections unchanged. Does a larger steering bound make the truck recover better from a sideways push?</p>
+<h2>What was done</h2>
+<p>A closed-loop bench with a simulated vehicle, on 30 validation windows from 6 recorded drives of one truck and one driver. Each window was run unpushed and with a sideways yaw push of 1.0 m and of 1.5 m to each side: 30 unpushed and 120 pushed episodes per arm. The push is applied over the first 2 seconds (10 steps) while the policy is steering. The arms:</p>
+<ul>
+<li>the model as it runs on the truck (with the shipped camera adapter), bound 1;</li>
+<li>the same with the steering correction's bound at 2, and at 3;</li>
+<li>the unadapted model with only the steering bound at 2, and with only the speed bound at 2, to separate the two halves of the change.</li>
+</ul>
+<p>Differences are paired against the first arm, with 95% bootstrap intervals over windows, then over drives where the two disagree.</p>
+<h2>Result</h2>
+<p>While the push is applied, the raised bound cancels more of it. Paired against the adapter, 120 pushed episodes:</p>
+<table>
+<thead><tr><th scope="col">Measure</th><th scope="col">adapter, bound 1</th><th scope="col">bound 2</th><th scope="col">bound 3</th><th scope="col">2 minus adapter</th><th scope="col">3 minus adapter</th></tr></thead>
+<tbody>
+<tr><td>distance from path at push end (2 s), m</td><td>0.844</td><td>0.658</td><td>0.602</td><td>-0.186 [-0.254, -0.125]</td><td>-0.242 [-0.339, -0.155]</td></tr>
+<tr><td>departed the corridor</td><td>15.8%</td><td>10.0%</td><td>8.3%</td><td>-5.8 points [-10.8, -1.7]</td><td>-7.5 points [-14.2, -1.7]</td></tr>
+<tr><td>lane error over the episode, m</td><td>0.829</td><td>0.581</td><td>0.558</td><td>-0.248 [-0.465, -0.069]</td><td>-0.271 [-0.535, -0.066]</td></tr>
+<tr><td>recovered share</td><td>49.2%</td><td>50.8%</td><td>50.8%</td><td>+1.7 points [-2.5, +6.7]</td><td>+1.7 points [-2.5, +6.7]</td></tr>
+</tbody>
+</table>
+<p>The recovered share does not move: both intervals include zero. Unpushed (30 episodes) lane error, distance from path and departures are unchanged (differences under 0.002 m).</p>
+<p>The two halves of the change were separated on the unadapted model. The steering bound alone reproduces every tracking number of the combined edit (distance at push end -0.151 m [-0.212, -0.096] against the unadapted model at bound 1) and leaves unpushed speed error where it was (+0.001 m/s [-0.003, +0.005]). The speed bound alone changes no tracking number and carries the whole small rise in unpushed speed error (+0.027 m/s [+0.007, +0.050]). So only the steering half does anything useful.</p>
+<p><strong>How often the correction is near its bound</strong> (bound 1, share of steps where the tanh output is above 0.8; first of two navigation modes, the same 30 windows):</p>
+<table>
+<thead><tr><th scope="col">Arm</th><th scope="col">unpushed, all steps</th><th scope="col">1.0 m push, during</th><th scope="col">1.5 m push, during</th><th scope="col">1.0 m, after</th><th scope="col">1.5 m, after</th></tr></thead>
+<tbody>
+<tr><td>unadapted model, above 0.8</td><td>0.0%</td><td>19.0%</td><td>36.5%</td><td>5.5%</td><td>8 to 10%</td></tr>
+<tr><td>unadapted model, above 0.95</td><td>0.0%</td><td>6.8%</td><td>16.8%</td><td>3.5%</td><td>5%</td></tr>
+<tr><td>adapter, above 0.8</td><td>0.1%</td><td>23.0%</td><td>41.5%</td><td>5.7%</td><td>7 to 10%</td></tr>
+<tr><td>adapter, above 0.95</td><td>0.0%</td><td>7.8%</td><td>19.0%</td><td>3.5%</td><td>5%</td></tr>
+</tbody>
+</table>
+<p>During the push the bound binds in about a fifth to two fifths of steps. In unpushed driving it does not bind: the correction's 99th percentile is 0.28 to 0.49 of the bound. So the unpushed rows above say the edit is inert there, not that it is safe.</p>
+<p><strong>The decisive control: an equal offset.</strong> Every arm drove with bound 1 through the push and switched to its own bound at push end (step 10). All arms then start from the same offset: distance from path at push end is 0.844 m in all three, paired difference 0.000 [-0.001, 0.000]. From there, 120 pushed episodes, adapter first:</p>
+<table>
+<thead><tr><th scope="col">Measure</th><th scope="col">adapter</th><th scope="col">bound 2 after push</th><th scope="col">bound 3 after push</th><th scope="col">2 minus adapter</th><th scope="col">3 minus adapter</th></tr></thead>
+<tbody>
+<tr><td>distance from path at 4 s, m</td><td>0.845</td><td>0.836</td><td>0.835</td><td>-0.010 [-0.037, +0.010]</td><td>-0.010 [-0.045, +0.015]</td></tr>
+<tr><td>lane error over the episode, m</td><td>0.829</td><td>0.774</td><td>0.766</td><td>-0.056 [-0.152, +0.018]</td><td>-0.063 [-0.194, +0.027]</td></tr>
+<tr><td>recovered share</td><td>49.2%</td><td>47.5%</td><td>47.5%</td><td>-1.7 points [-4.2, 0.0]</td><td>-1.7 points [-4.2, 0.0]</td></tr>
+<tr><td>settled in lane</td><td>50.8%</td><td>50.0%</td><td>50.8%</td><td>-0.8 points [-3.3, +1.7]</td><td>0.0 [-3.3, +3.3]</td></tr>
+<tr><td>departed by 7 s</td><td>20.0%</td><td>19.2%</td><td>19.2%</td><td>-0.8 points [-2.5, 0.0]</td><td>-0.8 points [-2.5, 0.0]</td></tr>
+</tbody>
+</table>
+<p>Starting from the same offset, the raised bound returns to the path no faster: every interval includes zero and the recovered share is two episodes lower. The whole effect above is that a larger correction cancels more of a yaw disturbance while the disturbance is being applied.</p>
+<p><strong>Correction.</strong> The first reading of the first tables was that the raised bound "returns toward the path sooner after a push". That was wrong. Two outside model reviews pointed out that the push is not a starting offset: it is applied over the first 2 seconds while the policy steers, so "distance from path at 2 s" is the offset at the last push step, and departure and contact include the push itself. The tables measure how much of the push the policy cancels while it is applied. The wording was corrected, and the equal-offset run above was added to test the recovery reading directly.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>That raising the bound improves recovery. It does not: this is a negative result for that claim. The effect is push rejection during the disturbance.</li>
+<li>Anything about the road. The bench injects the push as yaw outside the vehicle model, and the vehicle model (linear understeer, one lag, no tyre or roll limit) makes extra steering command free. Lateral acceleration, jerk, overshoot and path crossings were not measured.</li>
+<li>That the edit is safe where the bound would matter. It never binds in the unpushed windows, so there is no unpushed case here that could show a cost. The measure named in advance for this kind of test was the recovered share; it did not move, and the measures that did move were picked after seeing the table.</li>
+<li>Scale: 30 windows from 6 drives of one truck and one driver, a simulated vehicle, one model file edited, no training, nothing deployed.</li>
+</ul>
+<h2>Decision</h2>
+<p>The raised steering bound is closed as a way to improve recovery. It is not a change to the model that runs on the truck.</p>

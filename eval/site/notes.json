@@ -2,6 +2,17 @@
  "_doc": "Work notes on the site, newest first by date. Each: date, title, slug, summary, grade (measured, derived, borrowed or hypothetical, and where); the body is site/notes/<slug>.html.",
  "notes": [
   {
+   "date": "2026-11-15",
+   "title": "Raising the steering correction's bound cancels more of a sideways push while it is applied, but returns to the path no faster",
+   "slug": "steering-bound-push-rejection",
+   "summary": "Closed-loop bench, simulated vehicle, 30 validation windows from 6 drives, a yaw push of 1.0 or 1.5 m applied over the first 2 s. Editing comma's exported model so the steering correction's tanh bound is 2 or 3 instead of 1 (no training) cancels more of the push while it is applied: against the shipped adapter, distance from path at push end -0.186 m [-0.254, -0.125] (bound 2) and -0.242 m [-0.339, -0.155] (bound 3), departures -5.8 and -7.5 points, lane error -0.248 and -0.271 m. The recovered share does not move (+1.7 points [-2.5, +6.7]). The steering half carries all of it; the speed half only adds unpushed speed error. The correction is above 0.8 of its bound in a fifth to two fifths of push steps and in 0.0 to 0.1% of unpushed steps. When every arm drives at bound 1 through the push and switches at push end, all start from the same offset (0.844 m) and the raised bound returns no faster (distance at 4 s -0.010 m [-0.037, +0.010]; recovered share 1.7 points lower). The first reading, that the raised bound recovers sooner, was wrong: two outside model reviews pointed out that the push is applied while the policy steers.",
+   "grade": "Measured in simulation on recorded G55 drives: 30 validation windows from 6 drives, one model file edited per arm, no training, the bench's vehicle model has no tyre or roll limit. Two outside-model reviews changed the reading; nothing deployed.",
+   "result": "raised bound cancels more of the push while applied (distance at push end -0.186 m [-0.254, -0.125] at bound 2); from an equal offset it returns no faster (-0.010 m [-0.037, +0.010] at 4 s)",
+   "n": "30 windows, 6 drives, 120 pushed episodes per arm",
+   "kind": "simulation",
+   "domain": "p"
+  },
+  {
    "date": "2026-11-14",
    "title": "Given the route on its map input, the frozen model slows a little more before turns, but a corridor that stops at the junction does as much",
    "slug": "route-on-map-input-planned-speed",
