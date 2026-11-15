@@ -1,0 +1,28 @@
+<h2>What was asked</h2>
+<p>comma's driving policy takes an input for how much steering delay it should compensate (the lateral delay request). The truck's camera adapter feeds it 0.275 s. Does the policy's steering respond to that input in the closed-loop push bench, and by how much?</p>
+<h2>What was done</h2>
+<p>The closed-loop push bench (simulated vehicle) on 30 validation windows from 6 recorded drives of one truck and one driver, with the adapter's lateral request set to 0.275 s (the current value), 0.375, 0.475 and 0.775 s. Each pushed episode is a yaw push of 1.0 m or 1.5 m to each side. The result table uses the 25 windows at 10 m/s and over, which is 100 pushed episodes (50 per push size). The 5 slower windows are left out because at low speed the push is a lane-sized swing that no setting settles, which would dominate the means. The peak displacement is taken within the push, signed by push side, and every episode is paired with the same window at 0.275 s (the start state was checked to be identical). Intervals are 95% over windows.</p>
+<h2>Result</h2>
+<p>The action responds in every episode: the displacement peak within the push is smaller in 50 of 50 episodes at every larger request, for both push sizes. Each extra 0.1 s of request takes about 3 cm (1.0 m push) to 7 cm (1.5 m push) off the displacement during the push and about 3 cm off the overshoot. By 5.6 s there is no difference. Differences to the 0.275 s run, in metres:</p>
+<table>
+<thead><tr><th scope="col">Measure</th><th scope="col">0.375 s</th><th scope="col">0.475 s</th><th scope="col">0.775 s</th></tr></thead>
+<tbody>
+<tr><td>peak within the push, 1.0 m push</td><td>-0.034 [-0.038, -0.030]</td><td>-0.068 [-0.079, -0.059]</td><td>-0.129 [-0.153, -0.111]</td></tr>
+<tr><td>peak within the push, 1.5 m push</td><td>-0.071 [-0.086, -0.057]</td><td>-0.136 [-0.167, -0.108]</td><td>-0.227 [-0.277, -0.186]</td></tr>
+<tr><td>overshoot, 1.0 m push</td><td>-0.031 [-0.046, -0.018]</td><td>-0.066 [-0.092, -0.043]</td><td>-0.102 [-0.155, -0.055]</td></tr>
+<tr><td>distance at 4 s, 1.0 m push</td><td>-0.027 [-0.042, -0.013]</td><td>-0.055 [-0.083, -0.029]</td><td>-0.082 [-0.136, -0.034]</td></tr>
+<tr><td>distance at 5.6 s, 1.0 m push</td><td>+0.003 [-0.015, +0.019]</td><td>-0.016 [-0.046, +0.009]</td><td>-0.012 [-0.056, +0.029]</td></tr>
+<tr><td>share settled at the end</td><td>no change</td><td>+2 points [0, +6]</td><td>no change</td></tr>
+</tbody>
+</table>
+<p>The cost is on the unpushed episodes: steering activity rises with the request (all 30 windows: 0.057 at 0.275 s, then +0.003, +0.006 and +0.019), and at 0.375 s it is higher in 22 of 30 windows.</p>
+<p><strong>Correction of the first reading.</strong> The first reading of this run called 0.375 s a "matched" value with a larger gain (a peak about 0.27 m smaller). That was wrong. The larger number came from taking the peak over the whole episode instead of within the push, and from the slow windows, where episodes keep swinging. With the peak taken within the push and the slow windows removed, the gain is the 3 to 7 cm per 0.1 s above. Two outside model reviews caught this.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>A better setting. The effect grows steadily with the request and has no best value, so this is sensitivity, not a match to anything. The bench's lateral controller already compensates the simulated vehicle's excess lag with a predictor built from the same numbers, so a larger request compensates the same lag a second time.</li>
+<li>That a larger request costs nothing. Unpushed steering activity is higher, and 30 windows did not resolve how much that matters.</li>
+<li>Anything under 10 m/s, which was excluded.</li>
+<li>Anything on the road. The vehicle has no steering actuator, so the lateral action is not used there and nothing changes. An actuator's own delay would add to the number.</li>
+<li>Whether the best request moves with the vehicle's delay: crossing the bench's actuator delay with the request was not run. Also not run: comma's longitudinal request.</li>
+<li>Scale: one seed, a simulated vehicle, 25 windows in the table (6 drives of one truck and one driver), no training, nothing deployed.</li>
+</ul>
