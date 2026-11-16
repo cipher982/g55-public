@@ -52,5 +52,8 @@
 <li>That the edit is safe where the bound would matter. It never binds in the unpushed windows, so there is no unpushed case here that could show a cost. The measure named in advance for this kind of test was the recovered share; it did not move, and the measures that did move were picked after seeing the table.</li>
 <li>Scale: 30 windows from 6 drives of one truck and one driver, a simulated vehicle, one model file edited, no training, nothing deployed.</li>
 </ul>
+<h2>Correction, 2026-11-16: a sideways step at the first step</h2>
+<p>The equal-offset test above raised the bound only after step 10 of a yaw push. It never applied a sideways step from the first step. Run that way later, the untrained model with the bound doubled (no training) is 0.13 m closer to its own unpushed line at 4 s than the shipped model, with no change in unpushed driving. The earlier test did not measure this. Outside reviewers attributed it to the step being a jump of the vehicle: right after the jump the frozen base policy steers the wrong way for about a second, and a larger bound cancels more of that.</p>
+<p>A test with no jump supports that reading. On a push that builds up over 3.2 s, the doubled bound is only 3 to 4 cm from shipped (distance from own unpushed run: -0.029 m [-0.047, -0.012] at 4 s and -0.044 m [-0.071, -0.021] at 5.6 s). So the conclusion of this note, no real gain in return from the bound alone, stands for a gradual push, and the 13 cm on the step comes from the step. The other findings here are unchanged.</p>
 <h2>Decision</h2>
 <p>The raised steering bound is closed as a way to improve recovery. It is not a change to the model that runs on the truck.</p>
