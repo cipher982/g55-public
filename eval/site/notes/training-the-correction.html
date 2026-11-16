@@ -1,0 +1,47 @@
+<h2>What was asked</h2>
+<p>comma's driving policy is a base policy plus a learned correction (the residual head). Can the correction alone be trained, in closed loop in the simulator on the truck's drives, by imitating a teacher, so that the truck returns to its line faster after a disturbance without driving worse when nothing disturbs it? Two quick tests were run on the same day, one after the other. The second was designed from the reviews of the first.</p>
+<h2>What was done</h2>
+<p>Both tests trained only the correction head, starting from the truck's adapted model, on 73 windows from four recorded drives of one truck and one driver. Both were scored on the 30-window validation panel (6 other drives), paired by window against the shipped adapter, 95% intervals over windows. The closed-loop push bench steers a simulated vehicle while the camera view is redrawn from recorded frames; a push moves the truck sideways by 1.0 or 1.5 m, to each side, which gives 120 pushed episodes. One seed in test one, three in test two.</p>
+<p><strong>Test one.</strong> The teacher steered toward the driver's recorded path, using the true pose from the simulator. 8 epochs, correction at its shipped scale.</p>
+<p><strong>Test two.</strong> The teacher was the policy's own action plus feedback on the truck's deviation from the policy's own unpushed run of the same window at the same step, so the unpushed line cannot move by construction. The correction started at twice its shipped scale, with the smoothness costs off and low exploration noise, 10 epochs. Each of three seeds was stopped by the trainer's own cut alarm at the last epoch and exported by hand. Besides the yaw push, an equal-offset control was run: a sideways step with no yaw, so there is nothing to resist and both models start their return from the same place. The best setting that needs no training (a lateral delay request of 0.775 s, see the lateral delay request note) was run on the same step as a comparator.</p>
+<h2>Result</h2>
+<p><strong>Test one was negative.</strong> The first headline (recovered share against the driver's path fell from 0.492 to 0.333) mixed a moved unpushed line with failed recovery. Re-scored against the model's own unpushed run: distance at 2 s +0.105 m [+0.076, +0.135] (worse by about 0.1 m), at 4 s -0.025 m [-0.114, +0.056], at 5.6 s +0.056 m [-0.065, +0.182]. Share back within 0.3 m at 4 s 42.5% to 40.8%; at 5.6 s 70.8% to 57.5% (-13.3 points [-23.3, -4.2]). Unpushed lane error rose from 0.225 to 0.279 m. Outside review found the test weak for these reasons: the judge compared against a path the trained model's own line no longer sat on; a teacher that steers to the driver's path from the true pose teaches the policy an average bias, because the policy sees the lane and not the driver's line; the recipe was not given a chance (correction at its shipped scale, where the output cannot reach the teacher's demands; smoothness costs still half of the loss; 45 to 58% of pushed training episodes cut short; at most 31 of the 73 windows ever drawn). The result says this configuration did not help. It does not say training the correction fails.</p>
+<p><strong>Test two, equal-offset step</strong> (120 episodes; distance from each model's own unpushed run, metres; differences against shipped at 4 s, 95% by window):</p>
+<table>
+<thead><tr><th scope="col"></th><th scope="col">Shipped</th><th scope="col">Delay request 0.775 s, no training</th><th scope="col">Seed 0</th><th scope="col">Seed 1</th><th scope="col">Seed 2</th></tr></thead>
+<tbody>
+<tr><td>Distance at 2 s</td><td>1.088</td><td>0.975</td><td>0.628</td><td>0.621</td><td>0.609</td></tr>
+<tr><td>Distance at 4 s</td><td>0.522</td><td>0.476 (-0.046 [-0.105, +0.008])</td><td>0.268 (-0.254 [-0.344, -0.171])</td><td>0.247 (-0.275 [-0.361, -0.192])</td><td>0.258 (-0.265 [-0.358, -0.179])</td></tr>
+<tr><td>Distance at 5.6 s</td><td>0.368</td><td>0.272</td><td>0.144</td><td>0.138</td><td>0.145</td></tr>
+<tr><td>Within 0.3 m at 4 s</td><td>42.5%</td><td>32.5%</td><td>67.5%</td><td>71.7%</td><td>68.3%</td></tr>
+<tr><td>Peak command (m/s2)</td><td>1.17</td><td>1.03</td><td>1.54</td><td>1.56</td><td>1.60</td></tr>
+<tr><td>Bench: recovered against the driver's path</td><td>52.5%</td><td>47.5%</td><td>60.8%</td><td>55.8%</td><td>55.0%</td></tr>
+<tr><td>Bench: departures by 7 s</td><td>10.8%</td><td>5.0%</td><td>3.3%</td><td>3.3%</td><td>3.3%</td></tr>
+</tbody>
+</table>
+<p>From the same sideways offset the trained correction is back in about half the time, and each seed is ahead of the no-training comparator at 4 s by 0.21 to 0.23 m with intervals that exclude zero. The result holds by drive (6 drives), for 1.0 m and 1.5 m steps separately, at 10 m/s and over, and without the validation drive that continues a training drive (4 s differences of -0.20 to -0.22 m).</p>
+<p><strong>Test two, yaw push and unpushed driving</strong> (shipped, then seeds 0, 1 and 2; unpushed differences against shipped):</p>
+<table>
+<thead><tr><th scope="col"></th><th scope="col">Shipped</th><th scope="col">Seed 0</th><th scope="col">Seed 1</th><th scope="col">Seed 2</th></tr></thead>
+<tbody>
+<tr><td>Yaw push: distance at 2 / 4 / 5.6 s (m)</td><td>0.844 / 0.783 / 0.674</td><td>0.351 / 0.502 / 0.397</td><td>0.380 / 0.566 / 0.463</td><td>0.382 / 0.557 / 0.481</td></tr>
+<tr><td>Yaw push, bench: recovered / relative to own line</td><td>49.2 / 79.2%</td><td>45.8 / 78.7%</td><td>37.5 / 75.0%</td><td>45.0 / 73.5%</td></tr>
+<tr><td>Yaw push, bench: lane error (m) / departures</td><td>0.829 / 15.8%</td><td>0.600 / 10.8%</td><td>0.661 / 13.3%</td><td>0.661 / 12.5%</td></tr>
+<tr><td>Yaw push: peak command (m/s2)</td><td>1.44</td><td>3.09</td><td>3.25</td><td>3.26</td></tr>
+<tr><td>Unpushed: lane error (m)</td><td>0.225</td><td>0.236</td><td>0.235</td><td>0.261</td></tr>
+<tr><td>Unpushed, straight steps: distance from path (m)</td><td>0.170</td><td>+0.014 [+0.001, +0.029]</td><td>+0.030 [+0.008, +0.059]</td><td>+0.020 [+0.004, +0.038]</td></tr>
+<tr><td>Unpushed, turns (9 windows): outside of path (m)</td><td>0.199</td><td>+0.036 [-0.036, +0.111]</td><td>-0.068 [-0.218, +0.094]</td><td>+0.086 [-0.052, +0.236]</td></tr>
+<tr><td>Unpushed: command change per step (m/s2)</td><td>0.057</td><td>0.079</td><td>0.091</td><td>0.095</td></tr>
+</tbody>
+</table>
+<p>The costs replicate across the three seeds: 1.4 to 3.0 cm more drift on straight steps, 39 to 67% more command activity when nothing pushes the truck, peak commands above 3 m/s2 during a yaw push (shipped 1.44), and a drift away from its own line between 2 s and 4 s after a yaw push (0.35 to 0.38 m at 2 s, 0.50 to 0.57 m at 4 s). The share recovered on the yaw push is flat or lower in every seed (49.2% shipped; 37.5% at the lowest). The turn measure is noise at nine windows, since the seeds disagree in sign.</p>
+<p>The trainer's own evaluation on training windows also got worse in every run (the stopping alarm above); with valid views only, the first run's deterioration was all newly invalid renders at the end of the push, where hard counter-steer takes marginal views past the coverage limit.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>It is not a proven improvement. It is a replicated effect on one disturbance type (a sideways offset with no yaw) with replicated costs. The benchmark's own recovery verdicts on the yaw push do not improve.</li>
+<li>Everything is simulation. The simulated vehicle has no tyre or comfort limit, which makes a fast return cheap, and a peak command above 3 m/s2 is not tested on a real vehicle.</li>
+<li>One small panel of 30 windows, reused many times that day. The split between training and validation is by drive only; one validation drive is the continuation of a training drive. The results hold without it, but the split is not clean.</li>
+<li>The first reading of test two was overstated. It reported the truck displaced about half as far during a push. Outside review corrected it: being displaced less during a push is not the same as returning better, and after the push the trained model moved away from its own line (0.351 m at 2 s, 0.502 m at 4 s) while shipped fell (0.844, 0.783). The equal-offset control was run because of that review. A comparison at 2 s alone had been the one time that favoured the trained model.</li>
+<li>Not tried: whether lower teacher gains keep the faster return and drop the costs, whether the head uses the image during a push, and a clean split with a larger panel. Why the yaw push ends in drift is not explained; a guess, untested, is the teacher's heading term against a truck that leaves the push with a heading error.</li>
+<li>Models exported after the trainer's stop alarm are test articles, not candidates for the truck. Nothing is deployed.</li>
+</ul>
