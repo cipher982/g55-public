@@ -1,0 +1,36 @@
+<h2>What was asked</h2>
+<p>The yaw-rate sensor reads a small non-zero value at standstill, and every sideways driving label integrates it (<a href="yaw-sensor-offset-in-labels.html">earlier note</a>). Does a truck adapter trained on labels with that offset removed drive closer to the human driver?</p>
+<h2>What was done</h2>
+<ul>
+<li>The shipped training recipe was run four times: shipped labels and corrected labels, two random seeds each. Nothing else changed.</li>
+<li>Open loop scoring on nine drives recorded after everything else and never used for anything, plus the 17 validation drives.</li>
+<li>Primary measure: the distance between the model's planned path and the driver's actual path 4 s ahead, per drive, with a 95% interval resampled by drive.</li>
+<li>Pass rule, fixed before the run: a change below zero with an interval excluding zero on the new drives; the same sign on validation for both seeds; and a change larger than the difference between two seeds trained on the same labels.</li>
+<li>A re-run of the shipped recipe was checked against the shipped adapter and reproduced it exactly.</li>
+</ul>
+<h2>Result</h2>
+<p>The rule fails. Change in the 4 s distance to the driver's path, corrected labels against shipped labels (negative is better):</p>
+<table>
+<thead><tr><th scope="col">Drives</th><th scope="col">Change (m)</th><th scope="col">Note</th></tr></thead>
+<tbody>
+<tr><td>9 new drives</td><td>-0.004 [-0.012, +0.005]</td><td>mean error 0.49 m; better on 5 of 9</td></tr>
+<tr><td>17 validation drives, seed 1</td><td>-0.009 [-0.012, -0.006]</td><td></td></tr>
+<tr><td>17 validation drives, seed 2</td><td>-0.012 [-0.016, -0.007]</td><td></td></tr>
+<tr><td>Two seeds, same labels</td><td>0.017 [0.009, 0.026]</td><td>about twice the label effect</td></tr>
+</tbody>
+</table>
+<ul>
+<li>The new-drive interval includes zero. On validation the change is largest above 20 m/s, at -0.02 to -0.03 m.</li>
+<li>The change from labels is smaller than the difference between two seeds, so the third part of the rule fails.</li>
+<li>Scored against the labels as recorded, without the correction applied to the reference, the change is nil: -0.002 m [-0.007, +0.004] on the new drives.</li>
+</ul>
+<p><strong>What did change.</strong> The model's sideways command on straight road lost a small standing bias. On the new drives it went from about -0.016 to -0.009 m/s2, and on validation from -0.009 to about 0, for both seeds, with intervals excluding zero.</p>
+<p>The offset is real and the adapter does learn it. At this training size the effect on the plan is millimetres, below the spread between drives and below seed noise.</p>
+<p>The choice of random seed moved the 4 s number by about 4 percent, more than the thing being tested. Single-seed comparisons of this adapter need care.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Whether the correction matters with more motorway driving. The effect grows with speed and the new drives were mostly slow.</li>
+<li>Whether the standstill reading is the right correction while moving.</li>
+<li>Anything in closed loop.</li>
+<li>Anything beyond one truck, one driver and one adapter recipe.</li>
+</ul>
