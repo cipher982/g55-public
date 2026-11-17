@@ -1,0 +1,40 @@
+<h2>What was asked</h2>
+<p>Two questions, both answered with existing recordings and no training. First: does the model's lateral action carry a steady difference from the driver, and would a running correction built only from differences already observable at each moment remove it? Second: if a steady difference exists on each drive, is part of it in the driver labels rather than in the model?</p>
+<h2>What was done</h2>
+<ul>
+<li>Open loop only. The model's lateral action is compared with the driver's lateral acceleration 0.5 s later. The correction at each moment is the running mean of the differences seen so far, over a 30 s memory (and a 2 s memory for comparison).</li>
+<li>Two sets of 17 drives. The stock model was scored on both sets and the adapted model on the second. The drives had been read before for other questions, not this one.</li>
+<li>The yaw-rate sensor was read at standstill (all four wheel speeds zero) in every recording with enough standstill time, 23 recordings in all, and compared between the first and second half of each recording.</li>
+<li>The standstill reading was subtracted from the driver labels. The stock and adapted models were then re-scored against the corrected labels. The same offset with the wrong sign was run as a control.</li>
+</ul>
+<h2>Result</h2>
+<p><strong>Running correction.</strong> Change in the action error with a 30 s memory, by drive, with 95% intervals:</p>
+<table>
+<thead><tr><th scope="col">Model and drive set</th><th scope="col">Change in action error (m/s2)</th><th scope="col">Drives improved</th></tr></thead>
+<tbody>
+<tr><td>Stock, first set of 17 (0.1330 to 0.1292)</td><td>-0.0038 [-0.0063, -0.0015]</td><td>12 of 17</td></tr>
+<tr><td>Stock, second set of 17</td><td>-0.0029 [-0.0042, -0.0017]</td><td>15 of 17</td></tr>
+<tr><td>Adapted, second set of 17</td><td>-0.0030 [-0.0041, -0.0020]</td><td>16 of 17</td></tr>
+</tbody>
+</table>
+<ul>
+<li>That is 2 to 3 % of the action error, the same on two sets of drives and for both models.</li>
+<li>A 2 s memory removes more (-0.010 m/s2), but most of that is a copy of the driver's current steering.</li>
+<li>The difference is correlated with itself at 0.5 at 1 s and near 0 from 5 s to 60 s. What the 30 s memory removes is therefore a per-drive constant of 0.01 to 0.08 m/s2, with a sign that varies by drive.</li>
+</ul>
+<p><strong>Yaw-rate offset in the labels.</strong></p>
+<ul>
+<li>With all wheels stopped, the vehicle's yaw-rate sensor reads +0.008 to +0.046 deg/s in 22 of the 23 recordings, typically +0.02 deg/s, and about the same in both halves of a recording.</li>
+<li>Driver labels are built by integrating that reading. At 28 m/s and +0.046 deg/s the offset adds 0.023 m/s2 to the lateral acceleration label and 0.18 m to the path label at 4 s.</li>
+<li>On the three drives over 20 m/s, subtracting the offset moves the stock model's signed 4 s difference from the driver from +0.148 to -0.035 m, from +0.072 to -0.027 m, and from -0.012 to -0.107 m. The wrong sign makes all three worse (mean error up by 0.106, 0.038 and 0.021 m).</li>
+<li>Over all 17 drives the subtraction does not help: +0.001 m [-0.005, +0.005]. Below 20 m/s the offset moves the label by only 1 to 4 cm, and the stock model's known sideways shift on this camera (about -0.1 m at 4 s) has the opposite sign.</li>
+<li>The adapted model fits the corrected labels worse (4 s: +0.007 m [+0.004, +0.010]). That is expected of a model trained on labels that contain the offset.</li>
+</ul>
+<p>Lateral numbers elsewhere on this site were scored with the offset still in the labels. The effect is negligible in town and up to 0.1 to 0.2 m at 4 s at motorway speed, which is the size of some differences reported between models.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>A method. Nothing here is a correction that was shipped or proposed for the model.</li>
+<li>Anything general about fast driving. Only three drives are over 20 m/s.</li>
+<li>Stability of the offset. It was measured once per recording and not checked against temperature or time since start.</li>
+<li>A closed-loop consequence. Whether the adapted model's lane position at speed is off by the amount a label bias of this size would give is not measured.</li>
+</ul>
