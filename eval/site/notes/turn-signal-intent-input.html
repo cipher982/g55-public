@@ -1,0 +1,39 @@
+<h2>What was asked</h2>
+<p>The driving model has an input for the driver's stated intent: turn left, turn right, lane change left, lane change right. openpilot sets it from the turn signal. The truck's stack has always fed that input zeros, and so has every evaluation on this site, although the truck's turn signal is on the CAN bus and decoded. The question: if the model is told when the signal comes on, does its plan follow the driver's manoeuvre more closely?</p>
+<p>The test and its pass rule were written before the run. The result counts as a signal if the plan's sideways gap to the driver's path at 4 s falls by 10% or more after a signal onset, the interval over drives excludes zero, and the steps with no signal do not get worse by more than 1 cm. A second set of drives was to repeat it before it went anywhere near the truck.</p>
+<h2>What was done</h2>
+<ul>
+<li>Open loop on real recorded camera frames of one truck and one driver. No simulator, no training, nothing deployed.</li>
+<li>At each recorded turn-signal onset, one pulse is written to the intent input for one 0.2 s step. The model keeps its own 6.6 s history of that input. Two arms were run against a zeros capture: a lane-change pulse on the signalled side at every onset, and a turn pulse under 9 m/s with a lane-change pulse at 9 m/s and over (9 m/s is openpilot's minimum speed for a lane change).</li>
+<li>Measure: the sideways gap between the planned path and the path the driver then drove, at 2 s and 4 s ahead, over the 6 s after each onset while the signal is on, paired by step against zeros, with a 95% interval resampled by drive.</li>
+<li>The patched script with no pulses reproduces the unpatched capture exactly (74,032 steps, largest plan and action difference 0.000000).</li>
+<li>First set: 17 held-out drives, 134 signal onsets. Second set: 6 other drives (three trips) recorded later, 37 onsets, scored once with the same script.</li>
+</ul>
+<h2>Result</h2>
+<p>Sideways gap between the plan and the driver's path, zeros against the lane-change pulse. The two sets are separate measurements, not pooled.</p>
+<table>
+<thead><tr><th scope="col">Set</th><th scope="col">Steps after onset (drives)</th><th scope="col">Gap at 2 s, m</th><th scope="col">Gap at 4 s, m</th><th scope="col">Change at 4 s [95% by drive]</th></tr></thead>
+<tbody>
+<tr><td>17 drives, all speeds</td><td>1,860 (15)</td><td>0.327 to 0.239</td><td>1.219 to 0.883</td><td>-0.336 [-0.468, -0.188], -28%</td></tr>
+<tr><td>17 drives, 9 m/s and over</td><td>1,326 (15)</td><td>0.277 to 0.160</td><td>1.028 to 0.575</td><td>-0.453 [-0.599, -0.274], -44%</td></tr>
+<tr><td>17 drives, under 9 m/s</td><td>534 (15)</td><td>0.452 to 0.436</td><td>1.693 to 1.648</td><td>-0.045 [-0.109, +0.015]</td></tr>
+<tr><td>6 other drives, all speeds</td><td>660 (6)</td><td>0.347 to 0.321</td><td>1.234 to 1.080</td><td>-0.153 [-0.257, +0.339], -12%</td></tr>
+<tr><td>6 other drives, 9 m/s and over</td><td>441 (6)</td><td>0.209 to 0.172</td><td>0.991 to 0.781</td><td>-0.210 [-0.343, +0.555], -21%</td></tr>
+</tbody>
+</table>
+<ul>
+<li>On the first set the gap at 4 s is lower on 13 of 15 drives. Without the signal the plan sits 0.52 m short of the driver's path on the signalled side at 4 s (0.82 m at 9 m/s and over); with the pulse it is 0.13 m past (0.04 m at 9 m/s and over). All other steps are unchanged on average.</li>
+<li>The effect is in the first 2 s after onset (1.244 to 0.691 m at 4 s) and mostly gone by 6 s. Under 9 m/s, which is junction turns, a lane-change pulse changes nothing and a turn pulse makes the gap larger (1.693 to 1.832 m).</li>
+<li><strong>Not confirmed on a second set.</strong> By the rule written in advance the second set fails: the interval includes zero and three of the six drives are lower, three higher. One drive holds 27 of the 37 onsets and supplies all of the gain (1.217 to 0.944 m). The other five drives pooled get larger, about 1.28 to 1.44 m over 181 steps.</li>
+<li>A per-event reading made after the fact (not the planned measure, thresholds set after looking) shows the same pattern: 72 of 97 events lower by 2 cm or more on the first set, 19 of 30 on the second. The largest increases are on the second set: a 7 m/s turn where the pulsed plan goes about 2 m past the driver's path, and a 12 m/s event where it goes 1.1 m past. A lane-change pulse at every onset is too blunt.</li>
+<li>Is the pulse just a sideways shift toward the signalled side? A single fixed shift fitted on the first set at 9 m/s and over recovers 37% of the pulse's gain there (gap 1.028 with zeros, 0.861 with the shift, 0.575 with the pulse), and on the second set is 0.30 m above the pulse (1.085 against 0.781). The size of the pulse's change tracks how far the driver still has to move (correlation 0.63 and 0.44), so the model is sizing the move from the picture.</li>
+</ul>
+<h2>What it does not show</h2>
+<ul>
+<li>That this works. The first set is a measured effect; the second does not repeat it by the rule set in advance, and its by-drive unit is weak (three trips, one drive with most of the events). All drives on this camera outside the adapter's training have now been used for this question.</li>
+<li>Anything about steering. The score is on the planned path, not the steering command, which was saved and not scored. Closed-loop behaviour was not tested.</li>
+<li>Steps after a signal is cancelled while the pulse is still in the model's memory. The scoring window keeps only steps where the signal is on, so those fall into the unchanged-steps row, which could not have shown them (about 1.6% of those steps differ between the arms). Some signals were pulsed twice (171 pulses for 141 events), which openpilot would not do. Pulse placement is off on 3 to 4% of steps.</li>
+<li>How the model's intent input was labelled in training; that is not public. openpilot sets the lane-change intent when the driver also nudges the wheel, not at signal onset, and the truck has no steering-torque signal to copy that rule.</li>
+<li>An improvement to the model. This is an input used as its makers intended, which the truck's stack never connected.</li>
+</ul>
+<p><strong>State: parked.</strong> Before it goes on the truck it needs a trigger rule fixed in advance that the truck can compute, and a test per signal event, resampled by trip, on new drives at 9 m/s and over with no drive holding more than a quarter of the events. No such drives are being collected for it.</p>

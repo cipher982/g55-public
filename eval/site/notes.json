@@ -3,6 +3,17 @@
  "notes": [
   {
    "date": "2026-11-17",
+   "title": "Feeding the turn signal to the model's intent input: the plan follows lane changes more closely on 17 drives, not confirmed on a second set",
+   "slug": "turn-signal-intent-input",
+   "summary": "Planned before the run. The driving model has an input for the driver's stated intent, and the truck's stack has always fed it zeros. Open loop on real frames, one pulse at each recorded turn-signal onset, scored as the sideways gap between the planned path and the driver's path at 4 s ahead. On 17 held-out drives (134 onsets) the gap after a signal falls from 1.22 to 0.88 m (-28%, 95% by drive [-0.47, -0.19] m), and from 1.03 to 0.58 m (-44%) at 9 m/s and over. On a second set of six drives (37 onsets) it falls from 1.23 to 1.08 m (-12%) with an interval that includes zero: one drive supplies all of the gain and the other five pooled get worse. Not confirmed on a second set by the rule written in advance. It is an input used as intended, not an improvement to the model, and it is parked.",
+   "grade": "Measured open loop on real camera frames of one truck and one driver: 17 held-out drives (134 signal onsets) and a second set of 6 drives from three trips (37 onsets). Test and pass rule written before the run. No training, no simulator, nothing deployed. The second set does not meet the rule; the scoring window and pulse placement have known limits.",
+   "result": "gap to the driver's path at 4 s after a signal onset: 1.22 to 0.88 m (-28%) on 17 drives, 1.23 to 1.08 m (-12%, interval includes zero) on 6 other drives; not confirmed on a second set, parked",
+   "n": "17 drives, 134 onsets; 6 drives, 37 onsets",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-17",
    "title": "No line-type offset in the plan: on roads with a centre line and no painted right line, comma's plan sits where the driver drove (-0.002 m at 4 s)",
    "slug": "centre-line-plan-offset",
    "summary": "Planned before the result was read. Open loop on 17 held-out drives (real frames, no simulator): on two-way roads where the model sees a centre line and no painted right line, does its planned path sit to one side of where the driver drove? Straight driving only, 50,570 steps, road class from the model's own line confidences. For the truck's adapter at 4 s ahead the offset is -0.022 m [-0.053, +0.053] with both lines and -0.002 m [-0.042, +0.039] with a centre line only; paired by drive the difference is 0.000 m [-0.055, +0.064]. The pass rule (10 cm, interval excluding zero) is not met, so this is closed: no line-type offset in the plan. The reference is where this driver drove, not the lane centre.",
