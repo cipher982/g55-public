@@ -1,0 +1,36 @@
+<h2>What was asked</h2>
+<p>The driving model takes a 64-number map-feature input, which the truck's stack leaves at zero. A small controller could write to that input and so nudge the plan. That only works if the same change moves the plan the same way on different roads. Is there one fixed direction in the input that moves the sideways plan the same way everywhere, and how far does it move it?</p>
+<p>The test and its rule were written before the run. A usable direction needs a mean leave-one-drive-out cosine of 0.5 or more, the same sign in 90% or more of probes, and a shift of 10 cm or more at 4 s per unit of nudge. The question is closed in this form if the mean cosine is under 0.2 or the shift is under 2 cm per unit. In between, the result is recorded as it is and reviewed before anything is built.</p>
+<h2>What was done</h2>
+<ul>
+<li>Open loop on 17 drives of one truck and one driver, real camera frames, the truck's camera adapter, map input zero as on the truck. No training, no simulator, nothing deployed.</li>
+<li>At every 150th scored step, each of the 64 numbers of the map-feature history is moved up and down by half the channel's own spread (central differences, 129 model runs per probe). The model's state is not touched. The outputs read are the sideways plan at 2 s and 4 s, plan speed at 4 s and the two actions. That gives 493 probes, each with the sensitivity of every output to each of the 64 numbers.</li>
+<li>Consistency: the cosine between one probe's 64-number sensitivity of the 4 s sideways plan and the mean sensitivity of the probes from the other drives. Also the share of probes whose shift along that mean direction has the common sign.</li>
+<li>Size: the sideways shift at 4 s per unit of nudge along the mean direction, and the effect on plan speed and on the actions.</li>
+</ul>
+<h2>Result</h2>
+<table>
+<thead><tr><th scope="col">Measure</th><th scope="col">Value</th></tr></thead>
+<tbody>
+<tr><td>Leave-one-drive-out cosine, mean (median, 10th percentile)</td><td>0.37 (0.39, 0.13)</td></tr>
+<tr><td>Cosine by drive</td><td>0.15 to 0.41 on every drive</td></tr>
+<tr><td>Cosine by speed</td><td>0.27 under 12 m/s, 0.42 at 20 m/s and over</td></tr>
+<tr><td>Same sign along the common direction</td><td>97% of probes for the 4 s plan, 98% at 2 s, 100% for the lateral action</td></tr>
+<tr><td>Share of the sensitivity in the first direction</td><td>33% (the next five hold 4 to 8% each)</td></tr>
+<tr><td>Effect on plan speed at 4 s</td><td>-0.0000 m/s per unit; longitudinal action -0.0001</td></tr>
+<tr><td>Sideways shift at 4 s per unit of the planned scale (0.073)</td><td>0.3 cm</td></tr>
+</tbody>
+</table>
+<ul>
+<li>Consistency falls between the two limits set in advance (0.2 and 0.5) and the sign share is above 90%, so there is one clean sideways direction. The speed sensitivity has no common direction of its own (cosine 0.09) and is at right angles to the sideways one (0.005).</li>
+<li>By the rule as written, the size is under 2 cm and closes the test. The unit was a scale taken from the zero-map feature, and the plan warned it might be wrong. A separate earlier measurement puts the range real map features occupy at a radius about 7 times the zero-map feature's own norm. In that unit the common direction moves the 4 s plan about 0.14 m per radius by straight-line extrapolation. A probe's own best direction moves it 0.24 m at the median and 0.9 m at the 90th percentile.</li>
+<li>So across the range real map features occupy, the common direction is worth roughly 10 to 25 cm at 4 s if the response stays linear.</li>
+</ul>
+<p><strong>State: parked.</strong> The map-feature input has a weak, consistent sideways direction with no effect on speed, and no controller or dose sweep was built. A controller writing it would need information the model does not already see, and none was identified. The one signal this truck has that the model lacks is the turn signal, which has its own input (see the turn-signal note).</p>
+<h2>What it does not show</h2>
+<ul>
+<li>That a controller would help. A stable direction makes one possible and supplies no information.</li>
+<li>That the response is linear. The 10 to 25 cm is a straight-line extrapolation of a slope measured at small nudges, and was not tested with real nudges.</li>
+<li>Anything with real map data fed. The probe used zero maps, and the real range of the input is taken from a separate earlier measurement.</li>
+<li>Anything in closed loop, or on more than 17 drives of one truck and one driver.</li>
+</ul>

@@ -3,12 +3,34 @@
  "notes": [
   {
    "date": "2026-11-17",
-   "title": "Feeding the turn signal to the model's intent input: the plan follows lane changes more closely on 17 drives, not confirmed on a second set",
+   "title": "A sideways direction in the model's map-feature input: one weak, consistent direction on 17 drives, worth roughly 10 to 25 cm at 4 s by extrapolation",
+   "slug": "map-feature-sideways-direction",
+   "summary": "Planned before the run. The driving model takes a 64-number map-feature input. Is there one fixed direction in it that moves the plan sideways the same way on different roads? A sensitivity probe, open loop on real frames of 17 drives (493 probes, map input zero as on the truck): the effect of a small change along the common direction on the 4 s sideways plan has the same sign in 97% of probes (98% at 2 s, 100% for the steering command), the leave-one-drive-out cosine with the other drives' direction is 0.37, and the direction has no effect on plan speed. The effect is weak: 0.3 cm per unit of the scale fixed in advance, and roughly 10 to 25 cm at 4 s over the range real map features occupy, by extrapolating a local slope, which is not a measurement. Parked: a controller writing this input would need information the model cannot already see, and none was found.",
+   "grade": "Measured open loop on real camera frames of 17 drives of one truck and one driver, 493 probes, central differences on the model's own inputs, one adapter. The size over the real map range is an extrapolation of a local slope and is derived, not measured. Test and rule written before the run. No training, no simulator, nothing deployed.",
+   "result": "same sign in 97% of 493 probes, leave-one-drive-out cosine 0.37, no effect on speed; about 0.3 cm per planned unit, roughly 10 to 25 cm at 4 s over the real map range by extrapolation; weak, parked",
+   "n": "493 probes, 17 drives",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-17",
+   "title": "How the truck feeds comma's model against comma's own reference: one input was always zero, and the traffic-side setting is the right one (+0.004 m at 4 s if changed)",
+   "slug": "input-audit-against-reference",
+   "summary": "After the turn-signal gap was found, every model input and processing step the truck uses was compared by reading with the copy of comma's reference code and notes. Same as the reference: the pulse rule for the intent input, the image warp and focal lengths, which camera feeds which input, the 20 Hz pacing and in-graph history, the smoothing of the speed command, and the reset on a non-finite output. Different: the intent input was zeros (see the turn-signal note). Two comments in the truck's code disagreed on what the traffic-side setting means, so it was measured: on 17 drives, feeding the other setting changes the plan's sideways error at 4 s from 0.352 to 0.356 m (+0.004 m, by-drive interval [+0.000, +0.009]), with 14 of 17 drives slightly worse. The truck feeds the right one, and the input barely matters to this model. Four further differences are in live timing and image handling and were not measured.",
+   "grade": "The comparison is by reading code, not measured. The traffic-side input is measured open loop on real camera frames of 17 drives of one truck and one driver, the setting fed now against the other, with the run unchanged otherwise. No training, no simulator, nothing deployed.",
+   "result": "plan error at 4 s 0.352 m as fed, 0.356 m with the other traffic-side setting (+0.004 m [+0.000, +0.009], 14 of 17 drives worse); no other difference found that changes the plan on recorded drives",
+   "n": "17 drives (traffic-side measurement)",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-17",
+   "title": "Feeding the turn signal to the model's intent input: the plan follows lane changes more closely on 17 drives, not confirmed on two other sets",
    "slug": "turn-signal-intent-input",
-   "summary": "Planned before the run. The driving model has an input for the driver's stated intent, and the truck's stack has always fed it zeros. Open loop on real frames, one pulse at each recorded turn-signal onset, scored as the sideways gap between the planned path and the driver's path at 4 s ahead. On 17 held-out drives (134 onsets) the gap after a signal falls from 1.22 to 0.88 m (-28%, 95% by drive [-0.47, -0.19] m), and from 1.03 to 0.58 m (-44%) at 9 m/s and over. On a second set of six drives (37 onsets) it falls from 1.23 to 1.08 m (-12%) with an interval that includes zero: one drive supplies all of the gain and the other five pooled get worse. Not confirmed on a second set by the rule written in advance. It is an input used as intended, not an improvement to the model, and it is parked.",
-   "grade": "Measured open loop on real camera frames of one truck and one driver: 17 held-out drives (134 signal onsets) and a second set of 6 drives from three trips (37 onsets). Test and pass rule written before the run. No training, no simulator, nothing deployed. The second set does not meet the rule; the scoring window and pulse placement have known limits.",
-   "result": "gap to the driver's path at 4 s after a signal onset: 1.22 to 0.88 m (-28%) on 17 drives, 1.23 to 1.08 m (-12%, interval includes zero) on 6 other drives; not confirmed on a second set, parked",
-   "n": "17 drives, 134 onsets; 6 drives, 37 onsets",
+   "summary": "Planned before the run, tested twice more. The driving model has an input for the driver's stated intent, and the truck's stack has always fed it zeros. Open loop on real frames, one pulse at each recorded turn-signal onset, scored as the sideways gap between the planned path and the driver's path at 4 s ahead. On 17 held-out drives (134 onsets) the gap after a signal falls from 1.22 to 0.88 m (-28%, 95% by drive [-0.47, -0.19] m). On a second set of six drives (37 onsets) it falls 12% with an interval that includes zero. A third test, written in advance to the reviewers' specification (stock model, one lane-change pulse at an onset at 9 m/s and over, 47 events on 14 other drives), gives 1.18 to 0.99 m, a change of -0.20 m with a by-drive interval of [-0.30, +0.12] m, which includes zero, so its rule fails. The steering command's error against the driver did fall in that test, and that is recorded as a lead only. Helps on some drives, not shown in general. It is an input used as intended, not an improvement to the model, and it is parked.",
+   "grade": "Measured open loop on real camera frames of one truck and one driver: 17 held-out drives (134 signal onsets), a second set of 6 drives (37 onsets), and a third set of 14 drives with events from 17 captured (47 onsets, stock model, never read for this question). Tests and pass rules written before each run. No training, no simulator, nothing deployed. Neither later set meets the rule; the scoring window and pulse placement have known limits.",
+   "result": "gap to the driver's path at 4 s after a signal onset: 1.22 to 0.88 m (-28%) on 17 drives; 1.23 to 1.08 m (-12%, interval includes zero) on 6 other drives; 1.18 to 0.99 m (-0.20 m, by-drive interval [-0.30, +0.12]) on 47 events from 14 more drives, so the planned rule fails; helps on some drives, not shown in general, parked",
+   "n": "17 drives, 134 onsets; 6 drives, 37 onsets; 14 drives, 47 events",
    "kind": "measured",
    "domain": "p"
   },

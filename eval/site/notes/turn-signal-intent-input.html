@@ -8,6 +8,7 @@
 <li>Measure: the sideways gap between the planned path and the path the driver then drove, at 2 s and 4 s ahead, over the 6 s after each onset while the signal is on, paired by step against zeros, with a 95% interval resampled by drive.</li>
 <li>The patched script with no pulses reproduces the unpatched capture exactly (74,032 steps, largest plan and action difference 0.000000).</li>
 <li>First set: 17 held-out drives, 134 signal onsets. Second set: 6 other drives (three trips) recorded later, 37 onsets, scored once with the same script.</li>
+<li>Third set, a second confirmation built to outside reviewers' specification, with the rule and scorer written before its drives were captured: the stock model with no adapter (so no drive is one the adapter trained on), one lane-change pulse on the signalled side at a signal onset at 9 m/s and over, nothing under 9 m/s, no second pulse on the same side within 7 s, pulse placement taken from the evaluation's own frame grid. One signal event is one unit, scored over every step from 0 to 6 s after the onset whether or not the signal is still on, and needs 5 or more scored steps. The planned pass: the per-event change in the gap at 4 s is below zero with the by-drive interval excluding zero on 8 or more drives, still so with the drive with most events left out, and the steering command not worse. It was drawn from 20 drives not read for this question; 3 had no usable signal recording or driver path, so 17 were captured and 14 of them have events.</li>
 </ul>
 <h2>Result</h2>
 <p>Sideways gap between the plan and the driver's path, zeros against the lane-change pulse. The two sets are separate measurements, not pooled.</p>
@@ -28,12 +29,30 @@
 <li>A per-event reading made after the fact (not the planned measure, thresholds set after looking) shows the same pattern: 72 of 97 events lower by 2 cm or more on the first set, 19 of 30 on the second. The largest increases are on the second set: a 7 m/s turn where the pulsed plan goes about 2 m past the driver's path, and a 12 m/s event where it goes 1.1 m past. A lane-change pulse at every onset is too blunt.</li>
 <li>Is the pulse just a sideways shift toward the signalled side? A single fixed shift fitted on the first set at 9 m/s and over recovers 37% of the pulse's gain there (gap 1.028 with zeros, 0.861 with the shift, 0.575 with the pulse), and on the second set is 0.30 m above the pulse (1.085 against 0.781). The size of the pulse's change tracks how far the driver still has to move (correlation 0.63 and 0.44), so the model is sizing the move from the picture.</li>
 </ul>
+<h3>Third set: stock model, 47 events on 14 drives</h3>
+<table>
+<thead><tr><th scope="col">Measure</th><th scope="col">All events</th><th scope="col">Without the drive with most events</th></tr></thead>
+<tbody>
+<tr><td>Events (drives)</td><td>47 (14)</td><td>23 (13)</td></tr>
+<tr><td>Gap at 4 s, zeros to pulse, m</td><td>1.18 to 0.99</td><td></td></tr>
+<tr><td>Per-event change at 4 s, m [95% by drive]</td><td>-0.20 [-0.30, +0.12]</td><td>-0.05 [-0.22, +0.19]</td></tr>
+<tr><td>Events better or worse at 4 s</td><td>39 better, 8 worse</td><td>16 better, 7 worse</td></tr>
+<tr><td>Per-event change at 2 s, m</td><td>-0.06 [-0.08, +0.01]</td><td></td></tr>
+<tr><td>Steering command, change in error against the driver's lateral acceleration, m/s&sup2;</td><td>-0.12 [-0.15, -0.05]</td><td>-0.09 [-0.15, -0.03]</td></tr>
+</tbody>
+</table>
+<ul>
+<li><strong>The planned rule fails.</strong> The by-drive interval on the plan at 4 s includes zero with all events and with the largest drive left out. One drive holds 24 of the 47 events. The result is closed as written: feeding the turn signal helps on some drives and is not shown in general.</li>
+<li>The steering command improves, with the interval excluding zero both ways. It was a guard in the plan and not the test, so it is a lead for a new test written in advance, not a pass.</li>
+<li>The fed plan moves further toward the signalled side than the driver did: event means at 4 s are 1.26 m for the driver, 0.90 m with zeros and 1.43 m with the pulse. The worst event is a 4.3 m move by the driver where zeros already planned 5.4 m and the pulse made it 7.6 m. Where the driver moved 1 m or more (18 events) the change is -0.05 m [-0.22, +0.30]. Where the driver moved under 0.3 m toward that side (28 events on 7 drives, 24 of them better) it is -0.29 m [-0.38, 0.00]. Most of the gain on the plan sits in events where the driver hardly moved, and this output does not explain why.</li>
+<li>Steps outside every 7 s window: 0.1 to 0.3% differ at all, and the mean error is unchanged to the third decimal.</li>
+</ul>
 <h2>What it does not show</h2>
 <ul>
-<li>That this works. The first set is a measured effect; the second does not repeat it by the rule set in advance, and its by-drive unit is weak (three trips, one drive with most of the events). All drives on this camera outside the adapter's training have now been used for this question.</li>
-<li>Anything about steering. The score is on the planned path, not the steering command, which was saved and not scored. Closed-loop behaviour was not tested.</li>
+<li>That this works in general. The first set is a measured effect; the second does not repeat it by the rule set in advance, and the third, built to a stricter specification on other drives and a different model setting, fails its rule too. Its events are few and uneven across drives. The drives available for this question have now all been read.</li>
+<li>Closed-loop behaviour, which was not tested and cannot be on the simulator, which has no lane changes. The steering command was scored only in the third set, as a guard.</li>
 <li>Steps after a signal is cancelled while the pulse is still in the model's memory. The scoring window keeps only steps where the signal is on, so those fall into the unchanged-steps row, which could not have shown them (about 1.6% of those steps differ between the arms). Some signals were pulsed twice (171 pulses for 141 events), which openpilot would not do. Pulse placement is off on 3 to 4% of steps.</li>
 <li>How the model's intent input was labelled in training; that is not public. openpilot sets the lane-change intent when the driver also nudges the wheel, not at signal onset, and the truck has no steering-torque signal to copy that rule.</li>
 <li>An improvement to the model. This is an input used as its makers intended, which the truck's stack never connected.</li>
 </ul>
-<p><strong>State: parked.</strong> Before it goes on the truck it needs a trigger rule fixed in advance that the truck can compute, and a test per signal event, resampled by trip, on new drives at 9 m/s and over with no drive holding more than a quarter of the events. No such drives are being collected for it.</p>
+<p><strong>State: closed as helps on some drives, not shown in general.</strong> The one open lead is the steering command's lower error, which would need its own test written in advance, on new drives. No such drives are being collected for it.</p>

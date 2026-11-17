@@ -1,0 +1,32 @@
+<h2>What was asked</h2>
+<p>The turn-signal note found an input the truck had always fed as zeros. Are there other differences between how the truck feeds comma's driving model and how comma's own reference code feeds it, and does any of them change the plan?</p>
+<h2>What was done</h2>
+<ul>
+<li>A read-only comparison of every model input and processing step in the truck's perception code with the copy of comma's reference code and the notes kept on it. Nothing was run for this part.</li>
+<li>One difference was measured. Two comments in the truck's code disagreed on which traffic side the fed setting stands for. Open loop on real camera frames of 17 drives of one truck and one driver, the run was repeated with the other setting, and the plan's sideways error at 4 s was compared. No training, no simulator, nothing deployed.</li>
+</ul>
+<h2>Result</h2>
+<p>Same as the reference, by reading: the pulse rule for the intent input, the image warp and focal lengths, which camera feeds which input, the 20 Hz pacing and in-graph history, the 0.3 s smoothing of the speed command and none on the steering command, and the reset on a non-finite output.</p>
+<table>
+<thead><tr><th scope="col">Difference</th><th scope="col">How it was checked</th><th scope="col">Effect on the plan</th></tr></thead>
+<tbody>
+<tr><td>Intent input fed as zeros</td><td>Measured, see the turn-signal note</td><td>Changes the plan after a signal on some drives</td></tr>
+<tr><td>Traffic-side setting</td><td>Measured, 17 drives</td><td>Plan error at 4 s 0.352 m as fed, 0.356 m with the other setting: +0.004 m [+0.000, +0.009], 14 of 17 drives worse. The plan moves 2.5 cm sideways. Speed error at 6 s 1.119 against 1.100 m/s.</td></tr>
+<tr><td>State reset after a frame gap</td><td>Not measured</td><td>0.15 s on the truck, 0.35 s in evaluation with a 5 s warm-up before scoring</td></tr>
+<tr><td>Camera calibration</td><td>Not measured</td><td>The truck rebuilds the warp once per 5 s block when the motion estimate is steady. Evaluation uses the track's per-frame value.</td></tr>
+<tr><td>Wide camera frame</td><td>Not measured</td><td>Reaches the model through a JPEG on the truck</td></tr>
+<tr><td>Steering taken from the raw lateral acceleration action, not from curvature</td><td>Read only</td><td>A design choice of the truck's controller, not a feed error</td></tr>
+<tr><td>Route corridor in the map inputs</td><td>Covered by earlier map notes</td><td>The truck can paint a grey route corridor the model was not trained with when a route is active. Evaluation feeds roads-only maps or zeros.</td></tr>
+</tbody>
+</table>
+<ul>
+<li>The truck feeds the right traffic-side setting. The other choice changes the 4 s plan error by +0.004 m, so the input barely matters to this model. The comment that said otherwise was corrected.</li>
+<li>Apart from the intent input, no difference found changes the plan on recorded drives.</li>
+</ul>
+<h2>What it does not show</h2>
+<ul>
+<li>That the reference is the right behaviour. It is the comparison point, and the truck may differ from it on purpose.</li>
+<li>Anything about the four unmeasured differences. They concern live timing and image handling, which recorded-drive evaluation cannot see because it does not replay the truck's live path.</li>
+<li>That the comparison found everything. It was by reading, of the inputs and steps listed.</li>
+<li>Anything in closed loop, or beyond 17 drives of one truck and one driver.</li>
+</ul>
