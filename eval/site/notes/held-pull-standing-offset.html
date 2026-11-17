@@ -1,0 +1,40 @@
+<h2>What was asked</h2>
+<p>An outside review of <a href="disturbance-estimate-in-the-loop.html">the previous note</a> found that its measure was taken after the pull had ended, so it could not tell a standing offset from a slow return. The question here was what the shipped model does while the pull is still applied, and whether an outside estimate of the pull changes it. The readings were fixed before the run: the standing-offset reading holds if, on runs that stay in view, the shipped offset stops growing at a level that rises with the pull and the estimate arms hold a clearly smaller one. It fails in that form if the offset keeps growing or most shipped runs lose view of the road.</p>
+<h2>What was done</h2>
+<ul>
+<li>Bench only, no change to the model. The sideways pull is held for the whole 7.4 s run (37 steps) instead of 3.2 s.</li>
+<li>The same 33 windows from 7 drives, at two pull sizes (0.40 and 0.60 m/s2), 66 runs at each size and 132 pulled runs per arm. 12 of the windows contain a turn of 10 to 34 degrees with no signal, so they are not all straight road.</li>
+<li>Four arms: the shipped model; the outside estimate with its truck-model gain at 0.8 of the true value; the estimate at 1.2; and the estimate at 0.8 with its truck model one step (0.2 s) late.</li>
+<li>Measures: sideways offset toward the pull over time, its growth over the last 2 s, the mean offset in the last second, sideways jerk, and the same windows run without a pull. A run counts as valid when the simulator keeps at least 80% of the road view covered at every step.</li>
+</ul>
+<h2>Result</h2>
+<table>
+<thead><tr><th scope="col">Measure</th><th scope="col">Shipped</th><th scope="col">Estimate, gain 0.8</th><th scope="col">Estimate, gain 1.2</th><th scope="col">Estimate, gain 0.8, one step late</th></tr></thead>
+<tbody>
+<tr><td>Pulled runs that keep the road in view throughout (of 132)</td><td>41</td><td>102</td><td>121</td><td>103</td></tr>
+<tr><td>Pull 0.40, 31 runs valid in every arm: offset toward the pull at 3.2 s, median (m)</td><td>0.86</td><td>0.43</td><td>0.21</td><td>0.44</td></tr>
+<tr><td>Same runs, offset at 7.2 s, median (m)</td><td>1.24</td><td>0.52</td><td>0.07</td><td>0.52</td></tr>
+<tr><td>Same runs, growth over the last 2 s, median (m)</td><td>+0.11</td><td>+0.05</td><td>-0.04</td><td>+0.04</td></tr>
+<tr><td>Pull 0.60, 9 runs valid in every arm: offset at 7.2 s, median (m)</td><td>1.55</td><td>0.68</td><td>0.12</td><td>0.74</td></tr>
+<tr><td>Pull 0.40, all 66 runs: last-second offset, mean (m)</td><td>2.60</td><td>0.80</td><td>0.13</td><td>0.80</td></tr>
+<tr><td>Pull 0.60, all 66 runs: last-second offset, mean (m)</td><td>5.80</td><td>1.43</td><td>0.37</td><td>1.45</td></tr>
+<tr><td>Sideways jerk, rms, pull 0.40, all runs</td><td>0.710</td><td>0.502</td><td>0.480</td><td>0.506</td></tr>
+<tr><td>No pull: mean distance from the recorded path (m)</td><td>0.193</td><td>0.227</td><td>0.212</td><td>0.223</td></tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Standing offset.</strong> On the runs that stay in view, the shipped offset is still creeping at the end of the run (+0.11 m over the last 2 s, and 16% of runs grow by more than 0.25 m) but is flattening, near 1.2 m at the 0.40 pull and 1.5 m at the 0.60 pull. The ratio between the two pull sizes, paired by window (9 pairs, quartiles 1.29 to 1.40), is 1.34 against a pull ratio of 1.5. That is about 3 m of offset per m/s2 of pull while the pull lasts.</li>
+<li><strong>The estimate removes most of it.</strong> With the gain 20% low, 20% high or one step late, the offset at 7.2 s is 0.52, 0.07 and 0.52 m against 1.24 m shipped. The estimate arms also have lower sideways jerk (0.48 to 0.51 against 0.71).</li>
+<li><strong>Neither stress arm is worse than shipped.</strong> The gain 1.2 arm ends with the smallest offset: it over-cancels the pull, which here offsets the bench's own lateral controller, which adds roughly 15 to 21% to an outside sideways acceleration. No oscillation shows in the offsets or the jerk.</li>
+<li><strong>Cost without a pull.</strong> The windows run without a pull end 1.9 to 3.4 cm further from the recorded path in every estimate arm.</li>
+<li><strong>Lost road view.</strong> 91 of the 132 shipped runs leave the simulator's valid range (57 of the 66 at the larger pull), with last-second offsets of several metres. For those runs the bench cannot say whether the model would have settled. For about two thirds of the shipped runs, divergence and lost view is the accurate description.</li>
+</ul>
+<h2>What it does not show</h2>
+<ul>
+<li>The size of the effect over the whole set. 91 of 132 shipped runs leave the valid range, so the offsets above come from the minority that stay in view (31 runs at 0.40, 9 at 0.60).</li>
+<li>Independence from the simulator. The estimate's truck model is the simulator's own with one number changed, so delay, response and limits match. A 20% gain error and a one-step delay are the only mismatches tried.</li>
+<li>Robustness. There is no sensor noise, road bank or tyre slip in the simulation.</li>
+<li>A cause inside the model. The model has a feature queue and a recurrent state and could in principle learn to hold a correction. This measures what it does on this bench, not why.</li>
+<li>Novelty. Rejecting a constant disturbance with an estimate is textbook control, and openpilot's lateral controllers on real cars carry an integral term and a learned steering offset (stated from reading, not checked against source here). The result matters for a port without that term.</li>
+<li>Any change to the model, or anything on a vehicle. This is simulation only and nothing was deployed.</li>
+</ul>
