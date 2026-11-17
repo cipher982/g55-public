@@ -1,0 +1,26 @@
+<h2>What was asked</h2>
+<p>Our bench pull test found that the shipped model often fails to come back after a constant sideways pull. The question here was whether comma's own published reports show the same weakness, measured the same way.</p>
+<h2>What was done</h2>
+<ul>
+<li>Read comma's public model report for its "hugging" test (<a href="https://commaai.github.io/model_reports/f78ed37d-afad-4dbc-8050-40ea885eedde/12864/analyse_nurec.html">the report page</a>). It applies a constant sideways acceleration bias of 0.25 or 0.45 m/s2 to a simulated car driven by the model, at 30, 15, 5 and 1.5 m/s. A run passes when at least 60% of the displacement is recovered, measured against the same model's unperturbed run. The report uses six reconstructed scenes.</li>
+<li>Compared with our bench pull test on a later model, which counts a run as a failure when it ends more than 0.5 m from the model's own undisturbed run. That is the same kind of reference, with a different threshold.</li>
+<li>Listed the model's inputs from its published description and checked what the policy is given.</li>
+</ul>
+<h2>Result</h2>
+<table>
+<thead><tr><th scope="col">Test</th><th scope="col">Result</th></tr></thead>
+<tbody>
+<tr><td>comma's hugging test, model in the report we read</td><td>22 of 96 runs pass</td></tr>
+<tr><td>Three largest misses shown in the report</td><td>all at 5 m/s with 0.45 m/s2; 4.3 to 4.8 m off after about 5 s</td></tr>
+<tr><td>Our bench pull test, later model</td><td>149 of 264 runs do not come back within 0.5 m, mostly under 10 m/s</td></tr>
+</tbody>
+</table>
+<p>The two tests differ in simulator, pull size and pass threshold, so the counts are not comparable. What matches is the weakness: a constant sideways push is not corrected, mostly at low speed.</p>
+<p>A reading, not tested here: the policy's inputs are the camera frames, intent, traffic side, the requested delay, map and navigation channels, and histories of image features, intent and map features. They do not include its own earlier commands or the measured sideways acceleration. With no state that accumulates a standing error, it can only react to its offset from where it wants to be. Proportional correction against a constant push settles at a standing offset. At low speed the same sideways acceleration is a tighter curve, and the picture of the car turning may also lead the model to continue the turn.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>That the cause is the missing inputs. That is a reading from the input list, and the next note tests it on our bench.</li>
+<li>That the two simulators agree. comma's runs use reconstructed scenes and a bicycle model; ours uses a pull added to a truck model.</li>
+<li>Anything about the report's other models or later releases. One report was read.</li>
+<li>Anything on a vehicle.</li>
+</ul>

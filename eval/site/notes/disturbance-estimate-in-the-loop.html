@@ -1,0 +1,35 @@
+<h2>What was asked</h2>
+<p>The previous note reads the model's failure under a constant sideways pull as a missing state: nothing in the model accumulates a standing error. If that is right, a state added outside the model should fix most of the failures, where more correction gain and a retrained correction did not. The rule was written before the run.</p>
+<h2>What was done</h2>
+<ul>
+<li>Bench only. An estimate of the outside sideways pull is subtracted from the model's steering request. The estimate is the measured sideways acceleration minus what a truck model predicts for the steering applied, smoothed over half a second. The model file is unchanged.</li>
+<li>Same windows, pull size (0.4 gain) and scorer as the earlier steering-bound test. A run fails to come back when it ends more than 0.5 m from the model's own undisturbed run.</li>
+<li>Two versions of the estimate: the truck model exact, and the truck model's steering gain 20% wrong. An exact model costs nothing when undisturbed by construction, so the wrong one is the honest test.</li>
+<li>33 straight windows from 7 drives, and 8 turn windows from 4 drives with the wrong-gain version.</li>
+<li>Rule set in advance: with the wrong model, failures fall from the shipped count with an interval by drive that excludes zero and by more than the raised-bound test's 20, and undisturbed driving on the turn windows is not more than 5 cm further from the driver's path.</li>
+</ul>
+<h2>Result</h2>
+<p>Straight windows, one pull size, two start offsets (132 runs):</p>
+<table>
+<thead><tr><th scope="col">Measure</th><th scope="col">Shipped</th><th scope="col">Estimate, exact model</th><th scope="col">Estimate, gain 20% wrong</th></tr></thead>
+<tbody>
+<tr><td>Runs not back within 0.5 m</td><td>85 of 132</td><td>14</td><td>27</td></tr>
+<tr><td>Difference in share, interval by drive</td><td></td><td>-0.54 [-0.62, -0.49]</td><td>-0.44 [-0.51, -0.38]</td></tr>
+<tr><td>Furthest distance while pulled (m)</td><td>3.0</td><td>0.8</td><td>0.9</td></tr>
+<tr><td>Sideways jerk while pulled (rms)</td><td>0.871</td><td>0.681</td><td>0.691</td></tr>
+<tr><td>Undisturbed distance from the driver's path (m)</td><td>0.193</td><td>0.193</td><td>0.227</td></tr>
+</tbody>
+</table>
+<p>With the wrong model, undisturbed driving is 3 cm further from the driver's path (interval 0.4 to 6.7 cm). With the exact model it is identical.</p>
+<p>Turn windows, wrong-gain estimate: runs not back 25 of 32 to 11 of 32 (difference in share -0.44 [-0.71, -0.21]). Undisturbed distance from the driver's path 0.567 to 0.559 m (-0.8 cm, interval -3.9 to +0.8 cm, includes zero).</p>
+<p>Both parts of the rule held. Two deviations from the plan: the rule named a count pooled over four pull sizes, and only one size was run, so the comparison is at that size. The turn run failed twice when a shared graphics card ran out of memory, the partial output was discarded unread, and the third attempt completed.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>A better model. This is classical control with an expected sign: an integral-style state. The size of the effect is the information, not the idea.</li>
+<li>Robustness. The pull is added as the same quantity the estimate measures, so the only mismatch tested is one 20% gain error. There is no sensor noise, measurement delay, road bank or tyre slip.</li>
+<li>Other pull sizes or smoothing times. One of each was run.</li>
+<li>That every failure is fixed. 11 of 66 runs at the matching start offset still fail with the wrong model.</li>
+<li>That the gain is all control. The failures here often end with little of the scene left to render, so part of the gain may be staying inside what the bench can draw.</li>
+<li>Anything on a vehicle. Nothing was changed or run on one.</li>
+<li>Outside confirmation. An outside review is pending.</li>
+</ul>

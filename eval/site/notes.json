@@ -3,6 +3,28 @@
  "notes": [
   {
    "date": "2026-11-17",
+   "title": "comma's own published bias test shows the failure our pull test found: a constant sideways push is not corrected, mostly at low speed",
+   "slug": "published-bias-test-matches-pull-test",
+   "summary": "comma's public model report includes a \"hugging\" test: a constant sideways acceleration bias on a simulated car driven by the model. In the report we read, 22 of 96 runs pass, and the three largest misses shown are at 5 m/s (4.3 to 4.8 m off after about 5 s). Our bench pull test on a later model, measured the same way (against the model's own undisturbed run), finds the same weakness: 149 of 264 runs do not come back within 0.5 m, mostly under 10 m/s. A reading, not tested here: the policy's inputs include camera frames, intent and map channels but not its own earlier commands or measured sideways acceleration, so nothing in it accumulates a standing error.",
+   "grade": "Borrowed (comma's public report, one model, read not rerun) next to measured (our bench pull test, simulation). The cause is a reading from the model's input list, not a test.",
+   "result": "comma's hugging test 22 of 96 pass, largest misses at 5 m/s; our bench pull test 149 of 264 runs not back within 0.5 m, mostly under 10 m/s",
+   "n": "96 runs (comma); 264 runs (ours)",
+   "kind": "simulation",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-17",
+   "title": "A sideways-pull estimate added outside the model cuts runs that do not come back from 85 to 27 of 132 with a 20% wrong truck model (bench only)",
+   "slug": "disturbance-estimate-in-the-loop",
+   "summary": "Planned before the run. An estimate of the outside sideways pull (measured sideways acceleration minus what a truck model predicts for the steering applied, smoothed over half a second) is subtracted from the model's steering request; the model is unchanged. At one pull size on 33 windows from 7 drives, runs that do not come back within 0.5 m fall from 85 of 132 to 14 with an exact truck model and to 27 with its steering gain 20% wrong (difference in share -0.44, interval by drive -0.51 to -0.38). Furthest distance while pulled falls from 3.0 m to 0.8 and 0.9 m. Undisturbed driving is identical with the exact model and 3 cm further from the driver's path with the wrong one (interval 0.4 to 6.7 cm). On 8 turn windows from 4 drives, 25 of 32 fall to 11 and undisturbed distance is not worse (-0.8 cm, interval includes zero). The rule passed, with two deviations stated in the note. This is classical control with an expected sign, not a better model.",
+   "grade": "Measured in simulation on the bench's truck model, one pull size and one smoothing time. Pull injected as the quantity the estimate measures; no sensor noise, delay, road bank or tyre slip. Nothing run on a vehicle. Outside review pending.",
+   "result": "runs not back within 0.5 m: 85 of 132 shipped, 14 with an exact truck model, 27 with its gain 20% wrong; turn windows 25 to 11 of 32; undisturbed cost 3 cm with the wrong model",
+   "n": "33 windows, 7 drives; 8 turn windows, 4 drives",
+   "kind": "simulation",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-17",
    "title": "The turn signal does not help the plan speed, through the model's intent input or as a small learned offset",
    "slug": "turn-signal-speed-plan",
    "summary": "After a turn signal comes on the driver slows by 1.4 to 2.1 m/s over 4 to 8 s at 9 m/s and over, and the model, which does not see the signal, plans 0.5 to 1.2 m/s too fast. Two quick looks asked whether the signal can fix the plan speed. Fed through the intent input (103 onsets on 15 drives), the plan error changes by -0.05 m/s at 6 s [-0.11, +0.01] and -0.08 m/s at 8 s [-0.17, -0.04], against an error of about 2 m/s. As a least-squares offset while the signal is on, fitted leaving each drive out, the error gets worse: +0.12 m/s at 4 s, +0.23 at 6 s, +0.33 at 8 s, with intervals including zero. Both dropped. These are validation drives that had been looked at before, so this is not a held-out test.",
