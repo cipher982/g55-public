@@ -34,17 +34,16 @@
 <thead><tr><th scope="col">Measure</th><th scope="col">All events</th><th scope="col">Without the drive with most events</th></tr></thead>
 <tbody>
 <tr><td>Events (drives)</td><td>47 (14)</td><td>23 (13)</td></tr>
-<tr><td>Gap at 4 s, zeros to pulse, m</td><td>1.18 to 0.99</td><td></td></tr>
-<tr><td>Per-event change at 4 s, m [95% by drive]</td><td>-0.20 [-0.30, +0.12]</td><td>-0.05 [-0.22, +0.19]</td></tr>
-<tr><td>Events better or worse at 4 s</td><td>39 better, 8 worse</td><td>16 better, 7 worse</td></tr>
-<tr><td>Per-event change at 2 s, m</td><td>-0.06 [-0.08, +0.01]</td><td></td></tr>
+<tr><td>Per-event change at 4 s, m [95% by drive]</td><td>-0.22 [-0.32, +0.11]</td><td>-0.06 [-0.23, +0.19]</td></tr>
 <tr><td>Steering command, change in error against the driver's lateral acceleration, m/s&sup2;</td><td>-0.12 [-0.15, -0.05]</td><td>-0.09 [-0.15, -0.03]</td></tr>
 </tbody>
 </table>
 <ul>
-<li><strong>The planned rule fails.</strong> The by-drive interval on the plan at 4 s includes zero with all events and with the largest drive left out. One drive holds 24 of the 47 events. The result is closed as written: feeding the turn signal helps on some drives and is not shown in general.</li>
-<li>The steering command improves, with the interval excluding zero both ways. It was a guard in the plan and not the test, so it is a lead for a new test written in advance, not a pass.</li>
-<li>The fed plan moves further toward the signalled side than the driver did: event means at 4 s are 1.26 m for the driver, 0.90 m with zeros and 1.43 m with the pulse. The worst event is a 4.3 m move by the driver where zeros already planned 5.4 m and the pulse made it 7.6 m. Where the driver moved 1 m or more (18 events) the change is -0.05 m [-0.22, +0.30]. Where the driver moved under 0.3 m toward that side (28 events on 7 drives, 24 of them better) it is -0.29 m [-0.38, 0.00]. Most of the gain on the plan sits in events where the driver hardly moved, and this output does not explain why.</li>
+<li><strong>The planned rule fails.</strong> The by-drive interval on the plan at 4 s includes zero with all events and with the largest drive left out. One drive holds 24 of the 47 events, and the mean of the 14 per-drive means is -0.04 m (8 drives lower, 6 higher). The 14 drives are about 9 or 10 separate trips, so by-drive intervals are too narrow. The result is closed as written: feeding the turn signal improves one lane-change-heavy drive. On the other drives it is indistinguishable from zero, with one large overshoot on a turn.</li>
+<li><strong>Scorer correction after outside review.</strong> The first scoring window left out the pulse step. With it included the plan change is -0.22 m [-0.32, +0.11], and -0.06 m [-0.23, +0.19] without the largest drive. The gap, better-or-worse and 2 s figures from the first scorer are no longer shown because they were not rescored. After a gap in the camera frames, an onset inside the gap is pulsed late or missed.</li>
+<li>The steering command improves, with the interval excluding zero both ways. Checked at three lags of the driver's lateral acceleration (0.2, 0.5 and 1.0 s), the change is -0.12, -0.12 and -0.11 m/s&sup2;, each interval excluding zero. Left and right events are balanced (24 and 23). It was a guard in the plan and not the test, so it is a lead only, and nothing is built on it.</li>
+<li>The fed plan moves further toward the signalled side than the driver did: event means at 4 s are 1.26 m for the driver, 0.90 m with zeros and 1.43 m with the pulse. The worst event is a 4.3 m move by the driver where zeros already planned 5.4 m and the pulse made it 7.6 m.</li>
+<li>The pulse helps on lane changes and overshoots on turns and exits. Splitting events by how far the driver had moved toward the signalled side, measured in the truck's frame at each step, the gap to the driver at 4 s is: lane changes, driver -0.93 m, zero-intent plan -1.30 m, fed plan -0.77 m; turns and exits, driver +4.73 m, zero-intent plan +4.33 m, fed plan +4.91 m. A speed gate does not separate the two, since the worst events are at 9 to 16 m/s. This split was made after the score was read and selects on what the driver did next, so it is description only. An earlier reading here, that most of the gain sat where the driver hardly moved, came from the same binning: during a lane change the truck soon points along the new lane, so that offset is small or negative.</li>
 <li>Steps outside every 7 s window: 0.1 to 0.3% differ at all, and the mean error is unchanged to the third decimal.</li>
 </ul>
 <h2>What it does not show</h2>
@@ -55,4 +54,4 @@
 <li>How the model's intent input was labelled in training; that is not public. openpilot sets the lane-change intent when the driver also nudges the wheel, not at signal onset, and the truck has no steering-torque signal to copy that rule.</li>
 <li>An improvement to the model. This is an input used as its makers intended, which the truck's stack never connected.</li>
 </ul>
-<p><strong>State: closed as helps on some drives, not shown in general.</strong> The one open lead is the steering command's lower error, which would need its own test written in advance, on new drives. No such drives are being collected for it.</p>
+<p><strong>State: closed. The pulse improves one lane-change-heavy drive and is indistinguishable from zero on the others, with one large overshoot on a turn.</strong> The one open lead is the steering command's lower error, which would need its own test written in advance, on new drives. No such drives are being collected for it.</p>
