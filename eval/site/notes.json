@@ -3,6 +3,17 @@
  "notes": [
   {
    "date": "2026-11-17",
+   "title": "The turn signal does not help the plan speed, through the model's intent input or as a small learned offset",
+   "slug": "turn-signal-speed-plan",
+   "summary": "After a turn signal comes on the driver slows by 1.4 to 2.1 m/s over 4 to 8 s at 9 m/s and over, and the model, which does not see the signal, plans 0.5 to 1.2 m/s too fast. Two quick looks asked whether the signal can fix the plan speed. Fed through the intent input (103 onsets on 15 drives), the plan error changes by -0.05 m/s at 6 s [-0.11, +0.01] and -0.08 m/s at 8 s [-0.17, -0.04], against an error of about 2 m/s. As a least-squares offset while the signal is on, fitted leaving each drive out, the error gets worse: +0.12 m/s at 4 s, +0.23 at 6 s, +0.33 at 8 s, with intervals including zero. Both dropped. These are validation drives that had been looked at before, so this is not a held-out test.",
+   "grade": "Measured open loop on the 17 validation drives of one truck and one driver, existing captures of the shipped model, on drives that had been looked at before (a design-set look, not held out). No training, no new model runs, no simulator, nothing deployed. A negative result.",
+   "result": "intent input: plan speed error -0.05 m/s at 6 s [-0.11, +0.01] against about 2 m/s; learned offset: worse, +0.12 m/s at 4 s, +0.23 at 6 s, +0.33 at 8 s; both dropped",
+   "n": "103 onsets on 15 drives; 17 drives",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-17",
    "title": "Averaging the plan with the plan from a mirrored scene is not closer to the driver (-0.002 m at 4 s); the two plans disagree by 0.20 m",
    "slug": "mirrored-scene-plan-average",
    "summary": "Planned before the run. Mirror the camera picture and the traffic-side input, run comma's model, mirror its sideways plan back, and compare with the normal plan. Open loop on 6 drives (39,520 steps), stock model. Averaging the two plans changes the sideways error against the driver at 4 s from 0.381 m to 0.378 m (-0.002 m [-0.007, +0.002]), so the idea is killed by its pre-set rule. The two plans differ by 0.20 m on average at 4 s; the signed part is 0.06 m to the left [-0.11, -0.01], and the mirrored scene is planned 0.29 m/s slower. A mirrored scene is left-hand traffic and puts the off-centre camera on the other side, so this does not separate a model bias from the scene or the camera position.",

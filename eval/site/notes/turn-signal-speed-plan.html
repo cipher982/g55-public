@@ -1,0 +1,41 @@
+<h2>What was asked</h2>
+<p>After a turn signal comes on, the driver slows down: by 1.4 to 2.1 m/s over the next 4 to 8 s, at speeds of 9 m/s and over. The model does not see the signal and plans 0.5 to 1.2 m/s too fast over the same period. The truck controls speed and the driver steers, so a speed plan that eased off at a signal could be used today. Two quick looks asked whether it does, either by feeding the signal through the model's intent input or by adding a small learned offset to the plan speed while the signal is on.</p>
+<h2>What was done</h2>
+<ul>
+<li>Open loop, no training, on existing captures of the shipped model on the 17 validation drives. These drives had been looked at before, so this is a design-set look and not a held-out test. Nothing new was run through the model.</li>
+<li>Intent input: the captures from an earlier turn-signal test, scored this time for plan speed, which they had not been. 103 signal onsets on 15 drives. The test fed a lane-change pulse at each onset and compared the plan with the same plan fed zeros. The measure is the error of the plan speed against the driver's speed, with 95% intervals resampled by drive.</li>
+<li>Learned offset: while the signal is on, shift the plan speed by a least-squares linear function of speed and time since the onset (four numbers per horizon). Each drive was left out in turn, the offset fitted on the other 16 and scored on the one left out.</li>
+<li>Signal-on steps are 3.5% of all steps. They run from a lane change at speed to a signal left on for a minute.</li>
+</ul>
+<h2>Result</h2>
+<p>Intent input, change in plan speed error with the pulse fed (negative is better):</p>
+<table>
+<thead><tr><th scope="col">Horizon</th><th scope="col">Change in error, m/s</th></tr></thead>
+<tbody>
+<tr><td>6 s</td><td>-0.05 [-0.11, +0.01]</td></tr>
+<tr><td>8 s</td><td>-0.08 [-0.17, -0.04]</td></tr>
+</tbody>
+</table>
+<p>The error itself is about 2 m/s, so these changes are small. At 6 s the plan minus the driver is +0.88 m/s with zeros and +0.97 m/s with the pulse fed, so the plan is as fast as before. A turn pulse under 9 m/s has only 14 onsets and its intervals are a metre wide, which says nothing either way.</p>
+<p>Learned offset, change in plan speed error, left-one-drive-out (positive is worse):</p>
+<table>
+<thead><tr><th scope="col">Horizon</th><th scope="col">Change in error, m/s</th><th scope="col">Drives better, of 17</th></tr></thead>
+<tbody>
+<tr><td>2 s</td><td>-0.01</td><td></td></tr>
+<tr><td>4 s</td><td>+0.12</td><td>7 to 9</td></tr>
+<tr><td>6 s</td><td>+0.23</td><td>7 to 9</td></tr>
+<tr><td>8 s</td><td>+0.33</td><td>7 to 9</td></tr>
+</tbody>
+</table>
+<p>The intervals include zero at 4, 6 and 8 s, and the range 7 to 9 covers those three horizons. The offset does not make the plan speed better on drives it was not fitted on. How much the driver slows after signalling does not carry over from the other drives.</p>
+<p><strong>Dropped:</strong> both. The intent input does not carry "slow down", and the small offset made the error worse. Neither was run on held-out drives, since there is nothing to confirm.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Anything on drives that were not already read. These are validation drives that had been looked at before.</li>
+<li>That the driver does not slow after a signal. The slowing is real in these drives (1.4 to 2.1 m/s). The look shows only that these two ways of using it did not help the plan speed.</li>
+<li>Anything about other ways to use the signal, such as a nonlinear or longer-history offset, a separate model, or training with the signal as an input.</li>
+<li>Anything about the steering plan or the steering command, which are separate results.</li>
+<li>Anything for turns under 9 m/s on the intent input, where the intervals are too wide to read.</li>
+<li>Anything in closed loop, or about how an easing-off speed plan would feel to ride in.</li>
+<li>Anything beyond one truck, one driver and one adapter.</li>
+</ul>
