@@ -1,0 +1,31 @@
+<h2>What was asked</h2>
+<p>The push bench in simulation behaved differently on roads with a centre line and no painted right line (see the push bench by lane lines note). That was a simulator observation. The question here needs no simulator: on real recorded frames, on two-way roads where the model sees a centre line and no right line, does its planned path sit to one side of the path the driver then drove, more than it does on roads with both lines?</p>
+<p>The test was written down before the result was read. It counts as a signal if the centre-line-only offset at 4 s is 10 cm or more to one side, its interval over drives excludes zero, and it differs from the both-lines offset with an interval that also excludes zero. If not, the question is closed as "no line-type offset in the plan".</p>
+<h2>What was done</h2>
+<ul>
+<li>Open loop on 17 held-out drives of one truck and one driver, real camera frames, stock model and the truck's camera adapter. No training, no simulator.</li>
+<li>Road class for each step comes from the model's own confidence for the nearest line on each side, called seen at 0.5 or more.</li>
+<li>Measure: the plan minus the driver's path, sideways, at 4 s ahead (also 2 s). Positive is toward the centre line.</li>
+<li>Straight driving only: the driver's lateral acceleration under 0.3 m/s&sup2; now and 0.5 s later, speed 5 m/s and over. This kept 50,570 of 74,032 steps.</li>
+<li>Means per class with a 95% interval resampled by drive.</li>
+</ul>
+<h2>Result</h2>
+<table>
+<thead><tr><th scope="col">Model</th><th scope="col">Lines the model sees</th><th scope="col">Steps (drives)</th><th scope="col">Median speed, m/s</th><th scope="col">Plan minus driver at 4 s, m</th><th scope="col">Drives toward the centre line</th></tr></thead>
+<tbody>
+<tr><td>adapter</td><td>both</td><td>41,579 (17)</td><td>27.7</td><td>-0.022 [-0.053, +0.053]</td><td>10 of 17</td></tr>
+<tr><td>adapter</td><td>left only (centre line)</td><td>5,566 (15)</td><td>12.6</td><td>-0.002 [-0.042, +0.039]</td><td>8 of 15</td></tr>
+<tr><td>adapter</td><td>neither</td><td>3,028 (16)</td><td>8.4</td><td>+0.064 [-0.016, +0.173]</td><td>10 of 16</td></tr>
+<tr><td>stock</td><td>both</td><td>41,232 (17)</td><td>27.7</td><td>-0.108 [-0.151, -0.005]</td><td>7 of 17</td></tr>
+<tr><td>stock</td><td>left only (centre line)</td><td>5,751 (14)</td><td>12.8</td><td>-0.035 [-0.076, +0.004]</td><td>6 of 14</td></tr>
+</tbody>
+</table>
+<p>Paired by drive, for the adapter, the centre-line-only offset minus the both-lines offset is 0.000 m [-0.055, +0.064] at 4 s over 15 drives (7 positive), and -0.009 m at 2 s. The pass rule (10 cm, interval excluding zero) is not met. On roads with a centre line and no painted right line the plan sits where the driver drove, to within about 4 cm, for both models.</p>
+<p>Two other cells are not about this question. The stock model sits 11 cm to the right on two-line roads at speed, which is the camera-position effect the adapter was built to remove. The "right line only" class showed +0.23 m for the adapter, but it is 397 steps on 7 drives, under 1% of the data.</p>
+<p><strong>Closed:</strong> there is no line-type offset in the plan to train against. The bench's line-type behaviour under a push stays a description of the bench.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Where the lane centre is. The reference is where this driver drove, and a driver may keep to one side of a centre line by choice.</li>
+<li>Anything in closed loop.</li>
+<li>Anything beyond 17 drives of one truck and one driver, with road class taken from the model's own line confidences and not from a map.</li>
+</ul>

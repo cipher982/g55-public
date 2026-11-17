@@ -48,3 +48,13 @@
 <li>Whether the opposition is ordinary lane feedback. The split by whether the truck is inside or outside the lane centre during the turn was not run. One reviewer pointed to a possible cause in comma's training notes: the correction's loss charges curvature rate, which weighs far more at low speed in lateral terms. This was not tested.</li>
 <li>Scale: 5 slow bench windows, a simulated vehicle, 17 drives of one truck and one driver, open loop, no training, nothing deployed.</li>
 </ul>
+<h2>Update 2026-11-17: the speed half</h2>
+<p><strong>Asked.</strong> The same split for the speed output: does the learned correction help or hurt the base's acceleration request against what the driver actually did?</p>
+<p><strong>Done.</strong> No new model run. The open-loop capture on the same 17 held-out drives (about 72,700 steps at 5 Hz above 2 m/s, stock model, with the truck's camera adapter in parentheses) was scored against the driver's acceleration, taken as the speed change over the next second.</p>
+<p><strong>Result.</strong></p>
+<ul>
+<li>The full action tracks the driver's acceleration slightly better than the base alone: correlation 0.777 against 0.715 (adapter 0.791 against 0.745). Mean absolute error is 0.200 against 0.215 m/s&sup2;; the difference is -0.015 [-0.025, -0.005] by drive.</li>
+<li>The base changes about 2.5 times more from step to step than the full action: rms change per 0.2 s step is 0.34 against 0.14 m/s&sup2; (adapter 0.28 against 0.11). The correction is above 0.95 of its bound in 2.4% of steps (adapter 1.5%). The correction mostly smooths the base.</li>
+<li>When the driver brakes or accelerates harder than 1 m/s&sup2;, the full action asks for less than the driver did. Braking, 10 to 18 m/s: driver -1.41, full action -0.92, base -1.12 m/s&sup2;. Accelerating, 10 to 18 m/s: driver +1.41, full action +0.81, base +1.16.</li>
+</ul>
+<p><strong>Not shown.</strong> Those bands are chosen by what the driver did, so any predictor falls short in them, and the base was trained to imitate drivers, so it is closer there by construction (the same selection caveat as the per-step table above). The smoothing is not a selection effect: the result is closer to the driver over all steps. This is a description with no test attached. Closed loop, lead vehicles and comma's own segments were not looked at.</p>
