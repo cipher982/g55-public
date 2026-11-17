@@ -1,0 +1,36 @@
+<h2>What was asked</h2>
+<p>Is comma's model left-right symmetric on this truck? Mirror the camera picture left to right, set the traffic-side input to the other side, run the model, and mirror its sideways outputs back. A perfectly symmetric model returns the same plan. Any difference is a property of the frozen model that nobody had measured here: a sideways bias, or noise. If it is noise, the average of the normal plan and the mirrored plan might be closer to the driver, with no training.</p>
+<p>The rule was written before the run: go on to a confirmation on earlier drives only if the average's sideways error at 4 s is below the normal plan's, with an interval over drives that excludes zero. Otherwise the idea is killed. A consistent asymmetry on its own would be recorded as a measurement, not a method.</p>
+<h2>What was done</h2>
+<ul>
+<li>Open loop, no training, no simulator. Stock model, with no camera adapter, on 6 drives recorded with the current camera position (39,520 steps).</li>
+<li>The whole run is mirrored, history included: image width reversed, and the luma sub-planes of even and odd columns swapped to keep the encoding consistent.</li>
+<li>The scorer was written before the mirrored capture existed. No parameter is fitted: the average is half and half.</li>
+<li>Measures: mirrored-back minus normal at 2 s and 4 s and in the lateral action; the size of the disagreement; the change in the absolute error against the driver's path from the normal plan to the average, for the plan, the action at three lags and plan speed. All by drive, with 95% intervals resampled by drive.</li>
+</ul>
+<h2>Result</h2>
+<table>
+<thead><tr><th scope="col">Measure</th><th scope="col">Value</th></tr></thead>
+<tbody>
+<tr><td>Sideways error against the driver at 4 s, normal plan</td><td>0.381 m</td></tr>
+<tr><td>Sideways error against the driver at 4 s, averaged plan</td><td>0.378 m</td></tr>
+<tr><td>Change, average minus normal, at 4 s</td><td>-0.002 m [-0.007, +0.002], lower on 4 of 6 drives</td></tr>
+<tr><td>Change at 2 s</td><td>-0.001 m [-0.003, +0.002]</td></tr>
+<tr><td>Change in lateral-action error at 0.2, 0.5 and 1.0 s lag</td><td>-0.001, -0.001, -0.003 m/s&sup2;, all intervals include zero</td></tr>
+<tr><td>Change in plan speed at 4 s and 6 s</td><td>+0.02 m/s at each, intervals exclude zero (slightly worse)</td></tr>
+<tr><td>Mirrored plan alone minus normal, at 4 s</td><td>+0.025 m, worse on 6 of 6 drives</td></tr>
+<tr><td>Disagreement between the two plans, mean at 4 s (2 s)</td><td>0.20 m (0.07 m)</td></tr>
+<tr><td>Signed part: mirrored-back plan relative to normal, at 4 s</td><td>0.06 m to the left [-0.11, -0.01], 5 of 6 drives</td></tr>
+<tr><td>Difference in lateral action</td><td>0.008 m/s&sup2;</td></tr>
+<tr><td>Plan speed on the mirrored scene, at 4 s (6 s)</td><td>0.29 m/s (0.28 m/s) slower, on every drive</td></tr>
+</tbody>
+</table>
+<p>The average is not closer to the driver, so by the rule the idea is <strong>killed</strong> and no confirmation was run. What remains is a description. The two plans disagree by 0.20 m at 4 s, more than half the size of the error against the driver, yet averaging them changes the error by 2 mm. So that component is not noise around the driver's path. The signed part is small, 6 cm.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>That the model itself is asymmetric. A mirrored scene is left-hand traffic with mirrored signs and lane markings, which the model has seen far less of, so a worse mirrored plan may be the scene and not the model. The slower plan speed on the mirrored scene points the same way.</li>
+<li>Where the 6 cm signed part comes from. The truck's camera is off-centre, and mirroring puts it on the other side, so this test cannot separate a model bias from the camera position. The comparison is coherent only relative to the camera, and without the truck's adapter.</li>
+<li>Anything about the 11 drives with the earlier camera position, which were not run.</li>
+<li>Anything in closed loop, or about the adapter's model.</li>
+<li>Anything beyond 6 drives of one truck and one driver.</li>
+</ul>

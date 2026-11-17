@@ -3,6 +3,28 @@
  "notes": [
   {
    "date": "2026-11-17",
+   "title": "Averaging the plan with the plan from a mirrored scene is not closer to the driver (-0.002 m at 4 s); the two plans disagree by 0.20 m",
+   "slug": "mirrored-scene-plan-average",
+   "summary": "Planned before the run. Mirror the camera picture and the traffic-side input, run comma's model, mirror its sideways plan back, and compare with the normal plan. Open loop on 6 drives (39,520 steps), stock model. Averaging the two plans changes the sideways error against the driver at 4 s from 0.381 m to 0.378 m (-0.002 m [-0.007, +0.002]), so the idea is killed by its pre-set rule. The two plans differ by 0.20 m on average at 4 s; the signed part is 0.06 m to the left [-0.11, -0.01], and the mirrored scene is planned 0.29 m/s slower. A mirrored scene is left-hand traffic and puts the off-centre camera on the other side, so this does not separate a model bias from the scene or the camera position.",
+   "grade": "Measured open loop on 6 drives of one truck and one driver with the current camera position, real frames, stock model with no adapter. Test and kill rule written before the run. No training, no simulator, nothing deployed. A negative result; the 0.20 m disagreement and 0.06 m signed part are descriptions, with the scene and the camera position not separated from the model.",
+   "result": "averaged plan 0.378 m against 0.381 m normal at 4 s (-0.002 m [-0.007, +0.002]); plans disagree by 0.20 m at 4 s, signed part 0.06 m [-0.11, -0.01]; mirrored scene planned 0.29 m/s slower; killed",
+   "n": "6 drives, 39,520 steps",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-17",
+   "title": "Combining overlapping speed plans is worse than a plain low-pass filter at the same smoothness (+0.049 m/s² for two plans)",
+   "slug": "overlapping-plans-vs-lowpass",
+   "summary": "Each step the model plans speed, so several earlier plans also predicted the same moment. Combining them, as in robot action chunking, might smooth the command without a filter's lag. The test named by the idea's own source: at matched smoothness, is it better than a one-pole low-pass filter on the newest plan? Open loop on the 6 of 17 validation drives with enough unbroken history (7,193 steps), no training. Every combined arm is worse than the filter on all 6 drives: two plans +0.049 m/s² [+0.030, +0.076] in tracking error, three plans +0.158, their median +0.094. Older plans are worse predictions of the same moment, not independent ones. Killed; not run on held-out drives.",
+   "grade": "Measured open loop on 6 drives of one truck and one driver, existing capture of the shipped model, on validation drives that had been looked at before (a design-set look, not held out). The command is read from the plan, not the action output the truck uses. No training, no simulator, nothing deployed. A negative result.",
+   "result": "two plans +0.049 m/s² [+0.030, +0.076] worse than a low-pass filter at the same jerk, three plans +0.158, median +0.094; worse on all 6 drives; killed",
+   "n": "6 drives, 7,193 steps",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-17",
    "title": "A sideways direction in the model's map-feature input: one weak, consistent direction on 17 drives, worth roughly 10 to 25 cm at 4 s by extrapolation",
    "slug": "map-feature-sideways-direction",
    "summary": "Planned before the run. The driving model takes a 64-number map-feature input. Is there one fixed direction in it that moves the plan sideways the same way on different roads? A sensitivity probe, open loop on real frames of 17 drives (493 probes, map input zero as on the truck): the effect of a small change along the common direction on the 4 s sideways plan has the same sign in 97% of probes (98% at 2 s, 100% for the steering command), the leave-one-drive-out cosine with the other drives' direction is 0.37, and the direction has no effect on plan speed. The effect is weak: 0.3 cm per unit of the scale fixed in advance, and roughly 10 to 25 cm at 4 s over the range real map features occupy, by extrapolating a local slope, which is not a measurement. Parked: a controller writing this input would need information the model cannot already see, and none was found.",

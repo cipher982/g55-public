@@ -1,0 +1,31 @@
+<h2>What was asked</h2>
+<p>The model makes a new speed plan every step, so at any moment several earlier plans also predicted that same moment. An idea from robot action chunking is to combine those overlapping plans into one command: it might be smoother than the newest plan alone without the lag a low-pass filter adds. The question is whether combining them beats a plain low-pass filter at the same smoothness. The idea's own source named this as the test that would kill it.</p>
+<h2>What was done</h2>
+<ul>
+<li>Open loop, no training, on an existing capture of the shipped model on the validation drives. These drives had been looked at before, so this is a design-set look and not a held-out one.</li>
+<li>The command is the predicted speed 1 s ahead minus the speed now, per second.</li>
+<li>Four arms: the newest plan alone; the mean of the newest plan and the 2 s plan made 1 s earlier; the mean of those two and the 4 s plan made 3 s earlier; the median of the same three.</li>
+<li>Baseline: the newest plan's command through a one-pole low-pass filter at ten strengths.</li>
+<li>Per drive, two numbers: rms jerk of the command (smoothness) and mean absolute difference between the command and the driver's mean acceleration over the next second (tracking error). Each arm is compared with the filter read off at the same jerk.</li>
+<li>Only 6 of the 17 drives have enough unbroken 5 Hz runs to supply 3 s of history, 7,193 steps in all.</li>
+</ul>
+<h2>Result</h2>
+<table>
+<thead><tr><th scope="col">Arm</th><th scope="col">Tracking error minus the filter at the same jerk, m/s&sup2;</th></tr></thead>
+<tbody>
+<tr><td>Mean of two plans</td><td>+0.049 [+0.030, +0.076]</td></tr>
+<tr><td>Mean of three plans</td><td>+0.158</td></tr>
+<tr><td>Median of three plans</td><td>+0.094</td></tr>
+</tbody>
+</table>
+<p>On all 6 drives every combined arm is worse than the filter at the same jerk. The newest plan alone has a tracking error of 0.47 m/s&sup2;. Older plans of the same moment are worse predictions, not independent ones, so averaging them in adds error faster than it removes noise.</p>
+<p>Also seen: the command read from the plan is rough (rms jerk 2.9 m/s&sup3;). A low-pass filter smooths it about five-fold and also tracks the driver slightly better (0.47 to 0.42 m/s&sup2;). That is a filter being rewarded by an open-loop score, not a method. The truck uses the model's action output, not this plan readout.</p>
+<p><strong>Killed:</strong> combining overlapping plans is not better than a low-pass filter. Two ideas that depended on it (a fitted plan-to-acceleration readout, and plan disagreement as a comfort gate) are dropped with it. It was not run on held-out captures, since there is nothing to confirm.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Anything about the model's action output, which is what the truck uses.</li>
+<li>Anything about 11 of the 17 drives, which lack enough unbroken history.</li>
+<li>Anything in closed loop, or about how a smoother command feels to ride in.</li>
+<li>Whether other ways of combining plans (weighted, learned) would do better. Only equal-weight mean and median were tried.</li>
+<li>Anything beyond one truck, one driver and one adapter.</li>
+</ul>
