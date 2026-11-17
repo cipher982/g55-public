@@ -47,6 +47,7 @@
 <p><strong>Correction.</strong> The first reading of the first tables was that the raised bound "returns toward the path sooner after a push". That was wrong. Two outside model reviews pointed out that the push is not a starting offset: it is applied over the first 2 seconds while the policy steers, so "distance from path at 2 s" is the offset at the last push step, and departure and contact include the push itself. The tables measure how much of the push the policy cancels while it is applied. The wording was corrected, and the equal-offset run above was added to test the recovery reading directly.</p>
 <h2>What it does not show</h2>
 <ul>
+<li>Anything on a road. The pull in the 2026-11-17 test is a yaw-rate bias in a vehicle model with no sideslip, and the truck has no steering actuator, so nothing lateral can be tried on it.</li>
 <li>That raising the bound improves recovery. It does not: this is a negative result for that claim. The effect is push rejection during the disturbance.</li>
 <li>Anything about the road. The bench injects the push as yaw outside the vehicle model, and the vehicle model (linear understeer, one lag, no tyre or roll limit) makes extra steering command free. Lateral acceleration, jerk, overshoot and path crossings were not measured.</li>
 <li>That the edit is safe where the bound would matter. It never binds in the unpushed windows, so there is no unpushed case here that could show a cost. The measure named in advance for this kind of test was the recovered share; it did not move, and the measures that did move were picked after seeing the table.</li>
@@ -55,5 +56,24 @@
 <h2>Correction, 2026-11-16: a sideways step at the first step</h2>
 <p>The equal-offset test above raised the bound only after step 10 of a yaw push. It never applied a sideways step from the first step. Run that way later, the untrained model with the bound doubled (no training) is 0.13 m closer to its own unpushed line at 4 s than the shipped model, with no change in unpushed driving. The earlier test did not measure this. Outside reviewers attributed it to the step being a jump of the vehicle: right after the jump the frozen base policy steers the wrong way for about a second, and a larger bound cancels more of that.</p>
 <p>A test with no jump supports that reading. On a push that builds up over 3.2 s, the doubled bound is only 3 to 4 cm from shipped (distance from own unpushed run: -0.029 m [-0.047, -0.012] at 4 s and -0.044 m [-0.071, -0.021] at 5.6 s). So the conclusion of this note, no real gain in return from the bound alone, stands for a gradual push, and the 13 cm on the step comes from the step. The other findings here are unchanged.</p>
+<h2>Update, 2026-11-17: a planned test with a sustained pull, and why the work is closed</h2>
+<p>Question: with the steering bound at 2 and nothing else changed, does the model come back from a sustained sideways pull more often than the shipped file, on drives not used for the earlier low-speed runs? The plan, the scoring and the stop rules were written down before the run, and it was scored once.</p>
+<p><strong>The file.</strong> comma's policy output is a base action plus a learned correction that passes through a tanh, so the correction is limited to 1. In the exported file the steering correction was re-expressed as 2*tanh(x/2), with no training. The two forms have the same slope at zero, so this is not a gain change. The speed half is untouched (unpushed plant speed 9.332 against 9.331 m/s).</p>
+<p><strong>The test.</strong> A constant sideways pull applied inside the simulated vehicle for 3.2 s at four sizes (0.30, 0.40, 0.45 and 0.60 m/s2). The pull is a yaw-rate bias in a vehicle model with no sideslip. Windows: 33 under 12 m/s from 7 drives, 132 pulled episodes per pair of sizes (264 per model), plus 8 turn windows without a pull.</p>
+<table>
+<thead><tr><th scope="col">Measure (264 pulled episodes)</th><th scope="col">Shipped file</th><th scope="col">Bound 2 file</th></tr></thead>
+<tbody>
+<tr><td>ends more than 0.5 m from the model's own undisturbed run</td><td>149</td><td>129</td></tr>
+<tr><td>ends more than 1.0 m from it</td><td>108</td><td>76</td></tr>
+</tbody>
+</table>
+<p>The difference in the share past 0.5 m is -0.076, by-drive 95% interval [-0.131, -0.025]. 27 episodes fail only with the shipped file and 7 only with the changed one. The largest distance from the recorded path under the pull is lower in 33 of 33 windows. Undisturbed, nothing measurable changed: mean distance -0.005 m [-0.009, -0.000], rms jerk +0.001 [-0.006, +0.013]. In the 8 turn windows no difference was seen, and 8 windows can only say that nothing large appeared.</p>
+<p><strong>Why it is closed anyway.</strong> One stop rule asked whether, in the episodes the change rescues, the shipped correction was at its limit during the pull (|tanh| above 0.95 on any pull step). It was in 10 of 27; the rule needed half. So the shipped correction is not pinned at its limit in most rescued runs. The gain is less compression as the correction nears the limit: 74% of the summed difference between the two forms comes from steps with |tanh| above 0.76. Reading the pull window one or two steps longer gives 11 and 13 of 27, still under half.</p>
+<ul>
+<li>In the bench's other map mode the share past 0.5 m is 150 against 134 and the interval includes zero. The numbers above are from the mode the truck runs.</li>
+<li>The rescued episodes are ones where the shipped model's rendered view coverage in the last second has dropped (0.56 against 0.96). Part of "does not come back" is "left the rendered view".</li>
+<li>Per size at 0.5 m, 0.30 m/s2 has an interval that includes zero (24 against 23 of 66) and so does the top of the 0.60 interval (50 against 43, upper end +0.000).</li>
+</ul>
+<p>Two outside model reviews read the result and both said to close the work. The reading that holds: the doubled form cancels more of a sustained pull in the bench by compressing the correction less below its limit, and costs nothing measured in undisturbed driving. That is a real bench effect, not a method.</p>
 <h2>Decision</h2>
-<p>The raised steering bound is closed as a way to improve recovery. It is not a change to the model that runs on the truck.</p>
+<p>The raised steering bound is closed as a way to improve recovery, and closed again after the planned test of 2026-11-17: a real effect against a sustained pull in the bench, not a method. It is not a change to the model that runs on the truck.</p>
