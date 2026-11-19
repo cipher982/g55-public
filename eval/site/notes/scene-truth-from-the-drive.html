@@ -1,0 +1,52 @@
+<h2>What was asked</h2>
+<p>The truck's tablet draws a scene beside the driving model: other vehicles, stop signs and traffic lights. Its most visible fault is parked vehicles drawn as moving. An earlier finding gave the cause: if the scene reads a vehicle's range as a fraction <em>a</em> of the true range, a parked vehicle appears to move at (1 - <em>a</em>) times the truck's own speed. Fixing that needs a measure of true range that does not depend on lidar or hand labelling. What can the recorded drive itself say for certain, and do the candidate fixes for range help against it?</p>
+<h2>What was done</h2>
+<ul>
+<li><strong>Truth for things that do not move.</strong> As the truck drives past a fixed object, the changing direction to it plus the truck's own motion (wheel speed and yaw rate) fix the object's position. This was applied to parked vehicles (67 vehicles on 27 drives, each first judged parked from strips of images) and to stop signs and traffic lights, which need no judging because they cannot move.</li>
+<li><strong>Range from the size of a stop sign face</strong> was compared against the fitted positions.</li>
+<li><strong>In-service chain.</strong> A 2D detector, a hand-written placement from where the box meets the ground and the class height, and a Kalman tracker. Measured on held-out drives, on vehicles at close range, by how often a parked vehicle is drawn as moving.</li>
+<li><strong>A small learned head.</strong> It takes a vehicle's box history over a few seconds plus the truck's own motion. It was trained only on the 3D labels of a public dataset (Argoverse 2, non-commercial licence) and never on the truck's drives.</li>
+<li><strong>Per-frame metric depth, three ways.</strong> An off-the-shelf metric depth model (Depth Anything 3 metric, large); a larger multi-frame variant given the truck's own poses; and a LoRA fitted to the metric model on distance labels triangulated from static scenery on the truck's drives.</li>
+<li><strong>Range from the box bottom.</strong> The point where a vehicle's box meets the road, with the camera's pitch to the road measured from the video itself.</li>
+<li><strong>Vehicles seen while the truck stands still.</strong> A box that moves is a moving vehicle with no geometry needed.</li>
+</ul>
+<h2>Result</h2>
+<h3>Stop signs and traffic lights</h3>
+<p>The fit was run over every recorded drive that has scene results and decoded vehicle motion. It gave 1,158 sign and light tracks on 50 drives, keeping tracks whose bearing sweeps 5 degrees or more and whose fit residual is under 1 degree (median residual 0.07 degrees).</p>
+<p>An eye check of 30 tracks:</p>
+<ul>
+<li>All 15 stop-sign tracks followed one fixed sign throughout (509 stop-sign tracks in total).</li>
+<li>5 of 15 traffic-light tracks hop between neighbouring signal heads during the pass. Light tracks are not yet usable as truth.</li>
+</ul>
+<p>Against the fitted positions, the range the truck gives for stop signs from the size of the sign face has a median ratio of 0.94 (reading short) and is within 15% on 66% of results. Under 20 m the median ratio is 0.99 and 78% are within 15%. Beyond 80 m it is 0.79 and 23%.</p>
+<h3>Parked vehicles, held-out drives, close range</h3>
+<table>
+<thead><tr><th scope="col">Method</th><th scope="col">Parked drawn as moving</th><th scope="col">Moving drawn as moving</th><th scope="col">Range within 15%</th></tr></thead>
+<tbody>
+<tr><td>In-service chain</td><td>86%</td><td>80%</td><td>52%</td></tr>
+<tr><td>Learned head, public 3D labels only</td><td>31%</td><td>76%</td><td>70% on 43 development vehicles; 43% on the 24 held-out vehicles</td></tr>
+</tbody>
+</table>
+<p>The head cut the false motion on parked vehicles from 86% to 31% while vehicles that really move stayed drawn as moving (80% to 76%). On the 24 held-out vehicles every range estimator reads long, plain box height included. Several of those vehicles are half hidden or parked off the road surface. The development vehicles were never trained on either. A look at the frames found that one of the 24 held-out vehicles was an oncoming car at night, wrongly judged parked.</p>
+<p>The head is a probe. It is not on the truck.</p>
+<h3>Per-frame metric depth did not fix range</h3>
+<ul>
+<li>The metric depth model read within 15% on 61% of results, against 52% for the in-service placement and 55% for box height. It reads about 12% short beyond 60 m.</li>
+<li>The larger multi-frame variant, given the truck's own poses, was no better.</li>
+<li>The LoRA raised agreement with held-out scenery labels from 20% to 58% within 15%, and made parked vehicles worse. 90% of its label points sat in the top quarter of the image (trees and buildings), not where vehicles are. This was the one training run done before checking where its labels sat in the image, and it was the one that made things worse.</li>
+</ul>
+<h3>Range from the box bottom</h3>
+<p>With the camera pitch to the road measured from the video, range was within 15% on 25% of parked-vehicle results, below both baselines. The pitch measurement itself was steady (median 8.6 degrees, 5th to 95th percentile 8.1 to 9.1). The bottom of a detector box on a parked vehicle is not a point on the road plane under the truck.</p>
+<h3>Standing still</h3>
+<p>763 vehicle tracks are certainly moving and between 123 and 248 are certainly still, depending on where the cut is placed. The in-service chain is already right for these: still vehicles are shown as moving on about 9%. This fits the cause above, since the false motion needs the truck's own speed.</p>
+<p>The gains here came from working out what the recorded drive already knows for certain. Signs do not move, and a stationary truck sees motion directly.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>All vehicle numbers are on small sets: 67 parked vehicles, 24 held out, 43 for development. Several results are negative.</li>
+<li>One held-out vehicle was misjudged as parked, so the parked-vehicle truth is not clean.</li>
+<li>The fitted range rests on the wheel-speed scale, which the sign comparison does not test independently.</li>
+<li>Truth for the range and speed of moving vehicles on this camera is still missing.</li>
+<li>Traffic-light identity is unresolved: tracks hop between signal heads.</li>
+<li>It is not known whether labels from the truck's own drives would improve the learned head.</li>
+<li>One truck, one camera, one driver. Nothing was run on the truck itself.</li>
+</ul>
