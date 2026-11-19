@@ -3,6 +3,17 @@
  "notes": [
   {
    "date": "2026-11-19",
+   "title": "A replay loop for the scene model, and what it caught",
+   "slug": "scene-replay-loop",
+   "summary": "A loop replays a candidate scene model over all 46 recorded drives, measures it four separate ways beside the truck's hand-written placement on the same objects, and renders what the tablet would draw next to the camera frame and truth. The learned model from the earlier note read stop sign range within 15% on 0.83 of 168 signs against 0.42, but drew stationary vehicles as not moving 0.65 against 0.16 and moving vehicles as moving 0.69 against 0.86, and read the vehicle ahead 7 to 21% long. A second candidate with parked-vehicle labels from own drives did not fix the moving-vehicle drop. Neither replaces the hand-written placement; labels for moving vehicles are missing. The earlier note's claim that moving vehicles were kept does not hold on the paired comparison.",
+   "grade": "Measured on recorded drives of one truck, held-out drives, vehicle rows 24 to 36 vehicles; lead-distance rows are agreement with another model, not truth; candidates are probes and not on the truck.",
+   "result": "stop sign range within 15%: 0.83 candidate vs 0.42 hand-written; moving vehicles drawn moving 0.69 vs 0.86; vehicle ahead 3 to 15 m within 15% of lead distance 0.37 vs 0.90",
+   "n": "46 drives; 168 stop signs, 24 parked and 36 moving vehicles held out",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
+   "date": "2026-11-19",
    "title": "Stop signs do not move: building scene truth from the drive itself",
    "slug": "scene-truth-from-the-drive",
    "summary": "The truck's tablet draws other vehicles, stop signs and traffic lights beside the driving model, and draws parked vehicles as moving. Things that cannot move give range truth without lidar: a fit of the changing bearing to the object plus the truck's own motion gave 1,158 sign and light tracks on 50 drives. All 15 stop-sign tracks checked by eye were one fixed sign; 5 of 15 traffic-light tracks hop between signal heads. Against parked-vehicle truth (67 vehicles, 27 drives) the in-service chain draws 86% of parked vehicles as moving; a small head trained only on a public dataset's 3D labels cut that to 31% while moving vehicles stayed moving (80% to 76%), with range within 15% on 43% of 24 held-out vehicles. Off-the-shelf metric depth, a multi-frame variant, a LoRA on static-scenery labels and range from the box bottom did not fix range; the LoRA made parked vehicles worse because 90% of its labels sat in the top quarter of the image.",

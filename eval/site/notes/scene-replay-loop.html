@@ -1,0 +1,37 @@
+<h2>What was asked</h2>
+<p>The <a href="scene-truth-from-the-drive.html">earlier note</a> built range truth from fixed objects and tried a small learned model for vehicle placement, using parked vehicles only. Can a candidate scene model be tested on every recorded drive, beside the truck's current hand-written placement, without anyone driving?</p>
+<h2>What was done</h2>
+<p>A replay loop takes a candidate scene model (the part that places cars, signs and lights around the truck) and runs it over all 46 recorded drives. It measures the candidate and the current hand-written placement on the same objects, four separate ways:</p>
+<ul>
+<li>Labelled stationary vehicles drawn as moving, and labelled moving vehicles drawn as still.</li>
+<li>Range of parked vehicles against a fixed point fitted from the truck's own motion.</li>
+<li>Range of stop signs against the same kind of fit.</li>
+<li>Agreement with the driving model's lead-car distance for the vehicle ahead. This is agreement with another model, not truth.</li>
+</ul>
+<p>The loop also renders what the dashboard tablet would draw, in an emulator, next to the camera frame and next to truth where truth exists. The four measurements are never added into one score, and each report lists what nothing measures.</p>
+<p>The first candidate was the small learned model from the earlier note: a transformer on a vehicle's box history and the truck's motion, trained on public labels plus stop-sign labels from the truck's own drives.</p>
+<h2>Result</h2>
+<p>Held-out drives, share right:</p>
+<table>
+<thead><tr><th scope="col">Measurement</th><th scope="col">n</th><th scope="col">Hand-written</th><th scope="col">Candidate</th></tr></thead>
+<tbody>
+<tr><td>Stationary vehicles not drawn moving</td><td>31</td><td>0.16</td><td>0.65</td></tr>
+<tr><td>Moving vehicles drawn moving</td><td>36</td><td>0.86</td><td>0.69</td></tr>
+<tr><td>Parked vehicle range within 15%</td><td>24</td><td>0.58</td><td>0.62</td></tr>
+<tr><td>Stop sign range within 15%</td><td>168</td><td>0.42</td><td>0.83</td></tr>
+<tr><td>Vehicle ahead at 3 to 15 m, within 15% of lead distance</td><td></td><td>0.90</td><td>0.37</td></tr>
+<tr><td>Vehicle ahead at 15 to 30 m, within 15% of lead distance</td><td></td><td>0.93</td><td>0.83</td></tr>
+</tbody>
+</table>
+<p>The candidate's median reading for the vehicle ahead at 3 to 15 m is 1.17 times the lead distance.</p>
+<p><strong>Correction to the earlier note.</strong> Its vehicle numbers came from parked vehicles only, and "moving vehicles kept" does not hold on the paired comparison: moving vehicles drawn as moving fall from 0.86 to 0.69.</p>
+<p>Replayed over everything, the learned model reads a vehicle long wherever it gets no parallax. As a share of true range on parked vehicles it reads 1.00 with a long history at speed, 1.11 with 1 to 3 results of history, and 1.27 when the truck is slow. For the vehicle ahead it reads 7 to 21% long. In the rendered picture the lane ahead looks the same, and dense side rows and near queues are pushed away.</p>
+<p>A second candidate added parked-vehicle labels from the truck's own drives. It stopped more parked vehicles from moving (0.84), drew fewer moving vehicles as moving (0.64), and did not change the lead reading.</p>
+<p>Neither candidate replaces the hand-written placement. What is missing is labels for moving vehicles.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>Sample sizes are small for the vehicle rows (24 to 36), and the lead-distance rows compare against another model.</li>
+<li>No measurement covers moving-vehicle range or speed, signal lights, or how the render looks to a driver.</li>
+<li>The candidate was trained on stop-sign labels made by the same kind of fit that supplies stop-sign truth here, on other drives, so the stop-sign row is not fully independent of how truth was built.</li>
+<li>One truck, one camera. Neither candidate ran on the truck.</li>
+</ul>
