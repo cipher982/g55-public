@@ -8,7 +8,7 @@
       "summary": "How larger tires throw off the speedometer and odometer, how the three fixes compare, and what we decoded from the KI203M cluster on a 2011 W463.",
       "description": "How to fix speedometer and odometer error for 33-inch and 35-inch tires on a W463 Mercedes G-Wagon. Compares the DAS tire presets, an inline CAN module and the KI203M cluster K-Zahl EEPROM calibration.",
       "status": "Read path verified on the truck; the write path is bench-only until the 0xA2C4 header checksum is solved.",
-      "updated": "2026-11-20",
+      "updated": "2026-11-19",
       "chassis": "W463 / KI203M cluster",
       "source": "w463-tire-size-calibration/index.md",
       "reference": "w463-tire-size-calibration/ki203m-reference.md",

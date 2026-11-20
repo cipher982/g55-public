@@ -21,6 +21,7 @@ the method prose.
 from __future__ import annotations
 
 import argparse
+import datetime
 import html
 import hashlib
 import json
@@ -911,6 +912,7 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
         dom = f' data-domains="{esc(cfg["umami_domains"])}"' if cfg.get("umami_domains") else ""
         umami = (f'<script defer src="{esc(cfg["umami_src"])}" '
                  f'data-website-id="{esc(cfg["umami_website_id"])}"{dom}></script>')
+    gsc = f'<meta name="google-site-verification" content="{esc(cfg["gsc"])}">' if cfg.get("gsc") else ""
     nav = []
     for href, label, key in ((f"{up}truck/index.html", "Truck", "truck"), (f"{up}guides/index.html", "Guides", "guides"),
                              (f"{up}index.html#models", "Models", "releases"),
@@ -928,6 +930,8 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
+<meta name="robots" content="index, follow">
+<meta name="author" content="{esc(cfg['site_name'])}">
 <link rel="canonical" href="{esc(site)}/{esc(path)}">
 <link rel="alternate" type="application/rss+xml" title="{esc(cfg['site_name'])}" href="{up}feed.xml">
 <meta property="og:type" content="website">
@@ -947,7 +951,7 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <link rel="stylesheet" href="{up}style.css?v={css_v}">
 <link rel="icon" href="{up}favicon.svg" type="image/svg+xml">
-{extra_head}{umami}
+{extra_head}{gsc}{umami}
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1193,12 +1197,20 @@ def guides_index() -> str:
         for g in data["guides"]
     )
     planned = "".join(f'<li><b>{esc(p["title"])}</b> {esc(p["summary"])}</li>' for p in data.get("planned", []))
+    cards = "".join(
+        f'<article class="gcard"><a href="{esc(g["slug"])}.html">{esc(g["title"])}</a>'
+        f'<p>{esc(g["chassis"])}</p>'
+        f'<p class="gcard-status">{esc(g["status"])}</p>'
+        f'<p class="gcard-meta">Updated {esc(g["updated"])}</p></article>'
+        for g in data["guides"]
+    )
     return (
         '<section class="lead"><h1>Guides</h1><p>Owner-facing and technical guides to the G55: what was measured, what was derived, and what is still open. '
         'Each guide is a durable reference; the Notes section holds the dated findings behind it.</p></section>'
-        '<div class="tw"><table class="d-t"><thead><tr><th scope="col">Guide</th><th scope="col">Platform</th>'
+        '<div class="tw gtable"><table class="d-t"><thead><tr><th scope="col">Guide</th><th scope="col">Platform</th>'
         '<th scope="col">Status</th><th class="r" scope="col">Updated</th></tr></thead>'
         f'<tbody>{rows}</tbody></table></div>'
+        f'<div class="gcards">{cards}</div>'
         f'<section class="prose"><h2>Planned</h2><ul>{planned}</ul></section>'
     )
 
@@ -1951,6 +1963,89 @@ def inside_index(models, xr: dict) -> str:
 
 # ---------------------------------------------------------------- main
 
+FAQ = [
+    ("Will the largest Xentry/DAS tire preset fix 35-inch tires?",
+     "No. The largest factory preset is 235/85R16 at about 31.7 inches. It reduces the error but leaves a gap at 33 inches and above."),
+    ("Can I write the 1510 value today?",
+     "Not safely. The 0xA2C4 header validation is not solved, and the write is bench-only until it is."),
+    ("What works right now?",
+     "An inline CAN correction module. The module takes the ABS/ESP speed signal and corrects the speed and odometer before the cluster sees it."),
+    ("Does this apply to the 2013-and-later IC213 or the 2019-and-later W463A?",
+     "No. Those clusters use different hardware and coding tables."),
+    ("Does this change or reset my odometer?",
+     "No. The K-Zahl sets the scaling for future speed and distance. It does not change accumulated mileage."),
+    ("Why not just use a GPS speedometer app or an external display?",
+     "An external display or GPS app shows a corrected number for the driver, but the cluster's own speed output and odometer still use the stored K-Zahl. This work corrects the cluster."),
+]
+
+
+def jsonld(data: dict) -> str:
+    return '<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False) + "</script>"
+
+
+def article_ld(g: dict, reference: bool = False) -> str:
+    base = CFG["site_url"].rstrip("/")
+    url = f"{base}/guides/{g['slug']}{'-reference' if reference else ''}.html"
+    data = {
+        "@context": "https://schema.org",
+        "@type": "TechArticle" if reference else "Article",
+        "headline": g["title"] if not reference else f"{g['nav']} reference",
+        "description": g["description"] if not reference else f"Technical reference for {g['title']}.",
+        "datePublished": g["updated"],
+        "dateModified": g["updated"],
+        "author": {"@type": "Organization", "name": CFG["site_name"]},
+        "publisher": {"@type": "Organization", "name": CFG["site_name"]},
+        "mainEntityOfPage": url,
+        "image": f"{base}/og.png",
+        "about": {"@type": "Thing", "name": "2011 Mercedes-Benz G55 AMG W463"},
+        "keywords": "W463, G-Wagon, speedometer, odometer, tire size, K-Zahl",
+    }
+    crumbs = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": base + "/"},
+            {"@type": "ListItem", "position": 2, "name": "Guides", "item": base + "/guides/"},
+            {"@type": "ListItem", "position": 3, "name": g["nav"], "item": url},
+        ],
+    }
+    return jsonld(data) + jsonld(crumbs)
+
+
+def faq_ld() -> str:
+    return jsonld({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+            for q, a in FAQ
+        ],
+    })
+
+
+def website_ld() -> dict:
+    return {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": CFG["site_name"],
+        "url": CFG["site_url"].rstrip("/") + "/",
+    }
+
+
+def collection_ld() -> dict:
+    base = CFG["site_url"].rstrip("/")
+    return {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Guides",
+        "url": base + "/guides/",
+        "hasPart": [
+            {"@type": "Article", "name": g["title"], "url": f"{base}/guides/{g['slug']}.html"}
+            for g in _j("guides.json")["guides"]
+        ],
+    }
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=EVAL, help="directory with results/, per_unit/, xray/")
@@ -1994,10 +2089,12 @@ def main() -> None:
                                                    notes_index(), 1, "notes", "notes/index.html"))
     for g in _j("guides.json")["guides"]:
         (out / "guides" / f'{g["slug"]}.html').write_text(
-            page(cfg, f'{g["title"]} – {tag}', g["description"], guide_page(g), 1, "guides", f'guides/{g["slug"]}.html'))
+            page(cfg, f'{g["title"]} – {tag}', g["description"], guide_page(g), 1, "guides", f'guides/{g["slug"]}.html',
+                 extra_head=article_ld(g) + faq_ld()))
         (out / "guides" / f'{g["slug"]}-reference.html').write_text(
             page(cfg, f'{g["nav"]} reference – {tag}', f'Technical reference for {g["title"]}.',
-                 guide_page(g, reference=True), 1, "guides", f'guides/{g["slug"]}-reference.html'))
+                 guide_page(g, reference=True), 1, "guides", f'guides/{g["slug"]}-reference.html',
+                 extra_head=article_ld(g, reference=True)))
         media = GUIDES / g["slug"] / "media"
         if media.is_dir():
             (out / "guides" / "media").mkdir(parents=True, exist_ok=True)
@@ -2006,7 +2103,7 @@ def main() -> None:
                     shutil.copy2(f, out / "guides" / "media" / f.name)
     (out / "guides" / "index.html").write_text(
         page(cfg, f"Guides – {tag}", "Owner-facing and technical guides to the G55.",
-             guides_index(), 1, "guides", "guides/index.html"))
+             guides_index(), 1, "guides", "guides/index.html", extra_head=jsonld(collection_ld())))
     (out / "tests" / "index.html").write_text(page(cfg, f"Tests – {tag}", f"The {count_word(len(G55_TABLES))} tests on the G55's own drives that every openpilot release gets here.",
                                                    tests_index(models), 1, "tests", "tests/index.html"))
     if xr:
@@ -2022,7 +2119,8 @@ def main() -> None:
     shutil.copy2(EVAL / "SCHEMA.md", out / "schema.txt")
     desc = ("Work log of a 2011 Mercedes-Benz G55 AMG: its CAN buses decoded, a patched engine ECU, open-source transmission firmware, "
             "cruise control over CAN, and every comma openpilot driving model tested on the truck's own drives, with 95% intervals.")
-    (out / "index.html").write_text(page(cfg, tag, desc, index_page(models, cfg, root), 0, "releases", ""))
+    (out / "index.html").write_text(page(cfg, tag, desc, index_page(models, cfg, root), 0, "releases", "",
+                                          extra_head=jsonld(website_ld())))
     (out / "log.html").write_text(page(cfg, f"Log – {tag}", "Every release, test run and change to the tests.", log_page(models, root), 0, "log", "log.html"))
     (out / "method.html").write_text(page(cfg, f"Method – {tag}", "Scoring methodology for open-loop replay, "
                                           "worldmodel-4B closed-loop rollouts, drive-clustered intervals, and CSV downloads.", method(models, cfg, root), 0, "method", "method.html"))
@@ -2035,6 +2133,26 @@ def main() -> None:
     (out / "signals.html").write_text(page(cfg, f"W463 CAN signals – {tag}", "Every CAN signal decoded on a 2011 G55, with how each is known.",
                                            signals_page(), 0, "signals", "signals.html"))
     (out / "feed.xml").write_text(rss(models, root, cfg))
+    today = datetime.date.today().isoformat()
+    base = cfg["site_url"].rstrip("/")
+    urls = []
+    for f in sorted(out.rglob("*.html")):
+        rel = f.relative_to(out).as_posix()
+        if rel == "index.html":
+            loc, prio = base + "/", "1.0"
+        elif rel.endswith("/index.html"):
+            loc, prio = f"{base}/{rel[:-10]}", "0.8"
+        else:
+            loc, prio = f"{base}/{rel}", "0.6"
+        urls.append((loc, prio))
+    sm = "".join(
+        f"<url><loc>{esc(loc)}</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>{prio}</priority></url>"
+        for loc, prio in urls
+    )
+    (out / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + sm + "</urlset>\n"
+    )
+    (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {base}/sitemap.xml\n")
     leaks = boundary.check(out)
     if leaks:
         print("\n".join(f"FAIL boundary {x}" for x in leaks), file=sys.stderr)
