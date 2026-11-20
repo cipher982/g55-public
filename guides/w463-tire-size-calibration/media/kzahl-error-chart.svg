@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-label="Indicated speed against actual speed for the stock 2,419 mm tire, the 2,666 mm tire, and the calibrated cluster.">
+  <g font-family="IBM Plex Sans, sans-serif" font-size="13" fill="var(--muted, #5e646b)">
+    <line x1="64" y1="250" x2="620" y2="250" stroke="var(--rule, #d8dce1)"/>
+    <line x1="64" y1="250" x2="64" y2="28" stroke="var(--rule, #d8dce1)"/>
+    <g stroke="var(--rule, #d8dce1)" stroke-dasharray="2 4">
+      <line x1="64" y1="201" x2="620" y2="201"/>
+      <line x1="64" y1="152" x2="620" y2="152"/>
+      <line x1="64" y1="103" x2="620" y2="103"/>
+      <line x1="64" y1="54" x2="620" y2="54"/>
+      <line x1="203" y1="250" x2="203" y2="28"/>
+      <line x1="342" y1="250" x2="342" y2="28"/>
+      <line x1="481" y1="250" x2="481" y2="28"/>
+    </g>
+    <text x="64" y="272">0</text>
+    <text x="203" y="272" text-anchor="middle">20</text>
+    <text x="342" y="272" text-anchor="middle">40</text>
+    <text x="481" y="272" text-anchor="middle">60</text>
+    <text x="620" y="272" text-anchor="end">80</text>
+    <text x="58" y="254" text-anchor="end">0</text>
+    <text x="58" y="205" text-anchor="end">20</text>
+    <text x="58" y="156" text-anchor="end">40</text>
+    <text x="58" y="107" text-anchor="end">60</text>
+    <text x="58" y="58" text-anchor="end">80</text>
+    <text x="342" y="292" text-anchor="middle">Speedometer shows, mph</text>
+    <text x="20" y="139" transform="rotate(-90 20 139)" text-anchor="middle">Actual speed, mph</text>
+    <polyline points="64,250 620,54.4" fill="none" stroke="var(--muted, #5e646b)" stroke-width="2"/>
+    <polyline points="64,250 620,34.4" fill="none" stroke="var(--accent, #2f6fe8)" stroke-width="2"/>
+    <text x="450" y="135" fill="var(--muted, #5e646b)">stock and calibrated, 1:1</text>
+    <text x="280" y="76" fill="var(--accent, #2f6fe8)">35-inch tire, stock K-Zahl</text>
+  </g>
+</svg>

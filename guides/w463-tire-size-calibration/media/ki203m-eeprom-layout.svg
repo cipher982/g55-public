@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-label="KI203M EEPROM tire-size fields: header at 0x3900DE, four override slots at 0x3900F8 to 0x3900FE, and three speed curves at 0x390102, 0x39010E and 0x39011A.">
+  <g font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--muted, #5e646b)">
+    <rect x="20" y="24" width="600" height="30" fill="none" stroke="var(--rule, #d8dce1)"/>
+    <text x="32" y="43" fill="var(--ink, #1a1a1a)">0x3900DE  header 0xA2C4</text>
+    <rect x="20" y="62" width="600" height="30" fill="none" stroke="var(--rule, #d8dce1)"/>
+    <text x="32" y="81" fill="var(--ink, #1a1a1a)">0x3900F6  length or format 0x017F</text>
+    <g fill="none" stroke="var(--rule, #d8dce1)">
+      <rect x="20" y="100" width="140" height="44"/>
+      <rect x="170" y="100" width="140" height="44" stroke="var(--accent, #2f6fe8)" stroke-width="2"/>
+      <rect x="320" y="100" width="140" height="44"/>
+      <rect x="470" y="100" width="150" height="44"/>
+    </g>
+    <text x="32" y="119" fill="var(--ink, #1a1a1a)">slot 0 0x3900F8</text>
+    <text x="32" y="136">0xFFFF, unset</text>
+    <text x="182" y="119" fill="var(--ink, #1a1a1a)">slot 1 0x3900FA</text>
+    <text x="182" y="136">0x7FFF, live</text>
+    <text x="332" y="119" fill="var(--ink, #1a1a1a)">slot 2 0x3900FC</text>
+    <text x="332" y="136">0x7FFF, unset</text>
+    <text x="482" y="119" fill="var(--ink, #1a1a1a)">slot 3 0x3900FE</text>
+    <text x="482" y="136">0x7FFF, unset</text>
+    <text x="182" y="160" fill="var(--accent, #2f6fe8)">bench target: 0x05E6 (2,666 mm)</text>
+    <rect x="20" y="178" width="600" height="30" fill="none" stroke="var(--rule, #d8dce1)"/>
+    <text x="32" y="197" fill="var(--ink, #1a1a1a)">0x390102  speed curve A first point 1664</text>
+    <rect x="20" y="216" width="600" height="30" fill="none" stroke="var(--rule, #d8dce1)"/>
+    <text x="32" y="235" fill="var(--ink, #1a1a1a)">0x39010E  speed curve B first point 1664</text>
+    <rect x="20" y="254" width="600" height="30" fill="none" stroke="var(--rule, #d8dce1)"/>
+    <text x="32" y="273" fill="var(--ink, #1a1a1a)">0x39011A  speed curve C first point 1657</text>
+  </g>
+</svg>

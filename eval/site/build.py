@@ -1,5 +1,6 @@
 # /// script
 # requires-python = ">=3.11"
+# dependencies = ["markdown>=3.7", "numpy>=2.0"]
 # ///
 """Build the My Self-Driving G-Wagon site (until 2026-11-06 "openpilot G-Wagon evals") from results/*.json: a living record of comma's driving models.
 
@@ -23,6 +24,7 @@ import argparse
 import html
 import hashlib
 import json
+import markdown
 import math
 import re
 import shutil
@@ -32,6 +34,7 @@ from pathlib import Path
 
 SITE = Path(__file__).resolve().parent
 EVAL = SITE.parent
+GUIDES = SITE.parent.parent / "guides"
 sys.path.insert(0, str(EVAL))
 from geval import boundary, ranking, sections as GS  # noqa: E402  the boundary and order checks; the simulators and limits
 sys.path.insert(0, str(SITE))
@@ -909,7 +912,8 @@ def page(cfg: dict, title: str, desc: str, body: str, depth: int, current: str, 
         umami = (f'<script defer src="{esc(cfg["umami_src"])}" '
                  f'data-website-id="{esc(cfg["umami_website_id"])}"{dom}></script>')
     nav = []
-    for href, label, key in ((f"{up}truck/index.html", "Truck", "truck"), (f"{up}index.html#models", "Models", "releases"),
+    for href, label, key in ((f"{up}truck/index.html", "Truck", "truck"), (f"{up}guides/index.html", "Guides", "guides"),
+                             (f"{up}index.html#models", "Models", "releases"),
                              (f"{up}tests/index.html", "Tests", "tests"), (f"{up}notes/index.html", "Notes", "notes"),
                              (f"{up}signals.html", "Signals", "signals"), (f"{up}method.html", "Method", "method"),
                              (f"{up}log.html", "Log", "log")):
@@ -1142,6 +1146,61 @@ def notes_index() -> str:
     items = "".join(f'<li><a href="{esc(n["slug"])}.html">{esc(n["title"])}</a><span>{esc(nice_date(n["date"]))}. {esc(n["summary"])}</span></li>' for n in notes())
     return ('<section class="lead"><h1>Notes</h1><p>Notes on the work behind this site: what was built for the G55, what was measured and what did not work. '
             f'Newest first. Each says how its numbers were measured and what they cannot show.</p></section><ul class="sl big" data-history>{items}</ul>')
+
+
+def guide_links(text: str, slug: str) -> str:
+    def repl(m):
+        target = m.group(1)
+        if target == "index.md":
+            return f"]({slug}.html)"
+        if target == "ki203m-reference.md":
+            return f"]({slug}-reference.html)"
+        return m.group(0)
+    return re.sub(r"\]\((?!https?://)([^)]+\.md)\)", repl, text)
+
+
+def inline_svgs(html: str, slug: str) -> str:
+    def repl(m):
+        src = m.group(1)
+        path = GUIDES / slug / src
+        if path.suffix == ".svg" and path.is_file():
+            return path.read_text()
+        return m.group(0)
+    return re.sub(r'<img[^>]+src="(media/[^"]+\.svg)"[^>]*>', repl, html)
+
+
+def guide_html(rel: str, slug: str) -> str:
+    text = (GUIDES / rel).read_text()
+    text = guide_links(text, slug)
+    body = markdown.markdown(text, extensions=["extra", "sane_lists"])
+    body = body.replace("<table>", '<div class="tw"><table>').replace("</table>", "</table></div>")
+    return inline_svgs(body, slug)
+
+
+def guide_page(g: dict, reference: bool = False) -> str:
+    rel = g["reference"] if reference else g["source"]
+    label = g["nav"] + (" reference" if reference else "")
+    return (f'<p class="crumb"><a href="index.html">Guides</a> / {esc(label)}</p>'
+            f'<article class="prose">{guide_html(rel, g["slug"])}</article>')
+
+
+def guides_index() -> str:
+    data = _j("guides.json")
+    rows = "".join(
+        f'<tr><td><a href="{esc(g["slug"])}.html">{esc(g["title"])}</a></td>'
+        f'<td>{esc(g["chassis"])}</td><td>{esc(g["status"])}</td>'
+        f'<td class="r m">{esc(g["updated"])}</td></tr>'
+        for g in data["guides"]
+    )
+    planned = "".join(f'<li><b>{esc(p["title"])}</b> {esc(p["summary"])}</li>' for p in data.get("planned", []))
+    return (
+        '<section class="lead"><h1>Guides</h1><p>Owner-facing and technical guides to the G55: what was measured, what was derived, and what is still open. '
+        'Each guide is a durable reference; the Notes section holds the dated findings behind it.</p></section>'
+        '<div class="tw"><table class="d-t"><thead><tr><th scope="col">Guide</th><th scope="col">Platform</th>'
+        '<th scope="col">Status</th><th class="r" scope="col">Updated</th></tr></thead>'
+        f'<tbody>{rows}</tbody></table></div>'
+        f'<section class="prose"><h2>Planned</h2><ul>{planned}</ul></section>'
+    )
 
 
 def feed_items(models, root) -> list[dict]:
@@ -1907,7 +1966,7 @@ def main() -> None:
     TIERS.update(ranking.site_tests(root))
     if out.exists():
         shutil.rmtree(out)
-    for d in ("models", "results", "tests", "harness", "notes"):
+    for d in ("models", "results", "tests", "harness", "notes", "guides"):
         (out / d).mkdir(parents=True)
     for f in (SITE / "static").iterdir():
         if f.is_file():
@@ -1933,6 +1992,21 @@ def main() -> None:
         (out / "notes" / f'{n["slug"]}.html').write_text(page(cfg, f'{n["title"]} – {tag}', n["summary"], note_page(n), 1, "notes", f'notes/{n["slug"]}.html'))
     (out / "notes" / "index.html").write_text(page(cfg, f"Notes – {tag}", "Notes on the work of putting openpilot on a 2011 Mercedes-Benz G55.",
                                                    notes_index(), 1, "notes", "notes/index.html"))
+    for g in _j("guides.json")["guides"]:
+        (out / "guides" / f'{g["slug"]}.html').write_text(
+            page(cfg, f'{g["title"]} – {tag}', g["description"], guide_page(g), 1, "guides", f'guides/{g["slug"]}.html'))
+        (out / "guides" / f'{g["slug"]}-reference.html').write_text(
+            page(cfg, f'{g["nav"]} reference – {tag}', f'Technical reference for {g["title"]}.',
+                 guide_page(g, reference=True), 1, "guides", f'guides/{g["slug"]}-reference.html'))
+        media = GUIDES / g["slug"] / "media"
+        if media.is_dir():
+            (out / "guides" / "media").mkdir(parents=True, exist_ok=True)
+            for f in media.iterdir():
+                if f.is_file():
+                    shutil.copy2(f, out / "guides" / "media" / f.name)
+    (out / "guides" / "index.html").write_text(
+        page(cfg, f"Guides – {tag}", "Owner-facing and technical guides to the G55.",
+             guides_index(), 1, "guides", "guides/index.html"))
     (out / "tests" / "index.html").write_text(page(cfg, f"Tests – {tag}", f"The {count_word(len(G55_TABLES))} tests on the G55's own drives that every openpilot release gets here.",
                                                    tests_index(models), 1, "tests", "tests/index.html"))
     if xr:

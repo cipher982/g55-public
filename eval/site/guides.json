@@ -1,0 +1,24 @@
+{
+  "_doc": "The Guides section. Each entry is a Markdown source under public/guides; the build renders it to /guides/<slug>.html and /guides/<slug>-reference.html.",
+  "guides": [
+    {
+      "slug": "w463-tire-size-calibration",
+      "title": "Custom tire size speedometer calibration for W463 G-Wagons",
+      "nav": "W463 tire size calibration",
+      "summary": "How larger tires throw off the speedometer and odometer, how the three fixes compare, and what we decoded from the KI203M cluster on a 2011 W463.",
+      "description": "How to fix speedometer and odometer error for 33-inch and 35-inch tires on a W463 Mercedes G-Wagon. Compares the DAS tire presets, an inline CAN module and the KI203M cluster K-Zahl EEPROM calibration.",
+      "status": "Read path verified on the truck; the write path is bench-only until the 0xA2C4 header checksum is solved.",
+      "updated": "2026-11-20",
+      "chassis": "W463 / KI203M cluster",
+      "source": "w463-tire-size-calibration/index.md",
+      "reference": "w463-tire-size-calibration/ki203m-reference.md",
+      "tags": ["W463", "KI203M", "speedometer", "odometer", "K-Zahl", "EEPROM"]
+    }
+  ],
+  "planned": [
+    {"title": "CAN-B and CAN-C DBCs", "summary": "The messages and signals decoded on the truck, with evidence grades."},
+    {"title": "Bosch ME 2.8.1 K-line readout", "summary": "Reading the engine ECU over the K-line cable."},
+    {"title": "722.6 and Ultimate-NAG52", "summary": "The transmission firmware and its configuration."},
+    {"title": "Victron and BMS BLE telemetry", "summary": "The auxiliary power registers and codecs."}
+  ]
+}

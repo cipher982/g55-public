@@ -1,0 +1,5 @@
+label,circumference_mm,k_zahl,k_zahl_hex,slot_1_address,actual_over_indicated_pct,odometer_under_count_pct
+stock,2419,1664,0x0680,0x3900FA,0.0,0.0
+235/85R16,2530,1591,0x0637,0x3900FA,4.6,4.4
+33-inch,2630,1531,0x05FB,0x3900FA,8.7,8.0
+35-inch,2666,1510,0x05E6,0x3900FA,10.2,9.3

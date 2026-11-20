@@ -35,6 +35,7 @@ The public workspace currently contains:
 | Driving Eval | [`eval/README.md`](eval/README.md) | Open-loop and closed-loop results for comma's released driving models, and the site built from them |
 | CAD | [`cad/README.md`](cad/README.md) | Agent geometry review tooling and printable parts |
 | L2 | [`l2/README.md`](l2/README.md) | Layer boundaries and validation principles |
+| Guides | [`guides/README.md`](guides/README.md) | Owner-facing and technical guides, starting with the W463 tire size calibration |
 | Engine-control visual | [Shareable PNG](m113k-clutch-control.png) · [Editable SVG](m113k-clutch-control.svg) | Factory clutch switching, an offline diagnostic finding, and the unverified vehicle-control boundary |
 The repository is intentionally not a vehicle controller, a supported hardware
 product, or a road-use instruction set.

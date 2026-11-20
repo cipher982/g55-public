@@ -3,7 +3,7 @@ name = "geval"
 version = "1.0.0"
 description = "G-Wagon eval: score comma's openpilot driving models with one fixed suite"
 requires-python = ">=3.11"
-dependencies = ["numpy>=2.0"]
+dependencies = ["numpy>=2.0", "markdown>=3.7"]
 
 [project.optional-dependencies]
 # What the engines need (replay and the world-model loop). The suite can also point
