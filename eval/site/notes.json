@@ -2,6 +2,17 @@
  "_doc": "Work notes on the site, newest first by date. Each: date, title, slug, summary, grade (measured, derived, borrowed or hypothetical, and where); the body is site/notes/<slug>.html.",
  "notes": [
   {
+   "date": "2026-11-20",
+   "title": "Why vehicles were missing from the scene: range, pixels, detector misses and display rules",
+   "slug": "scene-range-detector-display-rules",
+   "summary": "Range from box growth works for fixed objects once the box has doubled and gives nothing for vehicles at road speed. A full-resolution horizon strip fed to the stock detector saw signs no earlier than the shrunk frame (paired ratio 1.00). Image features in the small placement head did no better than a random-feature control after the test was repaired. Against two larger detectors at full resolution, the stock detector misses 1.9 % of vehicles inside about 30 m and 3.4 % at 30 to 60 m, but 64 % beyond about 250 m, with more misses at night. On 20 clips, removing a first batch of hand-written display rules cut vehicles ahead with no figure from 52 % to 0 %; more flicker is expected and not yet measured in motion.",
+   "grade": "Measured on recorded drives of one truck; detector misses are against two larger detectors agreeing, which is not truth and is weak at night; display counters are one replay of 20 clips; nothing here gives truth for moving-vehicle range.",
+   "result": "vehicles ahead with no figure: 52% before vs 0% after the first display-rule removals; stock detector misses 3.4% of reference vehicles at 30 to 60 m, 64.0% beyond about 250 m",
+   "n": "45 drives, 18,098 frames; 168 held-out stop signs; 20 clips",
+   "kind": "measured",
+   "domain": "p"
+  },
+  {
    "date": "2026-11-19",
    "title": "A replay loop for the scene model, and what it caught",
    "slug": "scene-replay-loop",

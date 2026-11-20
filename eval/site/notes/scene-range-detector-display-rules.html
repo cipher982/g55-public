@@ -1,0 +1,66 @@
+<h2>What was asked</h2>
+<p>The scene is the set of detected vehicles, signs and lights the in-cab display draws. Vehicles were sometimes missing from it, and the range of moving vehicles was unknown. Four questions: can range come from how fast a box grows, would more pixels let the stock detector see vehicles earlier, would image features help the small learned placement head, and how many vehicles does the stock detector actually miss? A fifth followed from the answers: how much of what is drawn comes from hand-written rules between the networks and the picture.</p>
+<h2>What was done</h2>
+<ul>
+<li><strong>Range from box growth.</strong> The box's growth, together with the truck's own travel, gives range for a fixed object. This was checked on stop signs and parked vehicles against a range fitted from many camera rays, then tried on every vehicle track with a constant-speed assumption.</li>
+<li><strong>Full-resolution horizon strip.</strong> The same stock detector (YOLO26s, public COCO weights) saw three inputs for each stop sign: the frame shrunk to 960x608 as on the truck, a 960x512 strip at full resolution around the horizon, and a control that is the same strip shrunk 2x and enlarged again. The strip was centred on the sign being scored, which is the best case for resolution.</li>
+<li><strong>Image features in the placement head.</strong> A frozen DINOv3 ViT-S/16 vector from a crop around each box was added to the small learned head. The first try was found unsound (the control was shuffled once, about 600 objects were expanded to 130,000 windows and memorised, and the public rows were dropped). The repaired test starts every arm from the same weights, feeds the feature through a zero-initialised path with dropout, draws the control feature fresh each batch, and uses three seeds plus a 5-fold cross-validation by drive.</li>
+<li><strong>Missed vehicles.</strong> One frame every 2 s from 45 drives with the truck moving (18,098 frames). The reference is a vehicle that both RF-DETR large and D-FINE X box (each at 0.4 or more, overlap 0.5 or more) on nine full-resolution tiles plus one half-size pass. A vehicle counts as found if the truck recorded a box overlapping it by 0.3 or more.</li>
+<li><strong>Display rules.</strong> An audit of the rules between the networks and the picture found hand-written ones: waits before a figure appears, a hold after it disappears, smoothing, fades under the HUD, merges, a range limit for signs and lights, and a filter that drew only confirmed tracks. A first batch on the display side was removed, one change at a time, none replaced. The same 20 recorded clips were replayed before and after, and nothing was tuned to move the counters.</li>
+</ul>
+<h2>Result</h2>
+<p><strong>Box growth.</strong> It works for things that stand still once the box has at least doubled: 0.89 to 0.96 of 288 stop-sign tracks within 15 % of the ray-fitted range, and 0.92 of parked vehicles whose box grew over 3x (0.65 at 2 to 3x, reading 4 to 8 % short). Under 2x growth on vehicles it drops to 0.31. It gives nothing for vehicles at road speed. With one camera, a nearer slower car and a farther faster one make the same box growth, and when the truck brakes the traffic brakes too. On every vehicle track, 223 of 8,516 pass the fit's own error test; 130 of those stand still and the rest read 1 to 2 m/s, which is inside the fit's error.</p>
+<p><strong>Horizon strip.</strong> It did not help. Held out, 168 stop signs:</p>
+<table>
+<thead><tr><th scope="col">Held-out, 168 stop signs</th><th scope="col">Shrunk full frame</th><th scope="col">Full-resolution strip</th><th scope="col">Control strip</th></tr></thead>
+<tbody>
+<tr><td>First seen at, median</td><td>71 m</td><td>81 m</td><td>81 m</td></tr>
+<tr><td>Signs found at all</td><td>160</td><td>147</td><td>156</td></tr>
+<tr><td>Hit rate, under 30 m</td><td>0.87</td><td>0.73</td><td>0.85</td></tr>
+</tbody>
+</table>
+<p>Paired per sign, strip against shrunk frame: median ratio 1.00. Strip against control: median 1.00. What gain there is comes from the sign being drawn larger, which enlarging the shrunk image gives equally.</p>
+<p><strong>Image features.</strong> After the repair, real pixels did no better than the random-feature control. Share of results within 15 %, mean of 3 seeds, held-out:</p>
+<table>
+<thead><tr><th scope="col">Group (n)</th><th scope="col">Boxes only</th><th scope="col">Boxes + pixels</th><th scope="col">Random-feature control</th></tr></thead>
+<tbody>
+<tr><td>Stop signs (168)</td><td>0.76</td><td>0.76</td><td>0.74</td></tr>
+<tr><td>Standing vehicles (24)</td><td>0.59</td><td>0.64</td><td>0.65</td></tr>
+<tr><td>Overlapped by a nearer vehicle (17)</td><td>0.49</td><td>0.58</td><td>0.57</td></tr>
+<tr><td>Cross-validation, overlapped or cut (71, 1 seed)</td><td>0.58</td><td>0.66</td><td>0.65</td></tr>
+</tbody>
+</table>
+<p>Both feature arms sit a little above boxes only on overlapped and cut vehicles. Because the random control gets the same gain, it comes from having the extra input, not from what the crop shows. The cause was not found. In the first, unsound try the pixel arm was worse than boxes only on every group.</p>
+<p><strong>Missed vehicles.</strong> Share of reference vehicles the truck's detector did not box, with rough distances for a 1.5 m tall car:</p>
+<table>
+<thead><tr><th scope="col">Reference box height</th><th scope="col">About</th><th scope="col">Reference vehicles</th><th scope="col">Missed</th></tr></thead>
+<tbody>
+<tr><td>under 16 px</td><td>beyond 250 m</td><td>6,511</td><td>64.0 %</td></tr>
+<tr><td>16 to 32 px</td><td>125 to 250 m</td><td>7,729</td><td>20.3 %</td></tr>
+<tr><td>32 to 64 px</td><td>60 to 125 m</td><td>9,753</td><td>8.0 %</td></tr>
+<tr><td>64 to 128 px</td><td>30 to 60 m</td><td>6,982</td><td>3.4 %</td></tr>
+<tr><td>over 128 px</td><td>inside 30 m</td><td>5,113</td><td>1.9 %</td></tr>
+</tbody>
+</table>
+<p>Counting only boxes the detector produced on that frame, and not boxes the tracker carried forward, the shares are 68.6, 25.9, 12.7, 5.4 and 3.0 %. The centre of the frame misses 22.8 %, the left 11.0 % and the right 13.0 %. At night, where the reference found anything, the misses are several times the day share: 20.9 % at 32 to 64 px (n 139), 12.7 % at 64 to 128 px (n 331), 5.3 % over 128 px (n 302). Boxes the truck recorded with no reference vehicle behind them are 1.0 % of the boxes the detector produced that frame and 6.4 % once carried-forward boxes are counted, so things drawn with no vehicle behind them come mostly from tracker-carried boxes. An eye check of 39 random misses found about 35 plainly vehicles, and the rest a bin, a sign and two crops too dark or blurred to call.</p>
+<p><strong>Display rules.</strong> On the same 20 clips, before and after the first batch of removals:</p>
+<table>
+<thead><tr><th scope="col">Counter (total over clips)</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
+<tbody>
+<tr><td>Vehicles ahead with no figure</td><td>52 %</td><td>0 %</td></tr>
+<tr><td>Vehicles ahead with a visible figure</td><td>40 %</td><td>98 %</td></tr>
+<tr><td>Near entries dropped</td><td>28</td><td>3</td></tr>
+<tr><td>Near entries off the stage</td><td>124</td><td>203</td></tr>
+</tbody>
+</table>
+<p>The expected cost is more flicker, because the hold and smoothing are gone. It has not been measured in motion. Faint unconfirmed ghosts now show in two clips, and more entries are drawn outside the frame or under the HUD.</p>
+<p><strong>What this changes.</strong> The stock detector was not the main reason vehicles were missing from the picture in daylight at ordinary distance: inside about 60 m in daylight it finds 97 % of what two much larger detectors find at full resolution. Its weak spots are night and far range. Missing figures ahead came mostly from rules between the networks and the picture. There is still no truth for the range of moving vehicles from these recordings.</p>
+<h2>What it does not show</h2>
+<ul>
+<li>The reference is two detectors agreeing, not truth. A vehicle both miss is invisible here, and both are weak at night (809 reference vehicles in 1,795 night frames, against 35,279 in 16,303 day frames), so the night shares understate the misses.</li>
+<li>Nothing here says whether a found vehicle was placed at the right range, or what the true range or speed of a moving vehicle is.</li>
+<li>The strip test does not cover a detector trained on full-resolution crops. It counts only signs the truck found at some point, and beyond 60 m the predicted pixel is within the hit tolerance on 0.77 to 0.85 of recorded results, so far hits are partly noise. The weights were the public file, not the engine on the truck.</li>
+<li>The image-feature test is one design: a whole-crop summary vector, frozen, about 600 labelled objects. It does not cover features that keep position inside the box, a backbone trained on driving scenes, or predicting size instead of range. Seeds differ by up to 8 points, so smaller gaps mean nothing.</li>
+<li>The 20-clip counters are one replay of one batch of removals, with no held-out clips, no measure of flicker, and no judgement of whether the picture looks better to a driver. The earlier pilot clips no longer exist, so these are not comparable with them. Rules that were not removed (the cap of 8 signs, sign facing, a fade-out for signs) are not covered.</li>
+<li>One truck, one camera, recorded drives only.</li>
+</ul>
