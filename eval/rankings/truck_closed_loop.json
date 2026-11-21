@@ -12,7 +12,7 @@
    ],
    "n": 98,
    "clusters": 13,
-   "win_rate": 0.5159,
+   "win_rate": 0.5196,
    "rank": 2,
    "separated_below": 0
   },
@@ -25,7 +25,7 @@
    ],
    "n": 98,
    "clusters": 13,
-   "win_rate": 0.561,
+   "win_rate": 0.5675,
    "rank": 3,
    "separated_below": 0
   },
@@ -35,8 +35,18 @@
    "ci": null,
    "n": 49,
    "clusters": 9,
-   "win_rate": 0.4953,
-   "rank": 10,
+   "win_rate": 0.4964,
+   "rank": 11,
+   "separated_below": 0
+  },
+  "3f1a78e6_32768": {
+   "median": 0.1012,
+   "mean": 0.1477,
+   "ci": null,
+   "n": 47,
+   "clusters": 8,
+   "win_rate": 0.4176,
+   "rank": 8,
    "separated_below": 0
   },
   "6b5b705f_12800": {
@@ -48,7 +58,7 @@
    ],
    "n": 98,
    "clusters": 13,
-   "win_rate": 0.52,
+   "win_rate": 0.5215,
    "rank": 6,
    "separated_below": 0
   },
@@ -61,8 +71,8 @@
    ],
    "n": 98,
    "clusters": 13,
-   "win_rate": 0.5303,
-   "rank": 8,
+   "win_rate": 0.5313,
+   "rank": 9,
    "separated_below": 0
   },
   "8d736683_12864": {
@@ -74,7 +84,7 @@
    ],
    "n": 98,
    "clusters": 13,
-   "win_rate": 0.5662,
+   "win_rate": 0.5705,
    "rank": 5,
    "separated_below": 0
   },
@@ -87,7 +97,7 @@
    ],
    "n": 98,
    "clusters": 13,
-   "win_rate": 0.5569,
+   "win_rate": 0.5587,
    "rank": 1,
    "separated_below": 0
   },
@@ -97,7 +107,7 @@
    "ci": null,
    "n": 44,
    "clusters": 9,
-   "win_rate": 0.4738,
+   "win_rate": 0.4783,
    "rank": 4,
    "separated_below": 0
   },
@@ -110,7 +120,7 @@
    ],
    "n": 98,
    "clusters": 13,
-   "win_rate": 0.4585,
+   "win_rate": 0.4667,
    "rank": 7,
    "separated_below": 3
   },
@@ -123,8 +133,8 @@
    ],
    "n": 98,
    "clusters": 13,
-   "win_rate": 0.4821,
-   "rank": 9,
+   "win_rate": 0.4853,
+   "rank": 10,
    "separated_below": 1
   },
   "f78ed37d_12864": {
@@ -136,8 +146,8 @@
    ],
    "n": 98,
    "clusters": 13,
-   "win_rate": 0.4585,
-   "rank": 11,
+   "win_rate": 0.4638,
+   "rank": 12,
    "separated_below": 3
   },
   "lebowski_877m": {
@@ -149,8 +159,8 @@
    ],
    "n": 98,
    "clusters": 13,
-   "win_rate": 0.3662,
-   "rank": 12,
+   "win_rate": 0.3708,
+   "rank": 13,
    "separated_below": 9
   }
  }
